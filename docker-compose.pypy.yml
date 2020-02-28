@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  orient-pypy:
+    build:
+      context: .
+      args:
+        - PYTHON_IMAGE=${PYPY_IMAGE_NAME}
+        - PYTHON_IMAGE_VERSION=${PYPY_IMAGE_VERSION}
+    image: lycantropos/orient-pypy:0.0.0
+    volumes:
+      - ./orient/:/opt/orient/orient/
+      - ./tests/:/opt/orient/tests/
+      - ./README.md:/opt/orient/README.md
+      - ./requirements.txt:/opt/orient/requirements.txt
+      - ./requirements-tests.txt:/opt/orient/requirements-tests.txt
+      - ./setup.py:/opt/orient/setup.py
+      - ./pytest.ini:/opt/orient/pytest.ini
+    entrypoint: pytest
