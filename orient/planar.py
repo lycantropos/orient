@@ -50,7 +50,7 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
 class PointPolygonLocation(IntEnum):
     OUTSIDE = 0
     INSIDE = 1
-    ON_BORDER = 2
+    BOUNDARY = 2
 
 
 def point_in_polygon(point: Point, border: Contour) -> PointPolygonLocation:
@@ -73,11 +73,11 @@ def point_in_polygon(point: Point, border: Contour) -> PointPolygonLocation:
     :returns: location of point in relation to polygon.
 
     >>> border = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_polygon((0, 0), border) is PointPolygonLocation.ON_BORDER
+    >>> point_in_polygon((0, 0), border) is PointPolygonLocation.BOUNDARY
     True
     >>> point_in_polygon((1, 1), border) is PointPolygonLocation.INSIDE
     True
-    >>> point_in_polygon((2, 2), border) is PointPolygonLocation.ON_BORDER
+    >>> point_in_polygon((2, 2), border) is PointPolygonLocation.BOUNDARY
     True
     >>> point_in_polygon((3, 3), border) is PointPolygonLocation.OUTSIDE
     True
@@ -87,7 +87,7 @@ def point_in_polygon(point: Point, border: Contour) -> PointPolygonLocation:
     for index in range(len(border)):
         start, end = border[index - 1], border[index]
         if point_in_segment(point, (start, end)):
-            return PointPolygonLocation.ON_BORDER
+            return PointPolygonLocation.BOUNDARY
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
                 and ((end_y > start_y) is (to_orientation(end, start, point)
