@@ -47,50 +47,49 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
 
 
 @unique
-class PointPolygonLocation(IntEnum):
+class PointContourLocation(IntEnum):
     OUTSIDE = 0
     INSIDE = 1
     BOUNDARY = 2
 
 
-def point_in_polygon(point: Point, border: Contour) -> PointPolygonLocation:
+def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
     """
-    Finds location of point in relation to polygon given by its border.
+    Finds location of point in relation to contour.
 
     Based on ray casting algorithm.
 
     Time complexity:
-        ``O(len(border))``
+        ``O(len(contour))``
     Memory complexity:
         ``O(1)``
     Reference:
         https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
 
     :param point: point to locate.
-    :param border:
-        border of polygon to check,
-        vertices should be listed in counterclockwise order.
+    :param contour:
+        contour to check, vertices should be listed in counterclockwise order.
     :returns: location of point in relation to polygon.
 
-    >>> border = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_polygon((0, 0), border) is PointPolygonLocation.BOUNDARY
+    >>> contour = [(0, 0), (2, 0), (2, 2), (0, 2)]
+    >>> point_in_contour((0, 0), contour) is PointContourLocation.BOUNDARY
     True
-    >>> point_in_polygon((1, 1), border) is PointPolygonLocation.INSIDE
+    >>> point_in_contour((1, 1), contour) is PointContourLocation.INSIDE
     True
-    >>> point_in_polygon((2, 2), border) is PointPolygonLocation.BOUNDARY
+    >>> point_in_contour((2, 2), contour) is PointContourLocation.BOUNDARY
     True
-    >>> point_in_polygon((3, 3), border) is PointPolygonLocation.OUTSIDE
+    >>> point_in_contour((3, 3), contour) is PointContourLocation.OUTSIDE
     True
     """
     result = False
     _, point_y = point
-    for index in range(len(border)):
-        start, end = border[index - 1], border[index]
+    for index in range(len(contour)):
+        start, end = contour[index - 1], contour[index]
         if point_in_segment(point, (start, end)):
-            return PointPolygonLocation.BOUNDARY
+            return PointContourLocation.BOUNDARY
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
                 and ((end_y > start_y) is (to_orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return PointPolygonLocation(result)
+    return PointContourLocation(result)
