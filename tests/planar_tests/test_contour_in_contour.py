@@ -5,7 +5,8 @@ from hypothesis import given
 from orient.hints import Contour
 from orient.planar import contour_in_contour
 from tests.utils import (are_contours_similar,
-                         implication)
+                         implication,
+                         to_convex_hull)
 from . import strategies
 
 
@@ -40,3 +41,8 @@ def test_transitivity(contours_triplet: Tuple[Contour, Contour, Contour]
     assert implication(contour_in_contour(left_contour, mid_contour)
                        and contour_in_contour(mid_contour, right_contour),
                        contour_in_contour(left_contour, right_contour))
+
+
+@given(strategies.contours)
+def test_convex_hull(contour: Contour) -> None:
+    assert contour_in_contour(contour, to_convex_hull(contour))
