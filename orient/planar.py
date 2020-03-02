@@ -1,6 +1,7 @@
 from enum import (IntEnum,
                   unique)
 
+from .core import intra_contour as _intra_contour
 from .core.angular import (Orientation,
                            to_orientation)
 from .hints import (Contour,
@@ -93,3 +94,37 @@ def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
     return PointContourLocation(result)
+
+
+def contour_in_contour(left: Contour, right: Contour) -> bool:
+    """
+    Checks if the contour fully lies inside the region
+    bounded by the other one.
+
+    Time complexity:
+        ``O((len(left) + len(right)) * log (len(left) + len(right)))``
+    Memory complexity:
+        ``O((len(left) + len(right)) * log (len(left) + len(right)))``
+
+    :param left:
+        contour to check for,
+        vertices should be listed in counterclockwise order.
+    :param right:
+        contour to check in,
+        vertices should be listed in counterclockwise order.
+    :returns:
+        true if the left contour lies inside the other one, false otherwise.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> contour_in_contour(triangle, triangle)
+    True
+    >>> contour_in_contour(triangle, square)
+    True
+    >>> contour_in_contour(square, triangle)
+    False
+    >>> contour_in_contour(square, square)
+    True
+    """
+    return (_intra_contour.bounding_box_in_bounding_box(left, right)
+            and _intra_contour.sweep(left, right))
