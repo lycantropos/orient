@@ -55,5 +55,5 @@ class EventsQueueKey:
 
 
 EventsQueue = cast(Callable[[], PriorityQueue[Event]],
-                   partial(PriorityQueue,
+                   partial(PriorityQueue[Event],
                            key=EventsQueueKey))

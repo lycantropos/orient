@@ -27,25 +27,14 @@ def sweep(left: Contour,
             sweep_line.add(event)
             above_event, below_event = (sweep_line.above(event),
                                         sweep_line.below(event))
-            if below_event is not None:
-                if detect_intersection(below_event, event, events_queue) == 2:
-                    event.below_from_right_in_out = (
-                        not below_event.below_from_right_in_out)
-                else:
-                    event.below_from_right_in_out = (
-                        below_event.below_from_right_in_out
-                        if event.from_left_contour
-                        else not below_event.below_from_right_in_out)
+            if below_event is None:
+                event.below_from_right_contour_in_out = event.from_left_contour
+            else:
+                compute_transition(below_event, event, events_queue)
             if above_event is not None:
-                if detect_intersection(event, above_event, events_queue) == 2:
-                    above_event.below_from_right_in_out = (
-                        not event.below_from_right_in_out)
-                else:
-                    above_event.below_from_right_in_out = (
-                        event.below_from_right_in_out
-                        if above_event.from_left_contour
-                        else not event.below_from_right_in_out)
-            if event.from_left_contour and event.below_from_right_in_out:
+                compute_transition(event, above_event, events_queue)
+            if (event.from_left_contour
+                    and event.below_from_right_contour_in_out):
                 return False
         else:
             event = event.complement
@@ -56,6 +45,29 @@ def sweep(left: Contour,
                 if above_event is not None and below_event is not None:
                     detect_intersection(below_event, above_event, events_queue)
     return True
+
+
+def compute_transition(below_event: Event,
+                       event: Event,
+                       events_queue: EventsQueue) -> None:
+    if detect_intersection(below_event, event, events_queue) == 2:
+        if event.from_left_contour:
+            event.below_from_right_contour_in_out = (
+                below_event.below_from_right_contour_in_out)
+        else:
+            event.below_from_right_contour_in_out = (
+                not below_event.below_from_right_contour_in_out)
+    elif event.from_left_contour:
+        event.below_from_right_contour_in_out = (
+            below_event.below_from_right_contour_in_out)
+    elif below_event.from_left_contour:
+        event.below_from_right_contour_in_out = (
+            not below_event.below_from_right_contour_in_out)
+    else:
+        event.below_from_right_contour_in_out = (
+            below_event.below_from_right_contour_in_out
+            if event.is_vertical
+            else not below_event.below_from_right_contour_in_out)
 
 
 def register_segment(segment: Segment,
