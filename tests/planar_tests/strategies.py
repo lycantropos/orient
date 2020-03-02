@@ -1,3 +1,5 @@
+from functools import partial
+from itertools import repeat
 from typing import Tuple
 
 from hypothesis import strategies
@@ -38,3 +40,16 @@ def to_contours_with_points(coordinates: Strategy[Coordinate]
 
 
 contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
+
+
+def to_contours_tuples(coordinates: Strategy[Coordinate],
+                       *,
+                       size: int) -> Strategy[Tuple[Contour, Contour]]:
+    return strategies.tuples(*repeat(to_counterclockwise_contours(coordinates),
+                                     size))
+
+
+contours_pairs = coordinates_strategies.flatmap(partial(to_contours_tuples,
+                                                        size=2))
+contours_triplets = coordinates_strategies.flatmap(partial(to_contours_tuples,
+                                                           size=3))
