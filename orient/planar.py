@@ -1,9 +1,11 @@
 from enum import (IntEnum,
                   unique)
 
+from robust.angular import (Orientation,
+                            orientation)
+from robust.linear import segment_contains
+
 from .core import intra_contour as _intra_contour
-from .core.angular import (Orientation,
-                           to_orientation)
 from .hints import (Contour,
                     Point,
                     Segment)
@@ -29,22 +31,7 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
     >>> point_in_segment((0, 1), ((0, 0), (1, 0)))
     False
     """
-    start, end = segment
-    if point == start:
-        return True
-    elif point == end:
-        return True
-    else:
-        point_x, point_y = point
-        (start_x, start_y), (end_x, end_y) = start, end
-        left_x, right_x = ((start_x, end_x)
-                           if start_x < end_x
-                           else (end_x, start_x))
-        bottom_y, top_y = ((start_y, end_y)
-                           if start_y < end_y
-                           else (end_y, start_y))
-        return (left_x <= point_x <= right_x and bottom_y <= point_y <= top_y
-                and to_orientation(end, start, point) is Orientation.COLLINEAR)
+    return segment_contains(segment, point)
 
 
 @unique
@@ -90,7 +77,7 @@ def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
             return PointContourLocation.BOUNDARY
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
-                and ((end_y > start_y) is (to_orientation(end, start, point)
+                and ((end_y > start_y) is (orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
     return PointContourLocation(result)

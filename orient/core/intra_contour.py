@@ -1,4 +1,6 @@
-from bentley_ottmann import linear
+from robust.linear import (SegmentsRelationship,
+                           segments_intersection,
+                           segments_relationship)
 
 from orient.hints import (Contour,
                           Point,
@@ -84,18 +86,18 @@ def register_segment(segment: Segment,
 def detect_intersection(event: Event,
                         above_event: Event,
                         events_queue: EventsQueue) -> int:
-    intersections = linear.find_intersections(event.segment,
-                                              above_event.segment)
-    if not intersections:
+    segment, above_segment = event.segment, above_event.segment
+    relationship = segments_relationship(segment, above_segment)
+    if relationship is SegmentsRelationship.NONE:
         # no intersection
         return 0
-    elif len(intersections) == 1:
+    elif relationship is SegmentsRelationship.CROSS:
         # segments intersect
         if (event.start == above_event.start
                 or event.end == above_event.end):
             # segments intersect at an endpoint of both line segments
             return 0
-        point, = intersections
+        point = segments_intersection(segment, above_segment)
         if event.start != point and event.end != point:
             divide_segment(event, point, events_queue)
         if above_event.start != point and above_event.end != point:

@@ -1,9 +1,9 @@
 from typing import Tuple
 
 from hypothesis import given
+from robust.angular import (Orientation,
+                            orientation)
 
-from orient.core.angular import (Orientation,
-                                 to_orientation)
 from orient.hints import (Point,
                           Segment)
 from orient.planar import point_in_segment
@@ -34,5 +34,4 @@ def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
 
     start, end = segment
     assert implication(point_in_segment(point, segment),
-                       to_orientation(end, start, point)
-                       is Orientation.COLLINEAR)
+                       orientation(end, start, point) is Orientation.COLLINEAR)

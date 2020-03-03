@@ -4,9 +4,9 @@ from typing import (Callable,
 
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
+from robust.angular import (Orientation,
+                            orientation)
 
-from .angular import (Orientation,
-                      to_orientation)
 from .event import Event
 
 
@@ -40,9 +40,9 @@ class EventsQueueKey:
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
-            other_end_orientation = to_orientation(event.start,
-                                                   other_event.end,
-                                                   event.end)
+            other_end_orientation = orientation(event.start,
+                                                other_event.end,
+                                                event.end)
             # the lowest segment is processed first
             if other_end_orientation is not Orientation.COLLINEAR:
                 return other_end_orientation is Orientation.COUNTERCLOCKWISE

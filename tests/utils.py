@@ -3,9 +3,9 @@ from typing import (Iterable,
                     Sequence)
 
 from hypothesis.strategies import SearchStrategy
+from robust.angular import (Orientation,
+                            orientation)
 
-from orient.core.angular import (Orientation,
-                                 to_orientation)
 from orient.hints import (Contour,
                           Point)
 
@@ -23,7 +23,7 @@ def to_counterclockwise_contour(contour: Contour) -> Contour:
 
 
 def _to_first_angle_orientation(contour: Contour) -> Orientation:
-    return to_orientation(contour[-1], contour[0], contour[1])
+    return orientation(contour[-1], contour[0], contour[1])
 
 
 def are_contours_similar(left: Contour, right: Contour) -> bool:
@@ -53,7 +53,7 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     result = []
     for point in points:
         while len(result) >= 2:
-            if (to_orientation(result[-1], result[-2], point)
+            if (orientation(result[-1], result[-2], point)
                     is not Orientation.COUNTERCLOCKWISE):
                 del result[-1]
             else:
