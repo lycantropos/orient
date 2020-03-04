@@ -91,14 +91,10 @@ def contour_in_contour(left: Contour, right: Contour) -> bool:
     Time complexity:
         ``O((len(left) + len(right)) * log (len(left) + len(right)))``
     Memory complexity:
-        ``O((len(left) + len(right)) * log (len(left) + len(right)))``
+        ``O(len(left) + len(right))``
 
-    :param left:
-        contour to check for,
-        vertices should be listed in counterclockwise order.
-    :param right:
-        contour to check in,
-        vertices should be listed in counterclockwise order.
+    :param left: contour to check for.
+    :param right: contour to check in.
     :returns:
         true if the left contour lies inside the other one, false otherwise.
 
