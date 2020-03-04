@@ -110,4 +110,4 @@ def contour_in_contour(left: Contour, right: Contour) -> bool:
     True
     """
     return (_intra_contour.bounding_box_in_bounding_box(left, right)
-            and _intra_contour.sweep(left, right))
+            and _intra_contour.contour_contains_contour(right, left))

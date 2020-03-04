@@ -46,8 +46,8 @@ class EventsQueueKey:
             # the lowest segment is processed first
             if other_end_orientation is not Orientation.COLLINEAR:
                 return other_end_orientation is Orientation.COUNTERCLOCKWISE
-            elif event.from_left_contour is not other_event.from_left_contour:
-                return not event.from_left_contour
+            elif event.from_test_contour is not other_event.from_test_contour:
+                return not event.from_test_contour
             else:
                 end_x, end_y = event.end
                 other_end_x, other_end_y = other_event.end

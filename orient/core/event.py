@@ -11,20 +11,20 @@ from orient.hints import (Coordinate,
 
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement',
-                 'from_left_contour', 'below_from_right_contour_in_out')
+                 'from_test_contour', 'below_from_goal_contour_in_out')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
-                 from_left_contour: bool,
-                 below_from_right_contour_in_out: Optional[bool] = None
+                 from_test_contour: bool,
+                 below_from_goal_contour_in_out: Optional[bool] = None
                  ) -> None:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
-        self.from_left_contour = from_left_contour
-        self.below_from_right_contour_in_out = below_from_right_contour_in_out
+        self.from_test_contour = from_test_contour
+        self.below_from_goal_contour_in_out = below_from_goal_contour_in_out
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 

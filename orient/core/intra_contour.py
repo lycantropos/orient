@@ -2,7 +2,8 @@ from robust.linear import (SegmentsRelationship,
                            segments_intersection,
                            segments_relationship)
 
-from orient.hints import (Contour,
+from orient.hints import (BoundingBox,
+                          Contour,
                           Point,
                           Segment)
 from .event import Event
@@ -13,13 +14,27 @@ from .utils import (contour_to_bounding_box,
                     contour_to_segments)
 
 
-def sweep(left: Contour,
-          right: Contour) -> bool:
+def contour_contains_contour(goal: Contour, test: Contour) -> bool:
     events_queue = EventsQueue()
-    for segment in contour_to_segments(left):
+    for segment in contour_to_segments(test):
         register_segment(segment, True, events_queue)
-    for segment in contour_to_segments(right):
+    for segment in contour_to_segments(goal):
         register_segment(segment, False, events_queue)
+    return sweep(events_queue)
+
+
+def register_segment(segment: Segment,
+                     from_test_contour: bool,
+                     events_queue: EventsQueue) -> None:
+    start, end = sorted(segment)
+    start_event = Event(True, start, None, from_test_contour)
+    end_event = Event(False, end, start_event, from_test_contour)
+    start_event.complement = end_event
+    events_queue.push(start_event)
+    events_queue.push(end_event)
+
+
+def sweep(events_queue: EventsQueue) -> bool:
     sweep_line = SweepLine()
     while events_queue:
         event = events_queue.pop()
@@ -30,13 +45,15 @@ def sweep(left: Contour,
             above_event, below_event = (sweep_line.above(event),
                                         sweep_line.below(event))
             if below_event is None:
-                event.below_from_right_contour_in_out = event.from_left_contour
+                event.below_from_goal_contour_in_out = event.from_test_contour
             else:
-                compute_transition(below_event, event, events_queue)
+                detect_intersection(below_event, event, events_queue)
+                compute_transition(below_event, event)
             if above_event is not None:
-                compute_transition(event, above_event, events_queue)
-            if (event.from_left_contour
-                    and event.below_from_right_contour_in_out):
+                detect_intersection(event, above_event, events_queue)
+                compute_transition(event, above_event)
+            if (event.from_test_contour
+                    and event.below_from_goal_contour_in_out):
                 return False
         else:
             event = event.complement
@@ -49,57 +66,34 @@ def sweep(left: Contour,
     return True
 
 
-def compute_transition(below_event: Event,
-                       event: Event,
-                       events_queue: EventsQueue) -> None:
-    if detect_intersection(below_event, event, events_queue) == 2:
-        if event.from_left_contour:
-            event.below_from_right_contour_in_out = (
-                below_event.below_from_right_contour_in_out)
-        else:
-            event.below_from_right_contour_in_out = (
-                not below_event.below_from_right_contour_in_out)
-    elif event.from_left_contour:
-        event.below_from_right_contour_in_out = (
-            below_event.below_from_right_contour_in_out)
-    else:
-        event.below_from_right_contour_in_out = (
-            not below_event.below_from_right_contour_in_out)
-
-
-def register_segment(segment: Segment,
-                     from_left_contour: bool,
-                     events_queue: EventsQueue) -> None:
-    start, end = sorted(segment)
-    start_event = Event(True, start, None, from_left_contour)
-    end_event = Event(False, end, start_event, from_left_contour)
-    start_event.complement = end_event
-    events_queue.push(start_event)
-    events_queue.push(end_event)
+def compute_transition(below_event: Event, event: Event) -> None:
+    event.below_from_goal_contour_in_out = (
+        below_event.below_from_goal_contour_in_out
+        if event.from_test_contour
+        else not below_event.below_from_goal_contour_in_out)
 
 
 def detect_intersection(event: Event,
                         above_event: Event,
-                        events_queue: EventsQueue) -> int:
+                        events_queue: EventsQueue) -> None:
     segment, above_segment = event.segment, above_event.segment
     relationship = segments_relationship(segment, above_segment)
     if relationship is SegmentsRelationship.NONE:
         # no intersection
-        return 0
+        return
     elif relationship is SegmentsRelationship.CROSS:
         # segments intersect
-        if (event.start == above_event.start
-                or event.end == above_event.end):
+        if event.start == above_event.start or event.end == above_event.end:
             # segments intersect at an endpoint of both line segments
-            return 0
+            return
         point = segments_intersection(segment, above_segment)
         if event.start != point and event.end != point:
             divide_segment(event, point, events_queue)
         if above_event.start != point and above_event.end != point:
             divide_segment(above_event, point, events_queue)
-        return 1
+        return
     # segments overlap
-    if event.from_left_contour is above_event.from_left_contour:
+    if event.from_test_contour is above_event.from_test_contour:
         raise ValueError('Edges of the same polygon should not overlap.')
 
     sorted_events = []
@@ -129,11 +123,9 @@ def detect_intersection(event: Event,
         if not ends_equal:
             divide_segment(sorted_events[2].complement, sorted_events[1].start,
                            events_queue)
-        return 2
     elif ends_equal:
         # the line segments share the right endpoint
         divide_segment(sorted_events[0], sorted_events[1].start, events_queue)
-        return 3
     else:
         divide_segment(sorted_events[0]
                        # one line segment includes the other one
@@ -143,14 +135,13 @@ def detect_intersection(event: Event,
                        sorted_events[2].start,
                        events_queue)
         divide_segment(sorted_events[0], sorted_events[1].start, events_queue)
-        return 3
 
 
 def divide_segment(event: Event,
                    point: Point,
                    events_queue: EventsQueue) -> None:
-    left_event = Event(True, point, event.complement, event.from_left_contour)
-    right_event = Event(False, point, event, event.from_left_contour)
+    left_event = Event(True, point, event.complement, event.from_test_contour)
+    right_event = Event(False, point, event, event.from_test_contour)
     event.complement.complement, event.complement = left_event, right_event
     events_queue.push(left_event)
     events_queue.push(right_event)
