@@ -1,24 +1,34 @@
+from typing import (Iterable,
+                    Sequence)
+
 from robust.linear import (SegmentsRelationship,
                            segments_intersection,
                            segments_relationship)
 
-from orient.hints import (BoundingBox,
-                          Contour,
+from orient.hints import (Contour,
                           Point,
                           Segment)
 from .event import Event
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
-from .utils import (contour_to_bounding_box,
-                    contour_to_segments)
 
 
-def contour_contains_contour(goal: Contour, test: Contour) -> bool:
+def contains_contour(goal: Contour, test: Contour) -> bool:
     events_queue = EventsQueue()
-    for segment in contour_to_segments(test):
+    for segment in to_segments(test):
         register_segment(segment, True, events_queue)
-    for segment in contour_to_segments(goal):
+    for segment in to_segments(goal):
+        register_segment(segment, False, events_queue)
+    return sweep(events_queue)
+
+
+def contains_contours(goal: Contour, tests: Sequence[Contour]) -> bool:
+    events_queue = EventsQueue()
+    for test in tests:
+        for segment in to_segments(test):
+            register_segment(segment, True, events_queue)
+    for segment in to_segments(goal):
         register_segment(segment, False, events_queue)
     return sweep(events_queue)
 
@@ -32,6 +42,11 @@ def register_segment(segment: Segment,
     start_event.complement = end_event
     events_queue.push(start_event)
     events_queue.push(end_event)
+
+
+def to_segments(contour: Contour) -> Iterable[Segment]:
+    return ((contour[index - 1], contour[index])
+            for index in range(len(contour)))
 
 
 def sweep(events_queue: EventsQueue) -> bool:
@@ -145,11 +160,3 @@ def divide_segment(event: Event,
     event.complement.complement, event.complement = left_event, right_event
     events_queue.push(left_event)
     events_queue.push(right_event)
-
-
-def bounding_box_in_bounding_box(left: Contour, right: Contour) -> bool:
-    ((left_x_min, left_x_max, left_y_min, left_y_max),
-     (right_x_min, right_x_max, right_y_min, right_y_max)) = (
-        contour_to_bounding_box(left), contour_to_bounding_box(right))
-    return (right_x_min <= left_x_min and left_x_max <= right_x_max
-            and right_y_min <= left_y_min and left_y_max <= right_y_max)

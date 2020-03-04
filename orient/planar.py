@@ -1,11 +1,14 @@
 from enum import (IntEnum,
                   unique)
+from itertools import chain
+from typing import Sequence
 
 from robust.angular import (Orientation,
                             orientation)
 from robust.linear import segment_contains
 
-from .core import intra_contour as _intra_contour
+from .core import (bounding_box as _bounding_box,
+                   contour as _contour)
 from .hints import (Contour,
                     Point,
                     Segment)
@@ -109,5 +112,44 @@ def contour_in_contour(left: Contour, right: Contour) -> bool:
     >>> contour_in_contour(square, square)
     True
     """
-    return (_intra_contour.bounding_box_in_bounding_box(left, right)
-            and _intra_contour.contour_contains_contour(right, left))
+    return (_bounding_box.contains_bounding_box(
+            _bounding_box.from_points(right),
+            _bounding_box.from_points(left))
+            and _contour.contains_contour(right, left))
+
+
+def contours_in_contour(contours: Sequence[Contour],
+                        contour: Contour) -> bool:
+    """
+    Checks if contours fully lie inside the region bounded by other contour.
+
+    Time complexity:
+        ``O((sum(map(len, contours)) + len(contour)) \
+* log (sum(map(len, contours)) + len(contour)))``
+    Memory complexity:
+        ``O(sum(map(len, contours)) + len(contour))``
+
+    :param contours: non-overlapping contours to check for.
+    :param contour: contour to check in.
+    :returns: true if contours lie inside the other contour, false otherwise.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> contours_in_contour([], triangle)
+    True
+    >>> contours_in_contour([], square)
+    True
+    >>> contours_in_contour([triangle], triangle)
+    True
+    >>> contours_in_contour([triangle], square)
+    True
+    >>> contours_in_contour([square], triangle)
+    False
+    >>> contours_in_contour([square], square)
+    True
+    """
+    return (not contours
+            or (_bounding_box.contains_bounding_box(
+                    _bounding_box.from_points(contour),
+                    _bounding_box.from_points(chain.from_iterable(contours)))
+                and _contour.contains_contours(contour, contours)))
