@@ -4,6 +4,5 @@ from typing import (List,
 
 Coordinate = Real
 Point = Tuple[Coordinate, Coordinate]
-BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 Segment = Tuple[Point, Point]
 Contour = List[Point]

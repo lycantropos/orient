@@ -1,7 +1,10 @@
-from typing import Iterable
+from typing import (Iterable,
+                    Tuple)
 
-from orient.hints import (BoundingBox,
+from orient.hints import (Coordinate,
                           Point)
+
+BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 
 
 def contains_bounding_box(goal: BoundingBox, test: BoundingBox) -> bool:
