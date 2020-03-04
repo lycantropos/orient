@@ -62,14 +62,9 @@ def compute_transition(below_event: Event,
     elif event.from_left_contour:
         event.below_from_right_contour_in_out = (
             below_event.below_from_right_contour_in_out)
-    elif below_event.from_left_contour:
-        event.below_from_right_contour_in_out = (
-            not below_event.below_from_right_contour_in_out)
     else:
         event.below_from_right_contour_in_out = (
-            below_event.below_from_right_contour_in_out
-            if event.is_vertical
-            else not below_event.below_from_right_contour_in_out)
+            not below_event.below_from_right_contour_in_out)
 
 
 def register_segment(segment: Segment,
