@@ -74,8 +74,7 @@ def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
     """
     result = False
     _, point_y = point
-    for index in range(len(contour)):
-        start, end = contour[index - 1], contour[index]
+    for start, end in _contour.to_segments(contour):
         if point_in_segment(point, (start, end)):
             return PointContourLocation.BOUNDARY
         (_, start_y), (_, end_y) = start, end
