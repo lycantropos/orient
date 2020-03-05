@@ -62,11 +62,9 @@ def sweep(events_queue: EventsQueue) -> bool:
             if below_event is None:
                 event.below_from_goal_contour_in_out = event.from_test_contour
             else:
-                detect_intersection(below_event, event, events_queue)
-                compute_transition(below_event, event)
+                possible_intersection(below_event, event, events_queue)
             if above_event is not None:
-                detect_intersection(event, above_event, events_queue)
-                compute_transition(event, above_event)
+                possible_intersection(event, above_event, events_queue)
             if (event.from_test_contour
                     and event.below_from_goal_contour_in_out):
                 return False
@@ -79,6 +77,13 @@ def sweep(events_queue: EventsQueue) -> bool:
                 if above_event is not None and below_event is not None:
                     detect_intersection(below_event, above_event, events_queue)
     return True
+
+
+def possible_intersection(below_event: Event,
+                          event: Event,
+                          events_queue: EventsQueue) -> None:
+    detect_intersection(below_event, event, events_queue)
+    compute_transition(below_event, event)
 
 
 def compute_transition(below_event: Event, event: Event) -> None:
