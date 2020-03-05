@@ -88,68 +88,71 @@ def compute_transition(below_event: Event, event: Event) -> None:
         else not below_event.below_from_goal_contour_in_out)
 
 
-def detect_intersection(event: Event,
-                        above_event: Event,
+def detect_intersection(below_event: Event,
+                        event: Event,
                         events_queue: EventsQueue) -> None:
-    segment, above_segment = event.segment, above_event.segment
-    relationship = segments_relationship(segment, above_segment)
+    below_segment, segment = below_event.segment, event.segment
+    relationship = segments_relationship(below_segment, segment)
     if relationship is SegmentsRelationship.NONE:
         # no intersection
         return
-    elif relationship is SegmentsRelationship.CROSS:
+    elif relationship is SegmentsRelationship.OVERLAP:
+        # segments overlap
+        if below_event.from_test_contour is event.from_test_contour:
+            raise ValueError('Edges of the same polygon should not overlap.')
+
+        sorted_events = []
+        starts_equal = event.start == below_event.start
+        if starts_equal:
+            sorted_events.append(None)
+        elif EventsQueueKey(below_event) > EventsQueueKey(event):
+            sorted_events.append(event)
+            sorted_events.append(below_event)
+        else:
+            sorted_events.append(below_event)
+            sorted_events.append(event)
+
+        ends_equal = event.end == below_event.end
+        if ends_equal:
+            sorted_events.append(None)
+        elif (EventsQueueKey(below_event.complement)
+              > EventsQueueKey(event.complement)):
+            sorted_events.append(event.complement)
+            sorted_events.append(below_event.complement)
+        else:
+            sorted_events.append(below_event.complement)
+            sorted_events.append(event.complement)
+
+        if starts_equal:
+            # both line segments are equal or share the left endpoint
+            if not ends_equal:
+                divide_segment(sorted_events[2].complement,
+                               sorted_events[1].start,
+                               events_queue)
+        elif ends_equal:
+            # the line segments share the right endpoint
+            divide_segment(sorted_events[0], sorted_events[1].start,
+                           events_queue)
+        else:
+            divide_segment(sorted_events[0]
+                           # one line segment includes the other one
+                           if sorted_events[0] is sorted_events[3].complement
+                           # no line segment includes the other one
+                           else sorted_events[1],
+                           sorted_events[2].start,
+                           events_queue)
+            divide_segment(sorted_events[0], sorted_events[1].start,
+                           events_queue)
+    else:
         # segments intersect
-        if event.start == above_event.start or event.end == above_event.end:
+        if event.start == below_event.start or event.end == below_event.end:
             # segments intersect at an endpoint of both line segments
             return
-        point = segments_intersection(segment, above_segment)
-        if event.start != point and event.end != point:
+        point = segments_intersection(below_segment, segment)
+        if point != below_event.start and point != below_event.end:
+            divide_segment(below_event, point, events_queue)
+        if point != event.start and point != event.end:
             divide_segment(event, point, events_queue)
-        if above_event.start != point and above_event.end != point:
-            divide_segment(above_event, point, events_queue)
-        return
-    # segments overlap
-    if event.from_test_contour is above_event.from_test_contour:
-        raise ValueError('Edges of the same polygon should not overlap.')
-
-    sorted_events = []
-    starts_equal = event.start == above_event.start
-    if starts_equal:
-        sorted_events.append(None)
-    elif EventsQueueKey(event) > EventsQueueKey(above_event):
-        sorted_events.append(above_event)
-        sorted_events.append(event)
-    else:
-        sorted_events.append(event)
-        sorted_events.append(above_event)
-
-    ends_equal = event.end == above_event.end
-    if ends_equal:
-        sorted_events.append(None)
-    elif (EventsQueueKey(event.complement)
-          > EventsQueueKey(above_event.complement)):
-        sorted_events.append(above_event.complement)
-        sorted_events.append(event.complement)
-    else:
-        sorted_events.append(event.complement)
-        sorted_events.append(above_event.complement)
-
-    if starts_equal:
-        # both line segments are equal or share the left endpoint
-        if not ends_equal:
-            divide_segment(sorted_events[2].complement, sorted_events[1].start,
-                           events_queue)
-    elif ends_equal:
-        # the line segments share the right endpoint
-        divide_segment(sorted_events[0], sorted_events[1].start, events_queue)
-    else:
-        divide_segment(sorted_events[0]
-                       # one line segment includes the other one
-                       if sorted_events[0] is sorted_events[3].complement
-                       # no line segment includes the other one
-                       else sorted_events[1],
-                       sorted_events[2].start,
-                       events_queue)
-        divide_segment(sorted_events[0], sorted_events[1].start, events_queue)
 
 
 def divide_segment(event: Event,
