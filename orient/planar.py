@@ -5,7 +5,9 @@ from typing import Sequence
 
 from robust.angular import (Orientation,
                             orientation)
-from robust.linear import segment_contains
+from robust.linear import (SegmentsRelationship,
+                           segment_contains,
+                           segments_relationship)
 
 from .core import (bounding_box as _bounding_box,
                    contour as _contour)
@@ -83,6 +85,43 @@ def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
     return PointContourLocation(result)
+
+
+def segment_in_contour(segment: Segment, contour: Contour) -> bool:
+    """
+    Checks if the segment fully lies inside the region bounded by the contour.
+
+    Time complexity:
+        ``O(len(contour))``
+    Memory complexity:
+        ``O(1)``
+
+    :param segment: segment to check for.
+    :param contour: contour to check in.
+    :returns:
+        true if the segment lies inside the contour (or on its boundary),
+        false otherwise.
+
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> segment_in_contour(((0, 0), (1, 0)), square)
+    True
+    >>> segment_in_contour(((0, 0), (1, 1)), square)
+    True
+    >>> segment_in_contour(((0, 0), (2, 2)), square)
+    False
+    >>> segment_in_contour(((1, 0), (2, 0)), square)
+    False
+    """
+    start, end = segment
+
+    def segments_do_not_cross(left: Segment, right: Segment) -> bool:
+        return (segments_relationship(left, right)
+                is not SegmentsRelationship.CROSS)
+
+    return (bool(point_in_contour(start, contour))
+            and bool(point_in_contour(end, contour))
+            and all(segments_do_not_cross(segment, edge)
+                    for edge in _contour.to_segments(contour)))
 
 
 def contour_in_contour(left: Contour, right: Contour) -> bool:
