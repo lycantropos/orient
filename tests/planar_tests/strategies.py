@@ -47,15 +47,13 @@ def to_non_overlapping_contours_lists(coordinates: Strategy[Coordinate],
     return (strategies.lists(to_counterclockwise_contours(coordinates),
                              min_size=min_size,
                              max_size=max_size)
-            .map(to_non_overlapping_contours))
+            .filter(are_non_overlapping_contours))
 
 
-def to_non_overlapping_contours(contours: List[Contour]) -> List[Contour]:
-    return [contour for index, contour in enumerate(contours)
-            if not any(segments_overlap(list(to_segments(contour))
-                                        + list(to_segments(other_contour)))
-                       for other_contour in chain(contours[:index],
-                                                  contours[index + 1:]))]
+def are_non_overlapping_contours(contours: List[Contour]) -> bool:
+    return not segments_overlap(
+            list(chain.from_iterable(to_segments(contour)
+                                     for contour in contours)))
 
 
 def to_contours_with_non_overlapping_contours_lists(
