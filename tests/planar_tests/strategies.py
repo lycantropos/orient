@@ -2,6 +2,7 @@ from functools import partial
 from itertools import (chain,
                        repeat)
 from typing import (List,
+                    Optional,
                     Tuple)
 
 from bentley_ottmann.planar import segments_overlap
@@ -16,8 +17,6 @@ from orient.hints import (Contour,
 from tests.strategies import coordinates_strategies
 from tests.utils import (Strategy,
                          to_counterclockwise_contour)
-
-MAX_CONTOURS_SIZE = 10
 
 segments = coordinates_strategies.flatmap(planar.segments)
 
@@ -42,7 +41,7 @@ contours = coordinates_strategies.flatmap(to_counterclockwise_contours)
 def to_non_overlapping_contours_lists(coordinates: Strategy[Coordinate],
                                       *,
                                       min_size: int = 0,
-                                      max_size: int = MAX_CONTOURS_SIZE
+                                      max_size: Optional[int] = None
                                       ) -> Strategy[List[Contour]]:
     return (strategies.lists(to_counterclockwise_contours(coordinates),
                              min_size=min_size,
@@ -60,7 +59,7 @@ def to_contours_with_non_overlapping_contours_lists(
         coordinates: Strategy[Coordinate],
         *,
         min_size: int = 0,
-        max_size: int = MAX_CONTOURS_SIZE
+        max_size: Optional[int] = None
 ) -> Strategy[Tuple[Contour, List[Contour]]]:
     return strategies.tuples(
             to_counterclockwise_contours(coordinates),
