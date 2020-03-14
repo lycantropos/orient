@@ -17,8 +17,6 @@ class EventsQueueKey:
     __repr__ = generate_repr(__init__)
 
     def __lt__(self, other: 'EventsQueueKey') -> bool:
-        if not isinstance(other, EventsQueueKey):
-            return NotImplemented
         event, other_event = self.event, other.event
         start_x, start_y = event.start
         other_start_x, other_start_y = other_event.start
@@ -38,12 +36,13 @@ class EventsQueueKey:
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
-            other_end_orientation = orientation(event.start,
-                                                other_event.end,
-                                                event.end)
+            other_end_orientation = orientation(event.end, event.start,
+                                                other_event.end)
             # the lowest segment is processed first
             if other_end_orientation is not Orientation.COLLINEAR:
-                return other_end_orientation is Orientation.COUNTERCLOCKWISE
+                return other_end_orientation is (Orientation.COUNTERCLOCKWISE
+                                                 if event.is_left_endpoint
+                                                 else Orientation.CLOCKWISE)
             elif event.from_test_contour is not other_event.from_test_contour:
                 return not event.from_test_contour
             else:
