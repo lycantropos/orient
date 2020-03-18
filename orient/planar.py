@@ -159,10 +159,11 @@ def contours_in_contour(contours: Sequence[Contour],
     Checks if contours fully lie inside the region bounded by other contour.
 
     Time complexity:
-        ``O((sum(map(len, contours)) + len(contour)) \
-* log (sum(map(len, contours)) + len(contour)))``
+        ``O(vertices_count * log (vertices_count))``
     Memory complexity:
-        ``O(sum(map(len, contours)) + len(contour))``
+        ``O(vertices_count)``
+
+    where ``vertices_count = sum(map(len, contours)) + len(contour)``.
 
     :param contours: non-overlapping contours to check for.
     :param contour: contour to check in.
