@@ -8,9 +8,11 @@ from robust.linear import (SegmentsRelationship,
                            segment_contains,
                            segments_relationship)
 
-from .core import contour as _contour
+from .core import (contour as _contour,
+                   polygon as _polygon)
 from .hints import (Contour,
                     Point,
+                    Polygon,
                     Segment)
 
 
@@ -182,3 +184,38 @@ def contours_in_contour(contours: Sequence[Contour],
     True
     """
     return not contours or _contour.contains_contours(contour, contours)
+
+
+def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
+    """
+    Checks if the contour fully lies inside the region
+    bounded by the other one.
+
+    Time complexity:
+        ``O(vertices_count * log (vertices_count))``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(left_border) + sum(map(len, left_holes)) \
++ len(right_border) + sum(map(len, right_holes))``,
+    ``left_border, left_holes = left``, ``right_border, right_holes = right``.
+
+    :param left: polygon to check for.
+    :param right: polygon to check in.
+    :returns:
+        true if the left polygon lies inside the right one, false otherwise.
+
+    >>> outer_square = [(0, 0), (3, 0), (3, 3), (0, 3)]
+    >>> inner_square = [(1, 1), (2, 1), (2, 2), (1, 2)]
+    >>> polygon_in_polygon((outer_square, []), (outer_square, []))
+    True
+    >>> polygon_in_polygon((inner_square, []), (inner_square, []))
+    True
+    >>> polygon_in_polygon((inner_square, []), (outer_square, []))
+    True
+    >>> polygon_in_polygon((outer_square, []), (inner_square, []))
+    False
+    >>> polygon_in_polygon((inner_square, []), (outer_square, [inner_square]))
+    False
+    """
+    return _polygon.contains_polygon(right, left)
