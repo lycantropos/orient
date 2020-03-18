@@ -135,7 +135,7 @@ def contour_in_contour(left: Contour, right: Contour) -> bool:
     :param left: contour to check for.
     :param right: contour to check in.
     :returns:
-        true if the left contour lies inside the other one, false otherwise.
+        true if the left contour lies inside the right one, false otherwise.
 
     >>> triangle = [(0, 0), (1, 0), (0, 1)]
     >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
