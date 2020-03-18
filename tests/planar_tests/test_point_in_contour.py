@@ -4,7 +4,7 @@ from hypothesis import given
 
 from orient.hints import (Contour,
                           Point)
-from orient.planar import (PointContourLocation,
+from orient.planar import (PointLocation,
                            point_in_contour)
 from . import strategies
 
@@ -15,11 +15,10 @@ def test_basic(contour_with_point: Tuple[Contour, Point]) -> None:
 
     result = point_in_contour(point, contour)
 
-    assert isinstance(result, PointContourLocation)
+    assert isinstance(result, PointLocation)
 
 
 @given(strategies.contours)
 def test_contour(contour: Contour) -> None:
-    assert all(point_in_contour(vertex,
-                                contour) is PointContourLocation.BOUNDARY
+    assert all(point_in_contour(vertex, contour) is PointLocation.BOUNDARY
                for vertex in contour)

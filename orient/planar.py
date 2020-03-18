@@ -40,13 +40,13 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
 
 
 @unique
-class PointContourLocation(IntEnum):
+class PointLocation(IntEnum):
     OUTSIDE = 0
     INSIDE = 1
     BOUNDARY = 2
 
 
-def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
+def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     """
     Finds location of point in relation to contour.
 
@@ -65,26 +65,26 @@ def point_in_contour(point: Point, contour: Contour) -> PointContourLocation:
     :returns: location of point in relation to polygon.
 
     >>> contour = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_contour((0, 0), contour) is PointContourLocation.BOUNDARY
+    >>> point_in_contour((0, 0), contour) is PointLocation.BOUNDARY
     True
-    >>> point_in_contour((1, 1), contour) is PointContourLocation.INSIDE
+    >>> point_in_contour((1, 1), contour) is PointLocation.INSIDE
     True
-    >>> point_in_contour((2, 2), contour) is PointContourLocation.BOUNDARY
+    >>> point_in_contour((2, 2), contour) is PointLocation.BOUNDARY
     True
-    >>> point_in_contour((3, 3), contour) is PointContourLocation.OUTSIDE
+    >>> point_in_contour((3, 3), contour) is PointLocation.OUTSIDE
     True
     """
     result = False
     _, point_y = point
     for start, end in _contour.to_segments(contour):
         if point_in_segment(point, (start, end)):
-            return PointContourLocation.BOUNDARY
+            return PointLocation.BOUNDARY
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
                 and ((end_y > start_y) is (orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return PointContourLocation(result)
+    return PointLocation(result)
 
 
 def segment_in_contour(segment: Segment, contour: Contour) -> bool:
