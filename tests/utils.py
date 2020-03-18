@@ -1,19 +1,66 @@
-from typing import (Iterable,
+from operator import itemgetter
+from typing import (Any,
+                    Callable,
+                    Iterable,
                     List,
-                    Sequence)
+                    Optional,
+                    Sequence,
+                    Tuple,
+                    TypeVar)
 
+from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from robust.angular import (Orientation,
                             orientation)
 
 from orient.hints import (Contour,
-                          Point)
+                          Point,
+                          Polygon)
 
+Domain = TypeVar('Domain')
+Key = Callable[[Domain], Any]
 Strategy = SearchStrategy
 
 
 def implication(antecedent: bool, consequent: bool) -> bool:
     return not antecedent or consequent
+
+
+_sentinel = object()
+
+
+def to_index_min(values: Iterable[Domain],
+                 *,
+                 key: Optional[Key] = None,
+                 default: Any = _sentinel) -> int:
+    kwargs = {}
+    if key is not None:
+        kwargs['key'] = lambda value_with_index: key(value_with_index[0])
+    if default is not _sentinel:
+        kwargs['default'] = default
+    return min(((value, index)
+                for index, value in enumerate(values)),
+               **kwargs)[1]
+
+
+def are_polygons_similar(left: Polygon, right: Polygon) -> bool:
+    return normalize_polygon(left) == normalize_polygon(right)
+
+
+def normalize_polygon(polygon: Polygon) -> Polygon:
+    boundary, holes = polygon
+    return normalize_contour(boundary), sorted([normalize_contour(hole)
+                                                for hole in holes],
+                                               key=itemgetter(0))
+
+
+def normalize_contour(contour: Contour) -> Contour:
+    return to_counterclockwise_contour(rotate_sequence(contour,
+                                                       to_index_min(contour)))
+
+
+def rotate_sequence(sequence: Domain, index: int) -> Domain:
+    return sequence[index:] + sequence[:index]
 
 
 def to_counterclockwise_contour(contour: Contour) -> Contour:
@@ -40,6 +87,15 @@ def are_contours_similar(left: Contour, right: Contour) -> bool:
         if left[1] == right[-1]:
             right = right[:1] + right[:0:-1]
         return left == right
+
+
+def to_pairs(strategy: Strategy[Domain]) -> Strategy[Tuple[Domain, Domain]]:
+    return strategies.tuples(strategy, strategy)
+
+
+def to_triplets(strategy: Strategy[Domain]
+                ) -> Strategy[Tuple[Domain, Domain, Domain]]:
+    return strategies.tuples(strategy, strategy, strategy)
 
 
 def to_convex_hull(points: Sequence[Point]) -> Contour:

@@ -1,6 +1,5 @@
 from functools import partial
-from itertools import (chain,
-                       repeat)
+from itertools import chain
 from typing import (List,
                     Optional,
                     Tuple)
@@ -16,7 +15,9 @@ from orient.hints import (Contour,
                           Segment)
 from tests.strategies import coordinates_strategies
 from tests.utils import (Strategy,
-                         to_counterclockwise_contour)
+                         to_counterclockwise_contour,
+                         to_pairs,
+                         to_triplets)
 
 segments = coordinates_strategies.flatmap(planar.segments)
 
@@ -84,16 +85,11 @@ def to_contours_with_points(coordinates: Strategy[Coordinate]
 
 
 contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
+contours_strategies = coordinates_strategies.map(to_counterclockwise_contours)
+contours_pairs = contours_strategies.flatmap(to_pairs)
+contours_triplets = contours_strategies.flatmap(to_triplets)
 
-
-def to_contours_tuples(coordinates: Strategy[Coordinate],
-                       *,
-                       size: int) -> Strategy[Tuple[Contour, Contour]]:
-    return strategies.tuples(*repeat(to_counterclockwise_contours(coordinates),
-                                     size))
-
-
-contours_pairs = coordinates_strategies.flatmap(partial(to_contours_tuples,
-                                                        size=2))
-contours_triplets = coordinates_strategies.flatmap(partial(to_contours_tuples,
-                                                           size=3))
+polygons = coordinates_strategies.flatmap(planar.polygons)
+polygons_strategies = coordinates_strategies.map(planar.polygons)
+polygons_pairs = contours_strategies.flatmap(to_pairs)
+polygons_triplets = contours_strategies.flatmap(to_triplets)
