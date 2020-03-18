@@ -8,8 +8,8 @@ BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 
 
 def contains_bounding_box(goal: BoundingBox, test: BoundingBox) -> bool:
-    ((test_x_min, test_x_max, test_y_min, test_y_max),
-     (goal_x_min, goal_x_max, goal_y_min, goal_y_max)) = test, goal
+    ((goal_x_min, goal_x_max, goal_y_min, goal_y_max),
+     (test_x_min, test_x_max, test_y_min, test_y_max)) = goal, test
     return (goal_x_min <= test_x_min and test_x_max <= goal_x_max
             and goal_y_min <= test_y_min and test_y_max <= goal_y_max)
 
