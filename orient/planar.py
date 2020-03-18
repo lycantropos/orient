@@ -1,6 +1,5 @@
 from enum import (IntEnum,
                   unique)
-from itertools import chain
 from typing import Sequence
 
 from robust.angular import (Orientation,
@@ -9,8 +8,7 @@ from robust.linear import (SegmentsRelationship,
                            segment_contains,
                            segments_relationship)
 
-from .core import (bounding_box as _bounding_box,
-                   contour as _contour)
+from .core import contour as _contour
 from .hints import (Contour,
                     Point,
                     Segment)
@@ -150,10 +148,7 @@ def contour_in_contour(left: Contour, right: Contour) -> bool:
     >>> contour_in_contour(square, square)
     True
     """
-    return (_bounding_box.contains_bounding_box(
-            _bounding_box.from_points(right),
-            _bounding_box.from_points(left))
-            and _contour.contains_contour(right, left))
+    return _contour.contains_contour(right, left)
 
 
 def contours_in_contour(contours: Sequence[Contour],
@@ -186,8 +181,4 @@ def contours_in_contour(contours: Sequence[Contour],
     >>> contours_in_contour([square], square)
     True
     """
-    return (not contours
-            or (_bounding_box.contains_bounding_box(
-                    _bounding_box.from_points(contour),
-                    _bounding_box.from_points(chain.from_iterable(contours)))
-                and _contour.contains_contours(contour, contours)))
+    return not contours or _contour.contains_contours(contour, contours)

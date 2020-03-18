@@ -5,6 +5,7 @@ from robust.linear import (SegmentsRelationship,
                            segments_intersection,
                            segments_relationship)
 
+from orient.hints import Coordinate
 from .event import (EdgeKind,
                     Event)
 from .events_queue import (EventsQueue,
@@ -12,11 +13,15 @@ from .events_queue import (EventsQueue,
 from .sweep_line import SweepLine
 
 
-def sweep(events_queue: EventsQueue) -> Iterable[Event]:
+def sweep(events_queue: EventsQueue,
+          test_max_x: Coordinate) -> Iterable[Event]:
     sweep_line = SweepLine()
     while events_queue:
         event = events_queue.pop()
         start_x, _ = event.start
+        if start_x > test_max_x:
+            # no test segments left
+            return
         sweep_line.move_to(start_x)
         if event.is_left_endpoint:
             sweep_line.add(event)
