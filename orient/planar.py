@@ -62,7 +62,7 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     :param point: point to locate.
     :param contour:
         contour to check, vertices should be listed in counterclockwise order.
-    :returns: location of point in relation to polygon.
+    :returns: location of point in relation to contour.
 
     >>> contour = [(0, 0), (2, 0), (2, 2), (0, 2)]
     >>> point_in_contour((0, 0), contour) is PointLocation.BOUNDARY
