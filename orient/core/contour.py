@@ -15,7 +15,8 @@ def contains_contour(goal: Contour, test: Contour) -> bool:
     for segment in to_segments(test):
         events_queue.register_segment(segment,
                                       from_test_contour=True)
-    return sweep(events_queue)
+    return all(not event.from_test_contour or event.in_intersection
+               for event in sweep(events_queue))
 
 
 def contains_contours(goal: Contour, tests: Sequence[Contour]) -> bool:
@@ -27,7 +28,8 @@ def contains_contours(goal: Contour, tests: Sequence[Contour]) -> bool:
         for segment in to_segments(test):
             events_queue.register_segment(segment,
                                           from_test_contour=True)
-    return sweep(events_queue)
+    return all(not event.from_test_contour or event.in_intersection
+               for event in sweep(events_queue))
 
 
 def to_segments(contour: Contour) -> Iterable[Segment]:

@@ -1,3 +1,5 @@
+from enum import (IntEnum,
+                  unique)
 from reprlib import recursive_repr
 from typing import Optional
 
@@ -9,22 +11,34 @@ from orient.hints import (Coordinate,
                           Segment)
 
 
+@unique
+class EdgeKind(IntEnum):
+    NORMAL = 0
+    NON_CONTRIBUTING = 1
+    SAME_TRANSITION = 2
+    DIFFERENT_TRANSITION = 3
+
+
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement',
-                 'from_test_contour', 'below_from_goal_contour_in_out')
+                 'from_test_contour', 'in_out', 'other_in_out',
+                 'edge_kind')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
                  from_test_contour: bool,
-                 below_from_goal_contour_in_out: Optional[bool] = None
-                 ) -> None:
+                 edge_kind: EdgeKind,
+                 in_out: Optional[bool] = None,
+                 other_in_out: Optional[bool] = None) -> None:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
         self.from_test_contour = from_test_contour
-        self.below_from_goal_contour_in_out = below_from_goal_contour_in_out
+        self.edge_kind = edge_kind
+        self.in_out = in_out
+        self.other_in_out = other_in_out
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
@@ -43,6 +57,12 @@ class Event:
         _, start_y = self.start
         _, end_y = self.end
         return start_y == end_y
+
+    @property
+    def in_intersection(self) -> bool:
+        edge_kind = self.edge_kind
+        return (edge_kind is EdgeKind.NORMAL and not self.other_in_out
+                or edge_kind is EdgeKind.SAME_TRANSITION)
 
     @property
     def segment(self) -> Segment:

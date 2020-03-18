@@ -87,10 +87,7 @@ class SweepLineKey:
                 return other_start_orientation is Orientation.COUNTERCLOCKWISE
             # segments are collinear
             elif event.from_test_contour is not other_event.from_test_contour:
-                return ((event.from_test_contour
-                         and other_event.below_from_goal_contour_in_out)
-                        or (other_event.from_test_contour
-                            and not event.below_from_goal_contour_in_out))
+                return other_event.from_test_contour
             elif start_x == other_start_x:
                 if start_y != other_start_y:
                     # segments are vertical
