@@ -187,6 +187,51 @@ def contours_in_contour(contours: Sequence[Contour],
     return not contours or _contour.contains_contours(contour, contours)
 
 
+def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
+    """
+    Checks if the contour fully lies inside the region
+    bounded by the other one.
+
+    Time complexity:
+        ``O(vertices_count)``
+    Memory complexity:
+        ``O(1)``
+
+    where ``vertices_count = len(border) + sum(map(len, holes))``,
+    ``border, holes = polygon``.
+
+    :param point: point to check for.
+    :param polygon: polygon to check in.
+    :returns: location of point in relation to polygon.
+
+    >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
+    >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
+    >>> point_in_polygon((0, 0), (inner_square, [])) is PointLocation.OUTSIDE
+    True
+    >>> point_in_polygon((0, 0), (outer_square, [])) is PointLocation.BOUNDARY
+    True
+    >>> point_in_polygon((1, 1), (inner_square, [])) is PointLocation.BOUNDARY
+    True
+    >>> point_in_polygon((1, 1), (outer_square, [])) is PointLocation.INSIDE
+    True
+    >>> point_in_polygon((2, 2), (outer_square, [])) is PointLocation.INSIDE
+    True
+    >>> (point_in_polygon((2, 2), (outer_square, [inner_square]))
+    ...  is PointLocation.OUTSIDE)
+    True
+    """
+    border, holes = polygon
+    result = point_in_contour(point, border)
+    if result is PointLocation.INSIDE:
+        for hole in holes:
+            point_hole_location = point_in_contour(point, hole)
+            if point_hole_location is PointLocation.INSIDE:
+                return PointLocation.OUTSIDE
+            elif point_hole_location is PointLocation.BOUNDARY:
+                return PointLocation.BOUNDARY
+    return result
+
+
 def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
     """
     Checks if the contour fully lies inside the region
