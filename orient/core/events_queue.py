@@ -52,7 +52,7 @@ class EventsQueueKey:
 
 
 class EventsQueue:
-    __slots__ = ('_queue',)
+    __slots__ = '_queue',
 
     def __init__(self) -> None:
         self._queue = PriorityQueue(key=EventsQueueKey)
