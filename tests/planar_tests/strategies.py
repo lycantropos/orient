@@ -12,6 +12,7 @@ from orient.core.contour import to_segments
 from orient.hints import (Contour,
                           Coordinate,
                           Point,
+                          Polygon,
                           Segment)
 from tests.strategies import coordinates_strategies
 from tests.utils import (Strategy,
@@ -89,6 +90,14 @@ contours_strategies = coordinates_strategies.map(to_counterclockwise_contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)
 
+
+def to_polygons_with_points(coordinates: Strategy[Coordinate]
+                            ) -> Strategy[Tuple[Polygon, Point]]:
+    return strategies.tuples(planar.polygons(coordinates),
+                             planar.points(coordinates))
+
+
+polygons_with_points = coordinates_strategies.flatmap(to_polygons_with_points)
 polygons = coordinates_strategies.flatmap(planar.polygons)
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = contours_strategies.flatmap(to_pairs)
