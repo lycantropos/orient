@@ -100,5 +100,5 @@ def to_polygons_with_points(coordinates: Strategy[Coordinate]
 polygons_with_points = coordinates_strategies.flatmap(to_polygons_with_points)
 polygons = coordinates_strategies.flatmap(planar.polygons)
 polygons_strategies = coordinates_strategies.map(planar.polygons)
-polygons_pairs = contours_strategies.flatmap(to_pairs)
-polygons_triplets = contours_strategies.flatmap(to_triplets)
+polygons_pairs = polygons_strategies.flatmap(to_pairs)
+polygons_triplets = polygons_strategies.flatmap(to_triplets)
