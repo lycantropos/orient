@@ -67,6 +67,75 @@ Install:
   pypy setup.py install
   ```
 
+Usage
+-----
+
+```python
+>>> left_bottom = (0, 0)
+>>> right_bottom = (4, 0)
+>>> left_top = (0, 4)
+>>> right_top = (4, 4)
+>>> bottom_segment = (left_bottom, right_bottom)
+>>> from orient.planar import point_in_segment
+>>> point_in_segment(left_bottom, bottom_segment)
+True
+>>> point_in_segment(right_bottom, bottom_segment)
+True
+>>> point_in_segment(left_top, bottom_segment)
+False
+>>> square = [left_bottom, right_bottom, right_top, left_top]
+>>> from orient.planar import PointLocation, point_in_contour
+>>> point_in_contour(left_bottom, square) is PointLocation.BOUNDARY
+True
+>>> point_in_contour((1, 1), square) is PointLocation.INSIDE
+True
+>>> point_in_contour(right_top, square) is PointLocation.BOUNDARY
+True
+>>> point_in_contour((5, 5), square) is PointLocation.OUTSIDE
+True
+>>> main_diagonal = (left_bottom, right_top)
+>>> from orient.planar import segment_in_contour
+>>> segment_in_contour(bottom_segment, square)
+True
+>>> segment_in_contour(((1, 0), (5, 0)), square)
+False
+>>> segment_in_contour(main_diagonal, square)
+True
+>>> segment_in_contour(((1, 1), (5, 5)), square)
+False
+>>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
+>>> from orient.planar import contour_in_contour
+>>> contour_in_contour(square, square)
+True
+>>> contour_in_contour(inner_square, square)
+True
+>>> contour_in_contour(square, inner_square)
+False
+>>> from orient.planar import point_in_polygon
+>>> point_in_polygon(left_bottom, (square, [])) is PointLocation.BOUNDARY
+True
+>>> point_in_polygon((1, 1), (square, [])) is PointLocation.INSIDE
+True
+>>> point_in_polygon((2, 2), (square, [])) is PointLocation.INSIDE
+True
+>>> point_in_polygon((1, 1), (square, [inner_square])) is PointLocation.BOUNDARY
+True
+>>> point_in_polygon((2, 2), (square, [inner_square])) is PointLocation.OUTSIDE
+True
+>>> from orient.planar import polygon_in_polygon
+>>> polygon_in_polygon((square, []), (square, []))
+True
+>>> polygon_in_polygon((inner_square, []), (square, []))
+True
+>>> polygon_in_polygon((square, []), (inner_square, []))
+False
+>>> polygon_in_polygon((inner_square, []), (square, [inner_square]))
+False
+>>> polygon_in_polygon((square, [inner_square]), (inner_square, []))
+False
+
+```
+
 Development
 -----------
 
