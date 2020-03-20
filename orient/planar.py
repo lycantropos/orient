@@ -1,5 +1,6 @@
 from enum import (IntEnum,
                   unique)
+from itertools import chain
 from typing import Sequence
 
 from robust.angular import (Orientation,
@@ -226,6 +227,48 @@ def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
             elif point_hole_location is PointLocation.BOUNDARY:
                 return PointLocation.BOUNDARY
     return result
+
+
+def segment_in_polygon(segment: Segment, polygon: Polygon) -> bool:
+    """
+    Checks if the segment fully lies inside the polygon.
+
+    Time complexity:
+        ``O(edges_count)``
+    Memory complexity:
+        ``O(1)``
+
+    where ``edges_count = len(border) + sum(map(len, holes))``,
+    ``border, holes = polygon``.
+
+    :param segment: segment to check for.
+    :param polygon: polygon to check in.
+    :returns:
+        true if the segment lies inside the polygon (or on its boundary),
+        false otherwise.
+
+    >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
+    >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
+    >>> segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
+    True
+    >>> segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
+    True
+    >>> segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
+    True
+    >>> segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
+    True
+    >>> segment_in_polygon(((0, 0), (2, 2)), (outer_square, [inner_square]))
+    False
+    >>> segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
+    False
+    """
+    start, end = segment
+    border, holes = polygon
+    return (bool(point_in_polygon(start, polygon))
+            and bool(point_in_polygon(end, polygon))
+            and all(_segment.intersects_only_at_endpoints(segment, edge)
+                    for edge in chain(_contour.to_segments(border),
+                                      *map(_contour.to_segments, holes))))
 
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
