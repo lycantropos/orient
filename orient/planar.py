@@ -263,5 +263,7 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
     False
     >>> polygon_in_polygon((inner_square, []), (outer_square, [inner_square]))
     False
+    >>> polygon_in_polygon((outer_square, [inner_square]), (inner_square, []))
+    False
     """
     return _polygon.contains_polygon(right, left)
