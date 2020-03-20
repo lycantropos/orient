@@ -9,7 +9,8 @@ from robust.linear import (SegmentsRelationship,
                            segments_relationship)
 
 from .core import (contour as _contour,
-                   polygon as _polygon)
+                   polygon as _polygon,
+                   segment as _segment)
 from .hints import (Contour,
                     Point,
                     Polygon,
@@ -113,14 +114,9 @@ def segment_in_contour(segment: Segment, contour: Contour) -> bool:
     False
     """
     start, end = segment
-
-    def segments_do_not_cross(left: Segment, right: Segment) -> bool:
-        return (segments_relationship(left, right)
-                is not SegmentsRelationship.CROSS)
-
     return (bool(point_in_contour(start, contour))
             and bool(point_in_contour(end, contour))
-            and all(segments_do_not_cross(segment, edge)
+            and all(_segment.intersects_only_at_endpoints(segment, edge)
                     for edge in _contour.to_segments(contour)))
 
 
