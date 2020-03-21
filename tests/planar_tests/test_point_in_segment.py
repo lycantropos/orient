@@ -7,7 +7,10 @@ from robust.angular import (Orientation,
 from orient.hints import (Point,
                           Segment)
 from orient.planar import point_in_segment
-from tests.utils import implication
+from tests.utils import (implication,
+                         reverse_point_coordinates,
+                         reverse_segment,
+                         reverse_segment_coordinates)
 from . import strategies
 
 
@@ -35,3 +38,21 @@ def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
     start, end = segment
     assert implication(point_in_segment(point, segment),
                        orientation(end, start, point) is Orientation.COLLINEAR)
+
+
+@given(strategies.segments_with_points)
+def test_reversed(segment_with_point: Tuple[Segment, Point]) -> None:
+    segment, point = segment_with_point
+
+    assert (point_in_segment(point, segment)
+            is point_in_segment(point, reverse_segment(segment)))
+
+
+@given(strategies.segments_with_points)
+def test_reversed_coordinates(segment_with_point: Tuple[Segment, Point]
+                              ) -> None:
+    segment, point = segment_with_point
+
+    assert (point_in_segment(point, segment)
+            is point_in_segment(reverse_point_coordinates(point),
+                                reverse_segment_coordinates(segment)))

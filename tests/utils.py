@@ -131,3 +131,16 @@ def to_non_edge_rays(contour: Contour) -> Iterable[Segment]:
                                     range(index + 2,
                                           min(len(contour) + index - 1,
                                               len(contour)))))
+
+
+def reverse_segment(segment: Segment) -> Segment:
+    return segment[::-1]
+
+
+def reverse_segment_coordinates(segment: Segment) -> Segment:
+    start, end = segment
+    return reverse_point_coordinates(start), reverse_point_coordinates(end)
+
+
+def reverse_point_coordinates(point: Point) -> Point:
+    return point[::-1]
