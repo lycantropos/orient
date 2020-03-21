@@ -1,13 +1,15 @@
 from enum import (IntEnum,
                   unique)
-from itertools import chain
-from typing import Sequence
+from itertools import (chain,
+                       groupby)
+from typing import (Any,
+                    Iterable,
+                    Sequence,
+                    Tuple)
 
 from robust.angular import (Orientation,
                             orientation)
-from robust.linear import (SegmentsRelationship,
-                           segment_contains,
-                           segments_relationship)
+from robust.linear import segment_contains
 
 from .core import (contour as _contour,
                    polygon as _polygon,
@@ -89,9 +91,18 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     return PointLocation(result)
 
 
-def segment_in_contour(segment: Segment, contour: Contour) -> bool:
+@unique
+class SegmentLocation(IntEnum):
+    OUTSIDE = 0
+    TOUCH = 1
+    CROSS = 2
+    BOUNDARY = 3
+    INSIDE = 4
+
+
+def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
     """
-    Checks if the segment fully lies inside the region bounded by the contour.
+    Finds location of segment in relation to contour.
 
     Time complexity:
         ``O(len(contour))``
@@ -100,25 +111,76 @@ def segment_in_contour(segment: Segment, contour: Contour) -> bool:
 
     :param segment: segment to check for.
     :param contour: contour to check in.
-    :returns:
-        true if the segment lies inside the contour (or on its boundary),
-        false otherwise.
+    :returns: location of segment in relation to contour.
 
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> segment_in_contour(((0, 0), (1, 0)), square)
+    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
+    >>> (segment_in_contour(((0, 0), (1, 0)), square)
+    ...  is SegmentLocation.BOUNDARY)
     True
-    >>> segment_in_contour(((0, 0), (1, 1)), square)
+    >>> (segment_in_contour(((0, 0), (2, 0)), square)
+    ...  is SegmentLocation.BOUNDARY)
     True
-    >>> segment_in_contour(((0, 0), (2, 2)), square)
-    False
-    >>> segment_in_contour(((1, 0), (2, 0)), square)
-    False
+    >>> segment_in_contour(((2, 0), (3, 0)), square) is SegmentLocation.TOUCH
+    True
+    >>> segment_in_contour(((3, 0), (4, 0)), square) is SegmentLocation.OUTSIDE
+    True
+    >>> segment_in_contour(((1, 0), (1, 2)), square) is SegmentLocation.INSIDE
+    True
+    >>> segment_in_contour(((0, 0), (1, 1)), square) is SegmentLocation.INSIDE
+    True
+    >>> segment_in_contour(((0, 0), (2, 2)), square) is SegmentLocation.INSIDE
+    True
+    >>> segment_in_contour(((0, 0), (3, 3)), square) is SegmentLocation.CROSS
+    True
     """
     start, end = segment
-    return (bool(point_in_contour(start, contour))
-            and bool(point_in_contour(end, contour))
-            and all(_segment.intersects_only_at_endpoints(segment, edge)
-                    for edge in _contour.to_segments(contour)))
+    try:
+        start_index, end_index = contour.index(start), contour.index(end)
+    except ValueError:
+        start_location, end_location = (point_in_contour(start, contour),
+                                        point_in_contour(end, contour))
+        if start_location is PointLocation.OUTSIDE:
+            return (SegmentLocation.OUTSIDE
+                    if end_location is PointLocation.OUTSIDE
+                    else (SegmentLocation.TOUCH
+                          if end_location is PointLocation.BOUNDARY
+                          else SegmentLocation.CROSS))
+        elif end_location is PointLocation.OUTSIDE:
+            return (SegmentLocation.TOUCH
+                    if start_location is PointLocation.BOUNDARY
+                    else SegmentLocation.CROSS)
+        elif all(_segment.intersects_only_at_endpoints(segment, edge)
+                 for edge in _contour.to_segments(contour)):
+            return SegmentLocation.INSIDE
+        else:
+            return SegmentLocation.CROSS
+    else:
+        min_index, max_index = ((start_index, end_index)
+                                if start_index <= end_index
+                                else (end_index, start_index))
+        return (SegmentLocation.BOUNDARY
+                if ((max_index - min_index) == 1
+                    or not min_index and max_index == len(contour) - 1)
+                else
+                (SegmentLocation.INSIDE
+                 if _all_equal(chain((orientation(end, start, contour[index])
+                                      for index in range(min_index + 1,
+                                                         max_index)),
+                                     (orientation(start, end, contour[index])
+                                      for index in chain(
+                                             range(min_index),
+                                             range(max_index + 1,
+                                                   len(contour))))))
+                 else SegmentLocation.CROSS))
+
+
+def _sort_pair(first: int, second: int) -> Tuple[int, int]:
+    return (first, second) if first < second else (second, first)
+
+
+def _all_equal(iterable: Iterable[Any]) -> bool:
+    groups = groupby(iterable)
+    return next(groups, True) and not next(groups, False)
 
 
 def contour_in_contour(left: Contour, right: Contour) -> bool:
