@@ -44,8 +44,8 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
 @unique
 class PointLocation(IntEnum):
     OUTSIDE = 0
-    INSIDE = 1
-    BOUNDARY = 2
+    BOUNDARY = 1
+    INSIDE = 2
 
 
 def point_in_contour(point: Point, contour: Contour) -> PointLocation:
