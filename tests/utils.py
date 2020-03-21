@@ -1,3 +1,4 @@
+from itertools import chain
 from operator import itemgetter
 from typing import (Any,
                     Callable,
@@ -15,7 +16,8 @@ from robust.angular import (Orientation,
 
 from orient.hints import (Contour,
                           Point,
-                          Polygon)
+                          Polygon,
+                          Segment)
 
 Domain = TypeVar('Domain')
 Key = Callable[[Domain], Any]
@@ -24,6 +26,10 @@ Strategy = SearchStrategy
 
 def implication(antecedent: bool, consequent: bool) -> bool:
     return not antecedent or consequent
+
+
+def equivalence(left: bool, right: bool) -> bool:
+    return left is right
 
 
 _sentinel = object()
@@ -116,3 +122,12 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
                 break
         result.append(point)
     return result
+
+
+def to_non_edge_rays(contour: Contour) -> Iterable[Segment]:
+    return ((contour[index], contour[next_index])
+            for index in range(len(contour))
+            for next_index in chain(range(index - 1),
+                                    range(index + 2,
+                                          min(len(contour) + index - 1,
+                                              len(contour)))))

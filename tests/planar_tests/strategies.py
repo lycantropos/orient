@@ -40,6 +40,16 @@ def to_counterclockwise_contours(coordinates: Strategy[Coordinate]
 contours = coordinates_strategies.flatmap(to_counterclockwise_contours)
 
 
+def to_contours_with_segments(coordinates: Strategy[Coordinate]
+                              ) -> Strategy[Tuple[Segment, Point]]:
+    return strategies.tuples(planar.contours(coordinates),
+                             planar.segments(coordinates))
+
+
+contours_with_segments = (coordinates_strategies
+                          .flatmap(to_contours_with_segments))
+
+
 def to_non_overlapping_contours_lists(coordinates: Strategy[Coordinate],
                                       *,
                                       min_size: int = 0,
