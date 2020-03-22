@@ -280,15 +280,15 @@ def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
     True
     """
     border, holes = polygon
-    result = point_in_contour(point, border)
-    if result is PointLocation.INSIDE:
+    border_location = point_in_contour(point, border)
+    if border_location is PointLocation.INSIDE:
         for hole in holes:
-            point_hole_location = point_in_contour(point, hole)
-            if point_hole_location is PointLocation.INSIDE:
+            hole_location = point_in_contour(point, hole)
+            if hole_location is PointLocation.INSIDE:
                 return PointLocation.OUTSIDE
-            elif point_hole_location is PointLocation.BOUNDARY:
+            elif hole_location is PointLocation.BOUNDARY:
                 return PointLocation.BOUNDARY
-    return result
+    return border_location
 
 
 def segment_in_polygon(segment: Segment, polygon: Polygon) -> bool:
