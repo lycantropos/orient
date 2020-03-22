@@ -64,18 +64,17 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
         https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm
 
     :param point: point to locate.
-    :param contour:
-        contour to check, vertices should be listed in counterclockwise order.
+    :param contour: contour to check.
     :returns: location of point in relation to contour.
 
-    >>> contour = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_contour((0, 0), contour) is PointLocation.BOUNDARY
+    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
+    >>> point_in_contour((0, 0), square) is PointLocation.BOUNDARY
     True
-    >>> point_in_contour((1, 1), contour) is PointLocation.INSIDE
+    >>> point_in_contour((1, 1), square) is PointLocation.INSIDE
     True
-    >>> point_in_contour((2, 2), contour) is PointLocation.BOUNDARY
+    >>> point_in_contour((2, 2), square) is PointLocation.BOUNDARY
     True
-    >>> point_in_contour((3, 3), contour) is PointLocation.OUTSIDE
+    >>> point_in_contour((3, 3), square) is PointLocation.OUTSIDE
     True
     """
     result = False
