@@ -88,7 +88,9 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
                 and ((end_y > start_y) is (orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return PointLocation(result)
+    return (PointLocation.INSIDE
+            if result
+            else PointLocation.OUTSIDE)
 
 
 @unique
