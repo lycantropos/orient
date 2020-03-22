@@ -142,8 +142,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                                     point_in_contour(end, contour))
     if (start_location is PointLocation.OUTSIDE
             or end_location is PointLocation.OUTSIDE):
-        if (end_location is PointLocation.INSIDE
-                or start_location is PointLocation.INSIDE):
+        if (start_location is PointLocation.INSIDE
+                or end_location is PointLocation.INSIDE):
             return SegmentLocation.CROSS
         else:
             outsider = (start
@@ -157,8 +157,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                         if point_in_segment(vertex, segment))
             except ValueError:
                 return (SegmentLocation.TOUCH
-                        if (end_location is PointLocation.BOUNDARY
-                            or start_location is PointLocation.BOUNDARY)
+                        if (start_location is PointLocation.BOUNDARY
+                            or end_location is PointLocation.BOUNDARY)
                         else SegmentLocation.OUTSIDE)
             _, end_index = max(
                     (_to_squared_distance_between_points(outsider, vertex),
@@ -178,6 +178,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
           or end_location is PointLocation.INSIDE):
         return SegmentLocation.INSIDE
     else:
+        # both endpoints lie on contour
         start_index, end_index = (_to_point_index(contour, start),
                                   _to_point_index(contour, end))
         min_index, max_index = _sort_pair(start_index, end_index)
