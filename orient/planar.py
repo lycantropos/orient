@@ -291,7 +291,7 @@ def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
     return border_location
 
 
-def segment_in_polygon(segment: Segment, polygon: Polygon) -> bool:
+def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
     """
     Checks if the segment fully lies inside the polygon.
 
@@ -324,13 +324,17 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> bool:
     >>> segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
     False
     """
-    start, end = segment
     border, holes = polygon
-    return (bool(point_in_polygon(start, polygon))
-            and bool(point_in_polygon(end, polygon))
-            and all(_segment.intersects_only_at_endpoints(segment, edge)
-                    for edge in chain(_contour.to_segments(border),
-                                      *map(_contour.to_segments, holes))))
+    border_location = segment_in_contour(segment, border)
+    if border_location is SegmentLocation.INSIDE:
+        for hole in holes:
+            hole_location = segment_in_contour(segment, hole)
+            if (hole_location is SegmentLocation.INSIDE
+                    or hole_location is SegmentLocation.CROSS):
+                return SegmentLocation.OUTSIDE
+            elif hole_location is SegmentLocation.BOUNDARY:
+                return SegmentLocation.BOUNDARY
+    return border_location
 
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
