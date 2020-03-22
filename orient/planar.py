@@ -107,7 +107,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
     Time complexity:
         ``O(len(contour))``
     Memory complexity:
-        ``O(1)``
+        ``O(len(contour))``
 
     :param segment: segment to check for.
     :param contour: contour to check in.
@@ -190,6 +190,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                 start_index = index
                 break
             elif point_in_segment(start, edge):
+                contour = contour[:]
                 contour.insert(index, start)
                 start_index = index
                 break
@@ -202,6 +203,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                 end_index = index
                 break
             elif point_in_segment(end, edge):
+                contour = contour[:]
                 contour.insert(index, end)
                 end_index = index
                 if start_index > index:
