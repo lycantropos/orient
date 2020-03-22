@@ -9,11 +9,12 @@ from typing import (Any,
 
 from robust.angular import (Orientation,
                             orientation)
-from robust.linear import segment_contains
+from robust.linear import (SegmentsRelationship,
+                           segment_contains,
+                           segments_relationship)
 
 from .core import (contour as _contour,
-                   polygon as _polygon,
-                   segment as _segment)
+                   polygon as _polygon)
 from .hints import (Contour,
                     Point,
                     Polygon,
@@ -135,27 +136,41 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
     True
     """
     start, end = segment
-    try:
-        start_index, end_index = contour.index(start), contour.index(end)
-    except ValueError:
-        start_location, end_location = (point_in_contour(start, contour),
-                                        point_in_contour(end, contour))
-        if start_location is PointLocation.OUTSIDE:
-            return (SegmentLocation.OUTSIDE
-                    if end_location is PointLocation.OUTSIDE
-                    else (SegmentLocation.TOUCH
-                          if end_location is PointLocation.BOUNDARY
-                          else SegmentLocation.CROSS))
-        elif end_location is PointLocation.OUTSIDE:
-            return (SegmentLocation.TOUCH
-                    if start_location is PointLocation.BOUNDARY
-                    else SegmentLocation.CROSS)
-        elif all(_segment.intersects_only_at_endpoints(segment, edge)
-                 for edge in _contour.to_segments(contour)):
-            return SegmentLocation.INSIDE
-        else:
-            return SegmentLocation.CROSS
+    start_location, end_location = (point_in_contour(start, contour),
+                                    point_in_contour(end, contour))
+    if start_location is PointLocation.OUTSIDE:
+        return (SegmentLocation.CROSS
+                if (end_location is PointLocation.INSIDE
+                    or any(segments_relationship(segment, edge)
+                           is SegmentsRelationship.CROSS
+                           for edge in _contour.to_segments(contour)))
+                else (SegmentLocation.TOUCH
+                      if end_location is PointLocation.BOUNDARY
+                      else SegmentLocation.OUTSIDE))
+    elif end_location is PointLocation.OUTSIDE:
+        return (SegmentLocation.CROSS
+                if (start_location is PointLocation.INSIDE
+                    or any(segments_relationship(segment, edge)
+                           is SegmentsRelationship.CROSS
+                           for edge in _contour.to_segments(contour)))
+                else SegmentLocation.TOUCH)
+    elif (start_location is PointLocation.INSIDE
+          or end_location is PointLocation.INSIDE):
+        return (SegmentLocation.CROSS
+                if any(segments_relationship(segment, edge)
+                       is SegmentsRelationship.CROSS
+                       for edge in _contour.to_segments(contour))
+                else SegmentLocation.INSIDE)
     else:
+        # both endpoints lie on contour
+        start_index = next(index
+                           for index in range(len(contour))
+                           if point_in_segment(start, (contour[index - 1],
+                                                       contour[index])))
+        end_index = next(index
+                         for index in range(len(contour))
+                         if point_in_segment(end, (contour[index - 1],
+                                                   contour[index])))
         min_index, max_index = ((start_index, end_index)
                                 if start_index <= end_index
                                 else (end_index, start_index))
