@@ -166,7 +166,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                     for index, vertex in enumerate(contour)
                     if point_in_segment(vertex, segment))
             min_index, max_index = _sort_pair(start_index, end_index)
-            if max_index - min_index <= 1:
+            if (max_index - min_index <= 1
+                    or not min_index and max_index == len(contour) - 1):
                 return SegmentLocation.TOUCH
             first_part, second_part = _split_contour(contour, min_index,
                                                      max_index)
@@ -179,29 +180,42 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
         return SegmentLocation.INSIDE
     else:
         # both endpoints lie on contour
-        start_index, end_index = (_to_point_index(contour, start),
-                                  _to_point_index(contour, end))
+        start_index = end_index = None
+        for index, edge in enumerate(_contour.to_segments(contour)):
+            edge_start, edge_end = edge
+            if edge_start == start:
+                start_index = (index or len(contour)) - 1
+                break
+            elif edge_end == start:
+                start_index = index
+                break
+            elif point_in_segment(start, edge):
+                contour.insert(index, start)
+                start_index = index
+                break
+        for index, edge in enumerate(_contour.to_segments(contour)):
+            edge_start, edge_end = edge
+            if edge_start == end:
+                end_index = (index or len(contour)) - 1
+                break
+            elif edge_end == end:
+                end_index = index
+                break
+            elif point_in_segment(end, edge):
+                contour.insert(index, end)
+                end_index = index
+                if start_index > index:
+                    start_index = (start_index + 1) % len(contour)
+                break
         min_index, max_index = _sort_pair(start_index, end_index)
+        if (max_index - min_index <= 1
+                or not min_index and max_index == len(contour) - 1):
+            return SegmentLocation.BOUNDARY
         first_part, second_part = _split_contour(contour, min_index, max_index)
-        return (SegmentLocation.BOUNDARY
-                if min_index == max_index
-                else (SegmentLocation.INSIDE
-                      if (_to_orientation(first_part)
-                          is _to_orientation(second_part))
-                      else SegmentLocation.TOUCH))
-
-
-def _to_point_index(contour: Contour, point: Point) -> Optional[int]:
-    for index, edge in enumerate(_contour.to_segments(contour)):
-        (edge_start, edge_end) = edge
-        if edge_start == point:
-            return index
-        elif edge_end == point:
-            return index + 1
-        elif point_in_segment(point, edge):
-            contour.insert(index + 1, point)
-            return index + 1
-    return None
+        return (SegmentLocation.INSIDE
+                if (_to_orientation(first_part)
+                    is _to_orientation(second_part))
+                else SegmentLocation.TOUCH)
 
 
 def _to_orientation(contour: Contour) -> Orientation:
