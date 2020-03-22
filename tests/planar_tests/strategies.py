@@ -33,7 +33,7 @@ contours = coordinates_strategies.flatmap(planar.contours)
 
 
 def to_contours_with_segments(coordinates: Strategy[Coordinate]
-                              ) -> Strategy[Tuple[Segment, Point]]:
+                              ) -> Strategy[Tuple[Contour, Segment]]:
     return strategies.tuples(planar.contours(coordinates),
                              planar.segments(coordinates))
 
@@ -101,6 +101,17 @@ def to_polygons_with_points(coordinates: Strategy[Coordinate]
 
 polygons_with_points = coordinates_strategies.flatmap(to_polygons_with_points)
 polygons = coordinates_strategies.flatmap(planar.polygons)
+
+
+def to_polygons_with_segments(coordinates: Strategy[Coordinate]
+                              ) -> Strategy[Tuple[Polygon, Segment]]:
+    return strategies.tuples(planar.polygons(coordinates),
+                             planar.segments(coordinates))
+
+
+polygons_with_segments = (coordinates_strategies
+                          .flatmap(to_polygons_with_segments))
+
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
