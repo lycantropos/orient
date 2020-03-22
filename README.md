@@ -94,15 +94,15 @@ True
 >>> point_in_contour((5, 5), square) is PointLocation.OUTSIDE
 True
 >>> main_diagonal = (left_bottom, right_top)
->>> from orient.planar import segment_in_contour
->>> segment_in_contour(bottom_segment, square)
+>>> from orient.planar import SegmentLocation, segment_in_contour
+>>> segment_in_contour(bottom_segment, square) is SegmentLocation.BOUNDARY
 True
->>> segment_in_contour(((1, 0), (5, 0)), square)
-False
->>> segment_in_contour(main_diagonal, square)
+>>> segment_in_contour(((1, 0), (5, 0)), square) is SegmentLocation.TOUCH
 True
->>> segment_in_contour(((1, 1), (5, 5)), square)
-False
+>>> segment_in_contour(main_diagonal, square) is SegmentLocation.INSIDE
+True
+>>> segment_in_contour(((1, 1), (5, 5)), square) is SegmentLocation.CROSS
+True
 >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
 >>> from orient.planar import contour_in_contour
 >>> contour_in_contour(square, square)
