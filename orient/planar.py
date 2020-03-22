@@ -380,18 +380,24 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
 
     >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
     >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
-    >>> segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
+    >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
+    ...  is SegmentLocation.BOUNDARY)
     True
-    >>> segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
+    >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
+    ...  is SegmentLocation.INSIDE)
     True
-    >>> segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
+    >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
+    ...  is SegmentLocation.INSIDE)
     True
-    >>> segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
+    >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
+    ...  is SegmentLocation.BOUNDARY)
     True
-    >>> segment_in_polygon(((0, 0), (2, 2)), (outer_square, [inner_square]))
-    False
-    >>> segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
-    False
+    >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, [inner_square]))
+    ...  is SegmentLocation.CROSS)
+    True
+    >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
+    ...  is SegmentLocation.CROSS)
+    True
     """
     border, holes = polygon
     border_location = segment_in_contour(segment, border)
