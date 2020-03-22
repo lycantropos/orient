@@ -396,11 +396,12 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
     if border_location is SegmentLocation.INSIDE:
         for hole in holes:
             hole_location = segment_in_contour(segment, hole)
-            if (hole_location is SegmentLocation.INSIDE
-                    or hole_location is SegmentLocation.CROSS):
+            if hole_location is SegmentLocation.INSIDE:
                 return SegmentLocation.OUTSIDE
             elif hole_location is SegmentLocation.BOUNDARY:
                 return SegmentLocation.BOUNDARY
+            elif hole_location is SegmentLocation.CROSS:
+                return SegmentLocation.CROSS
     return border_location
 
 
