@@ -127,7 +127,8 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
 def to_non_edge_rays(contour: Contour) -> Iterable[Segment]:
     return ((contour[index], contour[next_index])
             for index in range(len(contour))
-            for next_index in chain(range(index - 1),
+            for next_index in chain(range(int(index == len(contour) - 1),
+                                          index - 1),
                                     range(index + 2,
                                           min(len(contour) + index - 1,
                                               len(contour)))))
