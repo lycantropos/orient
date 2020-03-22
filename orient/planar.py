@@ -248,8 +248,7 @@ def contours_in_contour(contours: Sequence[Contour],
 
 def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
     """
-    Checks if the contour fully lies inside the region
-    bounded by the other one.
+    Finds location of point in relation to polygon.
 
     Time complexity:
         ``O(vertices_count)``
