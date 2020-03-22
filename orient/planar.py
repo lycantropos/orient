@@ -1,9 +1,6 @@
 from enum import (IntEnum,
                   unique)
-from itertools import (chain,
-                       groupby)
-from typing import (Any,
-                    Iterable,
+from typing import (Optional,
                     Sequence,
                     Tuple)
 
@@ -16,6 +13,7 @@ from robust.linear import (SegmentsRelationship,
 from .core import (contour as _contour,
                    polygon as _polygon)
 from .hints import (Contour,
+                    Coordinate,
                     Point,
                     Polygon,
                     Segment)
@@ -135,68 +133,107 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
     >>> segment_in_contour(((0, 0), (3, 3)), square) is SegmentLocation.CROSS
     True
     """
+    if any(segments_relationship(segment, edge)
+           is SegmentsRelationship.CROSS
+           for edge in _contour.to_segments(contour)):
+        return SegmentLocation.CROSS
     start, end = segment
     start_location, end_location = (point_in_contour(start, contour),
                                     point_in_contour(end, contour))
-    if start_location is PointLocation.OUTSIDE:
-        return (SegmentLocation.CROSS
-                if (end_location is PointLocation.INSIDE
-                    or any(segments_relationship(segment, edge)
-                           is SegmentsRelationship.CROSS
-                           for edge in _contour.to_segments(contour)))
-                else (SegmentLocation.TOUCH
-                      if end_location is PointLocation.BOUNDARY
-                      else SegmentLocation.OUTSIDE))
-    elif end_location is PointLocation.OUTSIDE:
-        return (SegmentLocation.CROSS
-                if (start_location is PointLocation.INSIDE
-                    or any(segments_relationship(segment, edge)
-                           is SegmentsRelationship.CROSS
-                           for edge in _contour.to_segments(contour)))
-                else SegmentLocation.TOUCH)
+    if (start_location is PointLocation.OUTSIDE
+            or end_location is PointLocation.OUTSIDE):
+        if (end_location is PointLocation.INSIDE
+                or start_location is PointLocation.INSIDE):
+            return SegmentLocation.CROSS
+        else:
+            outsider = (start
+                        if start_location is PointLocation.OUTSIDE
+                        else end)
+            try:
+                _, start_index = min(
+                        (_to_squared_distance_between_points(outsider, vertex),
+                         index)
+                        for index, vertex in enumerate(contour)
+                        if point_in_segment(vertex, segment))
+            except ValueError:
+                return (SegmentLocation.TOUCH
+                        if (end_location is PointLocation.BOUNDARY
+                            or start_location is PointLocation.BOUNDARY)
+                        else SegmentLocation.OUTSIDE)
+            _, end_index = max(
+                    (_to_squared_distance_between_points(outsider, vertex),
+                     index)
+                    for index, vertex in enumerate(contour)
+                    if point_in_segment(vertex, segment))
+            min_index, max_index = _sort_pair(start_index, end_index)
+            if max_index - min_index <= 1:
+                return SegmentLocation.TOUCH
+            first_part, second_part = _split_contour(contour, min_index,
+                                                     max_index)
+            return (SegmentLocation.CROSS
+                    if (_to_orientation(first_part)
+                        is _to_orientation(second_part))
+                    else SegmentLocation.TOUCH)
     elif (start_location is PointLocation.INSIDE
           or end_location is PointLocation.INSIDE):
-        return (SegmentLocation.CROSS
-                if any(segments_relationship(segment, edge)
-                       is SegmentsRelationship.CROSS
-                       for edge in _contour.to_segments(contour))
-                else SegmentLocation.INSIDE)
+        return SegmentLocation.INSIDE
     else:
-        # both endpoints lie on contour
-        start_index = next(index
-                           for index in range(len(contour))
-                           if point_in_segment(start, (contour[index - 1],
-                                                       contour[index])))
-        end_index = next(index
-                         for index in range(len(contour))
-                         if point_in_segment(end, (contour[index - 1],
-                                                   contour[index])))
-        min_index, max_index = ((start_index, end_index)
-                                if start_index <= end_index
-                                else (end_index, start_index))
+        start_index, end_index = (_to_point_index(contour, start),
+                                  _to_point_index(contour, end))
+        min_index, max_index = _sort_pair(start_index, end_index)
+        first_part, second_part = _split_contour(contour, min_index, max_index)
         return (SegmentLocation.BOUNDARY
-                if ((max_index - min_index) == 1
-                    or not min_index and max_index == len(contour) - 1)
-                else
-                (SegmentLocation.INSIDE
-                 if _all_equal(chain((orientation(end, start, contour[index])
-                                      for index in range(min_index + 1,
-                                                         max_index)),
-                                     (orientation(start, end, contour[index])
-                                      for index in chain(
-                                             range(min_index),
-                                             range(max_index + 1,
-                                                   len(contour))))))
-                 else SegmentLocation.CROSS))
+                if min_index == max_index
+                else (SegmentLocation.INSIDE
+                      if (_to_orientation(first_part)
+                          is _to_orientation(second_part))
+                      else SegmentLocation.TOUCH))
+
+
+def _to_point_index(contour: Contour, point: Point) -> Optional[int]:
+    for index, edge in enumerate(_contour.to_segments(contour)):
+        (edge_start, edge_end) = edge
+        if edge_start == point:
+            return index
+        elif edge_end == point:
+            return index + 1
+        elif point_in_segment(point, edge):
+            contour.insert(index + 1, point)
+            return index + 1
+    return None
+
+
+def _to_orientation(contour: Contour) -> Orientation:
+    min_index = _argmin(contour)
+    contour[:] = contour[min_index:] + contour[:min_index]
+    while True:
+        candidate = orientation(contour[0], contour[-1], contour[1])
+        if candidate is Orientation.COLLINEAR:
+            del contour[0]
+        else:
+            return candidate
+
+
+def _argmin(contour: Contour) -> int:
+    return min(range(len(contour)),
+               key=contour.__getitem__)
+
+
+def _split_contour(contour: Contour,
+                   min_index: int,
+                   max_index: int) -> Tuple[Contour, Contour]:
+    return (contour[min_index:max_index + 1],
+            contour[:min_index + 1] + contour[max_index:])
+
+
+def _to_squared_distance_between_points(left: Point,
+                                        right: Point) -> Coordinate:
+    (left_x, left_y), (right_x, right_y) = left, right
+    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2
 
 
 def _sort_pair(first: int, second: int) -> Tuple[int, int]:
     return (first, second) if first < second else (second, first)
-
-
-def _all_equal(iterable: Iterable[Any]) -> bool:
-    groups = groupby(iterable)
-    return next(groups, True) and not next(groups, False)
 
 
 def contour_in_contour(left: Contour, right: Contour) -> bool:

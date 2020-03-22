@@ -49,5 +49,5 @@ def register(events_queue: EventsQueue, contour: Contour,
 
 
 def to_segments(contour: Contour) -> Iterable[Segment]:
-    return ((contour[index - 1], contour[index])
+    return ((contour[index], contour[(index + 1) % len(contour)])
             for index in range(len(contour)))
