@@ -16,7 +16,6 @@ from orient.hints import (Contour,
                           Segment)
 from tests.strategies import coordinates_strategies
 from tests.utils import (Strategy,
-                         to_counterclockwise_contour,
                          to_pairs,
                          to_triplets)
 
@@ -30,14 +29,7 @@ def to_segments_with_points(coordinates: Strategy[Coordinate]
 
 
 segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
-
-
-def to_counterclockwise_contours(coordinates: Strategy[Coordinate]
-                                 ) -> Strategy[Contour]:
-    return planar.contours(coordinates).map(to_counterclockwise_contour)
-
-
-contours = coordinates_strategies.flatmap(to_counterclockwise_contours)
+contours = coordinates_strategies.flatmap(planar.contours)
 
 
 def to_contours_with_segments(coordinates: Strategy[Coordinate]
@@ -55,7 +47,7 @@ def to_non_overlapping_contours_lists(coordinates: Strategy[Coordinate],
                                       min_size: int = 0,
                                       max_size: Optional[int] = None
                                       ) -> Strategy[List[Contour]]:
-    return (strategies.lists(to_counterclockwise_contours(coordinates),
+    return (strategies.lists(planar.contours(coordinates),
                              min_size=min_size,
                              max_size=max_size)
             .filter(are_non_overlapping_contours))
@@ -74,7 +66,7 @@ def to_contours_with_non_overlapping_contours_lists(
         max_size: Optional[int] = None
 ) -> Strategy[Tuple[Contour, List[Contour]]]:
     return strategies.tuples(
-            to_counterclockwise_contours(coordinates),
+            planar.contours(coordinates),
             to_non_overlapping_contours_lists(coordinates,
                                               min_size=min_size,
                                               max_size=max_size))
@@ -91,12 +83,12 @@ contours_with_non_empty_contours_lists = coordinates_strategies.flatmap(
 
 def to_contours_with_points(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Tuple[Contour, Point]]:
-    return strategies.tuples(to_counterclockwise_contours(coordinates),
+    return strategies.tuples(planar.contours(coordinates),
                              planar.points(coordinates))
 
 
 contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
-contours_strategies = coordinates_strategies.map(to_counterclockwise_contours)
+contours_strategies = coordinates_strategies.map(planar.contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)
 
