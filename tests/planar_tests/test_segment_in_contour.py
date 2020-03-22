@@ -5,9 +5,13 @@ from hypothesis import given
 from orient.core.contour import to_segments
 from orient.hints import (Contour,
                           Segment)
-from orient.planar import SegmentLocation, segment_in_contour
+from orient.planar import (PointLocation,
+                           SegmentLocation,
+                           point_in_contour,
+                           segment_in_contour)
 from tests.utils import (are_contours_similar,
                          equivalence,
+                         implication,
                          to_convex_hull,
                          to_non_edge_rays)
 from . import strategies
@@ -20,6 +24,20 @@ def test_basic(contour_with_segment: Tuple[Contour, Segment]) -> None:
     result = segment_in_contour(segment, contour)
 
     assert isinstance(result, SegmentLocation)
+
+
+@given(strategies.contours_with_segments)
+def test_outside(contour_with_segment: Tuple[Contour, Segment]) -> None:
+    contour, segment = contour_with_segment
+
+    result = segment_in_contour(segment, contour)
+
+    start, end = segment
+    assert implication(result is SegmentLocation.OUTSIDE,
+                       point_in_contour(start, contour)
+                       is PointLocation.OUTSIDE
+                       and point_in_contour(end, contour)
+                       is PointLocation.OUTSIDE)
 
 
 @given(strategies.contours)
