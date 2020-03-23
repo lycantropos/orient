@@ -56,6 +56,25 @@ def test_holes_edges(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons)
+def test_border_separators(polygon: Polygon) -> None:
+    border, holes = polygon
+    assert all(segment_in_polygon(segment, polygon)
+               in (SegmentLocation.TOUCH, SegmentLocation.CROSS,
+                   SegmentLocation.ENCLOSED)
+               for segment in to_contour_separators(border))
+
+
+@given(strategies.polygons)
+def test_holes_separators(polygon: Polygon) -> None:
+    border, holes = polygon
+    assert all(segment_in_polygon(segment, polygon)
+               in (SegmentLocation.TOUCH, SegmentLocation.CROSS,
+                   SegmentLocation.ENCLOSED)
+               for hole in holes
+               for segment in to_contour_separators(hole))
+
+
+@given(strategies.polygons)
 def test_convex_polygon_criterion(polygon: Polygon) -> None:
     border, holes = polygon
     assert (bool(holes)
