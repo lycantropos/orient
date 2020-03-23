@@ -285,6 +285,8 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
                 return SegmentLocation.CROSS
             elif hole_location is SegmentLocation.ENCLOSED:
                 return SegmentLocation.TOUCH
+            elif hole_location is SegmentLocation.TOUCH:
+                border_location = SegmentLocation.ENCLOSED
     return border_location
 
 
