@@ -49,6 +49,6 @@ def test_edges(contour: Contour) -> None:
 @given(strategies.contours)
 def test_convex_contour_criterion(contour: Contour) -> None:
     assert equivalence(all(segment_in_contour(ray, contour)
-                           is SegmentLocation.INSIDE
+                           is SegmentLocation.ENCLOSED
                            for ray in to_non_edge_rays(contour)),
                        are_contours_similar(contour, to_convex_hull(contour)))
