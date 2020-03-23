@@ -131,13 +131,15 @@ def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
 
 
 def orientation(contour: Contour) -> Orientation:
-    min_index = min(range(len(contour)),
-                    key=contour.__getitem__)
-    contour = contour[min_index:] + contour[:min_index]
+    index = min(range(len(contour)),
+                key=contour.__getitem__)
+    previous_index, next_index = (index - 1 if index else len(contour) - 1,
+                                  (index + 1) % len(contour))
     while True:
-        candidate = angle_orientation(contour[0], contour[-1], contour[1])
+        candidate = angle_orientation(contour[index], contour[previous_index],
+                                      contour[next_index])
         if candidate is Orientation.COLLINEAR:
-            del contour[0]
+            index, next_index = next_index, (next_index + 1) % len(contour)
         else:
             return candidate
 
