@@ -88,7 +88,7 @@ True
 >>> point_in_segment(left_top, bottom_segment) is PointLocation.EXTERNAL
 True
 >>> square = [left_bottom, right_bottom, right_top, left_top]
->>> from orient.planar import PointLocation, point_in_contour
+>>> from orient.planar import point_in_contour
 >>> point_in_contour(left_bottom, square) is PointLocation.BOUNDARY
 True
 >>> point_in_contour((1, 1), square) is PointLocation.INTERNAL
