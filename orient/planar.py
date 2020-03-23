@@ -370,7 +370,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
     Time complexity:
         ``O(edges_count)``
     Memory complexity:
-        ``O(1)``
+        ``O(edges_count)``
 
     where ``edges_count = len(border) + sum(map(len, holes))``,
     ``border, holes = polygon``.
@@ -386,17 +386,23 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
     >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
     ...  is SegmentLocation.BOUNDARY)
     True
-    >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
-    ...  is SegmentLocation.INSIDE)
-    True
-    >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
-    ...  is SegmentLocation.INSIDE)
-    True
     >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
     ...  is SegmentLocation.BOUNDARY)
     True
+    >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
+    ...  is SegmentLocation.ENCLOSED)
+    True
     >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, [inner_square]))
     ...  is SegmentLocation.CROSS)
+    True
+    >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, []))
+    ...  is SegmentLocation.INTERNAL)
+    True
+    >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, [inner_square]))
+    ...  is SegmentLocation.TOUCH)
+    True
+    >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
+    ...  is SegmentLocation.ENCLOSED)
     True
     >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
     ...  is SegmentLocation.CROSS)
