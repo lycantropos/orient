@@ -23,7 +23,7 @@ SegmentLocation = SegmentLocation
 
 def point_in_segment(point: Point, segment: Segment) -> PointLocation:
     """
-    Checks if point lies inside of the segment or is one of its endpoints.
+    Finds location of point in relation to segment.
 
     Time complexity:
         ``O(1)``
@@ -32,9 +32,7 @@ def point_in_segment(point: Point, segment: Segment) -> PointLocation:
 
     :param point: point to locate.
     :param segment: segment to check.
-    :returns:
-        true if point lies inside segment or equal to one of its endpoints,
-        false otherwise.
+    :returns: location of point in relation to segment.
 
     >>> segment = ((0, 0), (2, 0))
     >>> point_in_segment((0, 0), segment) is PointLocation.BOUNDARY
