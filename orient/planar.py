@@ -4,11 +4,11 @@ from typing import (Sequence,
 from robust.angular import (Orientation,
                             orientation)
 from robust.linear import (SegmentsRelationship,
-                           segment_contains,
                            segments_relationship)
 
 from .core import (contour as _contour,
-                   polygon as _polygon)
+                   polygon as _polygon,
+                   segment as _segment)
 from .core.location import (PointLocation,
                             SegmentLocation)
 from .hints import (Contour,
@@ -20,7 +20,8 @@ from .hints import (Contour,
 PointLocation = PointLocation
 SegmentLocation = SegmentLocation
 
-def point_in_segment(point: Point, segment: Segment) -> bool:
+
+def point_in_segment(point: Point, segment: Segment) -> PointLocation:
     """
     Checks if point lies inside of the segment or is one of its endpoints.
 
@@ -35,12 +36,19 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
         true if point lies inside segment or equal to one of its endpoints,
         false otherwise.
 
-    >>> point_in_segment((0, 0), ((0, 0), (1, 0)))
+    >>> segment = ((0, 0), (2, 0))
+    >>> point_in_segment((0, 0), segment) is PointLocation.BOUNDARY
     True
-    >>> point_in_segment((0, 1), ((0, 0), (1, 0)))
-    False
+    >>> point_in_segment((1, 0), segment) is PointLocation.INTERNAL
+    True
+    >>> point_in_segment((2, 0), segment) is PointLocation.BOUNDARY
+    True
+    >>> point_in_segment((3, 0), segment) is PointLocation.EXTERNAL
+    True
+    >>> point_in_segment((0, 1), segment) is PointLocation.EXTERNAL
+    True
     """
-    return segment_contains(segment, point)
+    return _segment.contains_point(segment, point)
 
 
 def point_in_contour(point: Point, contour: Contour) -> PointLocation:
@@ -72,9 +80,10 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     """
     result = False
     _, point_y = point
-    for start, end in _contour.to_segments(contour):
-        if point_in_segment(point, (start, end)):
+    for edge in _contour.to_segments(contour):
+        if point_in_segment(point, edge) is not PointLocation.EXTERNAL:
             return PointLocation.BOUNDARY
+        start, end = edge
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
                 and ((end_y > start_y) is (orientation(end, start, point)
@@ -143,7 +152,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                         (_to_squared_distance_between_points(outsider, vertex),
                          index)
                         for index, vertex in enumerate(contour)
-                        if point_in_segment(vertex, segment))
+                        if (point_in_segment(vertex, segment)
+                            is not PointLocation.EXTERNAL))
             except ValueError:
                 return (SegmentLocation.TOUCH
                         if (start_location is PointLocation.BOUNDARY
@@ -153,7 +163,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                     (_to_squared_distance_between_points(outsider, vertex),
                      index)
                     for index, vertex in enumerate(contour)
-                    if point_in_segment(vertex, segment))
+                    if (point_in_segment(vertex, segment)
+                        is not PointLocation.EXTERNAL))
             min_index, max_index = _sort_pair(start_index, end_index)
             if (max_index - min_index <= 1
                     or not min_index and max_index == len(contour) - 1):
@@ -181,7 +192,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
             elif edge_end == start:
                 start_index = index
                 break
-            elif point_in_segment(start, edge):
+            elif point_in_segment(start, edge) is not PointLocation.EXTERNAL:
                 contour = contour[:]
                 contour.insert(index, start)
                 start_index = index
@@ -194,7 +205,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
             elif edge_end == end:
                 end_index = index
                 break
-            elif point_in_segment(end, edge):
+            elif point_in_segment(end, edge) is not PointLocation.EXTERNAL:
                 contour = contour[:]
                 contour.insert(index, end)
                 end_index = index

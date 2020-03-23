@@ -7,6 +7,12 @@ from orient.hints import (Coordinate,
 BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 
 
+def contains_point(bounding_box: BoundingBox, point: Point) -> bool:
+    x_min, x_max, y_min, y_max = bounding_box
+    point_x, point_y = point
+    return x_min <= point_x <= x_max and y_min <= point_y <= y_max
+
+
 def contains_bounding_box(goal: BoundingBox, test: BoundingBox) -> bool:
     ((goal_x_min, goal_x_max, goal_y_min, goal_y_max),
      (test_x_min, test_x_max, test_y_min, test_y_max)) = goal, test
