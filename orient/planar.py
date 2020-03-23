@@ -1,7 +1,6 @@
 from enum import (IntEnum,
                   unique)
-from typing import (Optional,
-                    Sequence,
+from typing import (Sequence,
                     Tuple)
 
 from robust.angular import (Orientation,
