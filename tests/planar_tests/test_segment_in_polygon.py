@@ -36,9 +36,9 @@ def test_outside(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
     start, end = segment
     assert implication(result is SegmentLocation.EXTERNAL,
                        point_in_polygon(start, polygon)
-                       is PointLocation.OUTSIDE
+                       is PointLocation.EXTERNAL
                        and point_in_polygon(end, polygon)
-                       is PointLocation.OUTSIDE)
+                       is PointLocation.EXTERNAL)
 
 
 @given(strategies.polygons)

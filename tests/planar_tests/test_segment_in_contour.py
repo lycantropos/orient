@@ -35,9 +35,9 @@ def test_outside(contour_with_segment: Tuple[Contour, Segment]) -> None:
     start, end = segment
     assert implication(result is SegmentLocation.EXTERNAL,
                        point_in_contour(start, contour)
-                       is PointLocation.OUTSIDE
+                       is PointLocation.EXTERNAL
                        and point_in_contour(end, contour)
-                       is PointLocation.OUTSIDE)
+                       is PointLocation.EXTERNAL)
 
 
 @given(strategies.contours)

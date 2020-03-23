@@ -34,12 +34,12 @@ def test_solid(polygon_with_point: Tuple[Polygon, Point]) -> None:
     result = point_in_polygon(point, polygon)
 
     border, holes = polygon
-    assert implication(result is PointLocation.INSIDE,
+    assert implication(result is PointLocation.INTERNAL,
                        point_in_polygon(point, (border, []))
-                       is PointLocation.INSIDE)
+                       is PointLocation.INTERNAL)
     assert implication(point_in_polygon(point, (border, []))
-                       is PointLocation.OUTSIDE,
-                       result is PointLocation.OUTSIDE)
+                       is PointLocation.EXTERNAL,
+                       result is PointLocation.EXTERNAL)
     assert implication(point_in_polygon(point, (border, []))
                        is PointLocation.BOUNDARY,
                        result is PointLocation.BOUNDARY)

@@ -43,9 +43,9 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
 
 @unique
 class PointLocation(IntEnum):
-    OUTSIDE = 0
+    EXTERNAL = 0
     BOUNDARY = 1
-    INSIDE = 2
+    INTERNAL = 2
 
 
 def point_in_contour(point: Point, contour: Contour) -> PointLocation:
@@ -85,9 +85,9 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
                 and ((end_y > start_y) is (orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return (PointLocation.INSIDE
+    return (PointLocation.INTERNAL
             if result
-            else PointLocation.OUTSIDE)
+            else PointLocation.EXTERNAL)
 
 
 @unique
@@ -140,14 +140,14 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
     start, end = segment
     start_location, end_location = (point_in_contour(start, contour),
                                     point_in_contour(end, contour))
-    if (start_location is PointLocation.OUTSIDE
-            or end_location is PointLocation.OUTSIDE):
-        if (start_location is PointLocation.INSIDE
-                or end_location is PointLocation.INSIDE):
+    if (start_location is PointLocation.EXTERNAL
+            or end_location is PointLocation.EXTERNAL):
+        if (start_location is PointLocation.INTERNAL
+                or end_location is PointLocation.INTERNAL):
             return SegmentLocation.CROSS
         else:
             outsider = (start
-                        if start_location is PointLocation.OUTSIDE
+                        if start_location is PointLocation.EXTERNAL
                         else end)
             try:
                 _, start_index = min(
@@ -175,8 +175,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                     if (_to_orientation(first_part)
                         is _to_orientation(second_part))
                     else SegmentLocation.TOUCH)
-    elif (start_location is PointLocation.INSIDE
-          or end_location is PointLocation.INSIDE):
+    elif (start_location is PointLocation.INTERNAL
+          or end_location is PointLocation.INTERNAL):
         return SegmentLocation.INTERNAL
     else:
         # both endpoints lie on contour
@@ -350,11 +350,11 @@ def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
     """
     border, holes = polygon
     border_location = point_in_contour(point, border)
-    if border_location is PointLocation.INSIDE:
+    if border_location is PointLocation.INTERNAL:
         for hole in holes:
             hole_location = point_in_contour(point, hole)
-            if hole_location is PointLocation.INSIDE:
-                return PointLocation.OUTSIDE
+            if hole_location is PointLocation.INTERNAL:
+                return PointLocation.EXTERNAL
             elif hole_location is PointLocation.BOUNDARY:
                 return PointLocation.BOUNDARY
     return border_location

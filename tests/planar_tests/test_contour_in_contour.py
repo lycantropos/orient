@@ -56,5 +56,5 @@ def test_vertices(contours_pair: Tuple[Contour, Contour]) -> None:
 
     assert implication(contour_in_contour(left_contour, right_contour),
                        all(point_in_contour(vertex, right_contour)
-                           is not PointLocation.OUTSIDE
+                           is not PointLocation.EXTERNAL
                            for vertex in left_contour))
