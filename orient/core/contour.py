@@ -137,10 +137,10 @@ def orientation(contour: Contour) -> Orientation:
     for _ in range(len(contour)):
         candidate = angle_orientation(contour[index], contour[previous_index],
                                       contour[next_index])
-        if candidate is Orientation.COLLINEAR:
-            index, next_index = next_index, (next_index + 1) % len(contour)
-        else:
+        if candidate is not Orientation.COLLINEAR:
             return candidate
+        index, next_index = next_index, (next_index + 1) % len(contour)
+    return Orientation.COLLINEAR
 
 
 def _split(contour: Contour,
