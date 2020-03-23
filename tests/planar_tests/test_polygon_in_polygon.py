@@ -54,8 +54,11 @@ def test_border_convex_hull(polygon: Polygon) -> None:
 
 @given(strategies.polygons)
 def test_without_holes(polygon: Polygon) -> None:
-    border, _ = polygon
-    assert polygon_in_polygon(polygon, (border, []))
+    border, holes = polygon
+    polygon_without_holes = (border, [])
+    assert polygon_in_polygon(polygon, polygon_without_holes)
+    assert implication(bool(holes),
+                       not polygon_in_polygon(polygon_without_holes, polygon))
 
 
 @given(strategies.polygons_pairs)
