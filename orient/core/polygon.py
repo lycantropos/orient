@@ -50,6 +50,8 @@ def contains_polygon(goal: Polygon, test: Polygon) -> bool:
     test_border, test_holes = test
     if not contour_contains_contour(goal_border, test_border):
         return False
+    elif not goal_holes:
+        return True
     # we are checking that test polygon holes are supersets
     # of goal polygon holes which lie within test polygon border
     _, test_max_x, _, _ = bounding_box.from_points(test_border)
