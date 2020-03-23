@@ -113,24 +113,28 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
     :param contour: contour to check in.
     :returns: location of segment in relation to contour.
 
-    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
+    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
     >>> (segment_in_contour(((0, 0), (1, 0)), square)
     ...  is SegmentLocation.BOUNDARY)
     True
-    >>> (segment_in_contour(((0, 0), (2, 0)), square)
+    >>> (segment_in_contour(((0, 0), (3, 0)), square)
     ...  is SegmentLocation.BOUNDARY)
     True
-    >>> segment_in_contour(((2, 0), (3, 0)), square) is SegmentLocation.TOUCH
+    >>> segment_in_contour(((2, 0), (4, 0)), square) is SegmentLocation.TOUCH
     True
-    >>> segment_in_contour(((3, 0), (4, 0)), square) is SegmentLocation.OUTSIDE
+    >>> (segment_in_contour(((4, 0), (5, 0)), square)
+    ...  is SegmentLocation.EXTERNAL)
     True
-    >>> segment_in_contour(((1, 0), (1, 2)), square) is SegmentLocation.INSIDE
+    >>> (segment_in_contour(((1, 0), (1, 2)), square)
+    ...  is SegmentLocation.ENCLOSED)
     True
-    >>> segment_in_contour(((0, 0), (1, 1)), square) is SegmentLocation.INSIDE
+    >>> (segment_in_contour(((0, 0), (1, 1)), square)
+    ...  is SegmentLocation.ENCLOSED)
     True
-    >>> segment_in_contour(((0, 0), (2, 2)), square) is SegmentLocation.INSIDE
+    >>> (segment_in_contour(((1, 1), (2, 2)), square)
+    ...  is SegmentLocation.INTERNAL)
     True
-    >>> segment_in_contour(((0, 0), (3, 3)), square) is SegmentLocation.CROSS
+    >>> segment_in_contour(((2, 2), (4, 4)), square) is SegmentLocation.CROSS
     True
     """
     if any(segments_relationship(segment, edge)
