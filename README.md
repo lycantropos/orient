@@ -117,6 +117,19 @@ True
 True
 >>> contour_in_contour(square, inner_square)
 False
+>>> from orient.planar import contours_in_contour
+>>> contours_in_contour([], square)
+True
+>>> contours_in_contour([square], square)
+True
+>>> contours_in_contour([inner_square], square)
+True
+>>> contours_in_contour([inner_square, square], square)
+True
+>>> contours_in_contour([square], inner_square)
+False
+>>> contours_in_contour([inner_square, square], inner_square)
+False
 >>> from orient.planar import point_in_polygon
 >>> point_in_polygon(left_bottom, (square, [])) is PointLocation.BOUNDARY
 True
