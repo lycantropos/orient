@@ -93,11 +93,12 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
 
 @unique
 class SegmentLocation(IntEnum):
-    OUTSIDE = 0
+    EXTERNAL = 0
     TOUCH = 1
     CROSS = 2
     BOUNDARY = 3
-    INSIDE = 4
+    ENCLOSED = 4
+    INTERNAL = 5
 
 
 def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
@@ -159,7 +160,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                 return (SegmentLocation.TOUCH
                         if (start_location is PointLocation.BOUNDARY
                             or end_location is PointLocation.BOUNDARY)
-                        else SegmentLocation.OUTSIDE)
+                        else SegmentLocation.EXTERNAL)
             _, end_index = max(
                     (_to_squared_distance_between_points(outsider, vertex),
                      index)
@@ -177,7 +178,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                     else SegmentLocation.TOUCH)
     elif (start_location is PointLocation.INSIDE
           or end_location is PointLocation.INSIDE):
-        return SegmentLocation.INSIDE
+        return SegmentLocation.INTERNAL
     else:
         # both endpoints lie on contour
         start_index = end_index = None
@@ -214,7 +215,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                 or not min_index and max_index == len(contour) - 1):
             return SegmentLocation.BOUNDARY
         first_part, second_part = _split_contour(contour, min_index, max_index)
-        return (SegmentLocation.INSIDE
+        return (SegmentLocation.ENCLOSED
                 if (_to_orientation(first_part)
                     is _to_orientation(second_part))
                 else SegmentLocation.TOUCH)
@@ -401,15 +402,18 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
     """
     border, holes = polygon
     border_location = segment_in_contour(segment, border)
-    if border_location is SegmentLocation.INSIDE:
+    if (border_location is SegmentLocation.INTERNAL
+            or border_location is SegmentLocation.ENCLOSED):
         for hole in holes:
             hole_location = segment_in_contour(segment, hole)
-            if hole_location is SegmentLocation.INSIDE:
-                return SegmentLocation.OUTSIDE
+            if hole_location is SegmentLocation.INTERNAL:
+                return SegmentLocation.EXTERNAL
             elif hole_location is SegmentLocation.BOUNDARY:
                 return SegmentLocation.BOUNDARY
             elif hole_location is SegmentLocation.CROSS:
                 return SegmentLocation.CROSS
+            elif hole_location is SegmentLocation.ENCLOSED:
+                return SegmentLocation.TOUCH
     return border_location
 
 

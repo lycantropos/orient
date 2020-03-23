@@ -34,7 +34,7 @@ def test_outside(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
     result = segment_in_polygon(segment, polygon)
 
     start, end = segment
-    assert implication(result is SegmentLocation.OUTSIDE,
+    assert implication(result is SegmentLocation.EXTERNAL,
                        point_in_polygon(start, polygon)
                        is PointLocation.OUTSIDE
                        and point_in_polygon(end, polygon)
@@ -60,7 +60,7 @@ def test_convex_polygon_criterion(polygon: Polygon) -> None:
     border, holes = polygon
     assert (bool(holes)
             or equivalence(all(segment_in_polygon(ray, polygon)
-                               is SegmentLocation.INSIDE
+                               is SegmentLocation.ENCLOSED
                                for ray in to_non_edge_rays(border)),
                            are_polygons_similar(polygon,
                                                 (to_convex_hull(border),
