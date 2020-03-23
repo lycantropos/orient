@@ -25,6 +25,8 @@ def contains_contour(goal: Contour, test: Contour) -> bool:
 
 
 def contains_contours(goal: Contour, tests: Sequence[Contour]) -> bool:
+    if not tests:
+        return True
     tests_bounding_box = bounding_box.from_points(chain.from_iterable(tests))
     if not bounding_box.contains_bounding_box(bounding_box.from_points(goal),
                                               tests_bounding_box):

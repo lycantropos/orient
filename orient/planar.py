@@ -314,7 +314,7 @@ def contours_in_contour(contours: Sequence[Contour],
     >>> contours_in_contour([square], square)
     True
     """
-    return not contours or _contour.contains_contours(contour, contours)
+    return _contour.contains_contours(contour, contours)
 
 
 def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
