@@ -134,7 +134,7 @@ def orientation(contour: Contour) -> Orientation:
                 key=contour.__getitem__)
     previous_index, next_index = (index - 1 if index else len(contour) - 1,
                                   (index + 1) % len(contour))
-    while True:
+    for _ in range(len(contour)):
         candidate = angle_orientation(contour[index], contour[previous_index],
                                       contour[next_index])
         if candidate is Orientation.COLLINEAR:
