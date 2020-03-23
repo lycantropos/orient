@@ -57,8 +57,7 @@ def test_without_holes(polygon: Polygon) -> None:
     border, holes = polygon
     polygon_without_holes = (border, [])
     assert polygon_in_polygon(polygon, polygon_without_holes)
-    assert implication(bool(holes),
-                       not polygon_in_polygon(polygon_without_holes, polygon))
+    assert (not holes) is polygon_in_polygon(polygon_without_holes, polygon)
 
 
 @given(strategies.polygons_pairs)
