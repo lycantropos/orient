@@ -271,23 +271,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
     ...  is SegmentLocation.CROSS)
     True
     """
-    border, holes = polygon
-    border_location = segment_in_contour(segment, border)
-    if (border_location is SegmentLocation.INTERNAL
-            or border_location is SegmentLocation.ENCLOSED):
-        for hole in holes:
-            hole_location = segment_in_contour(segment, hole)
-            if hole_location is SegmentLocation.INTERNAL:
-                return SegmentLocation.EXTERNAL
-            elif hole_location is SegmentLocation.BOUNDARY:
-                return SegmentLocation.BOUNDARY
-            elif hole_location is SegmentLocation.CROSS:
-                return SegmentLocation.CROSS
-            elif hole_location is SegmentLocation.ENCLOSED:
-                return SegmentLocation.TOUCH
-            elif hole_location is SegmentLocation.TOUCH:
-                border_location = SegmentLocation.ENCLOSED
-    return border_location
+    return _polygon.contains_segment(polygon, segment)
 
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
