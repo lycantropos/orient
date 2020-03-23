@@ -6,7 +6,8 @@ from robust.angular import (Orientation,
 
 from orient.hints import (Point,
                           Segment)
-from orient.planar import point_in_segment
+from orient.planar import (PointLocation,
+                           point_in_segment)
 from tests.utils import (implication,
                          reverse_point_coordinates,
                          reverse_segment,
@@ -20,15 +21,15 @@ def test_basic(segment_with_point: Tuple[Segment, Point]) -> None:
 
     result = point_in_segment(point, segment)
 
-    assert isinstance(result, bool)
+    assert isinstance(result, PointLocation)
 
 
 @given(strategies.segments)
 def test_endpoints(segment: Segment) -> None:
     start, end = segment
 
-    assert point_in_segment(start, segment)
-    assert point_in_segment(end, segment)
+    assert point_in_segment(start, segment) is PointLocation.BOUNDARY
+    assert point_in_segment(end, segment) is PointLocation.BOUNDARY
 
 
 @given(strategies.segments_with_points)
@@ -36,7 +37,8 @@ def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
     segment, point = segment_with_point
 
     start, end = segment
-    assert implication(point_in_segment(point, segment),
+    assert implication(point_in_segment(point, segment)
+                       is not PointLocation.EXTERNAL,
                        orientation(end, start, point) is Orientation.COLLINEAR)
 
 
