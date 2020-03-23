@@ -1,10 +1,4 @@
-from typing import (Sequence,
-                    Tuple)
-
-from robust.angular import (Orientation,
-                            orientation)
-from robust.linear import (SegmentsRelationship,
-                           segments_relationship)
+from typing import Sequence
 
 from .core import (contour as _contour,
                    polygon as _polygon,
@@ -12,7 +6,6 @@ from .core import (contour as _contour,
 from .core.location import (PointLocation,
                             SegmentLocation)
 from .hints import (Contour,
-                    Coordinate,
                     Point,
                     Polygon,
                     Segment)
