@@ -2,11 +2,34 @@ from itertools import chain
 from typing import (Iterable,
                     Sequence)
 
+from robust.angular import (Orientation,
+                            orientation as angle_orientation)
+
 from orient.hints import (Contour,
+                          Point,
                           Segment)
 from . import bounding_box
 from .events_queue import EventsQueue
+from .location import PointLocation
+from .segment import contains_point as segment_contains_point
 from .sweep import sweep
+
+
+def contains_point(contour: Contour, point: Point) -> PointLocation:
+    result = False
+    _, point_y = point
+    for edge in to_segments(contour):
+        if segment_contains_point(edge, point) is not PointLocation.EXTERNAL:
+            return PointLocation.BOUNDARY
+        start, end = edge
+        (_, start_y), (_, end_y) = start, end
+        if ((start_y > point_y) is not (end_y > point_y)
+                and ((end_y > start_y) is (angle_orientation(end, start, point)
+                                           is Orientation.COUNTERCLOCKWISE))):
+            result = not result
+    return (PointLocation.INTERNAL
+            if result
+            else PointLocation.EXTERNAL)
 
 
 def contains_contour(goal: Contour, test: Contour) -> bool:

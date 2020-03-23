@@ -76,20 +76,7 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     >>> point_in_contour((3, 3), square) is PointLocation.EXTERNAL
     True
     """
-    result = False
-    _, point_y = point
-    for edge in _contour.to_segments(contour):
-        if point_in_segment(point, edge) is not PointLocation.EXTERNAL:
-            return PointLocation.BOUNDARY
-        start, end = edge
-        (_, start_y), (_, end_y) = start, end
-        if ((start_y > point_y) is not (end_y > point_y)
-                and ((end_y > start_y) is (orientation(end, start, point)
-                                           is Orientation.COUNTERCLOCKWISE))):
-            result = not result
-    return (PointLocation.INTERNAL
-            if result
-            else PointLocation.EXTERNAL)
+    return _contour.contains_point(contour, point)
 
 
 def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
