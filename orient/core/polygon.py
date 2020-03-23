@@ -1,12 +1,28 @@
 from orient.core import bounding_box
-from orient.hints import (Polygon,
+from orient.hints import (Point,
+                          Polygon,
                           Segment)
 from .contour import (contains_contour as contour_contains_contour,
+                      contains_point as contour_contains_point,
                       contains_segment as contour_contains_segment,
                       register as register_contour)
 from .events_queue import EventsQueue
-from .location import SegmentLocation
+from .location import (PointLocation,
+                       SegmentLocation)
 from .sweep import sweep
+
+
+def contains_point(polygon: Polygon, point: Point) -> PointLocation:
+    border, holes = polygon
+    border_location = contour_contains_point(border, point)
+    if border_location is PointLocation.INTERNAL:
+        for hole in holes:
+            hole_location = contour_contains_point(hole, point)
+            if hole_location is PointLocation.INTERNAL:
+                return PointLocation.EXTERNAL
+            elif hole_location is PointLocation.BOUNDARY:
+                return PointLocation.BOUNDARY
+    return border_location
 
 
 def contains_segment(polygon: Polygon, segment: Segment) -> SegmentLocation:

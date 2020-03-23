@@ -207,16 +207,7 @@ def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
     ...  is PointLocation.EXTERNAL)
     True
     """
-    border, holes = polygon
-    border_location = point_in_contour(point, border)
-    if border_location is PointLocation.INTERNAL:
-        for hole in holes:
-            hole_location = point_in_contour(point, hole)
-            if hole_location is PointLocation.INTERNAL:
-                return PointLocation.EXTERNAL
-            elif hole_location is PointLocation.BOUNDARY:
-                return PointLocation.BOUNDARY
-    return border_location
+    return _polygon.contains_point(polygon, point)
 
 
 def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
