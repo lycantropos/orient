@@ -23,7 +23,7 @@ from .sweep import sweep
 def contains_point(contour: Contour, point: Point) -> PointLocation:
     result = False
     _, point_y = point
-    for edge in to_segments(contour):
+    for edge in edges(contour):
         if segment_contains_point(edge, point) is not PointLocation.EXTERNAL:
             return PointLocation.BOUNDARY
         start, end = edge
@@ -38,9 +38,8 @@ def contains_point(contour: Contour, point: Point) -> PointLocation:
 
 
 def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
-    if any(segments_relationship(segment, edge)
-           is SegmentsRelationship.CROSS
-           for edge in to_segments(contour)):
+    if any(segments_relationship(segment, edge) is SegmentsRelationship.CROSS
+           for edge in edges(contour)):
         return SegmentLocation.CROSS
     start, end = segment
     start_location, end_location = (contains_point(contour, start),
@@ -90,7 +89,7 @@ def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
     else:
         # both endpoints lie on contour
         start_index = end_index = None
-        for index, edge in enumerate(to_segments(contour)):
+        for index, edge in enumerate(edges(contour)):
             edge_start, edge_end = edge
             if edge_start == start:
                 start_index = (index or len(contour)) - 1
@@ -104,7 +103,7 @@ def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
                 contour.insert(index, start)
                 start_index = index
                 break
-        for index, edge in enumerate(to_segments(contour)):
+        for index, edge in enumerate(edges(contour)):
             edge_start, edge_end = edge
             if edge_start == end:
                 end_index = (index or len(contour)) - 1
@@ -197,11 +196,11 @@ def contains_contours(goal: Contour, tests: Sequence[Contour]) -> bool:
 def register(events_queue: EventsQueue, contour: Contour,
              *,
              from_test_contour: bool) -> None:
-    for segment in to_segments(contour):
-        events_queue.register_segment(segment,
+    for edge in edges(contour):
+        events_queue.register_segment(edge,
                                       from_test_contour=from_test_contour)
 
 
-def to_segments(contour: Contour) -> Iterable[Segment]:
+def edges(contour: Contour) -> Iterable[Segment]:
     return ((contour[index - 1], contour[index])
             for index in range(len(contour)))

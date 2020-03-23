@@ -3,7 +3,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.contour import to_segments
+from orient.core.contour import edges
 from orient.hints import (Polygon,
                           Segment)
 from orient.planar import (PointLocation,
@@ -45,14 +45,14 @@ def test_outside(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
 def test_border_edges(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is SegmentLocation.BOUNDARY
-               for edge in to_segments(border))
+               for edge in edges(border))
 
 
 @given(strategies.polygons)
 def test_holes_edges(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is SegmentLocation.BOUNDARY
-               for edge in chain.from_iterable(map(to_segments, holes)))
+               for edge in chain.from_iterable(map(edges, holes)))
 
 
 @given(strategies.polygons)

@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.contour import to_segments
+from orient.core.contour import edges
 from orient.hints import (Contour,
                           Segment)
 from orient.planar import (PointLocation,
@@ -43,7 +43,7 @@ def test_outside(contour_with_segment: Tuple[Contour, Segment]) -> None:
 @given(strategies.contours)
 def test_edges(contour: Contour) -> None:
     assert all(segment_in_contour(edge, contour) is SegmentLocation.BOUNDARY
-               for edge in to_segments(contour))
+               for edge in edges(contour))
 
 
 @given(strategies.contours)
