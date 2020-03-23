@@ -124,7 +124,7 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     return result
 
 
-def to_non_edge_rays(contour: Contour) -> Iterable[Segment]:
+def to_contour_separators(contour: Contour) -> Iterable[Segment]:
     return ((contour[index], contour[next_index])
             for index in range(len(contour))
             for next_index in chain(range(int(index == len(contour) - 1),

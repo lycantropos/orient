@@ -13,8 +13,8 @@ from orient.planar import (PointLocation,
 from tests.utils import (are_polygons_similar,
                          equivalence,
                          implication,
-                         to_convex_hull,
-                         to_non_edge_rays)
+                         to_contour_separators,
+                         to_convex_hull)
 from . import strategies
 
 
@@ -59,9 +59,9 @@ def test_holes_edges(polygon: Polygon) -> None:
 def test_convex_polygon_criterion(polygon: Polygon) -> None:
     border, holes = polygon
     assert (bool(holes)
-            or equivalence(all(segment_in_polygon(ray, polygon)
+            or equivalence(all(segment_in_polygon(segment, polygon)
                                is SegmentLocation.ENCLOSED
-                               for ray in to_non_edge_rays(border)),
+                               for segment in to_contour_separators(border)),
                            are_polygons_similar(polygon,
                                                 (to_convex_hull(border),
                                                  holes))))
