@@ -87,11 +87,11 @@ False
 >>> from orient.planar import PointLocation, point_in_contour
 >>> point_in_contour(left_bottom, square) is PointLocation.BOUNDARY
 True
->>> point_in_contour((1, 1), square) is PointLocation.INSIDE
+>>> point_in_contour((1, 1), square) is PointLocation.INTERNAL
 True
 >>> point_in_contour(right_top, square) is PointLocation.BOUNDARY
 True
->>> point_in_contour((5, 5), square) is PointLocation.OUTSIDE
+>>> point_in_contour((5, 5), square) is PointLocation.EXTERNAL
 True
 >>> main_diagonal = (left_bottom, right_top)
 >>> from orient.planar import SegmentLocation, segment_in_contour
@@ -99,7 +99,9 @@ True
 True
 >>> segment_in_contour(((1, 0), (5, 0)), square) is SegmentLocation.TOUCH
 True
->>> segment_in_contour(main_diagonal, square) is SegmentLocation.INSIDE
+>>> segment_in_contour(main_diagonal, square) is SegmentLocation.ENCLOSED
+True
+>>> segment_in_contour(((1, 1), (2, 2)), square) is SegmentLocation.INTERNAL
 True
 >>> segment_in_contour(((1, 1), (5, 5)), square) is SegmentLocation.CROSS
 True
@@ -114,13 +116,38 @@ False
 >>> from orient.planar import point_in_polygon
 >>> point_in_polygon(left_bottom, (square, [])) is PointLocation.BOUNDARY
 True
->>> point_in_polygon((1, 1), (square, [])) is PointLocation.INSIDE
+>>> point_in_polygon((1, 1), (square, [])) is PointLocation.INTERNAL
 True
->>> point_in_polygon((2, 2), (square, [])) is PointLocation.INSIDE
+>>> point_in_polygon((2, 2), (square, [])) is PointLocation.INTERNAL
 True
->>> point_in_polygon((1, 1), (square, [inner_square])) is PointLocation.BOUNDARY
+>>> (point_in_polygon((1, 1), (square, [inner_square]))
+...  is PointLocation.BOUNDARY)
 True
->>> point_in_polygon((2, 2), (square, [inner_square])) is PointLocation.OUTSIDE
+>>> (point_in_polygon((2, 2), (square, [inner_square]))
+...  is PointLocation.EXTERNAL)
+True
+>>> from orient.planar import segment_in_polygon
+>>> (segment_in_polygon(bottom_segment, (square, []))
+...  is SegmentLocation.BOUNDARY)
+True
+>>> (segment_in_polygon(((1, 0), (5, 0)), (square, []))
+...  is SegmentLocation.TOUCH)
+True
+>>> segment_in_polygon(main_diagonal, (square, [])) is SegmentLocation.ENCLOSED
+True
+>>> (segment_in_polygon(main_diagonal, (square, [inner_square]))
+... is SegmentLocation.CROSS)
+True
+>>> (segment_in_polygon(((1, 1), (2, 2)), (square, []))
+...  is SegmentLocation.INTERNAL)
+True
+>>> (segment_in_polygon(((1, 1), (2, 2)), (square, [inner_square]))
+...  is SegmentLocation.TOUCH)
+True
+>>> segment_in_polygon(((1, 1), (5, 5)), (square, [])) is SegmentLocation.CROSS
+True
+>>> (segment_in_polygon(((1, 1), (5, 5)), (square, [inner_square]))
+...  is SegmentLocation.CROSS)
 True
 >>> from orient.planar import polygon_in_polygon
 >>> polygon_in_polygon((square, []), (square, []))
