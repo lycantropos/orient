@@ -75,14 +75,18 @@ Usage
 >>> right_bottom = (4, 0)
 >>> left_top = (0, 4)
 >>> right_top = (4, 4)
+>>> bottom_segment_midpoint = (2, 0)
 >>> bottom_segment = (left_bottom, right_bottom)
->>> from orient.planar import point_in_segment
->>> point_in_segment(left_bottom, bottom_segment)
+>>> from orient.planar import PointLocation, point_in_segment
+>>> point_in_segment(left_bottom, bottom_segment) is PointLocation.BOUNDARY
 True
->>> point_in_segment(right_bottom, bottom_segment)
+>>> (point_in_segment(bottom_segment_midpoint, bottom_segment) 
+...  is PointLocation.INTERNAL)
 True
->>> point_in_segment(left_top, bottom_segment)
-False
+>>> point_in_segment(right_bottom, bottom_segment) is PointLocation.BOUNDARY
+True
+>>> point_in_segment(left_top, bottom_segment) is PointLocation.EXTERNAL
+True
 >>> square = [left_bottom, right_bottom, right_top, left_top]
 >>> from orient.planar import PointLocation, point_in_contour
 >>> point_in_contour(left_bottom, square) is PointLocation.BOUNDARY
