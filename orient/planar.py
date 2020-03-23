@@ -176,8 +176,11 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
                         is _to_orientation(second_part))
                     else SegmentLocation.TOUCH)
     elif (start_location is PointLocation.INTERNAL
-          or end_location is PointLocation.INTERNAL):
+          and end_location is PointLocation.INTERNAL):
         return SegmentLocation.INTERNAL
+    elif (start_location is PointLocation.INTERNAL
+          or end_location is PointLocation.INTERNAL):
+        return SegmentLocation.ENCLOSED
     else:
         # both endpoints lie on contour
         start_index = end_index = None
