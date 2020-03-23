@@ -68,11 +68,11 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
     >>> point_in_contour((0, 0), square) is PointLocation.BOUNDARY
     True
-    >>> point_in_contour((1, 1), square) is PointLocation.INSIDE
+    >>> point_in_contour((1, 1), square) is PointLocation.INTERNAL
     True
     >>> point_in_contour((2, 2), square) is PointLocation.BOUNDARY
     True
-    >>> point_in_contour((3, 3), square) is PointLocation.OUTSIDE
+    >>> point_in_contour((3, 3), square) is PointLocation.EXTERNAL
     True
     """
     result = False
