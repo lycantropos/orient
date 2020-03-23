@@ -1,5 +1,3 @@
-from enum import (IntEnum,
-                  unique)
 from typing import (Sequence,
                     Tuple)
 
@@ -11,12 +9,16 @@ from robust.linear import (SegmentsRelationship,
 
 from .core import (contour as _contour,
                    polygon as _polygon)
+from .core.location import (PointLocation,
+                            SegmentLocation)
 from .hints import (Contour,
                     Coordinate,
                     Point,
                     Polygon,
                     Segment)
 
+PointLocation = PointLocation
+SegmentLocation = SegmentLocation
 
 def point_in_segment(point: Point, segment: Segment) -> bool:
     """
@@ -39,13 +41,6 @@ def point_in_segment(point: Point, segment: Segment) -> bool:
     False
     """
     return segment_contains(segment, point)
-
-
-@unique
-class PointLocation(IntEnum):
-    EXTERNAL = 0
-    BOUNDARY = 1
-    INTERNAL = 2
 
 
 def point_in_contour(point: Point, contour: Contour) -> PointLocation:
@@ -88,16 +83,6 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
     return (PointLocation.INTERNAL
             if result
             else PointLocation.EXTERNAL)
-
-
-@unique
-class SegmentLocation(IntEnum):
-    EXTERNAL = 0
-    TOUCH = 1
-    CROSS = 2
-    BOUNDARY = 3
-    ENCLOSED = 4
-    INTERNAL = 5
 
 
 def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
