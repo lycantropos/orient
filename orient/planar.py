@@ -260,8 +260,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
     """
-    Checks if the contour fully lies inside the region
-    bounded by the other one.
+    Checks if the polygon fully lies inside the other one.
 
     Time complexity:
         ``O(vertices_count * log (vertices_count))``
