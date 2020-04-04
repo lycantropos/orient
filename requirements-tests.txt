@@ -1,5 +1,5 @@
 bentley_ottmann>=0.5.1
-pytest>=5.2.0
+pytest>=5.4.0
 pytest-cov>=2.8.1
-hypothesis>=4.55.0
+hypothesis>=5.8.0
 hypothesis_geometry>=0.10.0
