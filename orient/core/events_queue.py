@@ -10,7 +10,7 @@ from .event import (EdgeKind,
 
 
 class EventsQueueKey:
-    __slots__ = ('event',)
+    __slots__ = 'event',
 
     def __init__(self, event: Event) -> None:
         self.event = event
