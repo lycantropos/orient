@@ -1,4 +1,6 @@
-from typing import (Iterable,
+from itertools import groupby
+from typing import (Any,
+                    Iterable,
                     Optional)
 
 from robust.linear import (SegmentsRelationship,
@@ -18,34 +20,51 @@ def sweep(events_queue: EventsQueue,
     sweep_line = SweepLine()
     while events_queue:
         event = events_queue.pop()
-        start_x, _ = event.start
+        start = event.start
+        start_x, _ = start
         if start_x > test_max_x:
             # no test segments left
             return
         sweep_line.move_to(start_x)
-        if event.is_left_endpoint:
-            sweep_line.add(event)
-            above_event, below_event = (sweep_line.above(event),
-                                        sweep_line.below(event))
-            compute_transition(below_event, event)
-            if (above_event is not None
-                    and detect_intersection(event, above_event, events_queue)):
-                compute_transition(below_event, event)
-                compute_transition(event, above_event)
-            if (below_event is not None
-                    and detect_intersection(below_event, event, events_queue)):
-                below_below_event = sweep_line.below(below_event)
-                compute_transition(below_below_event, below_event)
-                compute_transition(below_event, event)
-            yield event
-        else:
-            event = event.complement
-            if event in sweep_line:
+        same_start_events = [event]
+        while events_queue and events_queue.peek().start == start:
+            same_start_events.append(events_queue.pop())
+        if not all_equal(event.from_test_contour
+                         for event in same_start_events):
+            for event in same_start_events:
+                event.relationship = SegmentsRelationship.TOUCH
+        for event in same_start_events:
+            if event.is_left_endpoint:
+                sweep_line.add(event)
                 above_event, below_event = (sweep_line.above(event),
                                             sweep_line.below(event))
-                sweep_line.remove(event)
-                if above_event is not None and below_event is not None:
-                    detect_intersection(below_event, above_event, events_queue)
+                compute_transition(below_event, event)
+                if (above_event is not None
+                        and detect_intersection(event, above_event,
+                                                events_queue)):
+                    compute_transition(below_event, event)
+                    compute_transition(event, above_event)
+                if (below_event is not None
+                        and detect_intersection(below_event, event,
+                                                events_queue)):
+                    below_below_event = sweep_line.below(below_event)
+                    compute_transition(below_below_event, below_event)
+                    compute_transition(below_event, event)
+            else:
+                event = event.complement
+                if event in sweep_line:
+                    above_event, below_event = (sweep_line.above(event),
+                                                sweep_line.below(event))
+                    sweep_line.remove(event)
+                    if above_event is not None and below_event is not None:
+                        detect_intersection(below_event, above_event,
+                                            events_queue)
+                yield event
+
+
+def all_equal(values: Iterable[Any]) -> bool:
+    groups = groupby(values)
+    return next(groups, True) and not next(groups, False)
 
 
 def compute_transition(below_event: Optional[Event], event: Event) -> None:
@@ -73,6 +92,7 @@ def detect_intersection(below_event: Event,
         if event.from_test_contour is below_event.from_test_contour:
             raise ValueError('Edges of the same polygon '
                              'should not overlap.')
+        event.relationship = below_event.relationship = relationship
         sorted_events = []
         starts_equal = event.start == below_event.start
         if starts_equal:
@@ -119,13 +139,14 @@ def detect_intersection(below_event: Event,
                     sorted_events[2].start)
             events_queue.divide_segment(sorted_events[0],
                                         sorted_events[1].start)
-    elif (relationship is not SegmentsRelationship.NONE
-          and below_event.start != event.start
-          and below_event.end != event.end):
-        # segments do not intersect at endpoints
-        point = segments_intersection(below_segment, segment)
-        if point != below_event.start and point != below_event.end:
-            events_queue.divide_segment(below_event, point)
-        if point != event.start and point != event.end:
-            events_queue.divide_segment(event, point)
+    elif relationship is not SegmentsRelationship.NONE:
+        if event.from_test_contour is not below_event.from_test_contour:
+            event.relationship = below_event.relationship = relationship
+        if below_event.start != event.start and below_event.end != event.end:
+            # segments do not intersect at endpoints
+            point = segments_intersection(below_segment, segment)
+            if point != below_event.start and point != below_event.end:
+                events_queue.divide_segment(below_event, point)
+            if point != event.start and point != event.end:
+                events_queue.divide_segment(event, point)
     return False

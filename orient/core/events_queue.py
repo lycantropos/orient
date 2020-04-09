@@ -62,6 +62,9 @@ class EventsQueue:
     def __bool__(self) -> bool:
         return bool(self._queue)
 
+    def peek(self) -> Event:
+        return self._queue.peek()
+
     def pop(self) -> Event:
         return self._queue.pop()
 
