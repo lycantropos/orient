@@ -20,6 +20,13 @@ def contains_bounding_box(goal: BoundingBox, test: BoundingBox) -> bool:
             and goal_y_min <= test_y_min and test_y_max <= goal_y_max)
 
 
+def disjoint_with(goal: BoundingBox, test: BoundingBox) -> bool:
+    ((goal_x_min, goal_x_max, goal_y_min, goal_y_max),
+     (test_x_min, test_x_max, test_y_min, test_y_max)) = goal, test
+    return (goal_x_max < test_x_min or test_x_max < goal_x_min
+            or goal_y_max < test_y_min or test_y_max < goal_y_min)
+
+
 def from_points(points: Iterable[Point]) -> BoundingBox:
     iterator = iter(points)
     x_min, y_min = x_max, y_max = next(iterator)

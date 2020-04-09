@@ -110,10 +110,9 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     return _contour.relate_segment(contour, segment)
 
 
-def contour_in_contour(left: Contour, right: Contour) -> bool:
+def contour_in_contour(left: Contour, right: Contour) -> Relation:
     """
-    Checks if the contour fully lies inside the region
-    bounded by the other one.
+    Finds relation between contours.
 
     Time complexity:
         ``O((len(left) + len(right)) * log (len(left) + len(right)))``
@@ -122,25 +121,24 @@ def contour_in_contour(left: Contour, right: Contour) -> bool:
 
     :param left: contour to check for.
     :param right: contour to check in.
-    :returns:
-        true if the left contour lies inside the right one, false otherwise.
+    :returns: relation between contours.
 
     >>> triangle = [(0, 0), (1, 0), (0, 1)]
     >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> contour_in_contour(triangle, triangle)
+    >>> contour_in_contour(triangle, triangle) is Relation.EQUAL
     True
-    >>> contour_in_contour(triangle, square)
+    >>> contour_in_contour(triangle, square) is Relation.ENCLOSED
     True
-    >>> contour_in_contour(square, triangle)
-    False
-    >>> contour_in_contour(square, square)
+    >>> contour_in_contour(square, triangle) is Relation.ENCLOSES
+    True
+    >>> contour_in_contour(square, square) is Relation.EQUAL
     True
     """
-    return _contour.contains_contour(right, left)
+    return _contour.relate_contour(right, left)
 
 
 def contours_in_contour(contours: Sequence[Contour],
-                        contour: Contour) -> bool:
+                        contour: Contour) -> Relation:
     """
     Checks if contours fully lie inside the region bounded by other contour.
 
@@ -157,20 +155,20 @@ def contours_in_contour(contours: Sequence[Contour],
 
     >>> triangle = [(0, 0), (1, 0), (0, 1)]
     >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> contours_in_contour([], triangle)
+    >>> contours_in_contour([], triangle) is Relation.DISJOINT
     True
-    >>> contours_in_contour([], square)
+    >>> contours_in_contour([], square) is Relation.DISJOINT
     True
-    >>> contours_in_contour([triangle], triangle)
+    >>> contours_in_contour([triangle], triangle) is Relation.EQUAL
     True
-    >>> contours_in_contour([triangle], square)
+    >>> contours_in_contour([triangle], square) is Relation.ENCLOSED
     True
-    >>> contours_in_contour([square], triangle)
-    False
-    >>> contours_in_contour([square], square)
+    >>> contours_in_contour([square], triangle) is Relation.ENCLOSES
+    True
+    >>> contours_in_contour([square], square) is Relation.EQUAL
     True
     """
-    return _contour.contains_contours(contour, contours)
+    return _contour.relate_contours(contour, contours)
 
 
 def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
@@ -254,7 +252,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     return _polygon.relate_segment(polygon, segment)
 
 
-def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
+def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     """
     Checks if the polygon fully lies inside the other one.
 
@@ -274,21 +272,29 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:
 
     >>> outer_square = [(0, 0), (3, 0), (3, 3), (0, 3)]
     >>> inner_square = [(1, 1), (2, 1), (2, 2), (1, 2)]
-    >>> polygon_in_polygon((outer_square, []), (outer_square, []))
+    >>> (polygon_in_polygon((outer_square, []), (outer_square, []))
+    ...  is Relation.EQUAL)
     True
-    >>> polygon_in_polygon((inner_square, []), (inner_square, []))
+    >>> (polygon_in_polygon((inner_square, []), (inner_square, []))
+    ...  is Relation.EQUAL)
     True
-    >>> polygon_in_polygon((inner_square, []), (outer_square, []))
+    >>> (polygon_in_polygon((inner_square, []), (outer_square, []))
+    ...  is Relation.WITHIN)
     True
-    >>> polygon_in_polygon((outer_square, []), (inner_square, []))
-    False
-    >>> polygon_in_polygon((inner_square, []), (outer_square, [inner_square]))
-    False
-    >>> polygon_in_polygon((outer_square, []), (outer_square, [inner_square]))
-    False
-    >>> polygon_in_polygon((outer_square, [inner_square]), (inner_square, []))
-    False
-    >>> polygon_in_polygon((outer_square, [inner_square]), (outer_square, []))
+    >>> (polygon_in_polygon((outer_square, []), (inner_square, []))
+    ...  is Relation.COVER)
+    True
+    >>> (polygon_in_polygon((inner_square, []), (outer_square, [inner_square]))
+    ...  is Relation.TOUCH)
+    True
+    >>> (polygon_in_polygon((outer_square, []), (outer_square, [inner_square]))
+    ...  is Relation.ENCLOSES)
+    True
+    >>> (polygon_in_polygon((outer_square, [inner_square]), (inner_square, []))
+    ...  is Relation.TOUCH)
+    True
+    >>> (polygon_in_polygon((outer_square, [inner_square]), (outer_square, []))
+    ...  is Relation.ENCLOSED)
     True
     """
-    return _polygon.contains_polygon(right, left)
+    return _polygon.relate_polygon(right, left)

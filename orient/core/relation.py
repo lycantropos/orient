@@ -20,14 +20,25 @@ class Relation(IntEnum):
     CROSS = 2
     #: intersection is a strict subset of the geometry,
     #: has the same dimension as geometries
-    #: and boundaries cross
+    #: and boundaries cross or interiors intersect
     OVERLAP = 3
+    #: interior of the geometry is a superset of the other
+    COVER = 4
+    #: boundary of the geometry contains
+    #: at least one boundary point of the other, but not all,
+    #: interior of the geometry contains other points of the other
+    ENCLOSES = 5
+    #: interior/boundary of the geometry is a superset
+    #: of interior/boundary of the other
+    COMPOSITE = 6
+    #: geometries are equal
+    EQUAL = 7
     #: interior/boundary of the geometry is a subset
     #: of interior/boundary of the other
-    COMPONENT = 4
+    COMPONENT = 8
     #: at least one boundary point of the geometry
     #: lies on the boundary of the other, but not all,
     #: other points of the geometry lie in the interior of the other
-    ENCLOSED = 5
+    ENCLOSED = 9
     #: geometry is a subset of the interior of the other
-    WITHIN = 6
+    WITHIN = 10
