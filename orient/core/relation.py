@@ -19,7 +19,7 @@ class Relation(IntEnum):
     #: and boundaries cross
     CROSS = 2
     #: intersection is a strict subset of the geometry,
-    #: and has the same dimension as geometries
+    #: has the same dimension as geometries
     #: and boundaries cross
     OVERLAP = 3
     #: interior/boundary of the geometry is a subset
