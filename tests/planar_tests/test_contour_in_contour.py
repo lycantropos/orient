@@ -3,7 +3,7 @@ from typing import Tuple
 from hypothesis import given
 
 from orient.hints import Contour
-from orient.planar import (PointLocation,
+from orient.planar import (Relation,
                            contour_in_contour,
                            point_in_contour)
 from tests.utils import (are_contours_similar,
@@ -56,5 +56,5 @@ def test_vertices(contours_pair: Tuple[Contour, Contour]) -> None:
 
     assert implication(contour_in_contour(left_contour, right_contour),
                        all(point_in_contour(vertex, right_contour)
-                           is not PointLocation.EXTERNAL
+                           is not Relation.DISJOINT
                            for vertex in left_contour))
