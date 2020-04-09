@@ -33,7 +33,7 @@ class EventsQueueKey:
             # same start, but one is a left endpoint
             # and the other a right endpoint,
             # the right endpoint is processed first
-            return not event.is_left_endpoint
+            return other_event.is_left_endpoint
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
