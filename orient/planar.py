@@ -26,15 +26,15 @@ def point_in_segment(point: Point, segment: Segment) -> Relation:
     :returns: relation between point and segment.
 
     >>> segment = ((0, 0), (2, 0))
-    >>> point_in_segment((0, 0), segment) is Relation.BOUNDARY
+    >>> point_in_segment((0, 0), segment) is Relation.COMPONENT
     True
-    >>> point_in_segment((1, 0), segment) is Relation.INTERNAL
+    >>> point_in_segment((1, 0), segment) is Relation.COMPONENT
     True
-    >>> point_in_segment((2, 0), segment) is Relation.BOUNDARY
+    >>> point_in_segment((2, 0), segment) is Relation.COMPONENT
     True
-    >>> point_in_segment((3, 0), segment) is Relation.EXTERNAL
+    >>> point_in_segment((3, 0), segment) is Relation.DISJOINT
     True
-    >>> point_in_segment((0, 1), segment) is Relation.EXTERNAL
+    >>> point_in_segment((0, 1), segment) is Relation.DISJOINT
     True
     """
     return _segment.relate_point(segment, point)
