@@ -85,15 +85,15 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
 
     >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
     >>> (segment_in_contour(((0, 0), (1, 0)), square)
-    ...  is Relation.BOUNDARY)
+    ...  is Relation.COMPONENT)
     True
     >>> (segment_in_contour(((0, 0), (3, 0)), square)
-    ...  is Relation.BOUNDARY)
+    ...  is Relation.COMPONENT)
     True
     >>> segment_in_contour(((2, 0), (4, 0)), square) is Relation.TOUCH
     True
     >>> (segment_in_contour(((4, 0), (5, 0)), square)
-    ...  is Relation.EXTERNAL)
+    ...  is Relation.DISJOINT)
     True
     >>> (segment_in_contour(((1, 0), (1, 2)), square)
     ...  is Relation.ENCLOSED)
@@ -102,7 +102,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     ...  is Relation.ENCLOSED)
     True
     >>> (segment_in_contour(((1, 1), (2, 2)), square)
-    ...  is Relation.INTERNAL)
+    ...  is Relation.WITHIN)
     True
     >>> segment_in_contour(((2, 2), (4, 4)), square) is Relation.CROSS
     True
