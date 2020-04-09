@@ -227,10 +227,10 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
     >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
     >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
-    ...  is Relation.BOUNDARY)
+    ...  is Relation.COMPONENT)
     True
     >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
-    ...  is Relation.BOUNDARY)
+    ...  is Relation.COMPONENT)
     True
     >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
     ...  is Relation.ENCLOSED)
@@ -239,7 +239,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     ...  is Relation.CROSS)
     True
     >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, []))
-    ...  is Relation.INTERNAL)
+    ...  is Relation.WITHIN)
     True
     >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, [inner_square]))
     ...  is Relation.TOUCH)
