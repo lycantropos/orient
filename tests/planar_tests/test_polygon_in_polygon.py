@@ -4,7 +4,7 @@ from typing import Tuple
 from hypothesis import given
 
 from orient.hints import Polygon
-from orient.planar import (PointLocation,
+from orient.planar import (Relation,
                            point_in_polygon,
                            polygon_in_polygon)
 from tests.utils import (are_polygons_similar,
@@ -67,5 +67,5 @@ def test_vertices(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     left_border, left_holes = left_polygon
     assert implication(polygon_in_polygon(left_polygon, right_polygon),
                        all(point_in_polygon(vertex, right_polygon)
-                           is not PointLocation.EXTERNAL
+                           is not Relation.DISJOINT
                            for vertex in chain(left_border, *left_holes)))
