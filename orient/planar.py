@@ -58,13 +58,13 @@ def point_in_contour(point: Point, contour: Contour) -> Relation:
     :returns: relation between point and contour.
 
     >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_contour((0, 0), square) is Relation.BOUNDARY
+    >>> point_in_contour((0, 0), square) is Relation.COMPONENT
     True
-    >>> point_in_contour((1, 1), square) is Relation.INTERNAL
+    >>> point_in_contour((1, 1), square) is Relation.WITHIN
     True
-    >>> point_in_contour((2, 2), square) is Relation.BOUNDARY
+    >>> point_in_contour((2, 2), square) is Relation.COMPONENT
     True
-    >>> point_in_contour((3, 3), square) is Relation.EXTERNAL
+    >>> point_in_contour((3, 3), square) is Relation.DISJOINT
     True
     """
     return _contour.relate_point(contour, point)
