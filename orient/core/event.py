@@ -4,7 +4,8 @@ from reprlib import recursive_repr
 from typing import Optional
 
 from reprit.base import generate_repr
-from robust.linear import segments_intersection
+from robust.linear import (SegmentsRelationship,
+                           segments_intersection)
 
 from orient.hints import (Coordinate,
                           Point,
@@ -21,20 +22,22 @@ class EdgeKind(IntEnum):
 
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement',
-                 'from_test_contour', 'in_out', 'other_in_out',
-                 'edge_kind')
+                 'from_test_contour', '_relationship',
+                 'in_out', 'other_in_out', 'edge_kind')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
                  from_test_contour: bool,
+                 relationship: SegmentsRelationship,
                  edge_kind: EdgeKind,
                  in_out: Optional[bool] = None,
                  other_in_out: Optional[bool] = None) -> None:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
+        self._relationship = relationship
         self.from_test_contour = from_test_contour
         self.edge_kind = edge_kind
         self.in_out = in_out
@@ -45,6 +48,15 @@ class Event:
     @property
     def end(self) -> Point:
         return self.complement.start
+
+    @property
+    def relationship(self) -> SegmentsRelationship:
+        return self._relationship
+
+    @relationship.setter
+    def relationship(self, value: SegmentsRelationship) -> None:
+        self._relationship = self.complement._relationship = max(
+                self._relationship, value)
 
     @property
     def is_vertical(self) -> bool:

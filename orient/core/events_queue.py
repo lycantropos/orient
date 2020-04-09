@@ -2,6 +2,7 @@ from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 from robust.angular import (Orientation,
                             orientation)
+from robust.linear import SegmentsRelationship
 
 from orient.hints import (Point,
                           Segment)
@@ -69,18 +70,19 @@ class EventsQueue:
                          from_test_contour: bool) -> None:
         start, end = sorted(segment)
         start_event = Event(True, start, None, from_test_contour,
-                            EdgeKind.NORMAL)
+                            SegmentsRelationship.NONE, EdgeKind.NORMAL)
         end_event = Event(False, end, start_event, from_test_contour,
-                          EdgeKind.NORMAL)
+                          SegmentsRelationship.NONE, EdgeKind.NORMAL)
         start_event.complement = end_event
         self._queue.push(start_event)
         self._queue.push(end_event)
 
     def divide_segment(self, event: Event, point: Point) -> None:
         left_event = Event(True, point, event.complement,
-                           event.from_test_contour, EdgeKind.NORMAL)
+                           event.from_test_contour, event.relationship,
+                           EdgeKind.NORMAL)
         right_event = Event(False, point, event, event.from_test_contour,
-                            EdgeKind.NORMAL)
+                            event.complement.relationship, EdgeKind.NORMAL)
         event.complement.complement, event.complement = left_event, right_event
         self._queue.push(left_event)
         self._queue.push(right_event)
