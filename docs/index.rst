@@ -6,9 +6,7 @@ Welcome to orient's documentation!
    it should be considered as implementation detail
    that can change and should not be relied upon.
 
-.. autoclass:: PointLocation
-    :members:
-.. autoclass:: SegmentLocation
-    :members:
 .. automodule:: orient.planar
+    :members:
+.. autoclass:: Relation
     :members:
