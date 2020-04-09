@@ -3,46 +3,45 @@ from orient.hints import (Point,
                           Polygon,
                           Segment)
 from .contour import (contains_contour as contour_contains_contour,
-                      contains_point as contour_contains_point,
-                      contains_segment as contour_contains_segment,
-                      register as register_contour)
+                      register as register_contour,
+                      relate_point as relate_point_to_contour,
+                      relate_segment as relate_segment_to_contour)
 from .events_queue import EventsQueue
-from .location import (PointLocation,
-                       SegmentLocation)
+from .relation import Relation
 from .sweep import sweep
 
 
-def contains_point(polygon: Polygon, point: Point) -> PointLocation:
+def relate_point(polygon: Polygon, point: Point) -> Relation:
     border, holes = polygon
-    border_location = contour_contains_point(border, point)
-    if border_location is PointLocation.INTERNAL:
+    border_location = relate_point_to_contour(border, point)
+    if border_location is Relation.WITHIN:
         for hole in holes:
-            hole_location = contour_contains_point(hole, point)
-            if hole_location is PointLocation.INTERNAL:
-                return PointLocation.EXTERNAL
-            elif hole_location is PointLocation.BOUNDARY:
-                return PointLocation.BOUNDARY
+            hole_relation = relate_point_to_contour(hole, point)
+            if hole_relation is Relation.WITHIN:
+                return Relation.DISJOINT
+            elif hole_relation is Relation.COMPONENT:
+                return Relation.COMPONENT
     return border_location
 
 
-def contains_segment(polygon: Polygon, segment: Segment) -> SegmentLocation:
+def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
     border, holes = polygon
-    border_location = contour_contains_segment(border, segment)
-    if (border_location is SegmentLocation.INTERNAL
-            or border_location is SegmentLocation.ENCLOSED):
+    border_relation = relate_segment_to_contour(border, segment)
+    if (border_relation is Relation.WITHIN
+            or border_relation is Relation.ENCLOSED):
         for hole in holes:
-            hole_location = contour_contains_segment(hole, segment)
-            if hole_location is SegmentLocation.INTERNAL:
-                return SegmentLocation.EXTERNAL
-            elif hole_location is SegmentLocation.BOUNDARY:
-                return SegmentLocation.BOUNDARY
-            elif hole_location is SegmentLocation.CROSS:
-                return SegmentLocation.CROSS
-            elif hole_location is SegmentLocation.ENCLOSED:
-                return SegmentLocation.TOUCH
-            elif hole_location is SegmentLocation.TOUCH:
-                border_location = SegmentLocation.ENCLOSED
-    return border_location
+            hole_relation = relate_segment_to_contour(hole, segment)
+            if hole_relation is Relation.WITHIN:
+                return Relation.DISJOINT
+            elif hole_relation is Relation.COMPONENT:
+                return Relation.COMPONENT
+            elif hole_relation is Relation.CROSS:
+                return Relation.CROSS
+            elif hole_relation is Relation.ENCLOSED:
+                return Relation.TOUCH
+            elif hole_relation is Relation.TOUCH:
+                border_relation = Relation.ENCLOSED
+    return border_relation
 
 
 def contains_polygon(goal: Polygon, test: Polygon) -> bool:

@@ -4,15 +4,15 @@ from robust.angular import (Orientation,
 from orient.hints import (Point,
                           Segment)
 from . import bounding_box
-from .location import PointLocation
+from .relation import Relation
 
 
-def contains_point(segment: Segment, point: Point) -> PointLocation:
+def relate_point(segment: Segment, point: Point) -> Relation:
     start, end = segment
-    return (PointLocation.BOUNDARY if point == start or point == end
-            else
-            (PointLocation.INTERNAL
-             if (bounding_box.contains_point(bounding_box.from_points(segment),
-                                             point)
-                 and orientation(end, start, point) is Orientation.COLLINEAR)
-             else PointLocation.EXTERNAL))
+    return (
+        Relation.COMPONENT
+        if (point == start or point == end
+            or (bounding_box.contains_point(bounding_box.from_points(segment),
+                                            point)
+                and orientation(end, start, point) is Orientation.COLLINEAR))
+        else Relation.DISJOINT)

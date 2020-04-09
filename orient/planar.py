@@ -3,20 +3,18 @@ from typing import Sequence
 from .core import (contour as _contour,
                    polygon as _polygon,
                    segment as _segment)
-from .core.location import (PointLocation,
-                            SegmentLocation)
+from .core.relation import Relation
 from .hints import (Contour,
                     Point,
                     Polygon,
                     Segment)
 
-PointLocation = PointLocation
-SegmentLocation = SegmentLocation
+Relation = Relation
 
 
-def point_in_segment(point: Point, segment: Segment) -> PointLocation:
+def point_in_segment(point: Point, segment: Segment) -> Relation:
     """
-    Finds location of point in relation to segment.
+    Finds relation between point and segment.
 
     Time complexity:
         ``O(1)``
@@ -25,26 +23,26 @@ def point_in_segment(point: Point, segment: Segment) -> PointLocation:
 
     :param point: point to locate.
     :param segment: segment to check.
-    :returns: location of point in relation to segment.
+    :returns: relation between point and segment.
 
     >>> segment = ((0, 0), (2, 0))
-    >>> point_in_segment((0, 0), segment) is PointLocation.BOUNDARY
+    >>> point_in_segment((0, 0), segment) is Relation.BOUNDARY
     True
-    >>> point_in_segment((1, 0), segment) is PointLocation.INTERNAL
+    >>> point_in_segment((1, 0), segment) is Relation.INTERNAL
     True
-    >>> point_in_segment((2, 0), segment) is PointLocation.BOUNDARY
+    >>> point_in_segment((2, 0), segment) is Relation.BOUNDARY
     True
-    >>> point_in_segment((3, 0), segment) is PointLocation.EXTERNAL
+    >>> point_in_segment((3, 0), segment) is Relation.EXTERNAL
     True
-    >>> point_in_segment((0, 1), segment) is PointLocation.EXTERNAL
+    >>> point_in_segment((0, 1), segment) is Relation.EXTERNAL
     True
     """
-    return _segment.contains_point(segment, point)
+    return _segment.relate_point(segment, point)
 
 
-def point_in_contour(point: Point, contour: Contour) -> PointLocation:
+def point_in_contour(point: Point, contour: Contour) -> Relation:
     """
-    Finds location of point in relation to contour.
+    Finds relation between point and contour.
 
     Based on ray casting algorithm.
 
@@ -57,24 +55,24 @@ def point_in_contour(point: Point, contour: Contour) -> PointLocation:
 
     :param point: point to locate.
     :param contour: contour to check.
-    :returns: location of point in relation to contour.
+    :returns: relation between point and contour.
 
     >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_contour((0, 0), square) is PointLocation.BOUNDARY
+    >>> point_in_contour((0, 0), square) is Relation.BOUNDARY
     True
-    >>> point_in_contour((1, 1), square) is PointLocation.INTERNAL
+    >>> point_in_contour((1, 1), square) is Relation.INTERNAL
     True
-    >>> point_in_contour((2, 2), square) is PointLocation.BOUNDARY
+    >>> point_in_contour((2, 2), square) is Relation.BOUNDARY
     True
-    >>> point_in_contour((3, 3), square) is PointLocation.EXTERNAL
+    >>> point_in_contour((3, 3), square) is Relation.EXTERNAL
     True
     """
-    return _contour.contains_point(contour, point)
+    return _contour.relate_point(contour, point)
 
 
-def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
+def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     """
-    Finds location of segment in relation to contour.
+    Finds relation between segment and contour.
 
     Time complexity:
         ``O(len(contour))``
@@ -83,33 +81,33 @@ def segment_in_contour(segment: Segment, contour: Contour) -> SegmentLocation:
 
     :param segment: segment to check for.
     :param contour: contour to check in.
-    :returns: location of segment in relation to contour.
+    :returns: relation between segment and contour.
 
     >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
     >>> (segment_in_contour(((0, 0), (1, 0)), square)
-    ...  is SegmentLocation.BOUNDARY)
+    ...  is Relation.BOUNDARY)
     True
     >>> (segment_in_contour(((0, 0), (3, 0)), square)
-    ...  is SegmentLocation.BOUNDARY)
+    ...  is Relation.BOUNDARY)
     True
-    >>> segment_in_contour(((2, 0), (4, 0)), square) is SegmentLocation.TOUCH
+    >>> segment_in_contour(((2, 0), (4, 0)), square) is Relation.TOUCH
     True
     >>> (segment_in_contour(((4, 0), (5, 0)), square)
-    ...  is SegmentLocation.EXTERNAL)
+    ...  is Relation.EXTERNAL)
     True
     >>> (segment_in_contour(((1, 0), (1, 2)), square)
-    ...  is SegmentLocation.ENCLOSED)
+    ...  is Relation.ENCLOSED)
     True
     >>> (segment_in_contour(((0, 0), (1, 1)), square)
-    ...  is SegmentLocation.ENCLOSED)
+    ...  is Relation.ENCLOSED)
     True
     >>> (segment_in_contour(((1, 1), (2, 2)), square)
-    ...  is SegmentLocation.INTERNAL)
+    ...  is Relation.INTERNAL)
     True
-    >>> segment_in_contour(((2, 2), (4, 4)), square) is SegmentLocation.CROSS
+    >>> segment_in_contour(((2, 2), (4, 4)), square) is Relation.CROSS
     True
     """
-    return _contour.contains_segment(contour, segment)
+    return _contour.relate_segment(contour, segment)
 
 
 def contour_in_contour(left: Contour, right: Contour) -> bool:
@@ -175,9 +173,9 @@ def contours_in_contour(contours: Sequence[Contour],
     return _contour.contains_contours(contour, contours)
 
 
-def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
+def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
     """
-    Finds location of point in relation to polygon.
+    Finds relation between point and polygon.
 
     Time complexity:
         ``O(vertices_count)``
@@ -189,30 +187,30 @@ def point_in_polygon(point: Point, polygon: Polygon) -> PointLocation:
 
     :param point: point to check for.
     :param polygon: polygon to check in.
-    :returns: location of point in relation to polygon.
+    :returns: relation between point and polygon.
 
     >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
     >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
-    >>> point_in_polygon((0, 0), (inner_square, [])) is PointLocation.EXTERNAL
+    >>> point_in_polygon((0, 0), (inner_square, [])) is Relation.EXTERNAL
     True
-    >>> point_in_polygon((0, 0), (outer_square, [])) is PointLocation.BOUNDARY
+    >>> point_in_polygon((0, 0), (outer_square, [])) is Relation.BOUNDARY
     True
-    >>> point_in_polygon((1, 1), (inner_square, [])) is PointLocation.BOUNDARY
+    >>> point_in_polygon((1, 1), (inner_square, [])) is Relation.BOUNDARY
     True
-    >>> point_in_polygon((1, 1), (outer_square, [])) is PointLocation.INTERNAL
+    >>> point_in_polygon((1, 1), (outer_square, [])) is Relation.INTERNAL
     True
-    >>> point_in_polygon((2, 2), (outer_square, [])) is PointLocation.INTERNAL
+    >>> point_in_polygon((2, 2), (outer_square, [])) is Relation.INTERNAL
     True
     >>> (point_in_polygon((2, 2), (outer_square, [inner_square]))
-    ...  is PointLocation.EXTERNAL)
+    ...  is Relation.EXTERNAL)
     True
     """
-    return _polygon.contains_point(polygon, point)
+    return _polygon.relate_point(polygon, point)
 
 
-def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
+def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     """
-    Checks if the segment fully lies inside the polygon.
+    Finds relation between segment and polygon.
 
     Time complexity:
         ``O(edges_count)``
@@ -224,38 +222,36 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> SegmentLocation:
 
     :param segment: segment to check for.
     :param polygon: polygon to check in.
-    :returns:
-        true if the segment lies inside the polygon (or on its boundary),
-        false otherwise.
+    :returns: relation between segment and polygon.
 
     >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
     >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
     >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
-    ...  is SegmentLocation.BOUNDARY)
+    ...  is Relation.BOUNDARY)
     True
     >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
-    ...  is SegmentLocation.BOUNDARY)
+    ...  is Relation.BOUNDARY)
     True
     >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
-    ...  is SegmentLocation.ENCLOSED)
+    ...  is Relation.ENCLOSED)
     True
     >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, [inner_square]))
-    ...  is SegmentLocation.CROSS)
+    ...  is Relation.CROSS)
     True
     >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, []))
-    ...  is SegmentLocation.INTERNAL)
+    ...  is Relation.INTERNAL)
     True
     >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, [inner_square]))
-    ...  is SegmentLocation.TOUCH)
+    ...  is Relation.TOUCH)
     True
     >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
-    ...  is SegmentLocation.ENCLOSED)
+    ...  is Relation.ENCLOSED)
     True
     >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
-    ...  is SegmentLocation.CROSS)
+    ...  is Relation.CROSS)
     True
     """
-    return _polygon.contains_segment(polygon, segment)
+    return _polygon.relate_segment(polygon, segment)
 
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> bool:

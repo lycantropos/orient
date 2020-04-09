@@ -14,78 +14,77 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding_box
 from .events_queue import EventsQueue
-from .location import (PointLocation,
-                       SegmentLocation)
-from .segment import contains_point as segment_contains_point
+from .relation import Relation
+from .segment import relate_point as relate_point_to_segment
 from .sweep import sweep
 
 
-def contains_point(contour: Contour, point: Point) -> PointLocation:
+def relate_point(contour: Contour, point: Point) -> Relation:
     result = False
     _, point_y = point
     for edge in edges(contour):
-        if segment_contains_point(edge, point) is not PointLocation.EXTERNAL:
-            return PointLocation.BOUNDARY
+        if relate_point_to_segment(edge, point) is not Relation.DISJOINT:
+            return Relation.COMPONENT
         start, end = edge
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
                 and ((end_y > start_y) is (angle_orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return (PointLocation.INTERNAL
+    return (Relation.WITHIN
             if result
-            else PointLocation.EXTERNAL)
+            else Relation.DISJOINT)
 
 
-def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
+def relate_segment(contour: Contour, segment: Segment) -> Relation:
     if any(segments_relationship(segment, edge) is SegmentsRelationship.CROSS
            for edge in edges(contour)):
-        return SegmentLocation.CROSS
+        return Relation.CROSS
     start, end = segment
-    start_location, end_location = (contains_point(contour, start),
-                                    contains_point(contour, end))
-    if (start_location is PointLocation.EXTERNAL
-            or end_location is PointLocation.EXTERNAL):
-        if (start_location is PointLocation.INTERNAL
-                or end_location is PointLocation.INTERNAL):
-            return SegmentLocation.CROSS
+    start_relation, end_relation = (relate_point(contour, start),
+                                    relate_point(contour, end))
+    if (start_relation is Relation.DISJOINT
+            or end_relation is Relation.DISJOINT):
+        if (start_relation is Relation.WITHIN
+                or end_relation is Relation.WITHIN):
+            return Relation.CROSS
         else:
             outsider = (start
-                        if start_location is PointLocation.EXTERNAL
+                        if start_relation is Relation.DISJOINT
                         else end)
             try:
                 _, start_index = min(
                         (_to_squared_distance_between_points(outsider, vertex),
                          index)
                         for index, vertex in enumerate(contour)
-                        if (segment_contains_point(segment, vertex)
-                            is not PointLocation.EXTERNAL))
+                        if (relate_point_to_segment(segment, vertex)
+                            is not Relation.DISJOINT))
             except ValueError:
-                return (SegmentLocation.TOUCH
-                        if (start_location is PointLocation.BOUNDARY
-                            or end_location is PointLocation.BOUNDARY)
-                        else SegmentLocation.EXTERNAL)
+                return (Relation.TOUCH
+                        if (start_relation is Relation.COMPONENT
+                            or end_relation is Relation.COMPONENT)
+                        else Relation.DISJOINT)
             _, end_index = max(
                     (_to_squared_distance_between_points(outsider, vertex),
                      index)
                     for index, vertex in enumerate(contour)
-                    if (segment_contains_point(segment, vertex)
-                        is not PointLocation.EXTERNAL))
+                    if (relate_point_to_segment(segment, vertex)
+                        is not Relation.DISJOINT))
             min_index, max_index = _sort_pair(start_index, end_index)
             if (max_index - min_index <= 1
                     or not min_index and max_index == len(contour) - 1):
-                return SegmentLocation.TOUCH
+                return Relation.TOUCH
             first_part, second_part = _split(contour, min_index,
                                              max_index)
-            return (SegmentLocation.CROSS
+            return (Relation.CROSS
                     if orientation(first_part) is orientation(second_part)
-                    else SegmentLocation.TOUCH)
-    elif (start_location is PointLocation.INTERNAL
-          and end_location is PointLocation.INTERNAL):
-        return SegmentLocation.INTERNAL
-    elif (start_location is PointLocation.INTERNAL
-          or end_location is PointLocation.INTERNAL):
-        return SegmentLocation.ENCLOSED
+                    else Relation.TOUCH)
+    elif (start_relation is Relation.WITHIN
+          and end_relation is Relation.WITHIN):
+        return Relation.WITHIN
+    elif (start_relation is Relation.WITHIN
+          or end_relation is Relation.WITHIN):
+        return Relation.ENCLOSED
     else:
         # both endpoints lie on contour
         start_index = end_index = None
@@ -97,8 +96,8 @@ def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
             elif edge_end == start:
                 start_index = index
                 break
-            elif (segment_contains_point(edge, start)
-                  is not PointLocation.EXTERNAL):
+            elif (relate_point_to_segment(edge, start)
+                  is not Relation.DISJOINT):
                 contour = contour[:]
                 contour.insert(index, start)
                 start_index = index
@@ -111,8 +110,8 @@ def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
             elif edge_end == end:
                 end_index = index
                 break
-            elif (segment_contains_point(edge, end)
-                  is not PointLocation.EXTERNAL):
+            elif (relate_point_to_segment(edge, end)
+                  is not Relation.DISJOINT):
                 contour = contour[:]
                 contour.insert(index, end)
                 end_index = index
@@ -122,11 +121,11 @@ def contains_segment(contour: Contour, segment: Segment) -> SegmentLocation:
         min_index, max_index = _sort_pair(start_index, end_index)
         if (max_index - min_index <= 1
                 or not min_index and max_index == len(contour) - 1):
-            return SegmentLocation.BOUNDARY
+            return Relation.COMPONENT
         first_part, second_part = _split(contour, min_index, max_index)
-        return (SegmentLocation.ENCLOSED
+        return (Relation.ENCLOSED
                 if orientation(first_part) is orientation(second_part)
-                else SegmentLocation.TOUCH)
+                else Relation.TOUCH)
 
 
 def orientation(contour: Contour) -> Orientation:
