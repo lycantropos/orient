@@ -5,7 +5,7 @@ from hypothesis import given
 
 from orient.hints import (Point,
                           Polygon)
-from orient.planar import (PointLocation,
+from orient.planar import (Relation,
                            point_in_polygon)
 from tests.utils import implication
 from . import strategies
@@ -17,13 +17,13 @@ def test_basic(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
     result = point_in_polygon(point, polygon)
 
-    assert isinstance(result, PointLocation)
+    assert isinstance(result, Relation)
 
 
 @given(strategies.polygons)
 def test_vertices(polygon: Polygon) -> None:
     border, holes = polygon
-    assert all(point_in_polygon(vertex, polygon) is PointLocation.BOUNDARY
+    assert all(point_in_polygon(vertex, polygon) is Relation.COMPONENT
                for vertex in chain(border, *holes))
 
 
@@ -34,12 +34,12 @@ def test_solid(polygon_with_point: Tuple[Polygon, Point]) -> None:
     result = point_in_polygon(point, polygon)
 
     border, holes = polygon
-    assert implication(result is PointLocation.INTERNAL,
+    assert implication(result is Relation.WITHIN,
                        point_in_polygon(point, (border, []))
-                       is PointLocation.INTERNAL)
+                       is Relation.WITHIN)
     assert implication(point_in_polygon(point, (border, []))
-                       is PointLocation.EXTERNAL,
-                       result is PointLocation.EXTERNAL)
+                       is Relation.DISJOINT,
+                       result is Relation.DISJOINT)
     assert implication(point_in_polygon(point, (border, []))
-                       is PointLocation.BOUNDARY,
-                       result is PointLocation.BOUNDARY)
+                       is Relation.COMPONENT,
+                       result is Relation.COMPONENT)
