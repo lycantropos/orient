@@ -191,18 +191,18 @@ def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
 
     >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
     >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
-    >>> point_in_polygon((0, 0), (inner_square, [])) is Relation.EXTERNAL
+    >>> point_in_polygon((0, 0), (inner_square, [])) is Relation.DISJOINT
     True
-    >>> point_in_polygon((0, 0), (outer_square, [])) is Relation.BOUNDARY
+    >>> point_in_polygon((0, 0), (outer_square, [])) is Relation.COMPONENT
     True
-    >>> point_in_polygon((1, 1), (inner_square, [])) is Relation.BOUNDARY
+    >>> point_in_polygon((1, 1), (inner_square, [])) is Relation.COMPONENT
     True
-    >>> point_in_polygon((1, 1), (outer_square, [])) is Relation.INTERNAL
+    >>> point_in_polygon((1, 1), (outer_square, [])) is Relation.WITHIN
     True
-    >>> point_in_polygon((2, 2), (outer_square, [])) is Relation.INTERNAL
+    >>> point_in_polygon((2, 2), (outer_square, [])) is Relation.WITHIN
     True
     >>> (point_in_polygon((2, 2), (outer_square, [inner_square]))
-    ...  is Relation.EXTERNAL)
+    ...  is Relation.DISJOINT)
     True
     """
     return _polygon.relate_point(polygon, point)
