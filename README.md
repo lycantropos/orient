@@ -77,37 +77,37 @@ Usage
 >>> right_top = (4, 4)
 >>> bottom_segment_midpoint = (2, 0)
 >>> bottom_segment = (left_bottom, right_bottom)
->>> from orient.planar import PointLocation, point_in_segment
->>> point_in_segment(left_bottom, bottom_segment) is PointLocation.BOUNDARY
+>>> from orient.planar import Relation, point_in_segment
+>>> point_in_segment(left_bottom, bottom_segment) is Relation.COMPONENT
 True
 >>> (point_in_segment(bottom_segment_midpoint, bottom_segment) 
-...  is PointLocation.INTERNAL)
+...  is Relation.COMPONENT)
 True
->>> point_in_segment(right_bottom, bottom_segment) is PointLocation.BOUNDARY
+>>> point_in_segment(right_bottom, bottom_segment) is Relation.COMPONENT
 True
->>> point_in_segment(left_top, bottom_segment) is PointLocation.EXTERNAL
+>>> point_in_segment(left_top, bottom_segment) is Relation.DISJOINT
 True
 >>> square = [left_bottom, right_bottom, right_top, left_top]
 >>> from orient.planar import point_in_contour
->>> point_in_contour(left_bottom, square) is PointLocation.BOUNDARY
+>>> point_in_contour(left_bottom, square) is Relation.COMPONENT
 True
->>> point_in_contour((1, 1), square) is PointLocation.INTERNAL
+>>> point_in_contour((1, 1), square) is Relation.WITHIN
 True
->>> point_in_contour(right_top, square) is PointLocation.BOUNDARY
+>>> point_in_contour(right_top, square) is Relation.COMPONENT
 True
->>> point_in_contour((5, 5), square) is PointLocation.EXTERNAL
+>>> point_in_contour((5, 5), square) is Relation.DISJOINT
 True
 >>> main_diagonal = (left_bottom, right_top)
->>> from orient.planar import SegmentLocation, segment_in_contour
->>> segment_in_contour(bottom_segment, square) is SegmentLocation.BOUNDARY
+>>> from orient.planar import segment_in_contour
+>>> segment_in_contour(bottom_segment, square) is Relation.COMPONENT
 True
->>> segment_in_contour(((1, 0), (5, 0)), square) is SegmentLocation.TOUCH
+>>> segment_in_contour(((1, 0), (5, 0)), square) is Relation.TOUCH
 True
->>> segment_in_contour(main_diagonal, square) is SegmentLocation.ENCLOSED
+>>> segment_in_contour(main_diagonal, square) is Relation.ENCLOSED
 True
->>> segment_in_contour(((1, 1), (2, 2)), square) is SegmentLocation.INTERNAL
+>>> segment_in_contour(((1, 1), (2, 2)), square) is Relation.WITHIN
 True
->>> segment_in_contour(((1, 1), (5, 5)), square) is SegmentLocation.CROSS
+>>> segment_in_contour(((1, 1), (5, 5)), square) is Relation.CROSS
 True
 >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
 >>> from orient.planar import contour_in_contour
@@ -131,40 +131,35 @@ False
 >>> contours_in_contour([inner_square, square], inner_square)
 False
 >>> from orient.planar import point_in_polygon
->>> point_in_polygon(left_bottom, (square, [])) is PointLocation.BOUNDARY
+>>> point_in_polygon(left_bottom, (square, [])) is Relation.COMPONENT
 True
->>> point_in_polygon((1, 1), (square, [])) is PointLocation.INTERNAL
+>>> point_in_polygon((1, 1), (square, [])) is Relation.WITHIN
 True
->>> point_in_polygon((2, 2), (square, [])) is PointLocation.INTERNAL
+>>> point_in_polygon((2, 2), (square, [])) is Relation.WITHIN
 True
->>> (point_in_polygon((1, 1), (square, [inner_square]))
-...  is PointLocation.BOUNDARY)
+>>> point_in_polygon((1, 1), (square, [inner_square])) is Relation.COMPONENT
 True
->>> (point_in_polygon((2, 2), (square, [inner_square]))
-...  is PointLocation.EXTERNAL)
+>>> point_in_polygon((2, 2), (square, [inner_square])) is Relation.DISJOINT
 True
 >>> from orient.planar import segment_in_polygon
->>> (segment_in_polygon(bottom_segment, (square, []))
-...  is SegmentLocation.BOUNDARY)
+>>> segment_in_polygon(bottom_segment, (square, [])) is Relation.COMPONENT
 True
->>> (segment_in_polygon(((1, 0), (5, 0)), (square, []))
-...  is SegmentLocation.TOUCH)
+>>> segment_in_polygon(((1, 0), (5, 0)), (square, [])) is Relation.TOUCH
 True
->>> segment_in_polygon(main_diagonal, (square, [])) is SegmentLocation.ENCLOSED
+>>> segment_in_polygon(main_diagonal, (square, [])) is Relation.ENCLOSED
 True
 >>> (segment_in_polygon(main_diagonal, (square, [inner_square]))
-... is SegmentLocation.CROSS)
+... is Relation.CROSS)
 True
->>> (segment_in_polygon(((1, 1), (2, 2)), (square, []))
-...  is SegmentLocation.INTERNAL)
+>>> segment_in_polygon(((1, 1), (2, 2)), (square, [])) is Relation.WITHIN
 True
 >>> (segment_in_polygon(((1, 1), (2, 2)), (square, [inner_square]))
-...  is SegmentLocation.TOUCH)
+...  is Relation.TOUCH)
 True
->>> segment_in_polygon(((1, 1), (5, 5)), (square, [])) is SegmentLocation.CROSS
+>>> segment_in_polygon(((1, 1), (5, 5)), (square, [])) is Relation.CROSS
 True
 >>> (segment_in_polygon(((1, 1), (5, 5)), (square, [inner_square]))
-...  is SegmentLocation.CROSS)
+...  is Relation.CROSS)
 True
 >>> from orient.planar import polygon_in_polygon
 >>> polygon_in_polygon((square, []), (square, []))
