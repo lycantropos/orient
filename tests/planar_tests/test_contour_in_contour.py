@@ -6,7 +6,7 @@ from orient.hints import Contour
 from orient.planar import (Relation,
                            contour_in_contour,
                            point_in_contour)
-from tests.utils import (are_contours_similar,
+from tests.utils import (equivalence,
                          implication,
                          to_convex_hull)
 from . import strategies
@@ -18,43 +18,53 @@ def test_basic(contours_pair: Tuple[Contour, Contour]) -> None:
 
     result = contour_in_contour(left_contour, right_contour)
 
-    assert isinstance(result, bool)
+    assert isinstance(result, Relation)
 
 
 @given(strategies.contours)
-def test_reflexivity(contour: Contour) -> None:
-    assert contour_in_contour(contour, contour)
+def test_self(contour: Contour) -> None:
+    assert contour_in_contour(contour, contour) is Relation.EQUAL
 
 
 @given(strategies.contours_pairs)
-def test_antisymmetry(contours_pair: Tuple[Contour, Contour]) -> None:
+def test_symmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
     left_contour, right_contour = contours_pair
 
-    assert implication(contour_in_contour(left_contour, right_contour)
-                       and contour_in_contour(right_contour, left_contour),
-                       are_contours_similar(left_contour, right_contour))
+    result = contour_in_contour(left_contour, right_contour)
+
+    complement = contour_in_contour(right_contour, left_contour)
+    assert equivalence(result is complement,
+                       result in (Relation.DISJOINT, Relation.TOUCH,
+                                  Relation.OVERLAP, Relation.EQUAL))
 
 
-@given(strategies.contours_triplets)
-def test_transitivity(contours_triplet: Tuple[Contour, Contour, Contour]
-                      ) -> None:
-    left_contour, mid_contour, right_contour = contours_triplet
+@given(strategies.contours_pairs)
+def test_asymmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
+    left_contour, right_contour = contours_pair
 
-    assert implication(contour_in_contour(left_contour, mid_contour)
-                       and contour_in_contour(mid_contour, right_contour),
-                       contour_in_contour(left_contour, right_contour))
+    result = contour_in_contour(left_contour, right_contour)
+
+    complement = contour_in_contour(right_contour, left_contour)
+    assert equivalence(result is Relation.COVER, complement is Relation.WITHIN)
+    assert equivalence(result is Relation.ENCLOSES,
+                       complement is Relation.ENCLOSED)
+    assert equivalence(result is Relation.COMPOSITE,
+                       complement is Relation.COMPONENT)
 
 
 @given(strategies.contours)
 def test_convex_hull(contour: Contour) -> None:
-    assert contour_in_contour(contour, to_convex_hull(contour))
+    assert (contour_in_contour(contour, to_convex_hull(contour))
+            in (Relation.EQUAL, Relation.ENCLOSED))
 
 
 @given(strategies.contours_pairs)
 def test_vertices(contours_pair: Tuple[Contour, Contour]) -> None:
     left_contour, right_contour = contours_pair
 
-    assert implication(contour_in_contour(left_contour, right_contour),
+    assert implication(contour_in_contour(left_contour, right_contour)
+                       in (Relation.EQUAL, Relation.COMPONENT,
+                           Relation.ENCLOSES, Relation.WITHIN),
                        all(point_in_contour(vertex, right_contour)
                            is not Relation.DISJOINT
                            for vertex in left_contour))
