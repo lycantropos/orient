@@ -145,7 +145,7 @@ True
 >>> segment_in_polygon(main_diagonal, (square, [])) is Relation.ENCLOSED
 True
 >>> (segment_in_polygon(main_diagonal, (square, [inner_square]))
-... is Relation.CROSS)
+...  is Relation.CROSS)
 True
 >>> segment_in_polygon(((1, 1), (2, 2)), (square, [])) is Relation.WITHIN
 True
