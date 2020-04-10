@@ -111,25 +111,26 @@ True
 True
 >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
 >>> from orient.planar import contour_in_contour
->>> contour_in_contour(square, square)
+>>> contour_in_contour(square, square) is Relation.EQUAL
 True
->>> contour_in_contour(inner_square, square)
+>>> contour_in_contour(inner_square, square) is Relation.WITHIN
 True
->>> contour_in_contour(square, inner_square)
-False
+>>> contour_in_contour(square, inner_square) is Relation.COVER
+True
 >>> from orient.planar import contours_in_contour
->>> contours_in_contour([], square)
+>>> contours_in_contour([], square) is Relation.DISJOINT
 True
->>> contours_in_contour([square], square)
+>>> contours_in_contour([square], square) is Relation.EQUAL
 True
->>> contours_in_contour([inner_square], square)
+>>> contours_in_contour([inner_square], square) is Relation.WITHIN
 True
->>> contours_in_contour([inner_square, square], square)
+>>> contours_in_contour([inner_square, square], square) is Relation.ENCLOSED
 True
->>> contours_in_contour([square], inner_square)
-False
->>> contours_in_contour([inner_square, square], inner_square)
-False
+>>> contours_in_contour([square], inner_square) is Relation.COVER
+True
+>>> (contours_in_contour([inner_square, square], inner_square)
+...  is Relation.COMPOSITE)
+True
 >>> from orient.planar import point_in_polygon
 >>> point_in_polygon(left_bottom, (square, [])) is Relation.COMPONENT
 True
@@ -162,16 +163,18 @@ True
 ...  is Relation.CROSS)
 True
 >>> from orient.planar import polygon_in_polygon
->>> polygon_in_polygon((square, []), (square, []))
+>>> polygon_in_polygon((square, []), (square, [])) is Relation.EQUAL
 True
->>> polygon_in_polygon((inner_square, []), (square, []))
+>>> polygon_in_polygon((inner_square, []), (square, [])) is Relation.WITHIN
 True
->>> polygon_in_polygon((square, []), (inner_square, []))
-False
->>> polygon_in_polygon((inner_square, []), (square, [inner_square]))
-False
->>> polygon_in_polygon((square, [inner_square]), (inner_square, []))
-False
+>>> polygon_in_polygon((square, []), (inner_square, [])) is Relation.COVER
+True
+>>> (polygon_in_polygon((inner_square, []), (square, [inner_square]))
+...  is Relation.TOUCH)
+True
+>>> (polygon_in_polygon((square, [inner_square]), (inner_square, []))
+...  is Relation.TOUCH)
+True
 
 ```
 
