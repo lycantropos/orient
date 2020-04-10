@@ -1,10 +1,10 @@
-from typing import Sequence
-
 from .core import (contour as _contour,
+                   multicontour as _multicontour,
                    polygon as _polygon,
                    segment as _segment)
 from .core.relation import Relation
 from .hints import (Contour,
+                    Multicontour,
                     Point,
                     Polygon,
                     Segment)
@@ -137,38 +137,38 @@ def contour_in_contour(left: Contour, right: Contour) -> Relation:
     return _contour.relate_contour(right, left)
 
 
-def contours_in_contour(contours: Sequence[Contour],
-                        contour: Contour) -> Relation:
+def contour_in_multicontour(contour: Contour,
+                            multicontour: Multicontour) -> Relation:
     """
-    Checks if contours fully lie inside the region bounded by other contour.
+    Finds relation between contour and multicontour.
 
     Time complexity:
         ``O(vertices_count * log (vertices_count))``
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = sum(map(len, contours)) + len(contour)``.
+    where ``vertices_count = len(contour) + sum(map(len, multicontour))``.
 
-    :param contours: non-overlapping contours to check for.
-    :param contour: contour to check in.
-    :returns: true if contours lie inside the other contour, false otherwise.
+    :param contour: contour to check for.
+    :param multicontour: multicontour to check in.
+    :returns: relation between contour and multicontour.
 
     >>> triangle = [(0, 0), (1, 0), (0, 1)]
     >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> contours_in_contour([], triangle) is Relation.DISJOINT
+    >>> contour_in_multicontour(triangle, []) is Relation.DISJOINT
     True
-    >>> contours_in_contour([], square) is Relation.DISJOINT
+    >>> contour_in_multicontour(square, []) is Relation.DISJOINT
     True
-    >>> contours_in_contour([triangle], triangle) is Relation.EQUAL
+    >>> contour_in_multicontour(triangle, [triangle]) is Relation.EQUAL
     True
-    >>> contours_in_contour([triangle], square) is Relation.ENCLOSED
+    >>> contour_in_multicontour(square, [triangle]) is Relation.ENCLOSES
     True
-    >>> contours_in_contour([square], triangle) is Relation.ENCLOSES
+    >>> contour_in_multicontour(triangle, [square]) is Relation.ENCLOSED
     True
-    >>> contours_in_contour([square], square) is Relation.EQUAL
+    >>> contour_in_multicontour(square, [square]) is Relation.EQUAL
     True
     """
-    return _contour.relate_contours(contour, contours)
+    return _multicontour.relate_contour(multicontour, contour)
 
 
 def point_in_polygon(point: Point, polygon: Polygon) -> Relation:

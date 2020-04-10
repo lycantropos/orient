@@ -1,11 +1,11 @@
 from orient.hints import (Point,
                           Polygon,
                           Segment)
-from .contour import (contours_relation,
-                      relate_contour as relate_contour_to_contour,
-                      relate_contours as relate_contours_to_contour,
+from .contour import (relate_contour as relate_contours,
                       relate_point as relate_point_to_contour,
                       relate_segment as relate_segment_to_contour)
+from .multicontour import (relate_contour as relate_contour_to_multicontour,
+                           relate_multicontour as relate_multicontours)
 from .relation import Relation
 
 
@@ -45,13 +45,13 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
     goal_border, goal_holes = goal
     test_border, test_holes = test
-    borders_relation = relate_contour_to_contour(goal_border, test_border)
+    borders_relation = relate_contours(goal_border, test_border)
     if borders_relation in (Relation.DISJOINT, Relation.TOUCH,
                             Relation.OVERLAP):
         return borders_relation
     elif borders_relation is Relation.EQUAL:
         if goal_holes and test_holes:
-            relation_with_holes = contours_relation(test_holes, goal_holes)
+            relation_with_holes = relate_multicontours(test_holes, goal_holes)
             if relation_with_holes in (Relation.DISJOINT,
                                        Relation.TOUCH,
                                        Relation.OVERLAP):
@@ -71,23 +71,24 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
     elif borders_relation in (Relation.WITHIN, Relation.ENCLOSED,
                               Relation.COMPONENT):
         if goal_holes:
-            relation_with_border = relate_contours_to_contour(test_border,
-                                                              goal_holes)
+            relation_with_border = relate_contour_to_multicontour(goal_holes,
+                                                                  test_border)
             if relation_with_border is Relation.DISJOINT:
                 return borders_relation
-            elif relation_with_border is Relation.COVER:
+            elif relation_with_border is Relation.WITHIN:
                 return Relation.DISJOINT
-            elif relation_with_border in (Relation.ENCLOSES,
-                                          Relation.COMPOSITE,
+            elif relation_with_border in (Relation.ENCLOSED,
+                                          Relation.COMPONENT,
                                           Relation.EQUAL):
                 return Relation.TOUCH
             elif relation_with_border in (Relation.OVERLAP,
-                                          Relation.COMPONENT):
+                                          Relation.COMPOSITE):
                 return Relation.OVERLAP
             elif relation_with_border is Relation.TOUCH:
                 return Relation.ENCLOSED
             elif test_holes:
-                relation_with_holes = contours_relation(test_holes, goal_holes)
+                relation_with_holes = relate_multicontours(test_holes,
+                                                           goal_holes)
                 return (borders_relation
                         if relation_with_holes in (Relation.EQUAL,
                                                    Relation.COMPONENT,
@@ -102,23 +103,24 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
                     else borders_relation)
     else:
         if test_holes:
-            relation_with_border = relate_contours_to_contour(goal_border,
-                                                              test_holes)
+            relation_with_border = relate_contour_to_multicontour(test_holes,
+                                                                  goal_border)
             if relation_with_border is Relation.DISJOINT:
                 return borders_relation
-            elif relation_with_border is Relation.COVER:
+            elif relation_with_border is Relation.WITHIN:
                 return Relation.DISJOINT
-            elif relation_with_border in (Relation.ENCLOSES,
-                                          Relation.COMPOSITE,
+            elif relation_with_border in (Relation.ENCLOSED,
+                                          Relation.COMPONENT,
                                           Relation.EQUAL):
                 return Relation.TOUCH
             elif relation_with_border in (Relation.OVERLAP,
-                                          Relation.COMPONENT):
+                                          Relation.COMPOSITE):
                 return Relation.OVERLAP
             elif relation_with_border is Relation.TOUCH:
                 return Relation.ENCLOSES
             elif goal_holes:
-                relation_with_holes = contours_relation(goal_holes, test_holes)
+                relation_with_holes = relate_multicontours(goal_holes,
+                                                           test_holes)
                 return (borders_relation
                         if relation_with_holes in (Relation.EQUAL,
                                                    Relation.COMPONENT,

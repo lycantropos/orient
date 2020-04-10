@@ -1,6 +1,4 @@
-from itertools import chain
 from typing import (Iterable,
-                    Sequence,
                     Tuple)
 
 from robust.angular import (Orientation,
@@ -201,43 +199,6 @@ def equals(left: Contour, right: Contour) -> bool:
                 else:
                     return True
             start = index + 1
-
-
-def relate_contours(goal: Contour, tests: Sequence[Contour]) -> Relation:
-    if not tests:
-        return Relation.DISJOINT
-    tests_bounding_box = bounding_box.from_points(chain.from_iterable(tests))
-    if bounding_box.disjoint_with(bounding_box.from_points(goal),
-                                  tests_bounding_box):
-        return Relation.DISJOINT
-    events_queue = EventsQueue()
-    register(events_queue, goal,
-             from_test_contour=False)
-    for test in tests:
-        register(events_queue, test,
-                 from_test_contour=True)
-    _, tests_max_x, _, _ = tests_bounding_box
-    return _process_queue(events_queue, tests_max_x)
-
-
-def contours_relation(goals: Sequence[Contour],
-                      tests: Sequence[Contour]) -> Relation:
-    if not (goals and tests):
-        return Relation.DISJOINT
-    tests_bounding_box = bounding_box.from_points(chain.from_iterable(tests))
-    if bounding_box.disjoint_with(
-            bounding_box.from_points(chain.from_iterable(goals)),
-            tests_bounding_box):
-        return Relation.DISJOINT
-    events_queue = EventsQueue()
-    for goal in goals:
-        register(events_queue, goal,
-                 from_test_contour=False)
-    for test in tests:
-        register(events_queue, test,
-                 from_test_contour=True)
-    _, tests_max_x, _, _ = tests_bounding_box
-    return _process_queue(events_queue, tests_max_x)
 
 
 def _process_queue(events_queue: EventsQueue,
