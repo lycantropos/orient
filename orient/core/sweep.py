@@ -29,7 +29,7 @@ def sweep(events_queue: EventsQueue,
         same_start_events = [event]
         while events_queue and events_queue.peek().start == start:
             same_start_events.append(events_queue.pop())
-        if not all_equal(event.from_test_contour
+        if not all_equal(event.from_test
                          for event in same_start_events):
             for event in same_start_events:
                 event.relationship = SegmentsRelationship.TOUCH
@@ -70,7 +70,7 @@ def all_equal(values: Iterable[Any]) -> bool:
 def compute_transition(below_event: Optional[Event], event: Event) -> None:
     if below_event is None:
         event.in_out, event.other_in_out = False, True
-    elif event.from_test_contour is below_event.from_test_contour:
+    elif event.from_test is below_event.from_test:
         event.in_out, event.other_in_out = (not below_event.in_out,
                                             below_event.other_in_out)
     else:
@@ -89,7 +89,7 @@ def detect_intersection(below_event: Event,
     relationship = segments_relationship(below_segment, segment)
     if relationship is SegmentsRelationship.OVERLAP:
         # segments overlap
-        if event.from_test_contour is below_event.from_test_contour:
+        if event.from_test is below_event.from_test:
             raise ValueError('Edges of the same polygon '
                              'should not overlap.')
         event.relationship = below_event.relationship = relationship
@@ -140,7 +140,7 @@ def detect_intersection(below_event: Event,
             events_queue.divide_segment(sorted_events[0],
                                         sorted_events[1].start)
     elif relationship is not SegmentsRelationship.NONE:
-        if event.from_test_contour is not below_event.from_test_contour:
+        if event.from_test is not below_event.from_test:
             event.relationship = below_event.relationship = relationship
         if below_event.start != event.start and below_event.end != event.end:
             # segments do not intersect at endpoints

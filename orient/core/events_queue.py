@@ -45,8 +45,8 @@ class EventsQueueKey:
                 return other_end_orientation is (Orientation.COUNTERCLOCKWISE
                                                  if event.is_left_endpoint
                                                  else Orientation.CLOCKWISE)
-            elif event.from_test_contour is not other_event.from_test_contour:
-                return other_event.from_test_contour
+            elif event.from_test is not other_event.from_test:
+                return other_event.from_test
             else:
                 end_x, end_y = event.end
                 other_end_x, other_end_y = other_event.end
@@ -70,11 +70,11 @@ class EventsQueue:
 
     def register_segment(self, segment: Segment,
                          *,
-                         from_test_contour: bool) -> None:
+                         from_test: bool) -> None:
         start, end = sorted(segment)
-        start_event = Event(True, start, None, from_test_contour,
+        start_event = Event(True, start, None, from_test,
                             SegmentsRelationship.NONE, EdgeKind.NORMAL)
-        end_event = Event(False, end, start_event, from_test_contour,
+        end_event = Event(False, end, start_event, from_test,
                           SegmentsRelationship.NONE, EdgeKind.NORMAL)
         start_event.complement = end_event
         self._queue.push(start_event)
@@ -82,9 +82,9 @@ class EventsQueue:
 
     def divide_segment(self, event: Event, point: Point) -> None:
         left_event = Event(True, point, event.complement,
-                           event.from_test_contour, event.relationship,
+                           event.from_test, event.relationship,
                            EdgeKind.NORMAL)
-        right_event = Event(False, point, event, event.from_test_contour,
+        right_event = Event(False, point, event, event.from_test,
                             event.complement.relationship, EdgeKind.NORMAL)
         event.complement.complement, event.complement = left_event, right_event
         self._queue.push(left_event)

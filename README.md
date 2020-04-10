@@ -88,43 +88,43 @@ True
 >>> point_in_segment(left_top, bottom_segment) is Relation.DISJOINT
 True
 >>> square = [left_bottom, right_bottom, right_top, left_top]
->>> from orient.planar import point_in_contour
->>> point_in_contour(left_bottom, square) is Relation.COMPONENT
+>>> from orient.planar import point_in_region
+>>> point_in_region(left_bottom, square) is Relation.COMPONENT
 True
->>> point_in_contour((1, 1), square) is Relation.WITHIN
+>>> point_in_region((1, 1), square) is Relation.WITHIN
 True
->>> point_in_contour(right_top, square) is Relation.COMPONENT
+>>> point_in_region(right_top, square) is Relation.COMPONENT
 True
->>> point_in_contour((5, 5), square) is Relation.DISJOINT
+>>> point_in_region((5, 5), square) is Relation.DISJOINT
 True
 >>> main_diagonal = (left_bottom, right_top)
->>> from orient.planar import segment_in_contour
->>> segment_in_contour(bottom_segment, square) is Relation.COMPONENT
+>>> from orient.planar import segment_in_region
+>>> segment_in_region(bottom_segment, square) is Relation.COMPONENT
 True
->>> segment_in_contour(((1, 0), (5, 0)), square) is Relation.TOUCH
+>>> segment_in_region(((1, 0), (5, 0)), square) is Relation.TOUCH
 True
->>> segment_in_contour(main_diagonal, square) is Relation.ENCLOSED
+>>> segment_in_region(main_diagonal, square) is Relation.ENCLOSED
 True
->>> segment_in_contour(((1, 1), (2, 2)), square) is Relation.WITHIN
+>>> segment_in_region(((1, 1), (2, 2)), square) is Relation.WITHIN
 True
->>> segment_in_contour(((1, 1), (5, 5)), square) is Relation.CROSS
+>>> segment_in_region(((1, 1), (5, 5)), square) is Relation.CROSS
 True
 >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
->>> from orient.planar import contour_in_contour
->>> contour_in_contour(square, square) is Relation.EQUAL
+>>> from orient.planar import region_in_region
+>>> region_in_region(square, square) is Relation.EQUAL
 True
->>> contour_in_contour(inner_square, square) is Relation.WITHIN
+>>> region_in_region(inner_square, square) is Relation.WITHIN
 True
->>> contour_in_contour(square, inner_square) is Relation.COVER
+>>> region_in_region(square, inner_square) is Relation.COVER
 True
->>> from orient.planar import contour_in_multicontour
->>> contour_in_multicontour(square, []) is Relation.DISJOINT
+>>> from orient.planar import region_in_multiregion
+>>> region_in_multiregion(square, []) is Relation.DISJOINT
 True
->>> contour_in_multicontour(square, [square]) is Relation.EQUAL
+>>> region_in_multiregion(square, [square]) is Relation.EQUAL
 True
->>> contour_in_multicontour(square, [inner_square]) is Relation.COVER
+>>> region_in_multiregion(square, [inner_square]) is Relation.COVER
 True
->>> contour_in_multicontour(inner_square, [square]) is Relation.WITHIN
+>>> region_in_multiregion(inner_square, [square]) is Relation.WITHIN
 True
 >>> from orient.planar import point_in_polygon
 >>> point_in_polygon(left_bottom, (square, [])) is Relation.COMPONENT

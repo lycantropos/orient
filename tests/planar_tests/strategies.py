@@ -1,6 +1,5 @@
 from functools import partial
-from typing import (List,
-                    Optional,
+from typing import (Optional,
                     Tuple)
 
 from hypothesis import strategies
@@ -8,6 +7,7 @@ from hypothesis_geometry import planar
 
 from orient.hints import (Contour,
                           Coordinate,
+                          Multicontour,
                           Point,
                           Polygon,
                           Segment)
@@ -39,24 +39,23 @@ contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
 
 
-def to_contours_with_contours_lists(coordinates: Strategy[Coordinate],
-                                    *,
-                                    min_size: int = 0,
-                                    max_size: Optional[int] = None
-                                    ) -> Strategy[Tuple[Contour,
-                                                        List[Contour]]]:
+def to_contours_with_multicontours(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
+                                   ) -> Strategy[Tuple[Contour, Multicontour]]:
     return strategies.tuples(planar.contours(coordinates),
                              planar.multicontours(coordinates,
                                                   min_size=min_size,
                                                   max_size=max_size))
 
 
-contours_with_contours_lists = (coordinates_strategies
-                                .flatmap(to_contours_with_contours_lists))
-contours_with_empty_contours_lists = strategies.tuples(contours,
-                                                       strategies.builds(list))
-contours_with_non_empty_contours_lists = coordinates_strategies.flatmap(
-        partial(to_contours_with_contours_lists,
+contours_with_multicontours = (coordinates_strategies
+                               .flatmap(to_contours_with_multicontours))
+contours_with_empty_multicontours = strategies.tuples(contours,
+                                                      strategies.builds(list))
+contours_with_non_empty_multicontours = coordinates_strategies.flatmap(
+        partial(to_contours_with_multicontours,
                 min_size=1))
 
 
@@ -90,7 +89,6 @@ def to_polygons_with_segments(coordinates: Strategy[Coordinate]
 
 polygons_with_segments = (coordinates_strategies
                           .flatmap(to_polygons_with_segments))
-
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)

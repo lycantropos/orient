@@ -3,7 +3,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.contour import edges
+from orient.core.region import boundary_edges
 from orient.hints import (Polygon,
                           Segment)
 from orient.planar import (Relation,
@@ -42,14 +42,14 @@ def test_outside(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
 def test_border_edges(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
-               for edge in edges(border))
+               for edge in boundary_edges(border))
 
 
 @given(strategies.polygons)
 def test_holes_edges(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
-               for edge in chain.from_iterable(map(edges, holes)))
+               for edge in chain.from_iterable(map(boundary_edges, holes)))
 
 
 @given(strategies.polygons)

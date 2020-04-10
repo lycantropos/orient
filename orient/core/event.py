@@ -21,15 +21,14 @@ class EdgeKind(IntEnum):
 
 
 class Event:
-    __slots__ = ('is_left_endpoint', 'start', 'complement',
-                 'from_test_contour', '_relationship',
-                 'in_out', 'other_in_out', 'edge_kind')
+    __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
+                 '_relationship', 'in_out', 'other_in_out', 'edge_kind')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
-                 from_test_contour: bool,
+                 from_test: bool,
                  relationship: SegmentsRelationship,
                  edge_kind: EdgeKind,
                  in_out: Optional[bool] = None,
@@ -38,7 +37,7 @@ class Event:
         self.start = start
         self.complement = complement
         self._relationship = relationship
-        self.from_test_contour = from_test_contour
+        self.from_test = from_test
         self.edge_kind = edge_kind
         self.in_out = in_out
         self.other_in_out = other_in_out

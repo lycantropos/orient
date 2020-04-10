@@ -1,15 +1,14 @@
 from itertools import chain
 
-from orient.hints import (Contour,
-                          Multicontour)
+from orient.hints import (Multiregion, Region)
 from . import bounding_box
-from .contour import (_process_queue,
-                      register as register_contour)
 from .events_queue import EventsQueue
+from .region import (_process_queue,
+                     register as register_region)
 from .relation import Relation
 
 
-def relate_contour(goal: Multicontour, test: Contour) -> Relation:
+def relate_region(goal: Multiregion, test: Region) -> Relation:
     if not goal:
         return Relation.DISJOINT
     test_bounding_box = bounding_box.from_points(test)
@@ -19,14 +18,14 @@ def relate_contour(goal: Multicontour, test: Contour) -> Relation:
         return Relation.DISJOINT
     events_queue = EventsQueue()
     register(events_queue, goal,
-             from_test_contour=False)
-    register_contour(events_queue, test,
-                     from_test_contour=True)
+             from_test=False)
+    register_region(events_queue, test,
+                    from_test=True)
     _, test_max_x, _, _ = test_bounding_box
     return _process_queue(events_queue, test_max_x)
 
 
-def relate_multicontour(goal: Multicontour, test: Multicontour) -> Relation:
+def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
     test_bounding_box = bounding_box.from_points(chain.from_iterable(test))
@@ -36,16 +35,16 @@ def relate_multicontour(goal: Multicontour, test: Multicontour) -> Relation:
         return Relation.DISJOINT
     events_queue = EventsQueue()
     register(events_queue, goal,
-             from_test_contour=False)
+             from_test=False)
     register(events_queue, test,
-             from_test_contour=True)
+             from_test=True)
     _, test_max_x, _, _ = test_bounding_box
     return _process_queue(events_queue, test_max_x)
 
 
-def register(events_queue: EventsQueue, multicontour: Multicontour,
+def register(events_queue: EventsQueue, multiregion: Multiregion,
              *,
-             from_test_contour: bool) -> None:
-    for contour in multicontour:
-        register_contour(events_queue, contour,
-                         from_test_contour=from_test_contour)
+             from_test: bool) -> None:
+    for region in multiregion:
+        register_region(events_queue, region,
+                        from_test=from_test)
