@@ -22,7 +22,8 @@ def to_floats(min_value: Optional[float] = None,
 
 def to_digits_count(number: float,
                     *,
-                    max_digits_count: int = sys.float_info.dig) -> float:
+                    max_digits_count: int = sys.float_info.dig * 2 // 3
+                    ) -> float:
     decimal = Decimal(number).normalize()
     _, significant_digits, exponent = decimal.as_tuple()
     significant_digits_count = len(significant_digits)
