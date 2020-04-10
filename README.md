@@ -117,19 +117,14 @@ True
 True
 >>> contour_in_contour(square, inner_square) is Relation.COVER
 True
->>> from orient.planar import contours_in_contour
->>> contours_in_contour([], square) is Relation.DISJOINT
+>>> from orient.planar import contour_in_multicontour
+>>> contour_in_multicontour(square, []) is Relation.DISJOINT
 True
->>> contours_in_contour([square], square) is Relation.EQUAL
+>>> contour_in_multicontour(square, [square]) is Relation.EQUAL
 True
->>> contours_in_contour([inner_square], square) is Relation.WITHIN
+>>> contour_in_multicontour(square, [inner_square]) is Relation.COVER
 True
->>> contours_in_contour([inner_square, square], square) is Relation.ENCLOSED
-True
->>> contours_in_contour([square], inner_square) is Relation.COVER
-True
->>> (contours_in_contour([inner_square, square], inner_square)
-...  is Relation.COMPOSITE)
+>>> contour_in_multicontour(inner_square, [square]) is Relation.WITHIN
 True
 >>> from orient.planar import point_in_polygon
 >>> point_in_polygon(left_bottom, (square, [])) is Relation.COMPONENT
