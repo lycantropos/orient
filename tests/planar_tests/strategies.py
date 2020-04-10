@@ -1,5 +1,7 @@
 from functools import partial
-from typing import Tuple
+from typing import (List,
+                    Optional,
+                    Tuple)
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -35,12 +37,27 @@ def to_contours_with_segments(coordinates: Strategy[Coordinate]
 
 contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
-contours_with_contours_lists = coordinates_strategies.flatmap(planar.polygons)
+
+
+def to_contours_with_contours_lists(coordinates: Strategy[Coordinate],
+                                    *,
+                                    min_size: int = 0,
+                                    max_size: Optional[int] = None
+                                    ) -> Strategy[Tuple[Contour,
+                                                        List[Contour]]]:
+    return strategies.tuples(planar.contours(coordinates),
+                             planar.multicontours(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
+
+
+contours_with_contours_lists = (coordinates_strategies
+                                .flatmap(to_contours_with_contours_lists))
 contours_with_empty_contours_lists = strategies.tuples(contours,
                                                        strategies.builds(list))
 contours_with_non_empty_contours_lists = coordinates_strategies.flatmap(
-        partial(planar.polygons,
-                min_holes_size=1))
+        partial(to_contours_with_contours_lists,
+                min_size=1))
 
 
 def to_contours_with_points(coordinates: Strategy[Coordinate]
