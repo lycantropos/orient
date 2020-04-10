@@ -116,7 +116,7 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
                                           Relation.COMPONENT):
                 return Relation.OVERLAP
             elif relation_with_border is Relation.TOUCH:
-                return Relation.ENCLOSED
+                return Relation.ENCLOSES
             elif goal_holes:
                 relation_with_holes = contours_relation(goal_holes, test_holes)
                 return (borders_relation
