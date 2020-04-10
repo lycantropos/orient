@@ -2,14 +2,14 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.contour import edges
+from orient.core.contour import (edges,
+                                 equals)
 from orient.hints import (Contour,
                           Segment)
 from orient.planar import (Relation,
                            point_in_contour,
                            segment_in_contour)
-from tests.utils import (are_contours_similar,
-                         equivalence,
+from tests.utils import (equivalence,
                          implication,
                          to_contour_separators,
                          to_convex_hull)
@@ -57,4 +57,4 @@ def test_convex_contour_criterion(contour: Contour) -> None:
     assert equivalence(all(segment_in_contour(segment, contour)
                            is Relation.ENCLOSED
                            for segment in to_contour_separators(contour)),
-                       are_contours_similar(contour, to_convex_hull(contour)))
+                       equals(contour, to_convex_hull(contour)))
