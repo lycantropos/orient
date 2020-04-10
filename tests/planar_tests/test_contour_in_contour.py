@@ -64,7 +64,7 @@ def test_vertices(contours_pair: Tuple[Contour, Contour]) -> None:
 
     assert implication(contour_in_contour(left_contour, right_contour)
                        in (Relation.EQUAL, Relation.COMPONENT,
-                           Relation.ENCLOSES, Relation.WITHIN),
+                           Relation.ENCLOSED, Relation.WITHIN),
                        all(point_in_contour(vertex, right_contour)
                            is not Relation.DISJOINT
                            for vertex in left_contour))
