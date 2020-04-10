@@ -28,12 +28,14 @@ class Relation(IntEnum):
     #: at least one boundary point of the other, but not all,
     #: interior of the geometry contains other points of the other
     ENCLOSES = 5
-    #: interior/boundary of the geometry is a superset
+    #: geometry is a strict superset of the other
+    #: and interior/boundary of the geometry is a superset
     #: of interior/boundary of the other
     COMPOSITE = 6
     #: geometries are equal
     EQUAL = 7
-    #: interior/boundary of the geometry is a subset
+    #: geometry is a strict subset of the other
+    #: and interior/boundary of the geometry is a subset
     #: of interior/boundary of the other
     COMPONENT = 8
     #: at least one boundary point of the geometry
