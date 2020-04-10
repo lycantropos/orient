@@ -77,7 +77,7 @@ def test_vertices(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     left_border, left_holes = left_polygon
     assert implication(polygon_in_polygon(left_polygon, right_polygon)
                        in (Relation.EQUAL, Relation.COMPONENT,
-                           Relation.ENCLOSES, Relation.WITHIN),
+                           Relation.ENCLOSED, Relation.WITHIN),
                        all(point_in_polygon(vertex, right_polygon)
                            is not Relation.DISJOINT
                            for vertex in chain(left_border, *left_holes)))
