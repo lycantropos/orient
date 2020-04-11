@@ -25,7 +25,7 @@ def relate_point(region: Region, point: Point) -> Relation:
     result = False
     _, point_y = point
     for edge in boundary_edges(region):
-        if relate_point_to_segment(edge, point) is not Relation.DISJOINT:
+        if relate_point_to_segment(edge, point) is Relation.COMPONENT:
             return Relation.COMPONENT
         start, end = edge
         (_, start_y), (_, end_y) = start, end
