@@ -53,26 +53,26 @@ def relate_segment(goal: Segment, test: Segment) -> Relation:
                 return Relation.DISJOINT
         else:
             return Relation.DISJOINT
+    elif goal_start_orientation is Orientation.COLLINEAR:
+        return (Relation.TOUCH
+                if test_start <= goal_start <= test_end
+                else Relation.DISJOINT)
+    elif goal_end_orientation is Orientation.COLLINEAR:
+        return (Relation.TOUCH
+                if test_start <= goal_end <= test_end
+                else Relation.DISJOINT)
     else:
         test_start_orientation = orientation(goal_end, goal_start, test_start)
         test_end_orientation = orientation(goal_end, goal_start, test_end)
         if test_start_orientation is test_end_orientation:
             return Relation.DISJOINT
-        elif goal_start_orientation is Orientation.COLLINEAR:
-            return (Relation.TOUCH
-                    if test_start <= goal_start <= test_end
-                    else Relation.DISJOINT)
-        elif goal_end_orientation is Orientation.COLLINEAR:
-            return (Relation.TOUCH
-                    if test_start <= goal_end <= test_end
-                    else Relation.DISJOINT)
         elif test_start_orientation is Orientation.COLLINEAR:
             return (Relation.TOUCH
-                    if goal_start <= test_start <= goal_end
+                    if goal_start < test_start < goal_end
                     else Relation.DISJOINT)
         elif test_end_orientation is Orientation.COLLINEAR:
             return (Relation.TOUCH
-                    if goal_start <= test_end <= goal_end
+                    if goal_start < test_end < goal_end
                     else Relation.DISJOINT)
         else:
             return Relation.CROSS
