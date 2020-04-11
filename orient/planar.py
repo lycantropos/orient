@@ -54,6 +54,8 @@ def segment_in_segment(left: Segment, right: Segment) -> Relation:
     :returns: relation between segments.
 
     >>> segment = ((0, 0), (2, 0))
+    >>> segment_in_segment(((0, 0), (0, 2)), segment) is Relation.TOUCH
+    True
     >>> segment_in_segment(((0, 0), (1, 0)), segment) is Relation.COMPONENT
     True
     >>> segment_in_segment(((0, 0), (2, 0)), segment) is Relation.EQUAL
