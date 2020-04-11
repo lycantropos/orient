@@ -119,6 +119,7 @@ def equal(left: Contour, right: Contour) -> bool:
 
 def _process_queue(events_queue: EventsQueue,
                    test_max_x: Coordinate) -> Relation:
+    test_boundary_in_goal_interior = goal_boundary_in_test_interior = False
     has_cross = has_touch = False
     test_is_subset_of_goal = goal_is_subset_of_test = True
     for event in sweep(events_queue, test_max_x):
@@ -126,6 +127,14 @@ def _process_queue(events_queue: EventsQueue,
             has_cross = True
         if not has_touch and event.relationship is SegmentsRelationship.TOUCH:
             has_touch = True
+        if (not test_boundary_in_goal_interior and event.from_test
+                and event.relationship in (SegmentsRelationship.NONE,
+                                           SegmentsRelationship.TOUCH)):
+            test_boundary_in_goal_interior = True
+        if (not goal_boundary_in_test_interior and not event.from_test
+                and event.relationship in (SegmentsRelationship.NONE,
+                                           SegmentsRelationship.TOUCH)):
+            goal_boundary_in_test_interior = True
         if (test_is_subset_of_goal and event.from_test
                 and not event.in_intersection
                 and (event.relationship is not SegmentsRelationship.OVERLAP)):
@@ -137,9 +146,13 @@ def _process_queue(events_queue: EventsQueue,
     if goal_is_subset_of_test:
         return (Relation.EQUAL
                 if test_is_subset_of_goal
-                else Relation.COMPOSITE)
+                else (Relation.OVERLAP
+                      if goal_boundary_in_test_interior
+                      else Relation.COMPOSITE))
     elif test_is_subset_of_goal:
-        return Relation.COMPONENT
+        return (Relation.OVERLAP
+                if test_boundary_in_goal_interior
+                else Relation.COMPONENT)
     else:
         return (Relation.CROSS
                 if has_cross
