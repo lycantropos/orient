@@ -1,10 +1,12 @@
-from orient.hints import (Point,
+from orient.hints import (Contour,
+                          Point,
                           Polygon,
                           Region,
                           Segment)
 from .multiregion import (relate_multiregion as relate_multiregions,
                           relate_region as relate_region_to_multiregion)
-from .region import (relate_point as relate_point_to_region,
+from .region import (_to_contour_relation,
+                     relate_point as relate_point_to_region,
                      relate_region as relate_regions,
                      relate_segment as relate_segment_to_region)
 from .relation import Relation
@@ -41,6 +43,10 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
             elif relation_with_hole is Relation.TOUCH:
                 relation_with_border = Relation.ENCLOSED
     return relation_with_border
+
+
+def relate_contour(goal: Polygon, test: Contour) -> Relation:
+    return _to_contour_relation(relate_region(goal, test))
 
 
 def relate_region(polygon: Polygon, region: Region) -> Relation:
