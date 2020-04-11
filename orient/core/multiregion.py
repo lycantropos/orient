@@ -11,8 +11,8 @@ from .region import (_process_queue,
 from .relation import Relation
 
 
-def relate_contour(goal: Multiregion, test: Contour) -> Relation:
-    return _to_contour_relation(relate_region(goal, test))
+def relate_contour(multiregion: Multiregion, region: Contour) -> Relation:
+    return _to_contour_relation(relate_region(multiregion, region))
 
 
 def relate_region(goal: Multiregion, test: Region) -> Relation:
