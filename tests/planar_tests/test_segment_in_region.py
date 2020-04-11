@@ -3,7 +3,7 @@ from typing import Tuple
 from hypothesis import given
 
 from orient.core.region import (boundary_edges,
-                                equals)
+                                equal)
 from orient.hints import (Region,
                           Segment)
 from orient.planar import (Relation,
@@ -55,4 +55,4 @@ def test_convex_contour_criterion(region: Region) -> None:
     assert equivalence(all(segment_in_region(segment, region)
                            is Relation.ENCLOSED
                            for segment in to_contour_separators(region)),
-                       equals(region, to_convex_hull(region)))
+                       equal(region, to_convex_hull(region)))
