@@ -68,6 +68,16 @@ def to_contours_with_points(coordinates: Strategy[Coordinate]
 
 
 contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
+
+
+def to_contours_with_polygons(coordinates: Strategy[Coordinate]
+                              ) -> Strategy[Tuple[Contour, Polygon]]:
+    return strategies.tuples(planar.contours(coordinates),
+                             planar.polygons(coordinates))
+
+
+contours_with_polygons = (coordinates_strategies
+                          .flatmap(to_contours_with_polygons))
 contours_strategies = coordinates_strategies.map(planar.contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)
