@@ -1,5 +1,6 @@
 from orient.hints import (Point,
                           Polygon,
+                          Region,
                           Segment)
 from .multiregion import (relate_multiregion as relate_multiregions,
                           relate_region as relate_region_to_multiregion)
@@ -40,6 +41,41 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
             elif relation_with_hole is Relation.TOUCH:
                 relation_with_border = Relation.ENCLOSED
     return relation_with_border
+
+
+def relate_region(polygon: Polygon, region: Region) -> Relation:
+    border, holes = polygon
+    relation_with_border = relate_regions(border, region)
+    if relation_with_border in (Relation.DISJOINT,
+                                Relation.TOUCH,
+                                Relation.OVERLAP,
+                                Relation.COVER,
+                                Relation.ENCLOSES):
+        return relation_with_border
+    elif (relation_with_border is Relation.COMPOSITE
+          or relation_with_border is Relation.EQUAL):
+        return (Relation.ENCLOSES
+                if holes
+                else relation_with_border)
+    elif holes:
+        relation_with_holes = relate_region_to_multiregion(holes, region)
+        if relation_with_holes is Relation.DISJOINT:
+            return relation_with_border
+        elif relation_with_holes is Relation.WITHIN:
+            return Relation.DISJOINT
+        elif relation_with_holes is Relation.TOUCH:
+            return Relation.ENCLOSED
+        elif (relation_with_holes is Relation.OVERLAP
+              or relation_with_holes is Relation.COMPOSITE):
+            return Relation.OVERLAP
+        elif relation_with_holes in (Relation.ENCLOSED,
+                                     Relation.COMPONENT,
+                                     Relation.EQUAL):
+            return Relation.TOUCH
+        else:
+            return Relation.OVERLAP
+    else:
+        return relation_with_border
 
 
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:

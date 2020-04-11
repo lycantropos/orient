@@ -394,6 +394,37 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     return _polygon.relate_segment(polygon, segment)
 
 
+def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
+    """
+    Finds relation between region and polygon.
+
+    Time complexity:
+        ``O(vertices_count * log (vertices_count))``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(region)\
+ + len(border) + sum(map(len, holes))``,
+    ``border, holes = polygon``
+
+    :param region: region to check for.
+    :param polygon: polygon to check in.
+    :returns: relation between region and polygon.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> region_in_polygon(triangle, (triangle, [])) is Relation.EQUAL
+    True
+    >>> region_in_polygon(square, (triangle, [])) is Relation.ENCLOSES
+    True
+    >>> region_in_polygon(triangle, (square, [])) is Relation.ENCLOSED
+    True
+    >>> region_in_polygon(square, (square, [])) is Relation.EQUAL
+    True
+    """
+    return _polygon.relate_region(polygon, region)
+
+
 def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     """
     Checks if the polygon fully lies inside the other one.
