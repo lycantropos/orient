@@ -122,8 +122,6 @@ def _process_queue(events_queue: EventsQueue,
     has_cross = has_touch = False
     test_is_subset_of_goal = goal_is_subset_of_test = True
     for event in sweep(events_queue, test_max_x):
-        if event.relationship is SegmentsRelationship.OVERLAP:
-            return Relation.OVERLAP
         if not has_cross and event.relationship is SegmentsRelationship.CROSS:
             has_cross = True
         if not has_touch and event.relationship is SegmentsRelationship.TOUCH:
@@ -136,13 +134,18 @@ def _process_queue(events_queue: EventsQueue,
                 and not event.in_intersection
                 and (event.relationship is not SegmentsRelationship.OVERLAP)):
             goal_is_subset_of_test = False
-    return (Relation.EQUAL
-            if goal_is_subset_of_test and test_is_subset_of_goal
-            else (Relation.CROSS
-                  if has_cross
-                  else (Relation.TOUCH
-                        if has_touch
-                        else Relation.DISJOINT)))
+    if goal_is_subset_of_test:
+        return (Relation.EQUAL
+                if test_is_subset_of_goal
+                else Relation.COMPOSITE)
+    elif test_is_subset_of_goal:
+        return Relation.COMPONENT
+    else:
+        return (Relation.CROSS
+                if has_cross
+                else (Relation.TOUCH
+                      if has_touch
+                      else Relation.DISJOINT))
 
 
 def register(events_queue: EventsQueue, contour: Contour,
