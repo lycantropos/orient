@@ -1,9 +1,11 @@
-from .core import (multiregion as _multiregion,
+from .core import (contour as _contour,
+                   multiregion as _multiregion,
                    polygon as _polygon,
                    region as _region,
                    segment as _segment)
 from .core.relation import Relation
-from .hints import (Multiregion,
+from .hints import (Contour,
+                    Multiregion,
                     Point,
                     Polygon,
                     Region,
@@ -70,6 +72,32 @@ def segment_in_segment(left: Segment, right: Segment) -> Relation:
     True
     """
     return _segment.relate_segment(right, left)
+
+
+def point_in_contour(point: Point, contour: Contour) -> Relation:
+    """
+    Finds relation between point and contour.
+
+    Time complexity:
+        ``O(len(contour))``
+    Memory complexity:
+        ``O(1)``
+
+    :param point: point to check for.
+    :param contour: contour to check in.
+    :returns: relation between point and contour.
+
+    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
+    >>> point_in_contour((0, 0), square) is Relation.COMPONENT
+    True
+    >>> point_in_contour((1, 1), square) is Relation.DISJOINT
+    True
+    >>> point_in_contour((2, 2), square) is Relation.COMPONENT
+    True
+    >>> point_in_contour((3, 3), square) is Relation.DISJOINT
+    True
+    """
+    return _contour.relate_point(contour, point)
 
 
 def point_in_region(point: Point, region: Region) -> Relation:
