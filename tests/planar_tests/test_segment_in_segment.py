@@ -32,7 +32,8 @@ def test_symmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
     complement = segment_in_segment(right_segment, left_segment)
     assert equivalence(result is complement,
                        result in (Relation.DISJOINT, Relation.TOUCH,
-                                  Relation.OVERLAP, Relation.EQUAL))
+                                  Relation.CROSS, Relation.OVERLAP,
+                                  Relation.EQUAL))
 
 
 @given(strategies.segments_pairs)
