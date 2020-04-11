@@ -65,8 +65,10 @@ def normalize_contour(contour: Contour) -> Contour:
                                                        to_index_min(contour)))
 
 
-def rotate_sequence(sequence: Domain, index: int) -> Domain:
-    return sequence[index:] + sequence[:index]
+def rotate_sequence(sequence: Domain, offset: int) -> Domain:
+    return (sequence[offset:] + sequence[:offset]
+            if offset and sequence
+            else sequence)
 
 
 def to_counterclockwise_contour(contour: Contour) -> Contour:
