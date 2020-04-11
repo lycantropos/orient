@@ -11,16 +11,16 @@ class Relation(IntEnum):
     """
     #: intersection is empty
     DISJOINT = 0
-    #: intersection is a strict subset of the geometry
+    #: intersection is a strict subset of each of the geometries,
+    #: has dimension less than at least of one of the geometries
     #: and only boundaries intersect, but do not cross
     TOUCH = 1
-    #: intersection is a strict subset of the geometry,
+    #: intersection is a strict subset of each of the geometries,
     #: has dimension less than at least of one of the geometries
     #: and boundaries cross
     CROSS = 2
-    #: intersection is a strict subset of the geometry,
-    #: has the same dimension as geometries
-    #: and boundaries cross or interiors intersect
+    #: intersection is a strict subset of each of the geometries
+    #: and has the same dimension as geometries
     OVERLAP = 3
     #: interior of the geometry is a superset of the other
     COVER = 4
