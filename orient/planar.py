@@ -100,6 +100,40 @@ def point_in_contour(point: Point, contour: Contour) -> Relation:
     return _contour.relate_point(contour, point)
 
 
+def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
+    """
+    Finds relation between segment and contour.
+
+    Time complexity:
+        ``O(len(contour))``
+    Memory complexity:
+        ``O(len(contour))``
+
+    :param segment: segment to check for.
+    :param contour: contour to check in.
+    :returns: relation between segment and contour.
+
+    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
+    >>> segment_in_contour(((0, 0), (1, 0)), square) is Relation.COMPONENT
+    True
+    >>> segment_in_contour(((0, 0), (3, 0)), square) is Relation.COMPONENT
+    True
+    >>> segment_in_contour(((2, 0), (4, 0)), square) is Relation.OVERLAP
+    True
+    >>> segment_in_contour(((4, 0), (5, 0)), square) is Relation.DISJOINT
+    True
+    >>> segment_in_contour(((1, 0), (1, 2)), square) is Relation.TOUCH
+    True
+    >>> segment_in_contour(((0, 0), (1, 1)), square) is Relation.TOUCH
+    True
+    >>> segment_in_contour(((1, 1), (2, 2)), square) is Relation.DISJOINT
+    True
+    >>> segment_in_contour(((2, 2), (4, 4)), square) is Relation.CROSS
+    True
+    """
+    return _contour.relate_segment(contour, segment)
+
+
 def point_in_region(point: Point, region: Region) -> Relation:
     """
     Finds relation between point and region.
