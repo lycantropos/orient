@@ -5,7 +5,8 @@ from hypothesis import given
 from orient.hints import Segment
 from orient.planar import (Relation,
                            segment_in_segment)
-from tests.utils import equivalence
+from tests.utils import (equivalence,
+                         reverse_segment)
 from . import strategies
 
 
@@ -48,18 +49,12 @@ def test_asymmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
 
 
 @given(strategies.segments_pairs)
-def test_left_reversed(segments_pair: Tuple[Segment, Segment]) -> None:
+def test_reversed(segments_pair: Tuple[Segment, Segment]) -> None:
     left_segment, right_segment = segments_pair
 
     result = segment_in_segment(left_segment, right_segment)
 
-    assert result is segment_in_segment(left_segment[::-1], right_segment)
-
-
-@given(strategies.segments_pairs)
-def test_right_reversed(segments_pair: Tuple[Segment, Segment]) -> None:
-    left_segment, right_segment = segments_pair
-
-    result = segment_in_segment(left_segment, right_segment)
-
-    assert result is segment_in_segment(left_segment, right_segment[::-1])
+    assert result is segment_in_segment(reverse_segment(left_segment),
+                                        right_segment)
+    assert result is segment_in_segment(left_segment,
+                                        reverse_segment(right_segment))
