@@ -10,6 +10,9 @@ from orient.planar import (Relation,
                            point_in_contour,
                            segment_in_contour)
 from tests.utils import (implication,
+                         reverse_contour,
+                         reverse_segment,
+                         rotations,
                          to_contour_separators,
                          to_convex_hull)
 from . import strategies
@@ -56,3 +59,33 @@ def test_convex_contour(contour: Contour) -> None:
                        all(segment_in_contour(segment, contour)
                            is Relation.TOUCH
                            for segment in to_contour_separators(contour)))
+
+
+@given(strategies.contours_with_segments)
+def test_reversed_segment(contour_with_segment: Tuple[Contour, Segment]
+                          ) -> None:
+    contour, segment = contour_with_segment
+
+    result = segment_in_contour(segment, contour)
+
+    assert result is segment_in_contour(reverse_segment(segment), contour)
+
+
+@given(strategies.contours_with_segments)
+def test_reversed_contour(contour_with_segment: Tuple[Contour, Segment]
+                          ) -> None:
+    contour, segment = contour_with_segment
+
+    result = segment_in_contour(segment, contour)
+
+    assert result is segment_in_contour(segment, reverse_contour(contour))
+
+
+@given(strategies.contours_with_segments)
+def test_rotations(contour_with_segment: Tuple[Contour, Segment]) -> None:
+    contour, segment = contour_with_segment
+
+    result = segment_in_contour(segment, contour)
+
+    assert all(result is segment_in_contour(segment, rotated)
+               for rotated in rotations(contour))
