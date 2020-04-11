@@ -81,8 +81,8 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
                                           Relation.COMPONENT,
                                           Relation.EQUAL):
                 return Relation.TOUCH
-            elif relation_with_border in (Relation.OVERLAP,
-                                          Relation.COMPOSITE):
+            elif (relation_with_border is Relation.OVERLAP
+                  or relation_with_border is Relation.COMPOSITE):
                 return Relation.OVERLAP
             elif relation_with_border is Relation.TOUCH:
                 return Relation.ENCLOSED
@@ -113,8 +113,8 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
                                           Relation.COMPONENT,
                                           Relation.EQUAL):
                 return Relation.TOUCH
-            elif relation_with_border in (Relation.OVERLAP,
-                                          Relation.COMPOSITE):
+            elif (relation_with_border is Relation.OVERLAP
+                  or relation_with_border is Relation.COMPOSITE):
                 return Relation.OVERLAP
             elif relation_with_border is Relation.TOUCH:
                 return Relation.ENCLOSES
