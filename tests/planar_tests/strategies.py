@@ -26,6 +26,8 @@ def to_segments_with_points(coordinates: Strategy[Coordinate]
 
 
 segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
+segments_strategies = coordinates_strategies.map(planar.segments)
+segments_pairs = segments_strategies.flatmap(to_pairs)
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
