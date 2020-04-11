@@ -225,6 +225,33 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
     return _region.relate_segment(region, segment)
 
 
+def contour_in_region(contour: Contour, region: Region) -> Relation:
+    """
+    Finds relation between contour and region.
+
+    Time complexity:
+        ``O((len(contour) + len(region)) * log (len(contour) + len(region)))``
+    Memory complexity:
+        ``O(len(contour) + len(region))``
+
+    :param contour: contour to check for.
+    :param region: region to check in.
+    :returns: relation between contour and region.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> contour_in_region(triangle, triangle) is Relation.COMPONENT
+    True
+    >>> contour_in_region(triangle, square) is Relation.ENCLOSED
+    True
+    >>> contour_in_region(square, triangle) is Relation.TOUCH
+    True
+    >>> contour_in_region(square, square) is Relation.COMPONENT
+    True
+    """
+    return _region.relate_contour(region, contour)
+
+
 def region_in_region(left: Region, right: Region) -> Relation:
     """
     Finds relation between regions.

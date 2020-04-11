@@ -5,7 +5,8 @@ from robust.angular import (Orientation,
 from robust.linear import (SegmentsRelationship,
                            segments_relationship)
 
-from orient.hints import (Coordinate,
+from orient.hints import (Contour,
+                          Coordinate,
                           Point,
                           Region,
                           Segment)
@@ -142,6 +143,32 @@ def _to_squared_distance_between_points(left: Point,
 
 def _sort_pair(first: int, second: int) -> Tuple[int, int]:
     return (first, second) if first < second else (second, first)
+
+
+def relate_contour(goal: Region, test: Contour) -> Relation:
+    test_bounding_box = bounding_box.from_points(test)
+    if bounding_box.disjoint_with(bounding_box.from_points(goal),
+                                  test_bounding_box):
+        return Relation.DISJOINT
+    if equal(goal, test):
+        return Relation.COMPONENT
+    events_queue = EventsQueue()
+    register(events_queue, goal,
+             from_test=False)
+    register_contour(events_queue, test,
+                     from_test=True)
+    _, test_max_x, _, _ = test_bounding_box
+    relation = _process_queue(events_queue, test_max_x)
+    if relation is Relation.OVERLAP:
+        return Relation.CROSS
+    elif relation is Relation.COVER:
+        return Relation.DISJOINT
+    elif relation is Relation.ENCLOSES or relation is Relation.COMPOSITE:
+        return Relation.TOUCH
+    elif relation is Relation.EQUAL:
+        return Relation.COMPONENT
+    else:
+        return relation
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
