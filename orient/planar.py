@@ -134,6 +134,33 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     return _contour.relate_segment(contour, segment)
 
 
+def contour_in_contour(left: Contour, right: Contour) -> Relation:
+    """
+    Finds relation between contours.
+
+    Time complexity:
+        ``O((len(left) + len(right)) * log (len(left) + len(right)))``
+    Memory complexity:
+        ``O(len(left) + len(right))``
+
+    :param left: contour to check for.
+    :param right: contour to check in.
+    :returns: relation between contours.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> contour_in_contour(triangle, triangle) is Relation.EQUAL
+    True
+    >>> contour_in_contour(triangle, square) is Relation.OVERLAP
+    True
+    >>> contour_in_contour(square, triangle) is Relation.OVERLAP
+    True
+    >>> contour_in_contour(square, square) is Relation.EQUAL
+    True
+    """
+    return _contour.relate_contour(right, left)
+
+
 def point_in_region(point: Point, region: Region) -> Relation:
     """
     Finds relation between point and region.
