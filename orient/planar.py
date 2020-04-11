@@ -1,7 +1,13 @@
-from .core import (multiregion as _multiregion, polygon as _polygon,
-                   region as _region, segment as _segment)
+from .core import (multiregion as _multiregion,
+                   polygon as _polygon,
+                   region as _region,
+                   segment as _segment)
 from .core.relation import Relation
-from .hints import (Multiregion, Point, Polygon, Region, Segment)
+from .hints import (Multiregion,
+                    Point,
+                    Polygon,
+                    Region,
+                    Segment)
 
 Relation = Relation
 
