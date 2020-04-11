@@ -6,7 +6,8 @@ from orient.hints import (Point,
                           Region)
 from orient.planar import (Relation,
                            point_in_region)
-from tests.utils import rotate_sequence
+from tests.utils import (reverse_contour,
+                         rotations)
 from . import strategies
 
 
@@ -31,7 +32,7 @@ def test_reversed(region_with_point: Tuple[Region, Point]) -> None:
 
     result = point_in_region(point, region)
 
-    assert result is point_in_region(point, region[::-1])
+    assert result is point_in_region(point, reverse_contour(region))
 
 
 @given(strategies.contours_with_points)
@@ -40,6 +41,5 @@ def test_rotated(region_with_point: Tuple[Region, Point]) -> None:
 
     result = point_in_region(point, region)
 
-    assert all(result is point_in_region(point,
-                                         rotate_sequence(region, offset))
-               for offset in range(1, len(region)))
+    assert all(result is point_in_region(point, rotated)
+               for rotated in rotations(region))
