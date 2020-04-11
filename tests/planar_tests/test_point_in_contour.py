@@ -6,7 +6,8 @@ from orient.hints import (Contour,
                           Point)
 from orient.planar import (Relation,
                            point_in_contour)
-from tests.utils import rotate_sequence
+from tests.utils import (reverse_contour,
+                         rotations)
 from . import strategies
 
 
@@ -31,15 +32,14 @@ def test_reversed(contour_with_point: Tuple[Contour, Point]) -> None:
 
     result = point_in_contour(point, contour)
 
-    assert result is point_in_contour(point, contour[::-1])
+    assert result is point_in_contour(point, reverse_contour(contour))
 
 
 @given(strategies.contours_with_points)
-def test_rotated(contour_with_point: Tuple[Contour, Point]) -> None:
+def test_rotations(contour_with_point: Tuple[Contour, Point]) -> None:
     contour, point = contour_with_point
 
     result = point_in_contour(point, contour)
 
-    assert all(result is point_in_contour(point,
-                                          rotate_sequence(contour, offset))
-               for offset in range(1, len(contour)))
+    assert all(result is point_in_contour(point, rotated)
+               for rotated in rotations(contour))

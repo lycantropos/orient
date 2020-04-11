@@ -48,6 +48,16 @@ def normalize_contour(contour: Contour) -> Contour:
                                          key=contour.__getitem__)))
 
 
+def rotations(sequence: Domain) -> Iterable[Domain]:
+    yield sequence
+    for offset in range(1, len(sequence)):
+        yield rotate_sequence(sequence, offset)
+
+
+def reverse_contour(contour: Contour) -> Contour:
+    return contour[::-1]
+
+
 def rotate_sequence(sequence: Domain, offset: int) -> Domain:
     return (sequence[offset:] + sequence[:offset]
             if offset and sequence
