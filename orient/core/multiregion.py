@@ -2,13 +2,23 @@ from itertools import chain
 
 from orient.hints import (Contour,
                           Multiregion,
+                          Point,
                           Region)
 from . import bounding_box
 from .events_queue import EventsQueue
 from .region import (_process_queue,
                      _to_contour_relation,
-                     register as register_region)
+                     register as register_region,
+                     relate_point as relate_point_to_region)
 from .relation import Relation
+
+
+def relate_point(multiregion: Multiregion, point: Point) -> Relation:
+    for region in multiregion:
+        relation_with_region = relate_point_to_region(region, point)
+        if relation_with_region is not Relation.DISJOINT:
+            return relation_with_region
+    return Relation.DISJOINT
 
 
 def relate_contour(multiregion: Multiregion, region: Contour) -> Relation:
