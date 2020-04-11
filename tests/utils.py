@@ -54,6 +54,16 @@ def rotations(sequence: Domain) -> Iterable[Domain]:
         yield rotate_sequence(sequence, offset)
 
 
+def reverse_polygon_border(polygon: Polygon) -> Polygon:
+    border, holes = polygon
+    return reverse_contour(border), holes
+
+
+def reverse_polygon_holes(polygon: Polygon) -> Polygon:
+    border, holes = polygon
+    return border, holes[::-1]
+
+
 def reverse_contour(contour: Contour) -> Contour:
     return contour[::-1]
 

@@ -7,7 +7,9 @@ from orient.hints import (Point,
                           Polygon)
 from orient.planar import (Relation,
                            point_in_polygon)
-from tests.utils import implication
+from tests.utils import (implication,
+                         reverse_polygon_border,
+                         reverse_polygon_holes)
 from . import strategies
 
 
@@ -43,3 +45,21 @@ def test_solid(polygon_with_point: Tuple[Polygon, Point]) -> None:
     assert implication(point_in_polygon(point, (border, []))
                        is Relation.COMPONENT,
                        result is Relation.COMPONENT)
+
+
+@given(strategies.polygons_with_points)
+def test_reversed_border(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+
+    result = point_in_polygon(point, polygon)
+
+    assert result is point_in_polygon(point, reverse_polygon_border(polygon))
+
+
+@given(strategies.polygons_with_points)
+def test_reversed_holes(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+
+    result = point_in_polygon(point, polygon)
+
+    assert result is point_in_polygon(point, reverse_polygon_holes(polygon))
