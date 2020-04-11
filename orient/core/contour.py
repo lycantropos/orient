@@ -25,15 +25,30 @@ def relate_point(contour: Contour, point: Point) -> Relation:
 
 def relate_segment(contour: Contour, segment: Segment) -> Relation:
     has_touch = has_cross = False
-    for edge in edges(contour):
+    previous_touch_index = None
+    start, end = segment
+    for index, edge in enumerate(edges(contour)):
         relation_with_edge = relate_segments(edge, segment)
         if relation_with_edge in (Relation.COMPONENT, Relation.EQUAL):
             return Relation.COMPONENT
         elif relation_with_edge in (Relation.OVERLAP, Relation.COMPOSITE):
             return Relation.OVERLAP
-        elif not has_touch and relation_with_edge is Relation.TOUCH:
-            has_touch = True
+        elif relation_with_edge is Relation.TOUCH:
+            if has_touch:
+                if (not has_cross and index - previous_touch_index == 1
+                        and start not in edge and end not in edge):
+                    has_cross = True
+            else:
+                has_touch = True
+            previous_touch_index = index
         elif not has_cross and relation_with_edge is Relation.CROSS:
+            has_cross = True
+    if (not has_cross
+            and has_touch
+            and previous_touch_index == len(contour) - 1):
+        first_edge = contour[-1], contour[0]
+        if (relate_segments(first_edge, segment) is Relation.TOUCH
+                and start not in first_edge and end not in first_edge):
             has_cross = True
     return (Relation.CROSS
             if has_cross
