@@ -1,5 +1,4 @@
-from typing import (Iterable,
-                    Tuple)
+from typing import Tuple
 
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
@@ -11,6 +10,10 @@ from orient.hints import (Coordinate,
                           Region,
                           Segment)
 from . import bounding_box
+from .contour import (edges as boundary_edges,
+                      equal as contours_equal,
+                      orientation as boundary_orientation,
+                      register as register_contour)
 from .events_queue import EventsQueue
 from .relation import Relation
 from .segment import relate_point as relate_point_to_segment
@@ -124,20 +127,6 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
                 else Relation.TOUCH)
 
 
-def boundary_orientation(region: Region) -> Orientation:
-    index = min(range(len(region)),
-                key=region.__getitem__)
-    previous_index, next_index = (index - 1 if index else len(region) - 1,
-                                  (index + 1) % len(region))
-    for _ in range(len(region)):
-        candidate = angle_orientation(region[index], region[previous_index],
-                                      region[next_index])
-        if candidate is not Orientation.COLLINEAR:
-            return candidate
-        index, next_index = next_index, (next_index + 1) % len(region)
-    return Orientation.COLLINEAR
-
-
 def _split(region: Region,
            start_index: int,
            stop_index: int) -> Tuple[Region, Region]:
@@ -160,7 +149,7 @@ def relate_region(goal: Region, test: Region) -> Relation:
     if bounding_box.disjoint_with(bounding_box.from_points(goal),
                                   test_bounding_box):
         return Relation.DISJOINT
-    if equals(goal, test):
+    if equal(goal, test):
         return Relation.EQUAL
     events_queue = EventsQueue()
     register(events_queue, goal,
@@ -171,32 +160,7 @@ def relate_region(goal: Region, test: Region) -> Relation:
     return _process_queue(events_queue, test_max_x)
 
 
-def equals(left: Region, right: Region) -> bool:
-    if len(left) != len(right):
-        return False
-    if boundary_orientation(left) is not boundary_orientation(right):
-        right = right[:1] + right[:0:-1]
-    size = len(left)
-    start = 0
-    while start < size:
-        try:
-            index = right.index(left[0], start)
-        except ValueError:
-            return False
-        else:
-            left_index = 0
-            for left_index, right_index in zip(range(size),
-                                               range(index, size)):
-                if left[left_index] != right[right_index]:
-                    break
-            else:
-                for left_index, right_index in zip(range(left_index + 1, size),
-                                                   range(index)):
-                    if left[left_index] != right[right_index]:
-                        break
-                else:
-                    return True
-            start = index + 1
+equal = contours_equal
 
 
 def _process_queue(events_queue: EventsQueue,
@@ -255,14 +219,4 @@ def _process_queue(events_queue: EventsQueue,
                 else Relation.TOUCH)
 
 
-def register(events_queue: EventsQueue, region: Region,
-             *,
-             from_test: bool) -> None:
-    for edge in boundary_edges(region):
-        events_queue.register_segment(edge,
-                                      from_test=from_test)
-
-
-def boundary_edges(region: Region) -> Iterable[Segment]:
-    return ((region[index - 1], region[index])
-            for index in range(len(region)))
+register = register_contour

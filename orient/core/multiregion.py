@@ -1,6 +1,7 @@
 from itertools import chain
 
-from orient.hints import (Multiregion, Region)
+from orient.hints import (Multiregion,
+                          Region)
 from . import bounding_box
 from .events_queue import EventsQueue
 from .region import (_process_queue,
