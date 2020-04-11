@@ -45,8 +45,8 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
     return relation_with_border
 
 
-def relate_contour(goal: Polygon, test: Contour) -> Relation:
-    return _to_contour_relation(relate_region(goal, test))
+def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
+    return _to_contour_relation(relate_region(polygon, contour))
 
 
 def relate_region(polygon: Polygon, region: Region) -> Relation:
