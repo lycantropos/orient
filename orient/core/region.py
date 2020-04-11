@@ -145,8 +145,8 @@ def _sort_pair(first: int, second: int) -> Tuple[int, int]:
     return (first, second) if first < second else (second, first)
 
 
-def relate_contour(goal: Region, test: Contour) -> Relation:
-    return _to_contour_relation(relate_region(goal, test))
+def relate_contour(region: Region, contour: Contour) -> Relation:
+    return _to_contour_relation(relate_region(region, contour))
 
 
 def _to_contour_relation(relation: Relation) -> Relation:
