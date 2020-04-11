@@ -34,6 +34,36 @@ def point_in_segment(point: Point, segment: Segment) -> Relation:
     return _segment.relate_point(segment, point)
 
 
+def segment_in_segment(left: Segment, right: Segment) -> Relation:
+    """
+    Finds relation between segments.
+
+    Time complexity:
+        ``O(1)``
+    Memory complexity:
+        ``O(1)``
+
+    :param left: point to locate.
+    :param right: segment to check im.
+    :returns: relation between segments.
+
+    >>> segment = ((0, 0), (2, 0))
+    >>> segment_in_segment(((0, 0), (1, 0)), segment) is Relation.COMPONENT
+    True
+    >>> segment_in_segment(((0, 0), (2, 0)), segment) is Relation.EQUAL
+    True
+    >>> segment_in_segment(((0, 0), (3, 0)), segment) is Relation.COMPOSITE
+    True
+    >>> segment_in_segment(((1, 0), (3, 0)), segment) is Relation.OVERLAP
+    True
+    >>> segment_in_segment(((2, 0), (3, 0)), segment) is Relation.TOUCH
+    True
+    >>> segment_in_segment(((3, 0), (4, 0)), segment) is Relation.DISJOINT
+    True
+    """
+    return _segment.relate_segment(right, left)
+
+
 def point_in_region(point: Point, region: Region) -> Relation:
     """
     Finds relation between point and region.
