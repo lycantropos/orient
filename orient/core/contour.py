@@ -29,9 +29,11 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
     start, end = segment
     for index, edge in enumerate(edges(contour)):
         relation_with_edge = relate_segments(edge, segment)
-        if relation_with_edge in (Relation.COMPONENT, Relation.EQUAL):
+        if (relation_with_edge is Relation.COMPONENT
+                or relation_with_edge is Relation.EQUAL):
             return Relation.COMPONENT
-        elif relation_with_edge in (Relation.OVERLAP, Relation.COMPOSITE):
+        elif (relation_with_edge is Relation.OVERLAP
+              or relation_with_edge is Relation.COMPOSITE):
             return Relation.OVERLAP
         elif relation_with_edge is Relation.TOUCH:
             if has_touch:
