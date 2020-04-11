@@ -144,6 +144,8 @@ def _process_queue(events_queue: EventsQueue,
                 and (event.relationship is not SegmentsRelationship.OVERLAP)):
             goal_is_subset_of_test = False
     if goal_is_subset_of_test:
+        goal_is_subset_of_test = not events_queue
+    if goal_is_subset_of_test:
         return (Relation.EQUAL
                 if test_is_subset_of_goal
                 else (Relation.OVERLAP
