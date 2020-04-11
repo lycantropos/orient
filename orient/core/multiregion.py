@@ -1,12 +1,18 @@
 from itertools import chain
 
-from orient.hints import (Multiregion,
+from orient.hints import (Contour,
+                          Multiregion,
                           Region)
 from . import bounding_box
 from .events_queue import EventsQueue
 from .region import (_process_queue,
+                     _to_contour_relation,
                      register as register_region)
 from .relation import Relation
+
+
+def relate_contour(goal: Multiregion, test: Contour) -> Relation:
+    return _to_contour_relation(relate_region(goal, test))
 
 
 def relate_region(goal: Multiregion, test: Region) -> Relation:
