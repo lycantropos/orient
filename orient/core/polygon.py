@@ -11,35 +11,35 @@ from .relation import Relation
 
 def relate_point(polygon: Polygon, point: Point) -> Relation:
     border, holes = polygon
-    border_location = relate_point_to_region(border, point)
-    if border_location is Relation.WITHIN:
+    relation_with_border = relate_point_to_region(border, point)
+    if relation_with_border is Relation.WITHIN:
         for hole in holes:
-            hole_relation = relate_point_to_region(hole, point)
-            if hole_relation is Relation.WITHIN:
+            relation_with_hole = relate_point_to_region(hole, point)
+            if relation_with_hole is Relation.WITHIN:
                 return Relation.DISJOINT
-            elif hole_relation is Relation.COMPONENT:
+            elif relation_with_hole is Relation.COMPONENT:
                 return Relation.COMPONENT
-    return border_location
+    return relation_with_border
 
 
 def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
     border, holes = polygon
-    border_relation = relate_segment_to_region(border, segment)
-    if (border_relation is Relation.WITHIN
-            or border_relation is Relation.ENCLOSED):
+    relation_with_border = relate_segment_to_region(border, segment)
+    if (relation_with_border is Relation.WITHIN
+            or relation_with_border is Relation.ENCLOSED):
         for hole in holes:
-            hole_relation = relate_segment_to_region(hole, segment)
-            if hole_relation is Relation.WITHIN:
+            relation_with_hole = relate_segment_to_region(hole, segment)
+            if relation_with_hole is Relation.WITHIN:
                 return Relation.DISJOINT
-            elif hole_relation is Relation.COMPONENT:
+            elif relation_with_hole is Relation.COMPONENT:
                 return Relation.COMPONENT
-            elif hole_relation is Relation.CROSS:
+            elif relation_with_hole is Relation.CROSS:
                 return Relation.CROSS
-            elif hole_relation is Relation.ENCLOSED:
+            elif relation_with_hole is Relation.ENCLOSED:
                 return Relation.TOUCH
-            elif hole_relation is Relation.TOUCH:
-                border_relation = Relation.ENCLOSED
-    return border_relation
+            elif relation_with_hole is Relation.TOUCH:
+                relation_with_border = Relation.ENCLOSED
+    return relation_with_border
 
 
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
