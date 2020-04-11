@@ -146,19 +146,10 @@ def _sort_pair(first: int, second: int) -> Tuple[int, int]:
 
 
 def relate_contour(goal: Region, test: Contour) -> Relation:
-    test_bounding_box = bounding_box.from_points(test)
-    if bounding_box.disjoint_with(bounding_box.from_points(goal),
-                                  test_bounding_box):
-        return Relation.DISJOINT
-    if equal(goal, test):
-        return Relation.COMPONENT
-    events_queue = EventsQueue()
-    register(events_queue, goal,
-             from_test=False)
-    register_contour(events_queue, test,
-                     from_test=True)
-    _, test_max_x, _, _ = test_bounding_box
-    relation = _process_queue(events_queue, test_max_x)
+    return _to_contour_relation(relate_region(goal, test))
+
+
+def _to_contour_relation(relation: Relation) -> Relation:
     if relation is Relation.OVERLAP:
         return Relation.CROSS
     elif relation is Relation.COVER:
