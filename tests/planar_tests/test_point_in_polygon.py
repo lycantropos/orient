@@ -7,7 +7,8 @@ from orient.hints import (Point,
                           Polygon)
 from orient.planar import (Relation,
                            point_in_polygon)
-from tests.utils import (implication,
+from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
+                         implication,
                          reverse_polygon_border,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours)
@@ -21,6 +22,7 @@ def test_basic(polygon_with_point: Tuple[Polygon, Point]) -> None:
     result = point_in_polygon(point, polygon)
 
     assert isinstance(result, Relation)
+    assert result in PRIMITIVE_COMPOUND_RELATIONS
 
 
 @given(strategies.polygons)
