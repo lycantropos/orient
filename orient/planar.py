@@ -257,9 +257,11 @@ def region_in_region(left: Region, right: Region) -> Relation:
     Finds relation between regions.
 
     Time complexity:
-        ``O((len(left) + len(right)) * log (len(left) + len(right)))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
-        ``O(len(left) + len(right))``
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(left) + len(right)``.
 
     :param left: region to check for.
     :param right: region to check in.
