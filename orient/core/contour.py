@@ -2,7 +2,7 @@ from typing import Iterable
 
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
-from robust.linear import (SegmentsRelationship)
+from robust.linear import SegmentsRelationship
 
 from orient.hints import (Contour,
                           Coordinate,
