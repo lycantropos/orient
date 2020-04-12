@@ -139,9 +139,11 @@ def contour_in_contour(left: Contour, right: Contour) -> Relation:
     Finds relation between contours.
 
     Time complexity:
-        ``O((len(left) + len(right)) * log (len(left) + len(right)))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
-        ``O(len(left) + len(right))``
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(left) + len(right)``.
 
     :param left: contour to check for.
     :param right: contour to check in.
