@@ -6,7 +6,8 @@ from orient.hints import (Contour,
                           Point)
 from orient.planar import (Relation,
                            point_in_contour)
-from tests.utils import (reverse_contour,
+from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
+                         reverse_contour,
                          rotations)
 from . import strategies
 
@@ -18,6 +19,7 @@ def test_basic(contour_with_point: Tuple[Contour, Point]) -> None:
     result = point_in_contour(point, contour)
 
     assert isinstance(result, Relation)
+    assert result in PRIMITIVE_LINEAR_RELATIONS
 
 
 @given(strategies.contours)

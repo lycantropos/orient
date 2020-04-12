@@ -18,11 +18,13 @@ from orient.hints import (Contour,
                           Point,
                           Polygon,
                           Segment)
+from orient.planar import Relation
 
 Domain = TypeVar('Domain')
 Key = Callable[[Domain], Any]
 Strategy = SearchStrategy
 
+PRIMITIVE_LINEAR_RELATIONS = (Relation.DISJOINT, Relation.COMPONENT)
 
 def implication(antecedent: bool, consequent: bool) -> bool:
     return not antecedent or consequent
