@@ -86,15 +86,8 @@ def _segment_touches_consecutive_edges(segment: Segment,
 def orientation(contour: Contour) -> Orientation:
     index = min(range(len(contour)),
                 key=contour.__getitem__)
-    previous_index, next_index = (index - 1 if index else len(contour) - 1,
-                                  (index + 1) % len(contour))
-    for _ in range(len(contour)):
-        candidate = angle_orientation(contour[index], contour[previous_index],
-                                      contour[next_index])
-        if candidate is not Orientation.COLLINEAR:
-            return candidate
-        index, next_index = next_index, (next_index + 1) % len(contour)
-    return Orientation.COLLINEAR
+    return angle_orientation(contour[index], contour[index - 1],
+                             contour[(index + 1) % len(contour)])
 
 
 def relate_contour(goal: Contour, test: Contour) -> Relation:
