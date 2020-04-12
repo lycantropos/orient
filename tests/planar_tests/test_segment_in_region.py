@@ -10,7 +10,8 @@ from orient.planar import (Relation,
                            point_in_region,
                            segment_in_contour,
                            segment_in_region)
-from tests.utils import (equivalence,
+from tests.utils import (LINEAR_COMPOUND_RELATIONS,
+                         equivalence,
                          implication,
                          reverse_contour,
                          reverse_segment,
@@ -27,6 +28,7 @@ def test_basic(region_with_segment: Tuple[Region, Segment]) -> None:
     result = segment_in_region(segment, region)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_COMPOUND_RELATIONS
 
 
 @given(strategies.contours)
