@@ -1,9 +1,6 @@
-from typing import Tuple
-
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
-from robust.linear import (SegmentsRelationship,
-                           segments_relationship)
+from robust.linear import SegmentsRelationship
 
 from orient.hints import (Contour,
                           Coordinate,
@@ -11,10 +8,9 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import (edges as boundary_edges,
-                      equal as contours_equal,
-                      orientation as boundary_orientation,
-                      register as register_contour)
+from .contour import (edges as boundary_edges, equal as contours_equal,
+                      register as register_contour,
+                      relate_segment as relate_segment_to_contour)
 from .events_queue import EventsQueue
 from .relation import Relation
 from .segment import relate_point as relate_point_to_segment
@@ -39,110 +35,21 @@ def relate_point(region: Region, point: Point) -> Relation:
 
 
 def relate_segment(region: Region, segment: Segment) -> Relation:
-    if any(segments_relationship(segment, edge) is SegmentsRelationship.CROSS
-           for edge in boundary_edges(region)):
-        return Relation.CROSS
+    relation_with_contour = relate_segment_to_contour(region, segment)
+    if (relation_with_contour is Relation.CROSS
+            or relation_with_contour is Relation.COMPONENT):
+        return relation_with_contour
     start, end = segment
-    start_relation, end_relation = (relate_point(region, start),
-                                    relate_point(region, end))
-    if (start_relation is Relation.DISJOINT
-            or end_relation is Relation.DISJOINT):
-        if (start_relation is Relation.WITHIN
-                or end_relation is Relation.WITHIN):
-            return Relation.CROSS
-        else:
-            outsider = (start
-                        if start_relation is Relation.DISJOINT
-                        else end)
-            try:
-                _, start_index = min(
-                        (_to_squared_distance_between_points(outsider, vertex),
-                         index)
-                        for index, vertex in enumerate(region)
-                        if (relate_point_to_segment(segment, vertex)
-                            is not Relation.DISJOINT))
-            except ValueError:
-                return (Relation.TOUCH
-                        if (start_relation is Relation.COMPONENT
-                            or end_relation is Relation.COMPONENT)
-                        else Relation.DISJOINT)
-            _, end_index = max(
-                    (_to_squared_distance_between_points(outsider, vertex),
-                     index)
-                    for index, vertex in enumerate(region)
-                    if (relate_point_to_segment(segment, vertex)
-                        is not Relation.DISJOINT))
-            min_index, max_index = _sort_pair(start_index, end_index)
-            if (max_index - min_index <= 1
-                    or not min_index and max_index == len(region) - 1):
-                return Relation.TOUCH
-            first_part, second_part = _split(region, min_index,
-                                             max_index)
-            return (Relation.CROSS
-                    if (boundary_orientation(first_part)
-                        is boundary_orientation(second_part))
-                    else Relation.TOUCH)
-    elif start_relation is Relation.WITHIN and end_relation is Relation.WITHIN:
-        return Relation.WITHIN
-    elif start_relation is Relation.WITHIN or end_relation is Relation.WITHIN:
-        return Relation.ENCLOSED
+    start_relation = relate_point(region, start)
+    if relation_with_contour is Relation.DISJOINT:
+        return (Relation.DISJOINT
+                if start_relation is Relation.DISJOINT
+                else Relation.WITHIN)
     else:
-        # both endpoints lie in region
-        start_index = end_index = None
-        for index, edge in enumerate(boundary_edges(region)):
-            edge_start, edge_end = edge
-            if edge_start == start:
-                start_index = (index or len(region)) - 1
-                break
-            elif edge_end == start:
-                start_index = index
-                break
-            elif relate_point_to_segment(edge, start) is not Relation.DISJOINT:
-                region = region[:]
-                region.insert(index, start)
-                start_index = index
-                break
-        for index, edge in enumerate(boundary_edges(region)):
-            edge_start, edge_end = edge
-            if edge_start == end:
-                end_index = (index or len(region)) - 1
-                break
-            elif edge_end == end:
-                end_index = index
-                break
-            elif relate_point_to_segment(edge, end) is not Relation.DISJOINT:
-                region = region[:]
-                region.insert(index, end)
-                end_index = index
-                if start_index > index:
-                    start_index = (start_index + 1) % len(region)
-                break
-        min_index, max_index = _sort_pair(start_index, end_index)
-        if (max_index - min_index <= 1
-                or not min_index and max_index == len(region) - 1):
-            return Relation.COMPONENT
-        first_part, second_part = _split(region, min_index, max_index)
-        return (Relation.ENCLOSED
-                if (boundary_orientation(first_part)
-                    is boundary_orientation(second_part))
-                else Relation.TOUCH)
-
-
-def _split(region: Region,
-           start_index: int,
-           stop_index: int) -> Tuple[Region, Region]:
-    return (region[start_index:stop_index + 1],
-            region[:start_index + 1] + region[stop_index:])
-
-
-def _to_squared_distance_between_points(left: Point,
-                                        right: Point) -> Coordinate:
-    (left_x, left_y), (right_x, right_y) = left, right
-    return (left_x - right_x) ** 2 + (left_y - right_y) ** 2
-
-
-def _sort_pair(first: int, second: int) -> Tuple[int, int]:
-    return (first, second) if first < second else (second, first)
+        return (Relation.TOUCH
+                if (start_relation is Relation.DISJOINT
+                    or relate_point(region, end) is Relation.DISJOINT)
+                else Relation.ENCLOSED)
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
