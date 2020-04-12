@@ -7,7 +7,8 @@ from orient.hints import (Contour,
 from orient.planar import (Relation,
                            contour_in_multiregion,
                            contour_in_region)
-from tests.utils import (equivalence,
+from tests.utils import (LINEAR_RELATIONS,
+                         equivalence,
                          reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
@@ -22,6 +23,7 @@ def test_basic(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
     result = contour_in_multiregion(contour, multiregion)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_RELATIONS
 
 
 @given(strategies.contours)
