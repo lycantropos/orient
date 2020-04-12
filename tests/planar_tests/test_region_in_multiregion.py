@@ -7,7 +7,8 @@ from orient.hints import (Multiregion,
 from orient.planar import (Relation,
                            region_in_multiregion,
                            region_in_region)
-from tests.utils import (equivalence,
+from tests.utils import (COMPOUND_RELATIONS,
+                         equivalence,
                          reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
@@ -22,6 +23,7 @@ def test_basic(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     result = region_in_multiregion(region, multiregion)
 
     assert isinstance(result, Relation)
+    assert result in COMPOUND_RELATIONS
 
 
 @given(strategies.contours)
