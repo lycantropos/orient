@@ -44,7 +44,7 @@ def normalize_polygon(polygon: Polygon) -> Polygon:
 
 
 def normalize_contour(contour: Contour) -> Contour:
-    return to_counterclockwise_contour(
+    return _to_counterclockwise_contour(
             rotate_sequence(contour, min(range(len(contour)),
                                          key=contour.__getitem__)))
 
@@ -88,7 +88,7 @@ def rotate_sequence(sequence: Domain, offset: int) -> Domain:
             else sequence)
 
 
-def to_counterclockwise_contour(contour: Contour) -> Contour:
+def _to_counterclockwise_contour(contour: Contour) -> Contour:
     if _to_first_angle_orientation(contour) is not Orientation.CLOCKWISE:
         contour = contour[:1] + contour[1:][::-1]
     return contour
