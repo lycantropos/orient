@@ -230,9 +230,11 @@ def contour_in_region(contour: Contour, region: Region) -> Relation:
     Finds relation between contour and region.
 
     Time complexity:
-        ``O((len(contour) + len(region)) * log (len(contour) + len(region)))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
-        ``O(len(contour) + len(region))``
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(contour) + len(region)``.
 
     :param contour: contour to check for.
     :param region: region to check in.
