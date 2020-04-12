@@ -8,7 +8,8 @@ from orient.hints import (Point,
                           Segment)
 from orient.planar import (Relation,
                            point_in_segment)
-from tests.utils import (implication,
+from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
+                         implication,
                          reverse_point_coordinates,
                          reverse_segment,
                          reverse_segment_coordinates)
@@ -22,6 +23,7 @@ def test_basic(segment_with_point: Tuple[Segment, Point]) -> None:
     result = point_in_segment(point, segment)
 
     assert isinstance(result, Relation)
+    assert result in PRIMITIVE_LINEAR_RELATIONS
 
 
 @given(strategies.segments)
