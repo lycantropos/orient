@@ -284,11 +284,9 @@ def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
     Finds relation between point and multiregion.
 
     Time complexity:
-        ``O(vertices_count * log vertices_count)``
+        ``O(sum(map(len, multiregion)))``
     Memory complexity:
-        ``O(vertices_count)``
-
-    where ``vertices_count = sum(map(len, multiregion))``.
+        ``O(1)``
 
     :param point: point to check for.
     :param multiregion: multiregion to check in.
