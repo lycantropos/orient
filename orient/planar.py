@@ -312,6 +312,51 @@ def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
     return _multiregion.relate_point(multiregion, point)
 
 
+def segment_in_multiregion(segment: Segment,
+                           multiregion: Multiregion) -> Relation:
+    """
+    Finds relation between segment and multiregion.
+
+    Time complexity:
+        ``O(len(multiregion))``
+    Memory complexity:
+        ``O(len(multiregion))``
+
+    :param segment: segment to check for.
+    :param multiregion: multiregion to check in.
+    :returns: relation between segment and multiregion.
+
+    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
+    >>> (segment_in_multiregion(((0, 0), (1, 0)), [])
+    ...  is Relation.DISJOINT)
+    True
+    >>> (segment_in_multiregion(((0, 0), (1, 0)), [square])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (segment_in_multiregion(((0, 0), (3, 0)), [square])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (segment_in_multiregion(((2, 0), (4, 0)), [square])
+    ...  is Relation.TOUCH)
+    True
+    >>> (segment_in_multiregion(((4, 0), (5, 0)), [square])
+    ...  is Relation.DISJOINT)
+    True
+    >>> (segment_in_multiregion(((1, 0), (1, 2)), [square])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (segment_in_multiregion(((0, 0), (1, 1)), [square])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (segment_in_multiregion(((1, 1), (2, 2)), [square])
+    ...  is Relation.WITHIN)
+    True
+    >>> segment_in_multiregion(((2, 2), (4, 4)), [square]) is Relation.CROSS
+    True
+    """
+    return _multiregion.relate_segment(multiregion, segment)
+
+
 def contour_in_multiregion(contour: Contour,
                            multiregion: Multiregion) -> Relation:
     """
