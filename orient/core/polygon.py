@@ -52,12 +52,8 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
 def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
     border, holes = polygon
     relation_with_border = relate_contour_to_region(border, contour)
-    if not holes or relation_with_border in (Relation.DISJOINT,
-                                             Relation.TOUCH,
-                                             Relation.CROSS,
-                                             Relation.COMPONENT):
-        return relation_with_border
-    else:
+    if holes and (relation_with_border is Relation.ENCLOSED
+                  or relation_with_border is Relation.WITHIN):
         relation_with_holes = relate_contour_to_multiregion(holes, contour)
         if relation_with_holes is Relation.DISJOINT:
             return relation_with_border
@@ -71,6 +67,8 @@ def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
         else:
             # contour is within holes
             return Relation.DISJOINT
+    else:
+        return relation_with_border
 
 
 def relate_region(polygon: Polygon, region: Region) -> Relation:
