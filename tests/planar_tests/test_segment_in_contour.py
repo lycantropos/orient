@@ -9,7 +9,8 @@ from orient.hints import (Contour,
 from orient.planar import (Relation,
                            point_in_contour,
                            segment_in_contour)
-from tests.utils import (implication,
+from tests.utils import (LINEAR_RELATIONS,
+                         implication,
                          reverse_contour,
                          reverse_segment,
                          rotations,
@@ -25,6 +26,7 @@ def test_basic(contour_with_segment: Tuple[Contour, Segment]) -> None:
     result = segment_in_contour(segment, contour)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_RELATIONS
 
 
 @given(strategies.contours_with_segments)
