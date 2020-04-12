@@ -10,7 +10,6 @@ from orient.planar import (Relation,
                            point_in_polygon,
                            segment_in_polygon)
 from tests.utils import (are_polygons_similar,
-                         equivalence,
                          implication,
                          to_contour_separators,
                          to_convex_hull)
@@ -70,12 +69,12 @@ def test_holes_separators(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons)
-def test_convex_polygon_criterion(polygon: Polygon) -> None:
+def test_convex_polygon(polygon: Polygon) -> None:
     border, holes = polygon
+    polygon_with_convex_border = (to_convex_hull(border), holes)
     assert (bool(holes)
-            or equivalence(all(segment_in_polygon(segment, polygon)
+            or implication(are_polygons_similar(polygon,
+                                                polygon_with_convex_border),
+                           all(segment_in_polygon(segment, polygon)
                                is Relation.ENCLOSED
-                               for segment in to_contour_separators(border)),
-                           are_polygons_similar(polygon,
-                                                (to_convex_hull(border),
-                                                 holes))))
+                               for segment in to_contour_separators(border))))
