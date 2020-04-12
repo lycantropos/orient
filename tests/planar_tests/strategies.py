@@ -41,23 +41,23 @@ contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
 
 
-def to_contours_with_multicontours(coordinates: Strategy[Coordinate],
+def to_multicontours_with_contours(coordinates: Strategy[Coordinate],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
-                                   ) -> Strategy[Tuple[Contour, Multicontour]]:
-    return strategies.tuples(planar.contours(coordinates),
-                             planar.multicontours(coordinates,
+                                   ) -> Strategy[Tuple[Multicontour, Contour]]:
+    return strategies.tuples(planar.multicontours(coordinates,
                                                   min_size=min_size,
-                                                  max_size=max_size))
+                                                  max_size=max_size),
+                             planar.contours(coordinates))
 
 
-contours_with_multicontours = (coordinates_strategies
-                               .flatmap(to_contours_with_multicontours))
-contours_with_empty_multicontours = strategies.tuples(contours,
-                                                      strategies.builds(list))
-contours_with_non_empty_multicontours = coordinates_strategies.flatmap(
-        partial(to_contours_with_multicontours,
+multicontours_with_contours = (coordinates_strategies
+                               .flatmap(to_multicontours_with_contours))
+empty_multicontours_with_contours = strategies.tuples(strategies.builds(list),
+                                                      contours)
+non_empty_multicontours_with_contours = coordinates_strategies.flatmap(
+        partial(to_multicontours_with_contours,
                 min_size=1))
 
 
