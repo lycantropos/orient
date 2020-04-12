@@ -8,7 +8,8 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import (edges as boundary_edges, equal as contours_equal,
+from .contour import (edges as boundary_edges,
+                      equal as contours_equal,
                       register as register_contour,
                       relate_segment as relate_segment_to_contour)
 from .events_queue import EventsQueue
