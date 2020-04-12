@@ -6,6 +6,7 @@ from orient.hints import (Polygon,
                           Region)
 from orient.planar import (Relation,
                            region_in_polygon)
+from tests.utils import COMPOUND_RELATIONS
 from . import strategies
 
 
@@ -16,6 +17,7 @@ def test_basic(region_with_polygon: Tuple[Region, Polygon]) -> None:
     result = region_in_polygon(region, polygon)
 
     assert isinstance(result, Relation)
+    assert result in COMPOUND_RELATIONS
 
 
 @given(strategies.contours)
