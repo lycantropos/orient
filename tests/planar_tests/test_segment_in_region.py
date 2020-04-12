@@ -8,6 +8,7 @@ from orient.hints import (Region,
                           Segment)
 from orient.planar import (Relation,
                            point_in_region,
+                           segment_in_contour,
                            segment_in_region)
 from tests.utils import (equivalence,
                          implication,
@@ -87,3 +88,36 @@ def test_rotations(region_with_segment: Tuple[Region, Segment]) -> None:
 
     assert all(result is segment_in_region(segment, rotated)
                for rotated in rotations(region))
+
+
+@given(strategies.contours_with_segments)
+def test_connection_with_segment_in_contour(region_with_segment
+                                            : Tuple[Region, Segment]) -> None:
+    region, segment = region_with_segment
+
+    result = segment_in_region(segment, region)
+
+    relation_with_contour = segment_in_contour(segment, region)
+    assert implication(result is Relation.DISJOINT,
+                       relation_with_contour is Relation.DISJOINT)
+    assert implication(result is Relation.TOUCH,
+                       relation_with_contour is Relation.TOUCH
+                       or relation_with_contour is Relation.OVERLAP)
+    assert equivalence(result is Relation.CROSS,
+                       relation_with_contour is Relation.CROSS)
+    assert equivalence(result is Relation.COMPONENT,
+                       relation_with_contour is Relation.COMPONENT)
+    assert implication(result is Relation.ENCLOSED,
+                       relation_with_contour is Relation.TOUCH
+                       or relation_with_contour is Relation.OVERLAP)
+    assert implication(result is Relation.WITHIN,
+                       relation_with_contour is Relation.DISJOINT)
+    assert implication(relation_with_contour is Relation.DISJOINT,
+                       result is Relation.DISJOINT
+                       or result is Relation.WITHIN)
+    assert implication(relation_with_contour is Relation.TOUCH,
+                       result is Relation.TOUCH
+                       or result is Relation.ENCLOSED)
+    assert implication(relation_with_contour is Relation.OVERLAP,
+                       result is Relation.TOUCH
+                       or result is Relation.ENCLOSED)
