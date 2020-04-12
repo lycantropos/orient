@@ -6,7 +6,8 @@ from orient.hints import (Point,
                           Region)
 from orient.planar import (Relation,
                            point_in_region)
-from tests.utils import (reverse_contour,
+from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
+                         reverse_contour,
                          rotations)
 from . import strategies
 
@@ -18,6 +19,7 @@ def test_basic(region_with_point: Tuple[Region, Point]) -> None:
     result = point_in_region(point, region)
 
     assert isinstance(result, Relation)
+    assert result in PRIMITIVE_COMPOUND_RELATIONS
 
 
 @given(strategies.contours)

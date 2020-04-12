@@ -25,6 +25,7 @@ Key = Callable[[Domain], Any]
 Strategy = SearchStrategy
 
 PRIMITIVE_LINEAR_RELATIONS = (Relation.DISJOINT, Relation.COMPONENT)
+PRIMITIVE_COMPOUND_RELATIONS = PRIMITIVE_LINEAR_RELATIONS + (Relation.WITHIN,)
 
 def implication(antecedent: bool, consequent: bool) -> bool:
     return not antecedent or consequent
