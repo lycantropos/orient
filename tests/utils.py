@@ -27,8 +27,8 @@ Strategy = SearchStrategy
 PRIMITIVE_LINEAR_RELATIONS = (Relation.DISJOINT, Relation.COMPONENT)
 PRIMITIVE_COMPOUND_RELATIONS = PRIMITIVE_LINEAR_RELATIONS + (Relation.WITHIN,)
 LINEAR_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
-                    Relation.OVERLAP, Relation.COMPONENT, Relation.EQUAL,
-                    Relation.COMPOSITE)
+                    Relation.OVERLAP, Relation.COMPONENT, Relation.COMPOSITE)
+SAME_LINEAR_RELATIONS = LINEAR_RELATIONS + (Relation.EQUAL,)
 LINEAR_COMPOUND_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
                              Relation.COMPONENT, Relation.ENCLOSED,
                              Relation.WITHIN)
