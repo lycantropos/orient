@@ -1,9 +1,7 @@
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
-from robust.linear import SegmentsRelationship
 
 from orient.hints import (Contour,
-                          Coordinate,
                           Point,
                           Region,
                           Segment)
@@ -13,9 +11,10 @@ from .contour import (edges as boundary_edges,
                       register as register_contour,
                       relate_segment as relate_segment_to_contour)
 from .events_queue import EventsQueue
+from .processing import (process_compound_queue,
+                         process_linear_compound_queue)
 from .relation import Relation
 from .segment import relate_point as relate_point_to_segment
-from .sweep import sweep
 
 
 def relate_point(region: Region, point: Point) -> Relation:
@@ -69,7 +68,7 @@ def relate_contour(region: Region, contour: Contour) -> Relation:
     register_contour(events_queue, contour,
                      from_test=True)
     _, test_max_x, _, _ = test_bounding_box
-    return _process_linear_compound_queue(events_queue, test_max_x)
+    return process_linear_compound_queue(events_queue, test_max_x)
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
@@ -85,107 +84,8 @@ def relate_region(goal: Region, test: Region) -> Relation:
     register(events_queue, test,
              from_test=True)
     _, test_max_x, _, _ = test_bounding_box
-    return _process_queue(events_queue, test_max_x)
+    return process_compound_queue(events_queue, test_max_x)
 
 
 equal = contours_equal
-
-
-def _process_linear_compound_queue(events_queue: EventsQueue,
-                                   test_max_x: Coordinate) -> Relation:
-    # ``goal`` is a compound object
-    # ``test`` is a linear object
-    has_cross = has_touch = False
-    test_is_subset_of_goal = goal_is_subset_of_test = True
-    for event in sweep(events_queue, test_max_x):
-        if not has_cross and event.relationship is SegmentsRelationship.CROSS:
-            has_cross = True
-        if (not has_touch
-                and event.relationship in (SegmentsRelationship.TOUCH,
-                                           SegmentsRelationship.OVERLAP)):
-            has_touch = True
-        if (test_is_subset_of_goal and event.from_test
-                and not event.in_intersection
-                and (event.relationship is not SegmentsRelationship.OVERLAP)):
-            test_is_subset_of_goal = False
-        if (goal_is_subset_of_test and not event.from_test
-                and not event.in_intersection
-                and (event.relationship is not SegmentsRelationship.OVERLAP)):
-            goal_is_subset_of_test = False
-    if goal_is_subset_of_test:
-        goal_is_subset_of_test = not events_queue
-    if goal_is_subset_of_test:
-        return (Relation.COMPONENT
-                if test_is_subset_of_goal
-                else (Relation.TOUCH
-                      if has_touch
-                      else Relation.DISJOINT))
-    elif test_is_subset_of_goal:
-        return (Relation.ENCLOSED
-                if has_touch
-                else Relation.WITHIN)
-    else:
-        return (Relation.CROSS
-                if has_cross
-                else (Relation.TOUCH
-                      if has_touch
-                      else Relation.DISJOINT))
-
-
-def _process_queue(events_queue: EventsQueue,
-                   test_max_x: Coordinate) -> Relation:
-    test_boundary_in_goal_interior = goal_boundary_in_test_interior = False
-    boundaries_do_not_intersect, overlaps = True, False
-    test_is_subset_of_goal = goal_is_subset_of_test = True
-    for event in sweep(events_queue, test_max_x):
-        if event.relationship is SegmentsRelationship.CROSS:
-            return Relation.OVERLAP
-        if (boundaries_do_not_intersect
-                and event.relationship is not SegmentsRelationship.NONE):
-            boundaries_do_not_intersect = False
-        if (not overlaps and event.in_intersection
-                and event.relationship is not SegmentsRelationship.OVERLAP):
-            overlaps = True
-        if (not test_boundary_in_goal_interior and event.from_test
-                and event.relationship in (SegmentsRelationship.NONE,
-                                           SegmentsRelationship.TOUCH)):
-            test_boundary_in_goal_interior = True
-        if (not goal_boundary_in_test_interior and not event.from_test
-                and event.relationship in (SegmentsRelationship.NONE,
-                                           SegmentsRelationship.TOUCH)):
-            goal_boundary_in_test_interior = True
-        if (test_is_subset_of_goal and event.from_test
-                and not event.in_intersection
-                and (event.relationship is not SegmentsRelationship.OVERLAP)):
-            test_is_subset_of_goal = False
-        if (goal_is_subset_of_test and not event.from_test
-                and not event.in_intersection
-                and (event.relationship is not SegmentsRelationship.OVERLAP)):
-            goal_is_subset_of_test = False
-    if goal_is_subset_of_test:
-        goal_is_subset_of_test = not events_queue
-    if boundaries_do_not_intersect:
-        return (Relation.WITHIN
-                if test_is_subset_of_goal
-                else (Relation.COVER
-                      if goal_is_subset_of_test
-                      else (Relation.OVERLAP
-                            if overlaps
-                            else Relation.DISJOINT)))
-    elif test_is_subset_of_goal:
-        return (Relation.ENCLOSED
-                if test_boundary_in_goal_interior
-                else (Relation.EQUAL
-                      if goal_is_subset_of_test
-                      else Relation.COMPONENT))
-    elif goal_is_subset_of_test:
-        return (Relation.ENCLOSES
-                if goal_boundary_in_test_interior
-                else Relation.COMPOSITE)
-    else:
-        return (Relation.OVERLAP
-                if overlaps
-                else Relation.TOUCH)
-
-
 register = register_contour

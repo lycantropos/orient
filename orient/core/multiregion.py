@@ -7,8 +7,8 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding_box
 from .events_queue import EventsQueue
-from .region import (_process_queue,
-                     register as register_region,
+from .processing import process_compound_queue
+from .region import (register as register_region,
                      relate_contour as relate_contour_to_region,
                      relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region)
@@ -69,7 +69,7 @@ def relate_region(goal: Multiregion, test: Region) -> Relation:
     register_region(events_queue, test,
                     from_test=True)
     _, test_max_x, _, _ = test_bounding_box
-    return _process_queue(events_queue, test_max_x)
+    return process_compound_queue(events_queue, test_max_x)
 
 
 def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
@@ -86,7 +86,7 @@ def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
     register(events_queue, test,
              from_test=True)
     _, test_max_x, _, _ = test_bounding_box
-    return _process_queue(events_queue, test_max_x)
+    return process_compound_queue(events_queue, test_max_x)
 
 
 def register(events_queue: EventsQueue, multiregion: Multiregion,
