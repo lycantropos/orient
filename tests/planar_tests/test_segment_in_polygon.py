@@ -9,7 +9,8 @@ from orient.hints import (Polygon,
 from orient.planar import (Relation,
                            point_in_polygon,
                            segment_in_polygon)
-from tests.utils import (are_polygons_similar,
+from tests.utils import (LINEAR_COMPOUND_RELATIONS,
+                         are_polygons_similar,
                          implication,
                          to_contour_separators,
                          to_convex_hull)
@@ -23,6 +24,7 @@ def test_basic(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
     result = segment_in_polygon(segment, polygon)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_COMPOUND_RELATIONS
 
 
 @given(strategies.polygons_with_segments)
