@@ -7,7 +7,11 @@ from orient.hints import (Multiregion,
 from orient.planar import (Relation,
                            region_in_multiregion,
                            region_in_region)
-from tests.utils import equivalence
+from tests.utils import (equivalence,
+                         reverse_contour,
+                         reverse_multicontour,
+                         reverse_multicontour_contours,
+                         rotations)
 from . import strategies
 
 
@@ -90,17 +94,29 @@ def test_reversed(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
 
     result = region_in_multiregion(region, multiregion)
 
-    assert result is region_in_multiregion(region, [region[::-1]
-                                                    for region in
-                                                    multiregion])
-    assert result is region_in_multiregion(region[::-1], multiregion)
+    assert result is region_in_multiregion(region,
+                                           reverse_multicontour(multiregion))
 
 
 @given(strategies.multicontours_with_contours)
-def test_reversed_region(multiregion_with_region: Tuple[Multiregion, Region]
-                         ) -> None:
+def test_reversed_regions(multiregion_with_region: Tuple[Multiregion, Region]
+                          ) -> None:
     multiregion, region = multiregion_with_region
 
     result = region_in_multiregion(region, multiregion)
 
-    assert result is region_in_multiregion(region[::-1], multiregion)
+    assert result is region_in_multiregion(
+            region, reverse_multicontour_contours(multiregion))
+    assert result is region_in_multiregion(reverse_contour(region),
+                                           multiregion)
+
+
+@given(strategies.multicontours_with_contours)
+def test_rotations(multiregion_with_region: Tuple[Multiregion, Region]
+                   ) -> None:
+    multiregion, region = multiregion_with_region
+
+    result = region_in_multiregion(region, multiregion)
+
+    assert all(result is region_in_multiregion(region, rotated)
+               for rotated in rotations(multiregion))
