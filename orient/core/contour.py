@@ -24,6 +24,9 @@ def relate_point(contour: Contour, point: Point) -> Relation:
 
 
 def relate_segment(contour: Contour, segment: Segment) -> Relation:
+    if bounding_box.disjoint_with(bounding_box.from_points(contour),
+                                  bounding_box.from_points(segment)):
+        return Relation.DISJOINT
     has_touch = has_cross = False
     previous_touch_index = previous_touch_edge_start = None
     start, end = segment
