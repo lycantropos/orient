@@ -5,7 +5,8 @@ from hypothesis import given
 from orient.hints import Segment
 from orient.planar import (Relation,
                            segment_in_segment)
-from tests.utils import (equivalence,
+from tests.utils import (SAME_LINEAR_RELATIONS,
+                         equivalence,
                          reverse_segment)
 from . import strategies
 
@@ -17,6 +18,7 @@ def test_basic(segments_pair: Tuple[Segment, Segment]) -> None:
     result = segment_in_segment(left_segment, right_segment)
 
     assert isinstance(result, Relation)
+    assert result in SAME_LINEAR_RELATIONS
 
 
 @given(strategies.segments)
