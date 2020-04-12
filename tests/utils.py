@@ -14,6 +14,7 @@ from robust.angular import (Orientation,
                             orientation)
 
 from orient.hints import (Contour,
+                          Multicontour,
                           Point,
                           Polygon,
                           Segment)
@@ -61,7 +62,20 @@ def reverse_polygon_border(polygon: Polygon) -> Polygon:
 
 def reverse_polygon_holes(polygon: Polygon) -> Polygon:
     border, holes = polygon
-    return border, holes[::-1]
+    return border, reverse_multicontour(holes)
+
+
+def reverse_polygon_holes_contours(polygon: Polygon) -> Polygon:
+    border, holes = polygon
+    return border, reverse_multicontour_contours(holes)
+
+
+def reverse_multicontour(multicontour: Multicontour) -> Multicontour:
+    return multicontour[::-1]
+
+
+def reverse_multicontour_contours(multicontour: Multicontour) -> Multicontour:
+    return [reverse_contour(hole) for hole in multicontour]
 
 
 def reverse_contour(contour: Contour) -> Contour:
