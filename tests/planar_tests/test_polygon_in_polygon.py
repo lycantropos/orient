@@ -7,7 +7,8 @@ from orient.hints import Polygon
 from orient.planar import (Relation,
                            point_in_polygon,
                            polygon_in_polygon)
-from tests.utils import (equivalence,
+from tests.utils import (COMPOUND_RELATIONS,
+                         equivalence,
                          implication,
                          to_convex_hull)
 from . import strategies
@@ -20,6 +21,7 @@ def test_basic(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     result = polygon_in_polygon(left_polygon, right_polygon)
 
     assert isinstance(result, Relation)
+    assert result in COMPOUND_RELATIONS
 
 
 @given(strategies.polygons)
