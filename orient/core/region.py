@@ -57,7 +57,19 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
-    return _to_contour_relation(relate_region(region, contour))
+    test_bounding_box = bounding_box.from_points(contour)
+    if bounding_box.disjoint_with(bounding_box.from_points(region),
+                                  test_bounding_box):
+        return Relation.DISJOINT
+    if equal(region, contour):
+        return Relation.COMPONENT
+    events_queue = EventsQueue()
+    register(events_queue, region,
+             from_test=False)
+    register_contour(events_queue, contour,
+                     from_test=True)
+    _, test_max_x, _, _ = test_bounding_box
+    return _process_linear_compound_queue(events_queue, test_max_x)
 
 
 def _to_contour_relation(relation: Relation) -> Relation:
@@ -90,6 +102,47 @@ def relate_region(goal: Region, test: Region) -> Relation:
 
 
 equal = contours_equal
+
+
+def _process_linear_compound_queue(events_queue: EventsQueue,
+                                   test_max_x: Coordinate) -> Relation:
+    # ``goal`` is a compound object
+    # ``test`` is a linear object
+    has_cross = has_touch = False
+    test_is_subset_of_goal = goal_is_subset_of_test = True
+    for event in sweep(events_queue, test_max_x):
+        if not has_cross and event.relationship is SegmentsRelationship.CROSS:
+            has_cross = True
+        if (not has_touch
+                and event.relationship in (SegmentsRelationship.TOUCH,
+                                           SegmentsRelationship.OVERLAP)):
+            has_touch = True
+        if (test_is_subset_of_goal and event.from_test
+                and not event.in_intersection
+                and (event.relationship is not SegmentsRelationship.OVERLAP)):
+            test_is_subset_of_goal = False
+        if (goal_is_subset_of_test and not event.from_test
+                and not event.in_intersection
+                and (event.relationship is not SegmentsRelationship.OVERLAP)):
+            goal_is_subset_of_test = False
+    if goal_is_subset_of_test:
+        goal_is_subset_of_test = not events_queue
+    if goal_is_subset_of_test:
+        return (Relation.COMPONENT
+                if test_is_subset_of_goal
+                else (Relation.TOUCH
+                      if has_touch
+                      else Relation.DISJOINT))
+    elif test_is_subset_of_goal:
+        return (Relation.ENCLOSED
+                if has_touch
+                else Relation.WITHIN)
+    else:
+        return (Relation.CROSS
+                if has_cross
+                else (Relation.TOUCH
+                      if has_touch
+                      else Relation.DISJOINT))
 
 
 def _process_queue(events_queue: EventsQueue,
