@@ -8,8 +8,8 @@ from orient.hints import (Contour,
 from . import bounding_box
 from .events_queue import EventsQueue
 from .region import (_process_queue,
-                     _to_contour_relation,
                      register as register_region,
+                     relate_contour as relate_contour_to_region,
                      relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region)
 from .relation import Relation
@@ -39,8 +39,20 @@ def relate_segment(multiregion: Multiregion, segment: Segment) -> Relation:
             else Relation.TOUCH)
 
 
-def relate_contour(multiregion: Multiregion, region: Contour) -> Relation:
-    return _to_contour_relation(relate_region(multiregion, region))
+def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:
+    do_not_touch = True
+    for region in multiregion:
+        relation_with_region = relate_contour_to_region(region, contour)
+        if relation_with_region in (Relation.CROSS,
+                                    Relation.COMPONENT,
+                                    Relation.ENCLOSED,
+                                    Relation.WITHIN):
+            return relation_with_region
+        elif do_not_touch and relation_with_region is Relation.TOUCH:
+            do_not_touch = False
+    return (Relation.DISJOINT
+            if do_not_touch
+            else Relation.TOUCH)
 
 
 def relate_region(goal: Multiregion, test: Region) -> Relation:
