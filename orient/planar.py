@@ -107,7 +107,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     Time complexity:
         ``O(len(contour))``
     Memory complexity:
-        ``O(len(contour))``
+        ``O(1)``
 
     :param segment: segment to check for.
     :param contour: contour to check in.
