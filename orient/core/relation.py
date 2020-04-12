@@ -44,3 +44,20 @@ class Relation(IntEnum):
     ENCLOSED = 9
     #: geometry is a subset of the interior of the other
     WITHIN = 10
+
+    @property
+    def complement(self) -> 'Relation':
+        if self is Relation.COVER:
+            return Relation.WITHIN
+        elif self is Relation.ENCLOSES:
+            return Relation.ENCLOSED
+        elif self is Relation.COMPOSITE:
+            return Relation.COMPOSITE
+        elif self is Relation.COMPONENT:
+            return Relation.COMPONENT
+        elif self is Relation.ENCLOSED:
+            return Relation.ENCLOSES
+        elif self is Relation.WITHIN:
+            return Relation.COVER
+        else:
+            return self

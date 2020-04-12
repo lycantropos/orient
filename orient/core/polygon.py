@@ -1,4 +1,5 @@
 from orient.hints import (Contour,
+                          Multiregion,
                           Point,
                           Polygon,
                           Region,
@@ -82,6 +83,39 @@ def relate_region(polygon: Polygon, region: Region) -> Relation:
             return Relation.OVERLAP
     else:
         return relation_with_border
+
+
+def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
+    border, holes = polygon
+    border_relation = relate_region_to_multiregion(multiregion, border)
+    if not holes:
+        return border_relation.complement
+    elif border_relation in (Relation.DISJOINT,
+                             Relation.TOUCH,
+                             Relation.OVERLAP):
+        return border_relation
+    elif border_relation in (Relation.EQUAL,
+                             Relation.COMPONENT,
+                             Relation.ENCLOSED,
+                             Relation.WITHIN):
+        return Relation.OVERLAP
+    else:
+        holes_relation = relate_multiregions(multiregion, holes)
+        if holes_relation is Relation.DISJOINT:
+            return border_relation.complement
+        elif holes_relation is Relation.COVER:
+            return Relation.DISJOINT
+        elif holes_relation in (Relation.ENCLOSES,
+                                Relation.COMPOSITE,
+                                Relation.EQUAL):
+            return Relation.TOUCH
+        elif (holes_relation is Relation.OVERLAP
+              or holes_relation is Relation.COMPONENT):
+            return Relation.OVERLAP
+        elif holes_relation is Relation.TOUCH:
+            return Relation.ENCLOSED
+        else:
+            return Relation.OVERLAP
 
 
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
