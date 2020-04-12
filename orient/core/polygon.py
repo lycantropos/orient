@@ -6,7 +6,8 @@ from orient.hints import (Contour,
                           Segment)
 from .multiregion import (relate_contour as relate_contour_to_multiregion,
                           relate_multiregion as relate_multiregions,
-                          relate_region as relate_region_to_multiregion)
+                          relate_region as relate_region_to_multiregion,
+                          relate_segment as relate_segment_to_multiregion)
 from .region import (relate_contour as relate_contour_to_region,
                      relate_point as relate_point_to_region,
                      relate_region as relate_regions,
@@ -30,21 +31,22 @@ def relate_point(polygon: Polygon, point: Point) -> Relation:
 def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
     border, holes = polygon
     relation_with_border = relate_segment_to_region(border, segment)
-    if (relation_with_border is Relation.WITHIN
-            or relation_with_border is Relation.ENCLOSED):
-        for hole in holes:
-            relation_with_hole = relate_segment_to_region(hole, segment)
-            if relation_with_hole is Relation.WITHIN:
-                return Relation.DISJOINT
-            elif relation_with_hole is Relation.COMPONENT:
-                return Relation.COMPONENT
-            elif relation_with_hole is Relation.CROSS:
-                return Relation.CROSS
-            elif relation_with_hole is Relation.ENCLOSED:
-                return Relation.TOUCH
-            elif relation_with_hole is Relation.TOUCH:
-                relation_with_border = Relation.ENCLOSED
-    return relation_with_border
+    if (holes and (relation_with_border is Relation.WITHIN
+                   or relation_with_border is Relation.ENCLOSED)):
+        relation_with_holes = relate_segment_to_multiregion(holes, segment)
+        if relation_with_holes is Relation.WITHIN:
+            return Relation.DISJOINT
+        elif relation_with_holes is Relation.COMPONENT:
+            return Relation.COMPONENT
+        elif relation_with_holes is Relation.CROSS:
+            return Relation.CROSS
+        elif relation_with_holes is Relation.ENCLOSED:
+            return Relation.TOUCH
+        else:
+            # segment touches holes
+            return Relation.ENCLOSED
+    else:
+        return relation_with_border
 
 
 def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
