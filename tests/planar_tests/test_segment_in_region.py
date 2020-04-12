@@ -55,11 +55,11 @@ def test_contour_separators(region: Region) -> None:
 
 
 @given(strategies.contours)
-def test_convex_contour_criterion(region: Region) -> None:
-    assert equivalence(all(segment_in_region(segment, region)
+def test_convex_region(region: Region) -> None:
+    assert implication(equal(region, to_convex_hull(region)),
+                       all(segment_in_region(segment, region)
                            is Relation.ENCLOSED
-                           for segment in to_contour_separators(region)),
-                       equal(region, to_convex_hull(region)))
+                           for segment in to_contour_separators(region)))
 
 
 @given(strategies.contours_with_segments)
