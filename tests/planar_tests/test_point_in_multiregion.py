@@ -8,7 +8,6 @@ from orient.planar import (Relation,
                            point_in_multiregion,
                            point_in_region)
 from tests.utils import (equivalence,
-                         reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
                          rotations)
@@ -77,8 +76,6 @@ def test_reversed_regions(multiregion_with_point: Tuple[Multiregion, Point]
 
     assert result is point_in_multiregion(
             point, reverse_multicontour_contours(multiregion))
-    assert result is point_in_multiregion(reverse_contour(point),
-                                          multiregion)
 
 
 @given(strategies.multicontours_with_points)
