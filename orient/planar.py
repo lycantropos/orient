@@ -198,7 +198,7 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
     Time complexity:
         ``O(len(region))``
     Memory complexity:
-        ``O(len(region))``
+        ``O(1)``
 
     :param segment: segment to check for.
     :param region: region to check in.
