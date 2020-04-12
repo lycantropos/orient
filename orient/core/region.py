@@ -72,19 +72,6 @@ def relate_contour(region: Region, contour: Contour) -> Relation:
     return _process_linear_compound_queue(events_queue, test_max_x)
 
 
-def _to_contour_relation(relation: Relation) -> Relation:
-    if relation is Relation.OVERLAP:
-        return Relation.CROSS
-    elif relation is Relation.COVER:
-        return Relation.DISJOINT
-    elif relation is Relation.ENCLOSES or relation is Relation.COMPOSITE:
-        return Relation.TOUCH
-    elif relation is Relation.EQUAL:
-        return Relation.COMPONENT
-    else:
-        return relation
-
-
 def relate_region(goal: Region, test: Region) -> Relation:
     test_bounding_box = bounding_box.from_points(test)
     if bounding_box.disjoint_with(bounding_box.from_points(goal),
