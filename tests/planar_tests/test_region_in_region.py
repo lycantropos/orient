@@ -6,7 +6,8 @@ from orient.hints import Region
 from orient.planar import (Relation,
                            point_in_region,
                            region_in_region)
-from tests.utils import (equivalence,
+from tests.utils import (COMPOUND_RELATIONS,
+                         equivalence,
                          implication,
                          to_convex_hull)
 from . import strategies
@@ -19,6 +20,7 @@ def test_basic(regions_pair: Tuple[Region, Region]) -> None:
     result = region_in_region(left_region, right_region)
 
     assert isinstance(result, Relation)
+    assert result in COMPOUND_RELATIONS
 
 
 @given(strategies.contours)

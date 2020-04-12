@@ -32,6 +32,10 @@ SAME_LINEAR_RELATIONS = LINEAR_RELATIONS + (Relation.EQUAL,)
 LINEAR_COMPOUND_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
                              Relation.COMPONENT, Relation.ENCLOSED,
                              Relation.WITHIN)
+COMPOUND_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.OVERLAP,
+                      Relation.COVER, Relation.COMPOSITE, Relation.ENCLOSES,
+                      Relation.EQUAL, Relation.COMPONENT, Relation.ENCLOSED,
+                      Relation.WITHIN)
 
 
 def implication(antecedent: bool, consequent: bool) -> bool:
