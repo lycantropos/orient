@@ -6,10 +6,10 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import (edges as boundary_edges,
+from .contour import (_relate_segment as relate_segment_to_contour,
+                      edges as boundary_edges,
                       equal as contours_equal,
-                      register as register_contour,
-                      relate_segment as relate_segment_to_contour)
+                      register as register_contour)
 from .events_queue import EventsQueue
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
