@@ -8,7 +8,8 @@ from orient.planar import (Relation,
                            point_in_multiregion,
                            segment_in_multiregion,
                            segment_in_region)
-from tests.utils import (equivalence,
+from tests.utils import (LINEAR_COMPOUND_RELATIONS,
+                         equivalence,
                          implication,
                          reverse_contour,
                          reverse_multicontour,
@@ -25,6 +26,7 @@ def test_basic(multiregion_with_segment: Tuple[Multiregion, Segment]) -> None:
     result = segment_in_multiregion(segment, multiregion)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_COMPOUND_RELATIONS
 
 
 @given(strategies.multicontours_with_segments)

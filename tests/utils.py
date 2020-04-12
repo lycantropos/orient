@@ -29,6 +29,9 @@ PRIMITIVE_COMPOUND_RELATIONS = PRIMITIVE_LINEAR_RELATIONS + (Relation.WITHIN,)
 LINEAR_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
                     Relation.OVERLAP, Relation.COMPONENT, Relation.EQUAL,
                     Relation.COMPOSITE)
+LINEAR_COMPOUND_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
+                             Relation.COMPONENT, Relation.ENCLOSED,
+                             Relation.WITHIN)
 
 
 def implication(antecedent: bool, consequent: bool) -> bool:
