@@ -425,6 +425,36 @@ def region_in_multiregion(region: Region,
     return _multiregion.relate_region(multiregion, region)
 
 
+def multiregion_in_multiregion(left: Multiregion,
+                               right: Multiregion) -> Relation:
+    """
+    Finds relation between multiregions.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = sum(map(len, left)) + sum(map(len, right))``.
+
+    :param left: multiregion to check for.
+    :param right: multiregion to check in.
+    :returns: relation between multiregions.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multiregion_in_multiregion([triangle], [triangle]) is Relation.EQUAL
+    True
+    >>> multiregion_in_multiregion([triangle], [square]) is Relation.ENCLOSED
+    True
+    >>> multiregion_in_multiregion([square], [triangle]) is Relation.ENCLOSES
+    True
+    >>> multiregion_in_multiregion([square], [square]) is Relation.EQUAL
+    True
+    """
+    return _multiregion.relate_multiregion(right, left)
+
+
 def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
     """
     Finds relation between point and polygon.
