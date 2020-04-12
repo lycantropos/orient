@@ -9,7 +9,8 @@ from orient.planar import (Relation,
                            point_in_polygon)
 from tests.utils import (implication,
                          reverse_polygon_border,
-                         reverse_polygon_holes)
+                         reverse_polygon_holes,
+                         reverse_polygon_holes_contours)
 from . import strategies
 
 
@@ -48,12 +49,14 @@ def test_solid(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
 
 @given(strategies.polygons_with_points)
-def test_reversed_border(polygon_with_point: Tuple[Polygon, Point]) -> None:
+def test_reversed_contours(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
 
     result = point_in_polygon(point, polygon)
 
     assert result is point_in_polygon(point, reverse_polygon_border(polygon))
+    assert result is point_in_polygon(point,
+                                      reverse_polygon_holes_contours(polygon))
 
 
 @given(strategies.polygons_with_points)
