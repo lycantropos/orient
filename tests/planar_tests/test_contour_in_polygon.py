@@ -6,6 +6,7 @@ from orient.hints import (Contour,
                           Polygon)
 from orient.planar import (Relation,
                            contour_in_polygon)
+from tests.utils import LINEAR_RELATIONS
 from . import strategies
 
 
@@ -16,6 +17,7 @@ def test_basic(contour_with_polygon: Tuple[Contour, Polygon]) -> None:
     result = contour_in_polygon(contour, polygon)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_RELATIONS
 
 
 @given(strategies.contours)
