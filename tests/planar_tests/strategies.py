@@ -40,6 +40,7 @@ def to_contours_with_segments(coordinates: Strategy[Coordinate]
 
 contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
+multicontours = coordinates_strategies.flatmap(planar.multicontours)
 
 
 def to_multicontours_with_points(coordinates: Strategy[Coordinate],
@@ -53,7 +54,6 @@ def to_multicontours_with_points(coordinates: Strategy[Coordinate],
                              planar.points(coordinates))
 
 
-multicontours = coordinates_strategies.flatmap(planar.multicontours)
 multicontours_with_points = (coordinates_strategies
                              .flatmap(to_multicontours_with_points))
 empty_multicontours_with_points = strategies.tuples(strategies.builds(list),
