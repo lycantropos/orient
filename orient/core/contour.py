@@ -143,9 +143,12 @@ def equal(left: Contour, right: Contour) -> bool:
 def _process_queue(events_queue: EventsQueue,
                    test_max_x: Coordinate) -> Relation:
     test_boundary_in_goal_interior = goal_boundary_in_test_interior = False
-    has_cross = has_touch = False
+    has_overlap = has_cross = has_touch = False
     test_is_subset_of_goal = goal_is_subset_of_test = True
     for event in sweep(events_queue, test_max_x):
+        if (not has_overlap
+                and event.relationship is SegmentsRelationship.OVERLAP):
+            has_overlap = True
         if not has_cross and event.relationship is SegmentsRelationship.CROSS:
             has_cross = True
         if not has_touch and event.relationship is SegmentsRelationship.TOUCH:
@@ -179,11 +182,13 @@ def _process_queue(events_queue: EventsQueue,
                 if test_boundary_in_goal_interior
                 else Relation.COMPONENT)
     else:
-        return (Relation.CROSS
-                if has_cross
-                else (Relation.TOUCH
-                      if has_touch
-                      else Relation.DISJOINT))
+        return (Relation.OVERLAP
+                if has_overlap
+                else (Relation.CROSS
+                      if has_cross
+                      else (Relation.TOUCH
+                            if has_touch
+                            else Relation.DISJOINT)))
 
 
 def register(events_queue: EventsQueue, contour: Contour,
