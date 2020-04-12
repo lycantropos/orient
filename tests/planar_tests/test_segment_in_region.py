@@ -29,18 +29,6 @@ def test_basic(region_with_segment: Tuple[Region, Segment]) -> None:
     assert isinstance(result, Relation)
 
 
-@given(strategies.contours_with_segments)
-def test_outside(region_with_segment: Tuple[Region, Segment]) -> None:
-    region, segment = region_with_segment
-
-    result = segment_in_region(segment, region)
-
-    start, end = segment
-    assert implication(result is Relation.DISJOINT,
-                       point_in_region(start, region) is Relation.DISJOINT
-                       and point_in_region(end, region) is Relation.DISJOINT)
-
-
 @given(strategies.contours)
 def test_edges(region: Region) -> None:
     assert all(segment_in_region(edge, region) is Relation.COMPONENT
@@ -88,6 +76,29 @@ def test_rotations(region_with_segment: Tuple[Region, Segment]) -> None:
 
     assert all(result is segment_in_region(segment, rotated)
                for rotated in rotations(region))
+
+
+@given(strategies.contours_with_segments)
+def test_connection_with_point_in_region(region_with_segment
+                                         : Tuple[Region, Segment]) -> None:
+    region, segment = region_with_segment
+
+    result = segment_in_region(segment, region)
+
+    start, end = segment
+    start_relation, end_relation = (point_in_region(start, region),
+                                    point_in_region(end, region))
+    assert implication(result is Relation.DISJOINT,
+                       start_relation is end_relation is Relation.DISJOINT)
+    assert implication(result is Relation.COMPONENT,
+                       start_relation is end_relation is Relation.COMPONENT)
+    assert implication(result is Relation.WITHIN,
+                       start_relation is end_relation is Relation.WITHIN)
+    assert implication(start_relation is Relation.DISJOINT
+                       and end_relation is Relation.WITHIN
+                       or start_relation is Relation.WITHIN
+                       and end_relation is Relation.DISJOINT,
+                       result is Relation.CROSS)
 
 
 @given(strategies.contours_with_segments)
