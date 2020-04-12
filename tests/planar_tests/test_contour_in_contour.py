@@ -6,7 +6,8 @@ from orient.hints import Contour
 from orient.planar import (Relation,
                            contour_in_contour,
                            point_in_contour)
-from tests.utils import (equivalence,
+from tests.utils import (LINEAR_RELATIONS,
+                         equivalence,
                          implication,
                          to_convex_hull)
 from . import strategies
@@ -19,6 +20,7 @@ def test_basic(contours_pair: Tuple[Contour, Contour]) -> None:
     result = contour_in_contour(left_contour, right_contour)
 
     assert isinstance(result, Relation)
+    assert result in LINEAR_RELATIONS
 
 
 @given(strategies.contours)

@@ -26,6 +26,10 @@ Strategy = SearchStrategy
 
 PRIMITIVE_LINEAR_RELATIONS = (Relation.DISJOINT, Relation.COMPONENT)
 PRIMITIVE_COMPOUND_RELATIONS = PRIMITIVE_LINEAR_RELATIONS + (Relation.WITHIN,)
+LINEAR_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
+                    Relation.OVERLAP, Relation.COMPONENT, Relation.EQUAL,
+                    Relation.COMPOSITE)
+
 
 def implication(antecedent: bool, consequent: bool) -> bool:
     return not antecedent or consequent
