@@ -82,7 +82,7 @@ class EventsQueue:
 
     def divide_segment(self, event: Event, point: Point) -> None:
         left_event = Event(True, point, event.complement,
-                           event.from_test, event.relationship,
+                           event.from_test, SegmentsRelationship.NONE,
                            EdgeKind.NORMAL)
         right_event = Event(False, point, event, event.from_test,
                             event.relationship, EdgeKind.NORMAL)
