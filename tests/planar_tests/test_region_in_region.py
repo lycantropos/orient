@@ -4,6 +4,7 @@ from hypothesis import given
 
 from orient.hints import Region
 from orient.planar import (Relation,
+                           contour_in_region,
                            point_in_region,
                            region_in_region)
 from tests.utils import (COMPOUND_RELATIONS,
@@ -70,3 +71,29 @@ def test_vertices(regions_pair: Tuple[Region, Region]) -> None:
                        all(point_in_region(vertex, right_region)
                            is not Relation.DISJOINT
                            for vertex in left_region))
+
+
+@given(strategies.contours_pairs)
+def test_connection_with_contour_in_region(regions_pair: Tuple[Region, Region]
+                                           ) -> None:
+    left_region, right_region = regions_pair
+
+    result = region_in_region(left_region, right_region)
+
+    contour_relation = contour_in_region(left_region, right_region)
+    assert equivalence(result is Relation.DISJOINT
+                       or result is Relation.COVER,
+                       contour_relation is Relation.DISJOINT)
+    assert equivalence(result is Relation.TOUCH
+                       or result is Relation.ENCLOSES
+                       or result is Relation.COMPOSITE,
+                       contour_relation is Relation.TOUCH)
+    assert equivalence(result is Relation.OVERLAP,
+                       contour_relation is Relation.CROSS)
+    assert equivalence(result is Relation.COMPONENT
+                       or result is Relation.EQUAL,
+                       contour_relation is Relation.COMPONENT)
+    assert equivalence(result is Relation.ENCLOSED,
+                       contour_relation is Relation.ENCLOSED)
+    assert equivalence(result is Relation.WITHIN,
+                       contour_relation is Relation.WITHIN)
