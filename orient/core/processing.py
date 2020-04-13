@@ -133,10 +133,12 @@ def process_compound_queue(events_queue: EventsQueue,
                 and event.relationship is not SegmentsRelationship.OVERLAP):
             overlaps = True
         if (not test_boundary_in_goal_interior and event.from_test
+                and event.in_intersection
                 and event.relationship in (SegmentsRelationship.NONE,
                                            SegmentsRelationship.TOUCH)):
             test_boundary_in_goal_interior = True
         if (not goal_boundary_in_test_interior and not event.from_test
+                and event.in_intersection
                 and event.relationship in (SegmentsRelationship.NONE,
                                            SegmentsRelationship.TOUCH)):
             goal_boundary_in_test_interior = True
