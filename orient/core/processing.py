@@ -1,7 +1,6 @@
 from robust.linear import SegmentsRelationship
 
 from orient.hints import Coordinate
-from .event import EdgeKind
 from .events_queue import EventsQueue
 from .relation import Relation
 from .sweep import sweep
@@ -16,11 +15,11 @@ def process_linear_queue(events_queue: EventsQueue,
     for event in sweep(events_queue, test_max_x):
         if (test_is_subset_of_goal and event.from_test
                 and not event.in_intersection
-                and event.edge_kind is not EdgeKind.NON_CONTRIBUTING):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             test_is_subset_of_goal = False
         if (goal_is_subset_of_test and not event.from_test
                 and not event.in_intersection
-                and event.edge_kind is not EdgeKind.NON_CONTRIBUTING):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             goal_is_subset_of_test = False
         if (boundaries_do_not_intersect
                 and event.relationship is not SegmentsRelationship.NONE):
@@ -92,11 +91,11 @@ def process_linear_compound_queue(events_queue: EventsQueue,
             has_touch = True
         if (test_is_subset_of_goal and event.from_test
                 and not event.in_intersection
-                and event.edge_kind is not EdgeKind.NON_CONTRIBUTING):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             test_is_subset_of_goal = False
         if (goal_is_subset_of_test and not event.from_test
                 and not event.in_intersection
-                and event.edge_kind is not EdgeKind.NON_CONTRIBUTING):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             goal_is_subset_of_test = False
     if goal_is_subset_of_test:
         goal_is_subset_of_test = not events_queue
@@ -145,11 +144,11 @@ def process_compound_queue(events_queue: EventsQueue,
             goal_boundary_in_test_interior = True
         if (test_is_subset_of_goal and event.from_test
                 and not event.in_intersection
-                and event.edge_kind is not EdgeKind.NON_CONTRIBUTING):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             test_is_subset_of_goal = False
         if (goal_is_subset_of_test and not event.from_test
                 and not event.in_intersection
-                and event.edge_kind is not EdgeKind.NON_CONTRIBUTING):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             goal_is_subset_of_test = False
     if goal_is_subset_of_test:
         goal_is_subset_of_test = not events_queue
@@ -162,10 +161,10 @@ def process_compound_queue(events_queue: EventsQueue,
                             if overlaps
                             else Relation.DISJOINT)))
     elif test_is_subset_of_goal:
-        return (Relation.ENCLOSED
-                if test_boundary_in_goal_interior
-                else (Relation.EQUAL
-                      if goal_is_subset_of_test
+        return (Relation.EQUAL
+                if goal_is_subset_of_test
+                else (Relation.ENCLOSED
+                      if test_boundary_in_goal_interior
                       else Relation.COMPONENT))
     elif goal_is_subset_of_test:
         return (Relation.ENCLOSES
