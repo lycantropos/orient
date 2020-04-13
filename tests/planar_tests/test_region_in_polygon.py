@@ -46,11 +46,12 @@ def test_connection_with_contour_in_polygon(polygon_with_region
                        contour_relation is Relation.TOUCH)
     assert implication(result is Relation.OVERLAP,
                        contour_relation is Relation.CROSS
-                       or contour_relation is Relation.ENCLOSED)
+                       or contour_relation is Relation.ENCLOSED
+                       or contour_relation is Relation.WITHIN)
     assert equivalence(result is Relation.COMPONENT
                        or result is Relation.EQUAL,
                        contour_relation is Relation.COMPONENT)
     assert implication(result is Relation.ENCLOSED,
                        contour_relation is Relation.ENCLOSED)
-    assert equivalence(result is Relation.WITHIN,
+    assert implication(result is Relation.WITHIN,
                        contour_relation is Relation.WITHIN)
