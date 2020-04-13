@@ -34,17 +34,19 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
     if (holes and (relation_with_border is Relation.WITHIN
                    or relation_with_border is Relation.ENCLOSED)):
         relation_with_holes = relate_segment_to_multiregion(holes, segment)
-        if relation_with_holes is Relation.WITHIN:
-            return Relation.DISJOINT
-        elif relation_with_holes is Relation.COMPONENT:
-            return Relation.COMPONENT
+        if relation_with_holes is Relation.DISJOINT:
+            return relation_with_border
+        elif relation_with_holes is Relation.TOUCH:
+            return Relation.ENCLOSED
         elif relation_with_holes is Relation.CROSS:
             return Relation.CROSS
+        elif relation_with_holes is Relation.COMPONENT:
+            return Relation.COMPONENT
         elif relation_with_holes is Relation.ENCLOSED:
             return Relation.TOUCH
         else:
-            # segment touches holes
-            return Relation.ENCLOSED
+            # segment is within holes
+            return Relation.DISJOINT
     else:
         return relation_with_border
 
