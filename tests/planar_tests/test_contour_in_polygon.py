@@ -10,9 +10,9 @@ from tests.utils import LINEAR_COMPOUND_RELATIONS
 from . import strategies
 
 
-@given(strategies.contours_with_polygons)
-def test_basic(contour_with_polygon: Tuple[Contour, Polygon]) -> None:
-    contour, polygon = contour_with_polygon
+@given(strategies.polygons_with_contours)
+def test_basic(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
+    polygon, contour = polygon_with_contour
 
     result = contour_in_polygon(contour, polygon)
 

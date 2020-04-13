@@ -10,9 +10,9 @@ from tests.utils import COMPOUND_RELATIONS
 from . import strategies
 
 
-@given(strategies.contours_with_polygons)
-def test_basic(region_with_polygon: Tuple[Region, Polygon]) -> None:
-    region, polygon = region_with_polygon
+@given(strategies.polygons_with_contours)
+def test_basic(region_with_polygon: Tuple[Polygon, Region]) -> None:
+    polygon, region = region_with_polygon
 
     result = region_in_polygon(region, polygon)
 
