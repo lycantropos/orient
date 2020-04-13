@@ -55,18 +55,21 @@ def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:
             else Relation.TOUCH)
 
 
-def relate_region(goal: Multiregion, test: Region) -> Relation:
-    if not goal:
+def relate_region(multiregion: Multiregion, region: Region) -> Relation:
+    if not multiregion:
         return Relation.DISJOINT
-    test_bounding_box = bounding_box.from_points(test)
-    if bounding_box.disjoint_with(
-            bounding_box.from_points(chain.from_iterable(goal)),
-            test_bounding_box):
+    test_bounding_box = bounding_box.from_points(region)
+    overlapping_multiregion = [
+        region
+        for region in multiregion
+        if not bounding_box.disjoint_with(bounding_box.from_points(region),
+                                          test_bounding_box)]
+    if not overlapping_multiregion:
         return Relation.DISJOINT
     events_queue = EventsQueue()
-    register(events_queue, goal,
+    register(events_queue, multiregion,
              from_test=False)
-    register_region(events_queue, test,
+    register_region(events_queue, region,
                     from_test=True)
     _, test_max_x, _, _ = test_bounding_box
     return process_compound_queue(events_queue, test_max_x)
