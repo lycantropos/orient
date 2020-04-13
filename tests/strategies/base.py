@@ -7,9 +7,12 @@ from hypothesis import strategies
 
 from tests.utils import Strategy
 
+FLOATING_POINT_PRECISION = sys.float_info.dig // 2
+MAX_FLOAT = 10 ** FLOATING_POINT_PRECISION
 
-def to_floats(min_value: Optional[float] = None,
-              max_value: Optional[float] = None,
+
+def to_floats(min_value: Optional[float] = -MAX_FLOAT,
+              max_value: Optional[float] = MAX_FLOAT,
               *,
               allow_nan: bool = False,
               allow_infinity: bool = False) -> Strategy:
@@ -22,7 +25,7 @@ def to_floats(min_value: Optional[float] = None,
 
 def to_digits_count(number: float,
                     *,
-                    max_digits_count: int = sys.float_info.dig * 2 // 3
+                    max_digits_count: int = FLOATING_POINT_PRECISION
                     ) -> float:
     decimal = Decimal(number).normalize()
     _, significant_digits, exponent = decimal.as_tuple()
