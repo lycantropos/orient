@@ -32,7 +32,8 @@ def sweep(events_queue: EventsQueue,
         if not all_equal(event.from_test
                          for event in same_start_events):
             for event in same_start_events:
-                event.relationship = SegmentsRelationship.TOUCH
+                if event.relationship is SegmentsRelationship.NONE:
+                    event.relationship = SegmentsRelationship.TOUCH
         for event in same_start_events:
             if event.is_left_endpoint:
                 sweep_line.add(event)
