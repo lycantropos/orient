@@ -5,6 +5,7 @@ from hypothesis import given
 from orient.hints import (Multiregion,
                           Region)
 from orient.planar import (Relation,
+                           contour_in_multiregion,
                            region_in_multiregion,
                            region_in_region)
 from tests.utils import (COMPOUND_RELATIONS,
@@ -122,3 +123,30 @@ def test_rotations(multiregion_with_region: Tuple[Multiregion, Region]
 
     assert all(result is region_in_multiregion(region, rotated)
                for rotated in rotations(multiregion))
+
+
+@given(strategies.multicontours_with_contours)
+def test_connection_with_contour_in_multiregion(multiregion_with_region
+                                                : Tuple[Multiregion, Region]
+                                                ) -> None:
+    multiregion, region = multiregion_with_region
+
+    result = region_in_multiregion(region, multiregion)
+
+    contour_relation = contour_in_multiregion(region, multiregion)
+    assert equivalence(result is Relation.DISJOINT
+                       or result is Relation.COVER,
+                       contour_relation is Relation.DISJOINT)
+    assert equivalence(result is Relation.TOUCH
+                       or result is Relation.ENCLOSES
+                       or result is Relation.COMPOSITE,
+                       contour_relation is Relation.TOUCH)
+    assert equivalence(result is Relation.OVERLAP,
+                       contour_relation is Relation.CROSS)
+    assert equivalence(result is Relation.COMPONENT
+                       or result is Relation.EQUAL,
+                       contour_relation is Relation.COMPONENT)
+    assert equivalence(result is Relation.ENCLOSED,
+                       contour_relation is Relation.ENCLOSED)
+    assert equivalence(result is Relation.WITHIN,
+                       contour_relation is Relation.WITHIN)
