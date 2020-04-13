@@ -70,8 +70,19 @@ def process_linear_compound_queue(events_queue: EventsQueue,
     # ``goal`` is a compound object
     # ``test`` is a linear object
     has_cross = has_touch = False
+    test_boundary_in_goal_interior = test_boundary_in_goal_exterior = False
     test_is_subset_of_goal = goal_is_subset_of_test = True
     for event in sweep(events_queue, test_max_x):
+        if (not test_boundary_in_goal_interior and event.from_test
+                and event.in_intersection
+                and event.relationship in (SegmentsRelationship.NONE,
+                                           SegmentsRelationship.TOUCH)):
+            test_boundary_in_goal_interior = True
+        if (not test_boundary_in_goal_exterior and event.from_test
+                and not event.in_intersection
+                and event.relationship in (SegmentsRelationship.NONE,
+                                           SegmentsRelationship.TOUCH)):
+            test_boundary_in_goal_exterior = True
         if not has_cross and event.relationship is SegmentsRelationship.CROSS:
             has_cross = True
         if (not has_touch
@@ -80,11 +91,11 @@ def process_linear_compound_queue(events_queue: EventsQueue,
             has_touch = True
         if (test_is_subset_of_goal and event.from_test
                 and not event.in_intersection
-                and (event.relationship is not SegmentsRelationship.OVERLAP)):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             test_is_subset_of_goal = False
         if (goal_is_subset_of_test and not event.from_test
                 and not event.in_intersection
-                and (event.relationship is not SegmentsRelationship.OVERLAP)):
+                and event.relationship is not SegmentsRelationship.OVERLAP):
             goal_is_subset_of_test = False
     if goal_is_subset_of_test:
         goal_is_subset_of_test = not events_queue
@@ -100,7 +111,8 @@ def process_linear_compound_queue(events_queue: EventsQueue,
                 else Relation.WITHIN)
     else:
         return (Relation.CROSS
-                if has_cross
+                if has_cross or (test_boundary_in_goal_interior
+                                 and test_boundary_in_goal_exterior)
                 else (Relation.TOUCH
                       if has_touch
                       else Relation.DISJOINT))
