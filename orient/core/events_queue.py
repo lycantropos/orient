@@ -85,7 +85,7 @@ class EventsQueue:
                            event.from_test, event.relationship,
                            EdgeKind.NORMAL)
         right_event = Event(False, point, event, event.from_test,
-                            event.complement.relationship, EdgeKind.NORMAL)
+                            event.relationship, EdgeKind.NORMAL)
         event.complement.complement, event.complement = left_event, right_event
         self._queue.push(left_event)
         self._queue.push(right_event)
