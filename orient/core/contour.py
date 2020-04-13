@@ -44,15 +44,16 @@ def _relate_segment(contour: Contour, segment: Segment) -> Relation:
               or relation_with_edge is Relation.COMPOSITE):
             return Relation.OVERLAP
         elif relation_with_edge is Relation.TOUCH:
-            edge_start, _ = edge
+            edge_start, edge_end = edge
             if has_touch:
                 if (not has_cross
                         and index - previous_touch_index == 1
                         and start not in edge and end not in edge
                         and (angle_orientation(end, start, edge_start)
                              is Orientation.COLLINEAR)
-                        and not _segment_touches_consecutive_edges(
-                                segment, edge, previous_touch_edge_start)):
+                        and _point_vertex_line_divides_angle(
+                                start, previous_touch_edge_start,
+                                edge_start, edge_end)):
                     has_cross = True
             else:
                 has_touch = True
@@ -62,14 +63,14 @@ def _relate_segment(contour: Contour, segment: Segment) -> Relation:
     if (not has_cross
             and has_touch
             and previous_touch_index == len(contour) - 1):
-        first_edge_start = contour[-1]
-        first_edge = first_edge_start, contour[0]
+        first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
         if (relate_segments(first_edge, segment) is Relation.TOUCH
                 and start not in first_edge and end not in first_edge
                 and (angle_orientation(end, start, first_edge_start)
                      is Orientation.COLLINEAR)
-                and not _segment_touches_consecutive_edges(
-                        segment, first_edge, contour[-2])):
+                and _point_vertex_line_divides_angle(start, contour[-2],
+                                                     first_edge_start,
+                                                     first_edge_end)):
             has_cross = True
     return (Relation.CROSS
             if has_cross
@@ -78,17 +79,12 @@ def _relate_segment(contour: Contour, segment: Segment) -> Relation:
                   else Relation.DISJOINT))
 
 
-def _segment_touches_consecutive_edges(segment: Segment,
-                                       edge: Segment,
-                                       previous_edge_start: Point) -> bool:
-    start, end = segment
-    edge_start, edge_end = edge
-    edges_angle_orientation = angle_orientation(
-            edge_end, edge_start, previous_edge_start)
-    return ((angle_orientation(edge_end, edge_start, start)
-             is edges_angle_orientation)
-            is (angle_orientation(edge_end, edge_start, end)
-                is edges_angle_orientation))
+def _point_vertex_line_divides_angle(point: Point,
+                                     first_ray_point: Point,
+                                     vertex: Point,
+                                     second_ray_point: Point) -> bool:
+    return (angle_orientation(first_ray_point, vertex, point)
+            is angle_orientation(point, vertex, second_ray_point))
 
 
 def orientation(contour: Contour) -> Orientation:
