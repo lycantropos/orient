@@ -10,6 +10,7 @@ from orient.planar import (Relation,
                            region_in_region)
 from tests.utils import (COMPOUND_RELATIONS,
                          equivalence,
+                         implication,
                          reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
@@ -134,15 +135,28 @@ def test_connection_with_contour_in_multiregion(multiregion_with_region
     result = region_in_multiregion(region, multiregion)
 
     contour_relation = contour_in_multiregion(region, multiregion)
-    assert equivalence(result is Relation.DISJOINT
+    assert implication(result is Relation.DISJOINT
                        or result is Relation.COVER,
                        contour_relation is Relation.DISJOINT)
-    assert equivalence(result is Relation.TOUCH
+    assert implication(contour_relation is Relation.DISJOINT,
+                       result is Relation.DISJOINT
+                       or result is Relation.OVERLAP
+                       or result is Relation.COVER)
+    assert implication(result is Relation.TOUCH
                        or result is Relation.ENCLOSES
                        or result is Relation.COMPOSITE,
                        contour_relation is Relation.TOUCH)
-    assert equivalence(result is Relation.OVERLAP,
-                       contour_relation is Relation.CROSS)
+    assert implication(contour_relation is Relation.TOUCH,
+                       result is Relation.TOUCH
+                       or result is Relation.ENCLOSES
+                       or result is Relation.OVERLAP
+                       or result is Relation.COMPOSITE)
+    assert implication(result is Relation.OVERLAP,
+                       contour_relation is Relation.DISJOINT
+                       or contour_relation is Relation.CROSS
+                       or contour_relation is Relation.TOUCH)
+    assert implication(contour_relation is Relation.CROSS,
+                       result is Relation.OVERLAP)
     assert equivalence(result is Relation.COMPONENT
                        or result is Relation.EQUAL,
                        contour_relation is Relation.COMPONENT)
