@@ -45,6 +45,10 @@ class Event:
     __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
+    def from_goal(self) -> bool:
+        return not self.from_test
+
+    @property
     def end(self) -> Point:
         return self.complement.start
 
@@ -74,6 +78,25 @@ class Event:
         edge_kind = self.edge_kind
         return (edge_kind is EdgeKind.NORMAL and not self.other_in_out
                 or edge_kind is EdgeKind.SAME_TRANSITION)
+
+    @property
+    def inside(self) -> bool:
+        """
+        Checks if the segment enclosed by
+        or lies within the region of the intersection.
+        """
+        return (self.in_intersection
+                and (self.relationship is SegmentsRelationship.NONE
+                     or self.relationship is SegmentsRelationship.TOUCH))
+
+    @property
+    def outside(self) -> bool:
+        """
+        Checks if the segment touches
+        or disjoint with the region of the intersection.
+        """
+        return (not self.in_intersection
+                and self.relationship is not SegmentsRelationship.OVERLAP)
 
     @property
     def segment(self) -> Segment:
