@@ -110,6 +110,9 @@ def test_connection_with_segment_in_polygon(polygon_with_contour
                            for edge_relation in edges_relations)
                        and any(edge_relation is Relation.COMPONENT
                                or edge_relation is Relation.ENCLOSED
+                               for edge_relation in edges_relations)
+                       and any(edge_relation is Relation.ENCLOSED
+                               or edge_relation is Relation.WITHIN
                                for edge_relation in edges_relations))
     assert equivalence(result is Relation.WITHIN,
                        all(edge_relation is Relation.WITHIN
