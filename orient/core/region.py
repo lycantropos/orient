@@ -9,6 +9,7 @@ from . import bounding_box
 from .contour import (_relate_segment as relate_segment_to_contour,
                       edges as boundary_edges,
                       equal as contours_equal,
+                      orientation as contour_orientation,
                       register as register_contour)
 from .events_queue import EventsQueue
 from .processing import (process_compound_queue,
@@ -51,11 +52,59 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
         return (Relation.DISJOINT
                 if start_relation is Relation.DISJOINT
                 else Relation.WITHIN)
+    elif start_relation is Relation.DISJOINT:
+        return Relation.TOUCH
+    elif start_relation is Relation.WITHIN:
+        return Relation.ENCLOSED
     else:
-        return (Relation.TOUCH
-                if (start_relation is Relation.DISJOINT
-                    or relate_point(region, end) is Relation.DISJOINT)
-                else Relation.ENCLOSED)
+        end_relation = relate_point(region, end)
+        if end_relation is Relation.DISJOINT:
+            return Relation.TOUCH
+        elif end_relation is Relation.WITHIN:
+            return Relation.ENCLOSED
+        else:
+            start_index = end_index = None
+            start_is_not_vertex = end_is_not_vertex = True
+            for index, edge in enumerate(boundary_edges(region)):
+                if (start_index is None
+                        and (relate_point_to_segment(edge, start)
+                             is Relation.COMPONENT)):
+                    start_index = index
+                    edge_start, edge_end = edge
+                    if start == edge_start:
+                        start_is_not_vertex = False
+                    elif start == edge_end:
+                        start_index += 1
+                        start_is_not_vertex = False
+                if (end_index is None
+                        and (relate_point_to_segment(edge, end)
+                             is Relation.COMPONENT)):
+                    end_index = index
+                    edge_start, edge_end = edge
+                    if end == edge_start:
+                        end_is_not_vertex = False
+                    elif end == edge_end:
+                        end_index += 1
+                        end_is_not_vertex = False
+                if start_index is not None and end_index is not None:
+                    break
+            start_index = (start_index - 1) % len(region)
+            end_index = (end_index - 1) % len(region)
+            if start_index > end_index:
+                start, end = end, start
+                start_index, end_index = end_index, start_index
+                start_is_not_vertex, end_is_not_vertex = (end_is_not_vertex,
+                                                          start_is_not_vertex)
+            first_part = (region[:start_index + start_is_not_vertex]
+                          + [start] + [end]
+                          + region[end_index + 1:])
+            second_part = ([start] + region[start_index + 1
+                                            :end_index + end_is_not_vertex]
+                           + [end])
+            return (Relation.ENCLOSED
+                    if (contour_orientation(first_part)
+                        is contour_orientation(second_part))
+                    else Relation.TOUCH)
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
