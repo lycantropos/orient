@@ -168,7 +168,6 @@ def test_connection_with_segment_in_multiregion(
                            and edge_relation is not Relation.WITHIN
                            for edge_relation in edges_relations)
                        and any(edge_relation is Relation.TOUCH
-                               or edge_relation is Relation.COMPONENT
                                for edge_relation in edges_relations))
     assert equivalence(result is Relation.CROSS,
                        any(edge_relation is Relation.CROSS
