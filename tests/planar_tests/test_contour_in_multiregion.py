@@ -2,13 +2,17 @@ from typing import Tuple
 
 from hypothesis import given
 
+from orient.core.contour import edges
 from orient.hints import (Contour,
                           Multiregion)
 from orient.planar import (Relation,
                            contour_in_multiregion,
-                           contour_in_region)
+                           contour_in_region,
+                           point_in_multiregion,
+                           segment_in_multiregion)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
+                         implication,
                          reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
@@ -103,3 +107,89 @@ def test_rotations(multiregion_with_contour: Tuple[Multiregion, Contour]
 
     assert all(result is contour_in_multiregion(contour, rotated)
                for rotated in rotations(multiregion))
+
+
+@given(strategies.multicontours_with_contours)
+def test_connection_with_point_in_multiregion(
+        multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
+    multiregion, contour = multiregion_with_contour
+
+    result = contour_in_multiregion(contour, multiregion)
+
+    vertices_relations = [point_in_multiregion(vertex, multiregion)
+                          for vertex in contour]
+    assert implication(result is Relation.DISJOINT,
+                       all(vertex_relation is Relation.DISJOINT
+                           for vertex_relation in vertices_relations))
+    assert implication(result is Relation.TOUCH,
+                       all(vertex_relation is not Relation.WITHIN
+                           for vertex_relation in vertices_relations))
+    assert implication(result is Relation.COMPONENT,
+                       all(vertex_relation is Relation.COMPONENT
+                           for vertex_relation in vertices_relations))
+    assert implication(result is Relation.ENCLOSED,
+                       all(vertex_relation is not Relation.DISJOINT
+                           for vertex_relation in vertices_relations))
+    assert implication(result is Relation.WITHIN,
+                       all(vertex_relation is Relation.WITHIN
+                           for vertex_relation in vertices_relations))
+    assert implication(all(vertex_relation is Relation.DISJOINT
+                           for vertex_relation in vertices_relations),
+                       result is Relation.DISJOINT
+                       or result is Relation.TOUCH
+                       or result is Relation.CROSS)
+    assert implication(all(vertex_relation is Relation.WITHIN
+                           for vertex_relation in vertices_relations),
+                       result is Relation.CROSS
+                       or result is Relation.ENCLOSED
+                       or result is Relation.WITHIN)
+    assert implication(any(vertex_relation is Relation.DISJOINT
+                           for vertex_relation in vertices_relations)
+                       and any(vertex_relation is Relation.WITHIN
+                               for vertex_relation in vertices_relations),
+                       result is Relation.CROSS)
+
+
+@given(strategies.multicontours_with_contours)
+def test_connection_with_segment_in_multiregion(
+        multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
+    multiregion, contour = multiregion_with_contour
+
+    result = contour_in_multiregion(contour, multiregion)
+
+    edges_relations = [segment_in_multiregion(edge, multiregion)
+                       for edge in edges(contour)]
+    assert equivalence(result is Relation.DISJOINT,
+                       all(edge_relation is Relation.DISJOINT
+                           for edge_relation in edges_relations))
+    assert equivalence(result is Relation.TOUCH,
+                       all(edge_relation is not Relation.CROSS
+                           and edge_relation is not Relation.ENCLOSED
+                           and edge_relation is not Relation.WITHIN
+                           for edge_relation in edges_relations)
+                       and any(edge_relation is Relation.TOUCH
+                               or edge_relation is Relation.COMPONENT
+                               for edge_relation in edges_relations))
+    assert equivalence(result is Relation.CROSS,
+                       any(edge_relation is Relation.CROSS
+                           for edge_relation in edges_relations)
+                       or any(edge_relation is Relation.TOUCH
+                              or edge_relation is Relation.DISJOINT
+                              for edge_relation in edges_relations)
+                       and any(edge_relation is Relation.ENCLOSED
+                               or edge_relation is Relation.WITHIN
+                               for edge_relation in edges_relations))
+    assert equivalence(result is Relation.COMPONENT,
+                       all(edge_relation is Relation.COMPONENT
+                           for edge_relation in edges_relations))
+    assert equivalence(result is Relation.ENCLOSED,
+                       all(edge_relation is Relation.COMPONENT
+                           or edge_relation is Relation.ENCLOSED
+                           or edge_relation is Relation.WITHIN
+                           for edge_relation in edges_relations)
+                       and any(edge_relation is Relation.COMPONENT
+                               or edge_relation is Relation.ENCLOSED
+                               for edge_relation in edges_relations))
+    assert equivalence(result is Relation.WITHIN,
+                       all(edge_relation is Relation.WITHIN
+                           for edge_relation in edges_relations))
