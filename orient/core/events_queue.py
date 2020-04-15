@@ -89,6 +89,3 @@ class EventsQueue:
         event.complement.complement, event.complement = left_event, right_event
         self._queue.push(left_event)
         self._queue.push(right_event)
-
-    def clear(self) -> None:
-        self._queue.clear()
