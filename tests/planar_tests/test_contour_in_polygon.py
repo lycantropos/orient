@@ -30,6 +30,19 @@ def test_self(contour: Contour) -> None:
     assert contour_in_polygon(contour, (contour, [])) is Relation.COMPONENT
 
 
+@given(strategies.polygons)
+def test_border(polygon: Polygon) -> None:
+    border, holes = polygon
+    assert contour_in_polygon(border, polygon) is Relation.COMPONENT
+
+
+@given(strategies.polygons)
+def test_holes(polygon: Polygon) -> None:
+    _, holes = polygon
+    assert all(contour_in_polygon(hole, polygon) is Relation.COMPONENT
+               for hole in holes)
+
+
 @given(strategies.polygons_with_contours)
 def test_connection_with_point_in_polygon(polygon_with_contour
                                           : Tuple[Polygon, Contour]) -> None:
