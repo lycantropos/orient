@@ -28,6 +28,21 @@ def test_self(region: Region) -> None:
     assert region_in_polygon(region, (region, [])) is Relation.EQUAL
 
 
+@given(strategies.polygons)
+def test_border(polygon: Polygon) -> None:
+    border, holes = polygon
+    assert region_in_polygon(border, polygon) is (Relation.OVERLAP
+                                                  if holes
+                                                  else Relation.EQUAL)
+
+
+@given(strategies.polygons)
+def test_holes(polygon: Polygon) -> None:
+    _, holes = polygon
+    assert all(region_in_polygon(hole, polygon) is Relation.TOUCH
+               for hole in holes)
+
+
 @given(strategies.polygons_with_contours)
 def test_connection_with_contour_in_polygon(polygon_with_region
                                             : Tuple[Polygon, Region]
