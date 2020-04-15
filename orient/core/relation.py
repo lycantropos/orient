@@ -52,9 +52,9 @@ class Relation(IntEnum):
         elif self is Relation.ENCLOSES:
             return Relation.ENCLOSED
         elif self is Relation.COMPOSITE:
-            return Relation.COMPOSITE
-        elif self is Relation.COMPONENT:
             return Relation.COMPONENT
+        elif self is Relation.COMPONENT:
+            return Relation.COMPOSITE
         elif self is Relation.ENCLOSED:
             return Relation.ENCLOSES
         elif self is Relation.WITHIN:
