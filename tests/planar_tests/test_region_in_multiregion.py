@@ -33,6 +33,19 @@ def test_self(region: Region) -> None:
     assert region_in_multiregion(region, [region]) is Relation.EQUAL
 
 
+@given(strategies.multicontours)
+def test_elements(multiregion: Multiregion) -> None:
+    assert equivalence(bool(multiregion)
+                       and all(region_in_multiregion(element, multiregion)
+                               is Relation.EQUAL
+                               for element in multiregion),
+                       len(multiregion) == 1)
+    assert equivalence(all(region_in_multiregion(element, multiregion)
+                           is Relation.COMPONENT
+                           for element in multiregion),
+                       len(multiregion) != 1)
+
+
 @given(strategies.empty_multicontours_with_contours)
 def test_base(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     multiregion, region = multiregion_with_region
