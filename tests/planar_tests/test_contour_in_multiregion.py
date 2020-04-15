@@ -35,6 +35,13 @@ def test_self(contour: Contour) -> None:
     assert contour_in_multiregion(contour, [contour]) is Relation.COMPONENT
 
 
+@given(strategies.multicontours)
+def test_elements(multiregion: Multiregion) -> None:
+    assert all(contour_in_multiregion(element, multiregion)
+               is Relation.COMPONENT
+               for element in multiregion)
+
+
 @given(strategies.empty_multicontours_with_contours)
 def test_base(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
     multiregion, contour = multiregion_with_contour
