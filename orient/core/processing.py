@@ -88,9 +88,11 @@ def process_linear_compound_queue(events_queue: EventsQueue,
                       if has_touch
                       else Relation.DISJOINT))
     elif test_is_subset_of_goal:
-        return (Relation.ENCLOSED
-                if has_touch
-                else Relation.WITHIN)
+        return ((Relation.ENCLOSED
+                 if has_touch
+                 else Relation.WITHIN)
+                if test_boundary_in_goal_interior
+                else Relation.COMPONENT)
     else:
         return (Relation.CROSS
                 if test_boundary_in_goal_interior
