@@ -1,3 +1,5 @@
+from itertools import chain
+
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
 from robust.linear import (SegmentsRelationship,
@@ -11,7 +13,6 @@ from . import bounding_box
 from .contour import (_relate_segment as relate_segment_to_contour,
                       edges as boundary_edges,
                       equal as contours_equal,
-                      orientation as contour_orientation,
                       register as register_contour)
 from .events_queue import EventsQueue
 from .processing import (process_compound_queue,
@@ -150,15 +151,67 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
                 start_index, end_index = end_index, start_index
                 start_is_not_vertex, end_is_not_vertex = (end_is_not_vertex,
                                                           start_is_not_vertex)
-            first_part = (region[:start_index + start_is_not_vertex]
-                          + [start] + [end]
-                          + region[end_index + 1:])
-            second_part = ([start] + region[start_index + 1
-                                            :end_index + end_is_not_vertex]
-                           + [end])
+            first_part_min_index, second_part_min_index = (
+                min(chain(range(start_index + start_is_not_vertex),
+                          range(end_index + 1, len(region))),
+                    key=region.__getitem__),
+                min(range(start_index + 1,
+                          end_index + end_is_not_vertex),
+                    key=region.__getitem__))
+            first_part_min_vertex, second_part_min_vertex = (
+                region[first_part_min_index], region[second_part_min_index])
+            if first_part_min_vertex > start:
+                if start > end:
+                    first_part_orientation = angle_orientation(
+                            end, start, region[(end_index + 1) % len(region)])
+                else:
+                    first_part_orientation = angle_orientation(
+                            start,
+                            region[start_index + start_is_not_vertex - 1], end)
+            elif first_part_min_vertex > end:
+                first_part_orientation = angle_orientation(
+                        end, start, region[(end_index + 1) % len(region)])
+            elif first_part_min_index + 1 == start_index + start_is_not_vertex:
+                first_part_orientation = angle_orientation(
+                        first_part_min_vertex,
+                        region[first_part_min_index - 1], start)
+            elif first_part_min_index == (end_index + 1) % len(region):
+                first_part_orientation = angle_orientation(
+                        first_part_min_vertex,
+                        end, region[(first_part_min_index + 1) % len(region)])
+            else:
+                first_part_orientation = angle_orientation(
+                        first_part_min_vertex,
+                        region[first_part_min_index - 1],
+                        region[(first_part_min_index + 1) % len(region)])
+            if second_part_min_vertex > start:
+                if start > end:
+                    second_part_orientation = angle_orientation(
+                            end, region[end_index + end_is_not_vertex - 1],
+                            start)
+                else:
+                    second_part_orientation = angle_orientation(
+                            start, end, region[start_index + 1])
+            elif second_part_min_vertex > end:
+                second_part_orientation = angle_orientation(
+                        end, region[end_index + end_is_not_vertex - 1], start)
+            elif second_part_min_index == start_index + 1:
+                second_part_orientation = angle_orientation(
+                        second_part_min_vertex, start,
+                        region[second_part_min_index + 1]
+                        if second_part_min_index + 1 < len(region)
+                        else end)
+            elif second_part_min_index + 1 == end_index + end_is_not_vertex:
+                second_part_orientation = angle_orientation(
+                        second_part_min_vertex,
+                        region[second_part_min_index - 1], end)
+            else:
+                second_part_orientation = angle_orientation(
+                        second_part_min_vertex,
+                        region[second_part_min_index - 1],
+                        region[second_part_min_index + 1])
             return (Relation.ENCLOSED
-                    if (contour_orientation(first_part)
-                        is contour_orientation(second_part))
+                    if first_part_orientation is second_part_orientation
                     else Relation.TOUCH)
 
 
