@@ -1,5 +1,7 @@
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
+from robust.linear import (SegmentsRelationship,
+                           segments_relationship)
 
 from orient.hints import (Contour,
                           Point,
@@ -65,12 +67,39 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
         else:
             start_index = end_index = None
             start_is_not_vertex = end_is_not_vertex = True
+            overlaps_with_edges = relation_with_contour is Relation.OVERLAP
             for index, edge in enumerate(boundary_edges(region)):
                 if (start_index is None
                         and (relate_point_to_segment(edge, start)
                              is Relation.COMPONENT)):
                     start_index = index
                     edge_start, edge_end = edge
+                    if overlaps_with_edges:
+                        if (segments_relationship(segment, edge)
+                                is SegmentsRelationship.OVERLAP):
+                            start = (max if start < end else min)(edge_start,
+                                                                  edge_end)
+                        elif (start == edge_start
+                              and (segments_relationship(
+                                        segment,
+                                        (region[index - 2], edge_start))
+                                   is SegmentsRelationship.OVERLAP)):
+                            edge_start, edge_end = (region[index - 2],
+                                                    edge_start)
+                            start_index = (start_index - 1) % len(region)
+                            start = (max if start < end else min)(edge_start,
+                                                                  edge_end)
+                        elif (start == edge_end
+                              and (segments_relationship(
+                                        segment,
+                                        (edge_end,
+                                         region[(index + 1) % len(region)]))
+                                   is SegmentsRelationship.OVERLAP)):
+                            edge_start, edge_end = (
+                                edge_end, region[(index + 1) % len(region)])
+                            start_index = (start_index + 1) % len(region)
+                            start = (max if start < end else min)(edge_start,
+                                                                  edge_end)
                     if start == edge_start:
                         start_is_not_vertex = False
                     elif start == edge_end:
@@ -81,6 +110,32 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
                              is Relation.COMPONENT)):
                     end_index = index
                     edge_start, edge_end = edge
+                    if overlaps_with_edges:
+                        if (segments_relationship(segment, edge)
+                                is SegmentsRelationship.OVERLAP):
+                            end = (max if end < start else min)(edge_start,
+                                                                edge_end)
+                        elif (end == edge_start
+                              and (segments_relationship(
+                                        segment,
+                                        (region[index - 2], edge_start))
+                                   is SegmentsRelationship.OVERLAP)):
+                            edge_start, edge_end = (region[index - 2],
+                                                    edge_start)
+                            end_index = (end_index - 1) % len(region)
+                            end = (max if end < start else min)(edge_start,
+                                                                edge_end)
+                        elif (end == edge_end
+                              and (segments_relationship(
+                                        segment,
+                                        (edge_end,
+                                         region[(index + 1) % len(region)]))
+                                   is SegmentsRelationship.OVERLAP)):
+                            edge_start, edge_end = (
+                                edge_end, region[(index + 1) % len(region)])
+                            end_index = (end_index + 1) % len(region)
+                            end = (max if end < start else min)(edge_start,
+                                                                edge_end)
                     if end == edge_start:
                         end_is_not_vertex = False
                     elif end == edge_end:
