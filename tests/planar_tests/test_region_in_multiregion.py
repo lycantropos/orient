@@ -28,11 +28,6 @@ def test_basic(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     assert result in COMPOUND_RELATIONS
 
 
-@given(strategies.contours)
-def test_self(region: Region) -> None:
-    assert region_in_multiregion(region, [region]) is Relation.EQUAL
-
-
 @given(strategies.multicontours)
 def test_elements(multiregion: Multiregion) -> None:
     assert equivalence(bool(multiregion)
