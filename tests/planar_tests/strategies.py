@@ -121,16 +121,16 @@ def to_multicontours_pairs(coordinates: Strategy[Coordinate],
                            min_size: int = 0,
                            max_size: Optional[int] = None
                            ) -> Strategy[Tuple[Multicontour, Multicontour]]:
-    return strategies.tuples(planar.multicontours(coordinates),
-                             planar.multicontours(coordinates,
+    return strategies.tuples(planar.multicontours(coordinates,
                                                   min_size=min_size,
-                                                  max_size=max_size))
+                                                  max_size=max_size),
+                             planar.multicontours(coordinates))
 
 
 multicontours_pairs = coordinates_strategies.flatmap(to_multicontours_pairs)
-multicontours_with_empty_multicontours = strategies.tuples(multicontours,
-                                                           empty_multicontours)
-multicontours_with_non_empty_multicontours = (
+empty_multicontours_with_multicontours = strategies.tuples(empty_multicontours,
+                                                           multicontours)
+non_empty_multicontours_with_multicontours = (
     coordinates_strategies.flatmap(partial(to_multicontours_pairs,
                                            min_size=1)))
 polygons = coordinates_strategies.flatmap(planar.polygons)

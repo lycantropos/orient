@@ -73,7 +73,7 @@ def test_asymmetric_relations(multiregions_pair: Tuple[Multiregion,
                        and complement in ASYMMETRIC_COMPOUND_RELATIONS)
 
 
-@given(strategies.multicontours_with_empty_multicontours)
+@given(strategies.empty_multicontours_with_multicontours)
 def test_base(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
 
@@ -81,9 +81,9 @@ def test_base(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                                       right_multiregion) is Relation.DISJOINT
 
 
-@given(strategies.multicontours_with_non_empty_multicontours)
+@given(strategies.non_empty_multicontours_with_multicontours)
 def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
-    right_multiregion, left_multiregion = multiregions_pair
+    left_multiregion, right_multiregion = multiregions_pair
     first_region, *rest_left_multiregion = left_multiregion
 
     result = multiregion_in_multiregion(rest_left_multiregion,
