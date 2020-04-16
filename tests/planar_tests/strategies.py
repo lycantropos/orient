@@ -143,6 +143,26 @@ def to_polygons_with_contours(coordinates: Strategy[Coordinate]
 
 polygons_with_contours = (coordinates_strategies
                           .flatmap(to_polygons_with_contours))
+
+
+def to_polygons_with_multicontours(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
+                                   ) -> Strategy[Tuple[Polygon, Multicontour]]:
+    return strategies.tuples(planar.polygons(coordinates),
+                             planar.multicontours(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
+
+
+polygons_with_multicontours = (coordinates_strategies
+                               .flatmap(to_polygons_with_multicontours))
+polygons_with_empty_multicontours = strategies.tuples(polygons,
+                                                      strategies.builds(list))
+polygons_with_non_empty_multicontours = (
+    coordinates_strategies.flatmap(partial(to_polygons_with_multicontours,
+                                           min_size=1)))
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
