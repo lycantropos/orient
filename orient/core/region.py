@@ -234,9 +234,9 @@ def relate_contour(region: Region, contour: Contour) -> Relation:
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
-    test_bounding_box = bounding_box.from_points(test)
-    if bounding_box.disjoint_with(bounding_box.from_points(goal),
-                                  test_bounding_box):
+    goal_bounding_box, test_bounding_box = (bounding_box.from_points(goal),
+                                            bounding_box.from_points(test))
+    if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL
@@ -245,8 +245,9 @@ def relate_region(goal: Region, test: Region) -> Relation:
              from_test=False)
     register(events_queue, test,
              from_test=True)
-    _, test_max_x, _, _ = test_bounding_box
-    return process_compound_queue(events_queue, test_max_x)
+    (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
+                                                    test_bounding_box)
+    return process_compound_queue(events_queue, min(goal_max_x, test_max_x))
 
 
 equal = contours_equal
