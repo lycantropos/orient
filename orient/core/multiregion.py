@@ -68,21 +68,28 @@ def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:
 def relate_region(multiregion: Multiregion, region: Region) -> Relation:
     if not multiregion:
         return Relation.DISJOINT
-    test_bounding_box = bounding_box.from_points(region)
-    overlapping_multiregion = [
-        region
-        for region in multiregion
-        if not bounding_box.disjoint_with(bounding_box.from_points(region),
-                                          test_bounding_box)]
-    if not overlapping_multiregion:
+    region_bounding_box = bounding_box.from_points(region)
+    disjoint, multiregion_max_x, events_queue = True, None, None
+    for sub_region in multiregion:
+        sub_region_bounding_box = bounding_box.from_points(sub_region)
+        if not bounding_box.disjoint_with(region_bounding_box,
+                                          sub_region_bounding_box):
+            if disjoint:
+                disjoint = False
+                _, multiregion_max_x, _, _ = sub_region_bounding_box
+                events_queue = EventsQueue()
+                register_contour(events_queue, region,
+                                 from_test=True)
+            else:
+                _, sub_region_max_x, _, _ = sub_region_bounding_box
+                multiregion_max_x = max(multiregion_max_x, sub_region_max_x)
+            register_region(events_queue, sub_region,
+                            from_test=False)
+    if disjoint:
         return Relation.DISJOINT
-    events_queue = EventsQueue()
-    register(events_queue, multiregion,
-             from_test=False)
-    register_region(events_queue, region,
-                    from_test=True)
-    _, test_max_x, _, _ = test_bounding_box
-    return process_compound_queue(events_queue, test_max_x)
+    _, region_max_x, _, _ = region_bounding_box
+    return process_compound_queue(events_queue, min(multiregion_max_x,
+                                                    region_max_x))
 
 
 def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
