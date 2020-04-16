@@ -6,7 +6,9 @@ from orient.hints import Contour
 from orient.planar import (Relation,
                            contour_in_contour,
                            point_in_contour)
-from tests.utils import (SAME_LINEAR_RELATIONS,
+from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
+                         SAME_LINEAR_RELATIONS,
+                         SYMMETRIC_SAME_LINEAR_RELATIONS,
                          equivalence,
                          implication,
                          to_convex_hull)
@@ -36,9 +38,7 @@ def test_symmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
 
     complement = contour_in_contour(right_contour, left_contour)
     assert equivalence(result is complement,
-                       result in (Relation.DISJOINT, Relation.TOUCH,
-                                  Relation.OVERLAP, Relation.CROSS,
-                                  Relation.EQUAL))
+                       result in SYMMETRIC_SAME_LINEAR_RELATIONS)
 
 
 @given(strategies.contours_pairs)
@@ -48,8 +48,9 @@ def test_asymmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
     result = contour_in_contour(left_contour, right_contour)
 
     complement = contour_in_contour(right_contour, left_contour)
-    assert equivalence(result is Relation.COMPOSITE,
-                       complement is Relation.COMPONENT)
+    assert equivalence(result is not complement
+                       and complement in ASYMMETRIC_LINEAR_RELATIONS,
+                       result in ASYMMETRIC_LINEAR_RELATIONS)
 
 
 @given(strategies.contours)
