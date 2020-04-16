@@ -119,9 +119,10 @@ def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
         return border_relation
     elif border_relation in (Relation.EQUAL,
                              Relation.COMPONENT,
-                             Relation.ENCLOSED,
-                             Relation.WITHIN):
-        return Relation.OVERLAP
+                             Relation.ENCLOSED):
+        return Relation.ENCLOSES
+    elif border_relation is Relation.WITHIN:
+        return Relation.WITHIN
     else:
         holes_relation = relate_multiregions(multiregion, holes)
         if holes_relation is Relation.DISJOINT:
