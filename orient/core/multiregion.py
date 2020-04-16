@@ -41,21 +41,28 @@ def relate_segment(multiregion: Multiregion, segment: Segment) -> Relation:
 
 
 def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:
-    test_bounding_box = bounding_box.from_points(contour)
-    overlapping_multiregion = [
-        region
-        for region in multiregion
-        if not bounding_box.disjoint_with(bounding_box.from_points(region),
-                                          test_bounding_box)]
-    if not overlapping_multiregion:
+    contour_bounding_box = bounding_box.from_points(contour)
+    disjoint, multiregion_max_x, events_queue = True, None, None
+    for region in multiregion:
+        region_bounding_box = bounding_box.from_points(region)
+        if not bounding_box.disjoint_with(region_bounding_box,
+                                          contour_bounding_box):
+            if disjoint:
+                disjoint = False
+                _, multiregion_max_x, _, _ = region_bounding_box
+                events_queue = EventsQueue()
+                register_contour(events_queue, contour,
+                                 from_test=True)
+            else:
+                _, region_max_x, _, _ = region_bounding_box
+                multiregion_max_x = max(multiregion_max_x, region_max_x)
+            register_region(events_queue, region,
+                            from_test=False)
+    if disjoint:
         return Relation.DISJOINT
-    events_queue = EventsQueue()
-    register(events_queue, overlapping_multiregion,
-             from_test=False)
-    register_contour(events_queue, contour,
-                     from_test=True)
-    _, test_max_x, _, _ = test_bounding_box
-    return process_linear_compound_queue(events_queue, test_max_x)
+    _, contour_max_x, _, _ = contour_bounding_box
+    return process_linear_compound_queue(events_queue, min(contour_max_x,
+                                                           multiregion_max_x))
 
 
 def relate_region(multiregion: Multiregion, region: Region) -> Relation:
