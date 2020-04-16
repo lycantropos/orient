@@ -112,11 +112,11 @@ def process_linear_compound_queue(events_queue: EventsQueue,
 
 
 def process_compound_queue(events_queue: EventsQueue,
-                           test_max_x: Coordinate) -> Relation:
+                           stop_x: Coordinate) -> Relation:
     test_boundary_in_goal_interior = goal_boundary_in_test_interior = False
     boundaries_do_not_intersect, boundary_in_other_interior = True, False
     test_is_subset_of_goal = goal_is_subset_of_test = True
-    for event in sweep(events_queue, test_max_x):
+    for event in sweep(events_queue, stop_x):
         if event.relationship is SegmentsRelationship.CROSS:
             return Relation.OVERLAP
         if test_is_subset_of_goal and event.from_test and event.outside:
@@ -134,8 +134,11 @@ def process_compound_queue(events_queue: EventsQueue,
         if (not goal_boundary_in_test_interior
                 and event.from_goal and event.inside):
             goal_boundary_in_test_interior = True
-    if goal_is_subset_of_test:
-        goal_is_subset_of_test = not events_queue
+    if events_queue:
+        if events_queue.peek().from_test:
+            test_is_subset_of_goal = False
+        else:
+            goal_is_subset_of_test = False
     if boundaries_do_not_intersect:
         return (Relation.WITHIN
                 if test_is_subset_of_goal
