@@ -69,13 +69,16 @@ def relate_region(multiregion: Multiregion, region: Region) -> Relation:
     if not multiregion:
         return Relation.DISJOINT
     region_bounding_box = bounding_box.from_points(region)
-    disjoint, multiregion_max_x, events_queue = True, None, None
+    all_disjoint, any_disjoint, multiregion_max_x, events_queue = (True, False,
+                                                                   None, None)
     for sub_region in multiregion:
         sub_region_bounding_box = bounding_box.from_points(sub_region)
-        if not bounding_box.disjoint_with(region_bounding_box,
-                                          sub_region_bounding_box):
-            if disjoint:
-                disjoint = False
+        if bounding_box.disjoint_with(region_bounding_box,
+                                      sub_region_bounding_box):
+            any_disjoint = True
+        else:
+            if all_disjoint:
+                all_disjoint = False
                 _, multiregion_max_x, _, _ = sub_region_bounding_box
                 events_queue = EventsQueue()
                 register_contour(events_queue, region,
@@ -85,11 +88,20 @@ def relate_region(multiregion: Multiregion, region: Region) -> Relation:
                 multiregion_max_x = max(multiregion_max_x, sub_region_max_x)
             register_region(events_queue, sub_region,
                             from_test=False)
-    if disjoint:
+    if all_disjoint:
         return Relation.DISJOINT
     _, region_max_x, _, _ = region_bounding_box
-    return process_compound_queue(events_queue, min(multiregion_max_x,
-                                                    region_max_x))
+    relation = process_compound_queue(events_queue, min(multiregion_max_x,
+                                                        region_max_x))
+    return ((Relation.COMPONENT
+             if relation is Relation.EQUAL
+             else (Relation.OVERLAP
+                   if relation in (Relation.COVER,
+                                   Relation.ENCLOSES,
+                                   Relation.COMPOSITE)
+                   else relation))
+            if any_disjoint
+            else relation)
 
 
 def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
