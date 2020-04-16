@@ -65,7 +65,7 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
                        and relation_with_first_region is Relation.TOUCH
                        or result is Relation.TOUCH
                        and relation_with_first_region in (Relation.DISJOINT,
-                                                           Relation.TOUCH))
+                                                          Relation.TOUCH))
     assert equivalence(next_result is Relation.COMPONENT,
                        result is Relation.COMPONENT
                        or bool(rest_multiregion)
@@ -77,7 +77,7 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
                        and relation_with_first_region in (Relation.COVER,
-                                                           Relation.ENCLOSES)
+                                                          Relation.ENCLOSES)
                        or result in (Relation.COVER, Relation.ENCLOSES)
                        and relation_with_first_region is Relation.DISJOINT)
     assert equivalence(next_result is Relation.COVER,
@@ -86,7 +86,7 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     assert equivalence(next_result is Relation.ENCLOSES,
                        result is Relation.ENCLOSES
                        and relation_with_first_region in (Relation.ENCLOSES,
-                                                           Relation.COVER)
+                                                          Relation.COVER)
                        or (not rest_multiregion or result is Relation.COVER)
                        and relation_with_first_region is Relation.ENCLOSES)
     assert equivalence(next_result is Relation.EQUAL,
