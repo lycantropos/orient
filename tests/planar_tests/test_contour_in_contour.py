@@ -57,7 +57,7 @@ def test_asymmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
 @given(strategies.contours)
 def test_convex_hull(contour: Contour) -> None:
     assert (contour_in_contour(contour, to_convex_hull(contour))
-            in (Relation.EQUAL, Relation.OVERLAP))
+            in (Relation.TOUCH, Relation.OVERLAP, Relation.EQUAL))
 
 
 @given(strategies.contours_pairs)
