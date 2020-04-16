@@ -23,15 +23,10 @@ def test_basic(region_with_polygon: Tuple[Polygon, Region]) -> None:
     assert result in COMPOUND_RELATIONS
 
 
-@given(strategies.contours)
-def test_self(region: Region) -> None:
-    assert region_in_polygon(region, (region, [])) is Relation.EQUAL
-
-
 @given(strategies.polygons)
 def test_border(polygon: Polygon) -> None:
     border, holes = polygon
-    assert region_in_polygon(border, polygon) is (Relation.OVERLAP
+    assert region_in_polygon(border, polygon) is (Relation.ENCLOSES
                                                   if holes
                                                   else Relation.EQUAL)
 
