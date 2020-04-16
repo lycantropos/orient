@@ -33,7 +33,9 @@ def test_border(polygon: Polygon) -> None:
 @given(strategies.polygons)
 def test_holes(polygon: Polygon) -> None:
     _, holes = polygon
-    assert multiregion_in_polygon(holes, polygon) is Relation.TOUCH
+    assert multiregion_in_polygon(holes, polygon) is (Relation.TOUCH
+                                                      if holes
+                                                      else Relation.DISJOINT)
 
 
 @given(strategies.polygons_with_empty_multicontours)
