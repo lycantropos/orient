@@ -49,8 +49,9 @@ def test_asymmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
 
     complement = contour_in_contour(right_contour, left_contour)
     assert equivalence(result is not complement
-                       and complement in ASYMMETRIC_LINEAR_RELATIONS,
-                       result in ASYMMETRIC_LINEAR_RELATIONS)
+                       and result.complement is complement,
+                       result in ASYMMETRIC_LINEAR_RELATIONS
+                       and complement in ASYMMETRIC_LINEAR_RELATIONS)
 
 
 @given(strategies.contours)
