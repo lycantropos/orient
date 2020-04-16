@@ -9,7 +9,8 @@ from orient.planar import (Relation,
 from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
-                         equivalence)
+                         equivalence,
+                         implication)
 from . import strategies
 
 
@@ -104,7 +105,17 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                        and relation_with_first_region is Relation.TOUCH)
     assert equivalence(next_result is Relation.OVERLAP,
                        result is Relation.OVERLAP
+                       and (relation_with_first_region is Relation.DISJOINT
+                            or relation_with_first_region is Relation.TOUCH
+                            or relation_with_first_region is Relation.OVERLAP
+                            or relation_with_first_region is Relation.ENCLOSED
+                            or relation_with_first_region is Relation.WITHIN)
                        or relation_with_first_region is Relation.OVERLAP
+                       and (result is Relation.DISJOINT
+                            or result is Relation.TOUCH
+                            or result is Relation.OVERLAP
+                            or result is Relation.ENCLOSED
+                            or result is Relation.WITHIN)
                        or (bool(rest_left_multiregion)
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
@@ -127,13 +138,16 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                        or (relation_with_first_region is Relation.COMPOSITE
                            or bool(rest_left_multiregion)
                            and relation_with_first_region is Relation.EQUAL))
-    assert equivalence(next_result is Relation.EQUAL,
-                       not rest_left_multiregion
-                       and relation_with_first_region is Relation.EQUAL)
-    assert equivalence(next_result is Relation.COMPONENT,
-                       (not rest_left_multiregion
-                        or result is Relation.COMPONENT)
-                       and relation_with_first_region is Relation.COMPONENT)
+    assert implication(result is relation_with_first_region
+                       is Relation.COMPONENT,
+                       next_result is Relation.EQUAL
+                       or next_result is Relation.COMPONENT)
+    assert implication(not rest_left_multiregion
+                       and relation_with_first_region is Relation.EQUAL,
+                       next_result is Relation.EQUAL)
+    assert implication(not rest_left_multiregion
+                       and relation_with_first_region is Relation.COMPONENT,
+                       next_result is Relation.COMPONENT)
     assert equivalence(next_result is Relation.ENCLOSED,
                        (not rest_left_multiregion
                         or result is Relation.COMPONENT
