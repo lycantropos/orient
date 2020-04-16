@@ -55,7 +55,9 @@ def process_linear_queue(events_queue: EventsQueue,
                 else (Relation.OVERLAP
                       if has_overlap
                       else (Relation.CROSS
-                            if has_cross or goal_boundary_in_test_interior
+                            if (has_cross
+                                or test_boundary_in_goal_interior
+                                or goal_boundary_in_test_interior)
                             else Relation.TOUCH)))
 
 
