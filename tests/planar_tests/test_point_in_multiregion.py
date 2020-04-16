@@ -42,21 +42,21 @@ def test_base(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
 @given(strategies.non_empty_multicontours_with_points)
 def test_step(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_region
-    first_contour, *rest_multiregion = multiregion
+    first_region, *rest_multiregion = multiregion
 
     result = point_in_multiregion(point, rest_multiregion)
     next_result = point_in_multiregion(point, multiregion)
 
-    relation_with_first_contour = point_in_region(point, first_contour)
+    relation_with_first_region = point_in_region(point, first_region)
     assert equivalence(next_result is Relation.DISJOINT,
                        result is Relation.DISJOINT
-                       and relation_with_first_contour is Relation.DISJOINT)
+                       and relation_with_first_region is Relation.DISJOINT)
     assert equivalence(next_result is Relation.WITHIN,
                        result is Relation.WITHIN
-                       or relation_with_first_contour is Relation.WITHIN)
+                       or relation_with_first_region is Relation.WITHIN)
     assert equivalence(next_result is Relation.COMPONENT,
                        result is Relation.COMPONENT
-                       or relation_with_first_contour is Relation.COMPONENT)
+                       or relation_with_first_region is Relation.COMPONENT)
 
 
 @given(strategies.multicontours_with_points)
