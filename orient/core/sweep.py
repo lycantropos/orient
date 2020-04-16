@@ -16,14 +16,14 @@ from .sweep_line import SweepLine
 
 
 def sweep(events_queue: EventsQueue,
-          test_max_x: Coordinate) -> Iterable[Event]:
+          stop_x: Coordinate) -> Iterable[Event]:
     sweep_line = SweepLine()
     while events_queue:
         event = events_queue.pop()
         start = event.start
         start_x, _ = start
-        if start_x > test_max_x:
-            # no test segments left
+        if start_x > stop_x:
+            # no intersection segments left
             return
         sweep_line.move_to(start_x)
         same_start_events = [event]
