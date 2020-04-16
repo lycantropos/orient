@@ -216,9 +216,9 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
-    test_bounding_box = bounding_box.from_points(contour)
-    if bounding_box.disjoint_with(bounding_box.from_points(region),
-                                  test_bounding_box):
+    contour_bounding_box, region_bounding_box = (
+        bounding_box.from_points(contour), bounding_box.from_points(region))
+    if bounding_box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour):
         return Relation.COMPONENT
@@ -227,8 +227,10 @@ def relate_contour(region: Region, contour: Contour) -> Relation:
              from_test=False)
     register_contour(events_queue, contour,
                      from_test=True)
-    _, test_max_x, _, _ = test_bounding_box
-    return process_linear_compound_queue(events_queue, test_max_x)
+    (_, contour_max_x, _, _), (_, region_max_x, _, _) = (contour_bounding_box,
+                                                         region_bounding_box)
+    return process_linear_compound_queue(events_queue, min(contour_max_x,
+                                                           region_max_x))
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
