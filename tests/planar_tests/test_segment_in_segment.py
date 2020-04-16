@@ -47,8 +47,9 @@ def test_asymmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
 
     complement = segment_in_segment(right_segment, left_segment)
     assert equivalence(result is not complement
-                       and complement in ASYMMETRIC_LINEAR_RELATIONS,
-                       result in ASYMMETRIC_LINEAR_RELATIONS)
+                       and result.complement is complement,
+                       result in ASYMMETRIC_LINEAR_RELATIONS
+                       and complement in ASYMMETRIC_LINEAR_RELATIONS)
 
 
 @given(strategies.segments_pairs)
