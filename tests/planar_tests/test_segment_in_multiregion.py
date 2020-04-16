@@ -53,30 +53,30 @@ def test_base(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
 @given(strategies.non_empty_multicontours_with_segments)
 def test_step(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
     multiregion, segment = multiregion_with_region
-    first_contour, *rest_multiregion = multiregion
+    first_region, *rest_multiregion = multiregion
 
     result = segment_in_multiregion(segment, rest_multiregion)
     next_result = segment_in_multiregion(segment, multiregion)
 
-    relation_with_first_contour = segment_in_region(segment, first_contour)
+    relation_with_first_region = segment_in_region(segment, first_region)
     assert equivalence(next_result is Relation.DISJOINT,
                        result is Relation.DISJOINT
-                       and relation_with_first_contour is Relation.DISJOINT)
+                       and relation_with_first_region is Relation.DISJOINT)
     assert equivalence(next_result is Relation.WITHIN,
                        result is Relation.WITHIN
-                       or relation_with_first_contour is Relation.WITHIN)
+                       or relation_with_first_region is Relation.WITHIN)
     assert equivalence(next_result is Relation.COMPONENT,
                        result is Relation.COMPONENT
-                       or relation_with_first_contour is Relation.COMPONENT)
+                       or relation_with_first_region is Relation.COMPONENT)
     assert equivalence(next_result is Relation.CROSS,
                        result is Relation.CROSS
-                       or relation_with_first_contour is Relation.CROSS)
+                       or relation_with_first_region is Relation.CROSS)
     assert equivalence(next_result is Relation.TOUCH,
                        result is Relation.TOUCH
-                       and (relation_with_first_contour is Relation.DISJOINT
-                            or relation_with_first_contour is Relation.TOUCH)
+                       and (relation_with_first_region is Relation.DISJOINT
+                            or relation_with_first_region is Relation.TOUCH)
                        or result is Relation.DISJOINT
-                       and relation_with_first_contour is Relation.TOUCH)
+                       and relation_with_first_region is Relation.TOUCH)
 
 
 @given(strategies.multicontours_with_segments)
