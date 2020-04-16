@@ -5,7 +5,9 @@ from hypothesis import given
 from orient.hints import Segment
 from orient.planar import (Relation,
                            segment_in_segment)
-from tests.utils import (SAME_LINEAR_RELATIONS,
+from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
+                         SAME_LINEAR_RELATIONS,
+                         SYMMETRIC_SAME_LINEAR_RELATIONS,
                          equivalence,
                          reverse_segment)
 from . import strategies
@@ -34,9 +36,7 @@ def test_symmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
 
     complement = segment_in_segment(right_segment, left_segment)
     assert equivalence(result is complement,
-                       result in (Relation.DISJOINT, Relation.TOUCH,
-                                  Relation.CROSS, Relation.OVERLAP,
-                                  Relation.EQUAL))
+                       result in SYMMETRIC_SAME_LINEAR_RELATIONS)
 
 
 @given(strategies.segments_pairs)
@@ -46,8 +46,9 @@ def test_asymmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
     result = segment_in_segment(left_segment, right_segment)
 
     complement = segment_in_segment(right_segment, left_segment)
-    assert equivalence(result is Relation.COMPOSITE,
-                       complement is Relation.COMPONENT)
+    assert equivalence(result is not complement
+                       and complement in ASYMMETRIC_LINEAR_RELATIONS,
+                       result in ASYMMETRIC_LINEAR_RELATIONS)
 
 
 @given(strategies.segments_pairs)
