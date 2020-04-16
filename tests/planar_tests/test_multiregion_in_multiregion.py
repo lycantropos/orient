@@ -25,8 +25,10 @@ def test_basic(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
 
 @given(strategies.multicontours)
 def test_self(multiregion: Multiregion) -> None:
-    assert multiregion_in_multiregion(multiregion,
-                                      multiregion) is Relation.EQUAL
+    assert (multiregion_in_multiregion(multiregion, multiregion)
+            is (Relation.EQUAL
+                if multiregion
+                else Relation.DISJOINT))
 
 
 @given(strategies.multicontours)
