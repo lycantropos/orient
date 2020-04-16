@@ -122,7 +122,7 @@ def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
                              Relation.ENCLOSED):
         return Relation.ENCLOSES
     elif border_relation is Relation.WITHIN:
-        return Relation.WITHIN
+        return Relation.COVER
     else:
         holes_relation = relate_multiregions(multiregion, holes)
         if holes_relation is Relation.DISJOINT:
