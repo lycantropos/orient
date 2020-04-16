@@ -7,58 +7,63 @@ from .sweep import sweep
 
 
 def process_linear_queue(events_queue: EventsQueue,
-                         test_max_x: Coordinate) -> Relation:
+                         stop_x: Coordinate) -> Relation:
     test_is_subset_of_goal = goal_is_subset_of_test = True
-    boundaries_do_not_intersect = True
     test_boundary_in_goal_interior = goal_boundary_in_test_interior = False
-    has_overlap = has_cross = False
-    for event in sweep(events_queue, test_max_x):
+    has_cross = has_touch = has_overlap = False
+    for event in sweep(events_queue, stop_x):
         if (test_is_subset_of_goal
                 and event.from_test and event.outside):
             test_is_subset_of_goal = False
         if (goal_is_subset_of_test
                 and event.from_goal and event.outside):
             goal_is_subset_of_test = False
-        if (boundaries_do_not_intersect
-                and event.relationship is not SegmentsRelationship.NONE):
-            boundaries_do_not_intersect = False
         if (not test_boundary_in_goal_interior
                 and event.from_test and event.inside):
             test_boundary_in_goal_interior = True
         if (not goal_boundary_in_test_interior
                 and event.from_goal and event.inside):
             goal_boundary_in_test_interior = True
+        if not has_cross and event.relationship is SegmentsRelationship.CROSS:
+            has_cross = True
         if (not has_overlap
                 and event.relationship is SegmentsRelationship.OVERLAP):
             has_overlap = True
-        if not has_cross and event.relationship is SegmentsRelationship.CROSS:
-            has_cross = True
-    if goal_is_subset_of_test:
-        goal_is_subset_of_test = not events_queue
+        if not has_touch and event.relationship is SegmentsRelationship.TOUCH:
+            has_touch = True
+    if events_queue:
+        if events_queue.peek().from_test:
+            test_is_subset_of_goal = False
+        else:
+            goal_is_subset_of_test = False
     if goal_is_subset_of_test:
         return (Relation.EQUAL
                 if test_is_subset_of_goal
-                else (Relation.DISJOINT
-                      if boundaries_do_not_intersect
-                      else (Relation.OVERLAP
-                            if goal_boundary_in_test_interior
-                            else Relation.COMPOSITE)))
+                else ((Relation.OVERLAP
+                       if has_overlap
+                       else (Relation.TOUCH
+                             if has_touch
+                             else Relation.DISJOINT))
+                      if goal_boundary_in_test_interior
+                      else Relation.COMPOSITE))
     elif test_is_subset_of_goal:
-        return (Relation.DISJOINT
-                if boundaries_do_not_intersect
-                else (Relation.OVERLAP
-                      if test_boundary_in_goal_interior
-                      else Relation.COMPONENT))
+        return ((Relation.OVERLAP
+                 if has_overlap
+                 else (Relation.TOUCH
+                       if has_touch
+                       else Relation.DISJOINT))
+                if test_boundary_in_goal_interior
+                else Relation.COMPONENT)
     else:
-        return (Relation.DISJOINT
-                if boundaries_do_not_intersect
-                else (Relation.OVERLAP
-                      if has_overlap
-                      else (Relation.CROSS
-                            if (has_cross
-                                or test_boundary_in_goal_interior
-                                or goal_boundary_in_test_interior)
-                            else Relation.TOUCH)))
+        return (Relation.OVERLAP
+                if has_overlap
+                else (Relation.CROSS
+                      if (has_cross
+                          or test_boundary_in_goal_interior
+                          or goal_boundary_in_test_interior)
+                      else (Relation.TOUCH
+                            if has_touch
+                            else Relation.DISJOINT)))
 
 
 def process_linear_compound_queue(events_queue: EventsQueue,
