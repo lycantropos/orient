@@ -52,33 +52,33 @@ def test_base(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
 @given(strategies.non_empty_multicontours_with_contours)
 def test_step(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
     multiregion, contour = multiregion_with_contour
-    first_contour, *rest_multiregion = multiregion
+    first_region, *rest_multiregion = multiregion
 
     result = contour_in_multiregion(contour, rest_multiregion)
     next_result = contour_in_multiregion(contour, multiregion)
 
-    relation_with_first_contour = contour_in_region(contour, first_contour)
+    relation_with_first_region = contour_in_region(contour, first_region)
     assert equivalence(next_result is Relation.DISJOINT,
-                       result is relation_with_first_contour
+                       result is relation_with_first_region
                        is Relation.DISJOINT)
     assert equivalence(next_result is Relation.TOUCH,
                        result is Relation.DISJOINT
-                       and relation_with_first_contour is Relation.TOUCH
+                       and relation_with_first_region is Relation.TOUCH
                        or result is Relation.TOUCH
-                       and (relation_with_first_contour is Relation.DISJOINT
-                            or relation_with_first_contour is Relation.TOUCH))
+                       and (relation_with_first_region is Relation.DISJOINT
+                            or relation_with_first_region is Relation.TOUCH))
     assert equivalence(next_result is Relation.COMPONENT,
                        result is Relation.COMPONENT
-                       or relation_with_first_contour is Relation.COMPONENT)
+                       or relation_with_first_region is Relation.COMPONENT)
     assert equivalence(next_result is Relation.CROSS,
                        result is Relation.CROSS
-                       or relation_with_first_contour is Relation.CROSS)
+                       or relation_with_first_region is Relation.CROSS)
     assert equivalence(next_result is Relation.ENCLOSED,
                        result is Relation.ENCLOSED
-                       or relation_with_first_contour is Relation.ENCLOSED)
+                       or relation_with_first_region is Relation.ENCLOSED)
     assert equivalence(next_result is Relation.WITHIN,
                        result is Relation.WITHIN
-                       or relation_with_first_contour is Relation.WITHIN)
+                       or relation_with_first_region is Relation.WITHIN)
 
 
 @given(strategies.multicontours_with_contours)
