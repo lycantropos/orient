@@ -40,6 +40,7 @@ def to_contours_with_segments(coordinates: Strategy[Coordinate]
 
 contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
+empty_multicontours = strategies.builds(list)
 multicontours = coordinates_strategies.flatmap(planar.multicontours)
 
 
@@ -56,7 +57,7 @@ def to_multicontours_with_points(coordinates: Strategy[Coordinate],
 
 multicontours_with_points = (coordinates_strategies
                              .flatmap(to_multicontours_with_points))
-empty_multicontours_with_points = strategies.tuples(strategies.builds(list),
+empty_multicontours_with_points = strategies.tuples(empty_multicontours,
                                                     points)
 non_empty_multicontours_with_points = coordinates_strategies.flatmap(
         partial(to_multicontours_with_points,
@@ -76,7 +77,7 @@ def to_multicontours_with_segments(coordinates: Strategy[Coordinate],
 
 multicontours_with_segments = (coordinates_strategies
                                .flatmap(to_multicontours_with_segments))
-empty_multicontours_with_segments = strategies.tuples(strategies.builds(list),
+empty_multicontours_with_segments = strategies.tuples(empty_multicontours,
                                                       segments)
 non_empty_multicontours_with_segments = coordinates_strategies.flatmap(
         partial(to_multicontours_with_segments,
@@ -96,7 +97,7 @@ def to_multicontours_with_contours(coordinates: Strategy[Coordinate],
 
 multicontours_with_contours = (coordinates_strategies
                                .flatmap(to_multicontours_with_contours))
-empty_multicontours_with_contours = strategies.tuples(strategies.builds(list),
+empty_multicontours_with_contours = strategies.tuples(empty_multicontours,
                                                       contours)
 non_empty_multicontours_with_contours = coordinates_strategies.flatmap(
         partial(to_multicontours_with_contours,
@@ -113,6 +114,25 @@ contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
 contours_strategies = coordinates_strategies.map(planar.contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)
+
+
+def to_multicontours_pairs(coordinates: Strategy[Coordinate],
+                           *,
+                           min_size: int = 0,
+                           max_size: Optional[int] = None
+                           ) -> Strategy[Tuple[Multicontour, Multicontour]]:
+    return strategies.tuples(planar.multicontours(coordinates),
+                             planar.multicontours(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
+
+
+multicontours_pairs = coordinates_strategies.flatmap(to_multicontours_pairs)
+multicontours_with_empty_multicontours = strategies.tuples(multicontours,
+                                                           empty_multicontours)
+multicontours_with_non_empty_multicontours = (
+    coordinates_strategies.flatmap(partial(to_multicontours_pairs,
+                                           min_size=1)))
 polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
@@ -159,7 +179,7 @@ def to_polygons_with_multicontours(coordinates: Strategy[Coordinate],
 polygons_with_multicontours = (coordinates_strategies
                                .flatmap(to_polygons_with_multicontours))
 polygons_with_empty_multicontours = strategies.tuples(polygons,
-                                                      strategies.builds(list))
+                                                      empty_multicontours)
 polygons_with_non_empty_multicontours = (
     coordinates_strategies.flatmap(partial(to_polygons_with_multicontours,
                                            min_size=1)))
