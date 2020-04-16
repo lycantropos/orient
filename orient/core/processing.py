@@ -67,12 +67,12 @@ def process_linear_queue(events_queue: EventsQueue,
 
 
 def process_linear_compound_queue(events_queue: EventsQueue,
-                                  test_max_x: Coordinate) -> Relation:
+                                  stop_x: Coordinate) -> Relation:
     # ``goal`` is a compound object
     # ``test`` is a linear object
     test_boundary_in_goal_interior = has_touch = False
     test_is_subset_of_goal = goal_is_subset_of_test = True
-    for event in sweep(events_queue, test_max_x):
+    for event in sweep(events_queue, stop_x):
         if event.relationship is SegmentsRelationship.CROSS:
             return Relation.CROSS
         if test_is_subset_of_goal and event.from_test and event.outside:
@@ -86,8 +86,11 @@ def process_linear_compound_queue(events_queue: EventsQueue,
                 and (event.relationship is SegmentsRelationship.TOUCH
                      or event.relationship is SegmentsRelationship.OVERLAP)):
             has_touch = True
-    if goal_is_subset_of_test:
-        goal_is_subset_of_test = not events_queue
+    if events_queue:
+        if events_queue.peek().from_test:
+            test_is_subset_of_goal = False
+        else:
+            goal_is_subset_of_test = False
     if goal_is_subset_of_test:
         return (Relation.COMPONENT
                 if test_is_subset_of_goal
