@@ -65,7 +65,17 @@ def test_step(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
                        and relation_with_first_region is Relation.TOUCH)
     assert equivalence(next_result is Relation.OVERLAP,
                        result is Relation.OVERLAP
-                       or relation_with_first_region is Relation.OVERLAP)
+                       or relation_with_first_region is Relation.OVERLAP
+                       or (result is Relation.DISJOINT
+                           or result is Relation.TOUCH)
+                       and (relation_with_first_region is Relation.COMPONENT
+                            or relation_with_first_region is Relation.ENCLOSED
+                            or relation_with_first_region is Relation.WITHIN)
+                       or (result is Relation.COMPONENT
+                           or result is Relation.ENCLOSED
+                           or result is Relation.WITHIN)
+                       and (relation_with_first_region is Relation.DISJOINT
+                            or relation_with_first_region is Relation.TOUCH))
     assert equivalence(next_result is Relation.COVER,
                        result is Relation.COVER
                        or relation_with_first_region is Relation.COVER)
