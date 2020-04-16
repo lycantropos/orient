@@ -7,7 +7,9 @@ from orient.planar import (Relation,
                            contour_in_region,
                            point_in_region,
                            region_in_region)
-from tests.utils import (COMPOUND_RELATIONS,
+from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
+                         COMPOUND_RELATIONS,
+                         SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          to_convex_hull)
@@ -37,8 +39,7 @@ def test_symmetric_relations(regions_pair: Tuple[Region, Region]) -> None:
 
     complement = region_in_region(right_region, left_region)
     assert equivalence(result is complement,
-                       result in (Relation.DISJOINT, Relation.TOUCH,
-                                  Relation.OVERLAP, Relation.EQUAL))
+                       result in SYMMETRIC_COMPOUND_RELATIONS)
 
 
 @given(strategies.contours_pairs)
@@ -48,11 +49,10 @@ def test_asymmetric_relations(regions_pair: Tuple[Region, Region]) -> None:
     result = region_in_region(left_region, right_region)
 
     complement = region_in_region(right_region, left_region)
-    assert equivalence(result is Relation.COVER, complement is Relation.WITHIN)
-    assert equivalence(result is Relation.ENCLOSES,
-                       complement is Relation.ENCLOSED)
-    assert equivalence(result is Relation.COMPOSITE,
-                       complement is Relation.COMPONENT)
+    assert equivalence(result is not complement
+                       and result.complement is complement,
+                       result in ASYMMETRIC_COMPOUND_RELATIONS
+                       and complement in ASYMMETRIC_COMPOUND_RELATIONS)
 
 
 @given(strategies.contours)
