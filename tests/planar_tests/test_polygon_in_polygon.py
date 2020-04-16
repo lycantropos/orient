@@ -7,7 +7,9 @@ from orient.hints import Polygon
 from orient.planar import (Relation,
                            point_in_polygon,
                            polygon_in_polygon)
-from tests.utils import (COMPOUND_RELATIONS,
+from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
+                         COMPOUND_RELATIONS,
+                         SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          to_convex_hull)
@@ -37,8 +39,7 @@ def test_symmetric_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
 
     complement = polygon_in_polygon(right_polygon, left_polygon)
     assert equivalence(result is complement,
-                       result in (Relation.DISJOINT, Relation.TOUCH,
-                                  Relation.OVERLAP, Relation.EQUAL))
+                       result in SYMMETRIC_COMPOUND_RELATIONS)
 
 
 @given(strategies.polygons_pairs)
@@ -48,11 +49,10 @@ def test_asymmetric_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     result = polygon_in_polygon(left_polygon, right_polygon)
 
     complement = polygon_in_polygon(right_polygon, left_polygon)
-    assert equivalence(result is Relation.COVER, complement is Relation.WITHIN)
-    assert equivalence(result is Relation.ENCLOSES,
-                       complement is Relation.ENCLOSED)
-    assert equivalence(result is Relation.COMPOSITE,
-                       complement is Relation.COMPONENT)
+    assert equivalence(result is not complement
+                       and result.complement is complement,
+                       result in ASYMMETRIC_COMPOUND_RELATIONS
+                       and complement in ASYMMETRIC_COMPOUND_RELATIONS)
 
 
 @given(strategies.polygons)
