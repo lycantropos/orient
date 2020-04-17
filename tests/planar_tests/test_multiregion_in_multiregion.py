@@ -110,12 +110,12 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                             or relation_with_first_region is Relation.OVERLAP
                             or relation_with_first_region is Relation.ENCLOSED
                             or relation_with_first_region is Relation.WITHIN)
-                       or relation_with_first_region is Relation.OVERLAP
-                       and (result is Relation.DISJOINT
-                            or result is Relation.TOUCH
-                            or result is Relation.OVERLAP
-                            or result is Relation.ENCLOSED
-                            or result is Relation.WITHIN)
+                       or (result is Relation.DISJOINT
+                           or result is Relation.TOUCH
+                           or result is Relation.OVERLAP
+                           or result is Relation.ENCLOSED
+                           or result is Relation.WITHIN)
+                       and relation_with_first_region is Relation.OVERLAP
                        or (bool(rest_left_multiregion)
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
