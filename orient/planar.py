@@ -497,7 +497,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     Time complexity:
         ``O(vertices_count)``
     Memory complexity:
-        ``O(vertices_count)``
+        ``O(1)``
 
     where ``vertices_count = len(border) + sum(map(len, holes))``,
     ``border, holes = polygon``.
