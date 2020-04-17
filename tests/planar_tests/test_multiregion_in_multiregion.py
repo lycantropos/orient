@@ -130,9 +130,20 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     assert equivalence(next_result is Relation.COVER,
                        result is Relation.COVER
                        or relation_with_first_region is Relation.COVER)
-    assert equivalence(next_result is Relation.ENCLOSES,
+    assert implication(next_result is Relation.ENCLOSES,
                        result is Relation.ENCLOSES
-                       or relation_with_first_region is Relation.ENCLOSES)
+                       or relation_with_first_region is Relation.ENCLOSES
+                       or result is Relation.OVERLAP
+                       and relation_with_first_region is Relation.COMPONENT
+                       or result is Relation.COMPONENT
+                       and relation_with_first_region is Relation.OVERLAP)
+    assert implication(result is Relation.ENCLOSES
+                       and (relation_with_first_region is Relation.DISJOINT
+                            or relation_with_first_region is Relation.TOUCH)
+                       or (result is Relation.DISJOINT
+                           or result is Relation.TOUCH)
+                       and relation_with_first_region is Relation.ENCLOSES,
+                       next_result is Relation.ENCLOSES)
     assert equivalence(next_result is Relation.COMPOSITE,
                        result is Relation.COMPOSITE or result is Relation.EQUAL
                        or (relation_with_first_region is Relation.COMPOSITE
