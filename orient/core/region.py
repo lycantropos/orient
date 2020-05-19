@@ -22,9 +22,6 @@ from .segment import relate_point as relate_point_to_segment
 
 
 def relate_point(region: Region, point: Point) -> Relation:
-    if not bounding_box.contains_point(bounding_box.from_points(region),
-                                       point):
-        return Relation.DISJOINT
     result = False
     _, point_y = point
     for edge in boundary_edges(region):
