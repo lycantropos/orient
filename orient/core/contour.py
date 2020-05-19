@@ -15,9 +15,6 @@ from .segment import (relate_point as relate_point_to_segment,
 
 
 def relate_point(contour: Contour, point: Point) -> Relation:
-    if not bounding_box.contains_point(bounding_box.from_points(contour),
-                                       point):
-        return Relation.DISJOINT
     return (Relation.DISJOINT
             if all(relate_point_to_segment(edge, point) is Relation.DISJOINT
                    for edge in edges(contour))
