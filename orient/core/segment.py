@@ -19,10 +19,7 @@ def relate_point(segment: Segment, point: Point) -> Relation:
 
 
 def relate_segment(goal: Segment, test: Segment) -> Relation:
-    if bounding_box.disjoint_with(bounding_box.from_points(goal),
-                                  bounding_box.from_points(test)):
-        return Relation.DISJOINT
-    elif goal == test or goal == test[::-1]:
+    if goal == test or goal == test[::-1]:
         return Relation.EQUAL
     goal_start, goal_end = goal
     test_start, test_end = test
