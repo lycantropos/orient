@@ -39,9 +39,6 @@ def relate_point(region: Region, point: Point) -> Relation:
 
 
 def relate_segment(region: Region, segment: Segment) -> Relation:
-    if bounding_box.disjoint_with(bounding_box.from_points(region),
-                                  bounding_box.from_points(segment)):
-        return Relation.DISJOINT
     relation_with_contour = relate_segment_to_contour(region, segment)
     if (relation_with_contour is Relation.CROSS
             or relation_with_contour is Relation.COMPONENT):
