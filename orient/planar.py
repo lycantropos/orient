@@ -1,11 +1,13 @@
 from .core import (contour as _contour,
                    multiregion as _multiregion,
+                   multisegment as _multisegment,
                    polygon as _polygon,
                    region as _region,
                    segment as _segment)
 from .core.relation import Relation
 from .hints import (Contour,
                     Multiregion,
+                    Multisegment,
                     Point,
                     Polygon,
                     Region,
@@ -72,6 +74,37 @@ def segment_in_segment(left: Segment, right: Segment) -> Relation:
     True
     """
     return _segment.relate_segment(right, left)
+
+
+def point_in_multisegment(point: Point,
+                          multisegment: Multisegment) -> Relation:
+    """
+    Finds relation between point and multisegment.
+
+    Time complexity:
+        ``O(len(multisegment))``
+    Memory complexity:
+        ``O(1)``
+
+    :param point: point to check for.
+    :param multisegment: multisegment to check in.
+    :returns: relation between point and multisegment.
+
+    >>> multisegment = [((0, 0), (1, 0)), ((3, 0), (5, 0))]
+    >>> point_in_multisegment((0, 0), multisegment) is Relation.COMPONENT
+    True
+    >>> point_in_multisegment((0, 1), multisegment) is Relation.DISJOINT
+    True
+    >>> point_in_multisegment((1, 0), multisegment) is Relation.COMPONENT
+    True
+    >>> point_in_multisegment((2, 0), multisegment) is Relation.DISJOINT
+    True
+    >>> point_in_multisegment((3, 0), multisegment) is Relation.COMPONENT
+    True
+    >>> point_in_multisegment((4, 0), multisegment) is Relation.COMPONENT
+    True
+    """
+    return _multisegment.relate_point(multisegment, point)
 
 
 def point_in_contour(point: Point, contour: Contour) -> Relation:

@@ -5,6 +5,7 @@ from typing import (List,
 Coordinate = Real
 Point = Tuple[Coordinate, Coordinate]
 Segment = Tuple[Point, Point]
+Multisegment = List[Segment]
 Contour = Region = List[Point]
 Multicontour = List[Contour]
 Multiregion = List[Region]
