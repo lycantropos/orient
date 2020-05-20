@@ -5,14 +5,17 @@ from robust.angular import (Orientation,
                             orientation as angle_orientation)
 
 from orient.hints import (Contour,
+                          Multisegment,
                           Point,
                           Segment)
 from . import bounding_box
 from .events_queue import EventsQueue
+from .multisegment import register as register_multisegment
 from .processing import process_linear_queue
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
+from .utils import flatten
 
 
 def relate_point(contour: Contour, point: Point) -> Relation:
@@ -76,6 +79,25 @@ def _point_vertex_line_divides_angle(point: Point,
                                      second_ray_point: Point) -> bool:
     return (angle_orientation(first_ray_point, vertex, point)
             is angle_orientation(point, vertex, second_ray_point))
+
+
+def relate_multisegment(contour: Contour,
+                        multisegment: Multisegment) -> Relation:
+    contour_bounding_box, multisegment_bounding_box = (
+        bounding_box.from_points(contour),
+        bounding_box.from_points(flatten(multisegment)))
+    if bounding_box.disjoint_with(contour_bounding_box,
+                                  multisegment_bounding_box):
+        return Relation.DISJOINT
+    events_queue = EventsQueue()
+    register(events_queue, contour,
+             from_test=False)
+    register_multisegment(events_queue, multisegment,
+                          from_test=True)
+    (_, contour_max_x, _, _), (_, multisegment_max_x, _, _) = (
+        contour_bounding_box, multisegment_bounding_box)
+    return process_linear_queue(events_queue,
+                                min(contour_max_x, multisegment_max_x))
 
 
 def relate_contour(goal: Contour, test: Contour) -> Relation:

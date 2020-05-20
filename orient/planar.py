@@ -244,6 +244,39 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     return _contour.relate_segment(contour, segment)
 
 
+def multisegment_in_contour(multisegment: Multisegment,
+                            contour: Contour) -> Relation:
+    """
+    Finds relation between multisegment and contour.
+
+    Time complexity:
+        ``O(segments_count * log segments_count)``
+    Memory complexity:
+        ``O(segments_count)``
+
+    where ``segments_count = len(left) + len(right)``.
+
+    :param multisegment: multisegment to check for.
+    :param contour: contour to check in.
+    :returns: relation between multisegment and contour.
+
+    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
+    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
+    ...                 ((0, 1), (0, 0))]
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multisegment_in_contour(triangle_edges, triangle) is Relation.EQUAL
+    True
+    >>> multisegment_in_contour(triangle_edges, square) is Relation.OVERLAP
+    True
+    >>> multisegment_in_contour(square_edges, triangle) is Relation.OVERLAP
+    True
+    >>> multisegment_in_contour(square_edges, square) is Relation.EQUAL
+    True
+    """
+    return _contour.relate_multisegment(contour, multisegment)
+
+
 def contour_in_contour(left: Contour, right: Contour) -> Relation:
     """
     Finds relation between contours.
