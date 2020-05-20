@@ -6,5 +6,6 @@ Coordinate = Real
 Point = Tuple[Coordinate, Coordinate]
 Segment = Tuple[Point, Point]
 Contour = Region = List[Point]
-Multicontour = Multiregion = List[Region]
+Multicontour = List[Contour]
+Multiregion = List[Region]
 Polygon = Tuple[Region, Multiregion]
