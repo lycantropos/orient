@@ -107,6 +107,48 @@ def point_in_multisegment(point: Point,
     return _multisegment.relate_point(multisegment, point)
 
 
+def segment_in_multisegment(segment: Segment, 
+                            multisegment: Multisegment) -> Relation:
+    """
+    Finds relation between segment and multisegment.
+
+    Time complexity:
+        ``O(segments_count)``
+    Memory complexity:
+        ``O(segments_count)``
+
+    where ``segments_count = len(multisegment)``.
+
+    :param segment: segment to check for.
+    :param multisegment: multisegment to check in.
+    :returns: relation between segment and multisegment.
+
+    >>> multisegment = [((0, 0), (1, 1)), ((1, 1), (3, 3))]
+    >>> segment_in_multisegment(((0, 0), (1, 0)),
+    ...                         multisegment) is Relation.TOUCH
+    True
+    >>> segment_in_multisegment(((0, 0), (0, 1)),
+    ...                         multisegment) is Relation.TOUCH
+    True
+    >>> segment_in_multisegment(((0, 1), (1, 0)),
+    ...                         multisegment) is Relation.CROSS
+    True
+    >>> segment_in_multisegment(((0, 0), (1, 1)),
+    ...                         multisegment) is Relation.COMPONENT
+    True
+    >>> segment_in_multisegment(((0, 0), (3, 3)),
+    ...                         multisegment) is Relation.EQUAL
+    True
+    >>> segment_in_multisegment(((2, 2), (4, 4)),
+    ...                         multisegment) is Relation.OVERLAP
+    True
+    >>> segment_in_multisegment(((4, 4), (5, 5)),
+    ...                         multisegment) is Relation.DISJOINT
+    True
+    """
+    return _multisegment.relate_segment(multisegment, segment)
+
+
 def point_in_contour(point: Point, contour: Contour) -> Relation:
     """
     Finds relation between point and contour.
