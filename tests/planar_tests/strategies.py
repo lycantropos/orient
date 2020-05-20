@@ -85,6 +85,8 @@ def segment_to_multisegments_with_segments(segment: Segment
 
 multisegments_with_segments |= (
     segments.flatmap(segment_to_multisegments_with_segments))
+multisegments_strategies = coordinates_strategies.map(planar.multisegments)
+multisegments_pairs = multisegments_strategies.flatmap(to_pairs)
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
