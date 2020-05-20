@@ -78,13 +78,6 @@ def _point_vertex_line_divides_angle(point: Point,
             is angle_orientation(point, vertex, second_ray_point))
 
 
-def orientation(contour: Contour) -> Orientation:
-    index = min(range(len(contour)),
-                key=contour.__getitem__)
-    return angle_orientation(contour[index], contour[index - 1],
-                             contour[(index + 1) % len(contour)])
-
-
 def relate_contour(goal: Contour, test: Contour) -> Relation:
     goal_bounding_box, test_bounding_box = (bounding_box.from_points(goal),
                                             bounding_box.from_points(test))
@@ -133,6 +126,13 @@ def register(events_queue: EventsQueue, contour: Contour,
     for edge in edges(contour):
         events_queue.register_segment(edge,
                                       from_test=from_test)
+
+
+def orientation(contour: Contour) -> Orientation:
+    index = min(range(len(contour)),
+                key=contour.__getitem__)
+    return angle_orientation(contour[index], contour[index - 1],
+                             contour[(index + 1) % len(contour)])
 
 
 def edges(contour: Contour) -> Iterable[Segment]:
