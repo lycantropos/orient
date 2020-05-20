@@ -1,3 +1,4 @@
+from fractions import Fraction
 from functools import partial
 from typing import (Optional,
                     Tuple)
@@ -30,6 +31,7 @@ def to_segments_with_points(coordinates: Strategy[Coordinate]
 segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
 segments_strategies = coordinates_strategies.map(planar.segments)
 segments_pairs = segments_strategies.flatmap(to_pairs)
+multisegments = coordinates_strategies.flatmap(planar.multisegments)
 
 
 def to_multisegments_with_points(coordinates: Strategy[Coordinate]
@@ -40,6 +42,49 @@ def to_multisegments_with_points(coordinates: Strategy[Coordinate]
 
 multisegments_with_points = (coordinates_strategies
                              .flatmap(to_multisegments_with_points))
+
+
+def to_multisegments_with_segments(coordinates: Strategy[Coordinate]
+                                   ) -> Strategy[Tuple[Multisegment, Segment]]:
+    return strategies.tuples(planar.multisegments(coordinates),
+                             planar.segments(coordinates))
+
+
+multisegments_with_segments = (coordinates_strategies
+                               .flatmap(to_multisegments_with_segments))
+
+
+def chop_segment(segment: Segment, parts_count: int) -> Multisegment:
+    if parts_count == 1:
+        return [segment]
+    (start_x, start_y), (end_x, end_y) = segment
+    delta_x, delta_y = end_x - start_x, end_y - start_y
+    step_x, step_y = ((Fraction(delta_x, parts_count),
+                       Fraction(delta_y, parts_count))
+                      if isinstance(delta_x, int)
+                      else (delta_x / parts_count, delta_y / parts_count))
+    end_x, end_y = start_x + step_x, start_y + step_y
+    result = []
+    for part_index in range(parts_count):
+        result.append(((start_x, start_y), (end_x, end_y)))
+        start_x, start_y = end_x, end_y
+        end_x, end_y = start_x + step_x, start_y + step_y
+    return result
+
+
+def segment_to_multisegments_with_segments(segment: Segment
+                                           ) -> Strategy[Tuple[Multisegment,
+                                                               Segment]]:
+    always_segment = strategies.just(segment)
+    return strategies.tuples((strategies.builds(chop_segment,
+                                                always_segment,
+                                                strategies.integers(1, 10))
+                              .flatmap(strategies.permutations)),
+                             always_segment)
+
+
+multisegments_with_segments |= (
+    segments.flatmap(segment_to_multisegments_with_segments))
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
