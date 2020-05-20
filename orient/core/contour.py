@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Iterable
 
 from robust.angular import (Orientation,
@@ -104,29 +105,26 @@ def relate_contour(goal: Contour, test: Contour) -> Relation:
 def equal(left: Contour, right: Contour) -> bool:
     if len(left) != len(right):
         return False
-    if orientation(left) is not orientation(right):
-        right = right[:1] + right[:0:-1]
+    try:
+        index = right.index(left[0])
+    except ValueError:
+        return False
+    same_oriented = orientation(left) is orientation(right)
+    right_step = 1 if same_oriented else -1
     size = len(left)
-    start = 0
-    while start < size:
-        try:
-            index = right.index(left[0], start)
-        except ValueError:
-            return False
-        else:
-            left_index = 0
-            for left_index, right_index in zip(range(size),
-                                               range(index, size)):
-                if left[left_index] != right[right_index]:
-                    break
-            else:
-                for left_index, right_index in zip(range(left_index + 1, size),
-                                                   range(index)):
-                    if left[left_index] != right[right_index]:
-                        break
-                else:
-                    return True
-            start = index + 1
+    indices = chain(zip(range(size),
+                        range(index, size)
+                        if same_oriented
+                        else range(index, -1, right_step)),
+                    zip(range(size - index
+                              if same_oriented
+                              else index + 1,
+                              size),
+                        range(index)
+                        if same_oriented
+                        else range(size - 1, index - 1, right_step)))
+    return all(left[left_index] == right[right_index]
+               for left_index, right_index in indices)
 
 
 def register(events_queue: EventsQueue, contour: Contour,
