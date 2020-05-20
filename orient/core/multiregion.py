@@ -1,5 +1,3 @@
-from itertools import chain
-
 from orient.hints import (Contour,
                           Multiregion,
                           Point,
@@ -14,6 +12,7 @@ from .region import (register as register_region,
                      relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region)
 from .relation import Relation
+from .utils import flatten
 
 
 def relate_point(multiregion: Multiregion, point: Point) -> Relation:
@@ -108,8 +107,8 @@ def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
     goal_bounding_box, test_bounding_box = (
-        bounding_box.from_points(chain.from_iterable(goal)),
-        bounding_box.from_points(chain.from_iterable(test)))
+        bounding_box.from_points(flatten(goal)),
+        bounding_box.from_points(flatten(test)))
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     events_queue = EventsQueue()
