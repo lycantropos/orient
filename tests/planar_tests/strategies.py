@@ -8,6 +8,7 @@ from hypothesis_geometry import planar
 from orient.hints import (Contour,
                           Coordinate,
                           Multicontour,
+                          Multisegment,
                           Point,
                           Polygon,
                           Segment)
@@ -29,6 +30,16 @@ def to_segments_with_points(coordinates: Strategy[Coordinate]
 segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
 segments_strategies = coordinates_strategies.map(planar.segments)
 segments_pairs = segments_strategies.flatmap(to_pairs)
+
+
+def to_multisegments_with_points(coordinates: Strategy[Coordinate]
+                                 ) -> Strategy[Tuple[Multisegment, Point]]:
+    return strategies.tuples(planar.multisegments(coordinates),
+                             planar.points(coordinates))
+
+
+multisegments_with_points = (coordinates_strategies
+                             .flatmap(to_multisegments_with_points))
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
