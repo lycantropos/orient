@@ -149,6 +149,41 @@ def segment_in_multisegment(segment: Segment,
     return _multisegment.relate_segment(multisegment, segment)
 
 
+def multisegment_in_multisegment(left: Multisegment, 
+                                 right: Multisegment) -> Relation:
+    """
+    Finds relation between multisegments.
+
+    Time complexity:
+        ``O(segments_count * log segments_count)``
+    Memory complexity:
+        ``O(segments_count)``
+
+    where ``segments_count = len(left) + len(right)``.
+
+    :param left: multisegment to check for.
+    :param right: multisegment to check in.
+    :returns: relation between multisegments.
+
+    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
+    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
+    ...                 ((0, 1), (0, 0))]
+    >>> multisegment_in_multisegment(triangle_edges,
+    ...                              triangle_edges) is Relation.EQUAL
+    True
+    >>> multisegment_in_multisegment(triangle_edges,
+    ...                              square_edges) is Relation.OVERLAP
+    True
+    >>> multisegment_in_multisegment(square_edges,
+    ...                              triangle_edges) is Relation.OVERLAP
+    True
+    >>> multisegment_in_multisegment(square_edges,
+    ...                              square_edges) is Relation.EQUAL
+    True
+    """
+    return _multisegment.relate_multisegment(right, left)
+
+
 def point_in_contour(point: Point, contour: Contour) -> Relation:
     """
     Finds relation between point and contour.
