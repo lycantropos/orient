@@ -52,21 +52,23 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                 has_no_overlap = False
             start, end = segment = _subtract_segments_overlap(segment,
                                                               sub_segment)
-        elif has_no_overlap:
+        else:
             if all_components:
                 all_components = False
-            if relation_with_edge is Relation.TOUCH:
-                if has_no_touch:
-                    has_no_touch = False
-                if has_no_cross:
-                    intersection = segments_intersection(sub_segment, segment)
-                    if intersection != start and intersection != end:
-                        if intersection in non_endpoints_touch_points:
-                            has_no_cross = False
-                        else:
-                            non_endpoints_touch_points.add(intersection)
-            elif has_no_cross and relation_with_edge is Relation.CROSS:
-                has_no_cross = False
+            if has_no_overlap:
+                if relation_with_edge is Relation.TOUCH:
+                    if has_no_touch:
+                        has_no_touch = False
+                    if has_no_cross:
+                        intersection = segments_intersection(sub_segment,
+                                                             segment)
+                        if intersection != start and intersection != end:
+                            if intersection in non_endpoints_touch_points:
+                                has_no_cross = False
+                            else:
+                                non_endpoints_touch_points.add(intersection)
+                elif has_no_cross and relation_with_edge is Relation.CROSS:
+                    has_no_cross = False
     if has_no_overlap:
         return (Relation.DISJOINT
                 if has_no_touch and has_no_cross
@@ -75,16 +77,19 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                       else Relation.CROSS))
     elif components:
         components_iterator = iter(components)
-        component_start, max_component_end = next(components_iterator)
-        components_starts = {component_start}
+        min_component_start, max_component_end = next(components_iterator)
+        components_starts = {min_component_start}
         for component_start, component_end in components_iterator:
             components_starts.add(component_start)
+            if min_component_start > component_start:
+                min_component_start = component_start
             if max_component_end < component_end:
                 max_component_end = component_end
         return ((Relation.EQUAL
                  if all_components
                  else Relation.COMPONENT)
-                if (max_component_end == end
+                if (min_component_start == start
+                    and max_component_end == end
                     and all(component_end in components_starts
                             or component_end == max_component_end
                             for _, component_end in components))
@@ -92,7 +97,9 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                       if all_components
                       else Relation.OVERLAP))
     else:
-        return Relation.OVERLAP
+        return (Relation.COMPOSITE
+                if all_components
+                else Relation.OVERLAP)
 
 
 def _subtract_segments_overlap(minuend: Segment,
