@@ -43,6 +43,18 @@ multisegments_with_points = (coordinates_strategies
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
+def to_contours_with_points(coordinates: Strategy[Coordinate]
+                            ) -> Strategy[Tuple[Contour, Point]]:
+    return strategies.tuples(planar.contours(coordinates),
+                             planar.points(coordinates))
+
+
+contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
+contours_strategies = coordinates_strategies.map(planar.contours)
+contours_pairs = contours_strategies.flatmap(to_pairs)
+contours_triplets = contours_strategies.flatmap(to_triplets)
+
+
 def to_contours_with_segments(coordinates: Strategy[Coordinate]
                               ) -> Strategy[Tuple[Contour, Segment]]:
     return strategies.tuples(planar.contours(coordinates),
@@ -113,18 +125,6 @@ empty_multicontours_with_contours = strategies.tuples(empty_multicontours,
 non_empty_multicontours_with_contours = coordinates_strategies.flatmap(
         partial(to_multicontours_with_contours,
                 min_size=1))
-
-
-def to_contours_with_points(coordinates: Strategy[Coordinate]
-                            ) -> Strategy[Tuple[Contour, Point]]:
-    return strategies.tuples(planar.contours(coordinates),
-                             planar.points(coordinates))
-
-
-contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
-contours_strategies = coordinates_strategies.map(planar.contours)
-contours_pairs = contours_strategies.flatmap(to_pairs)
-contours_triplets = contours_strategies.flatmap(to_triplets)
 
 
 def to_multicontours_pairs(coordinates: Strategy[Coordinate],
