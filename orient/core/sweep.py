@@ -90,7 +90,7 @@ def detect_intersection(below_event: Event,
     if relationship is SegmentsRelationship.OVERLAP:
         # segments overlap
         if event.from_test is below_event.from_test:
-            raise ValueError('Edges of the same polygon '
+            raise ValueError('Segments of the same object '
                              'should not overlap.')
         event.relationship = below_event.relationship = relationship
         sorted_events = []
