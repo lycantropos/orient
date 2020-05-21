@@ -19,12 +19,13 @@ def sweep(events_queue: EventsQueue,
           stop_x: Coordinate) -> Iterable[Event]:
     sweep_line = SweepLine()
     while events_queue:
-        event = events_queue.pop()
+        event = events_queue.peek()
         start = event.start
         start_x, _ = start
         if start_x > stop_x:
             # no intersection segments left
             return
+        events_queue.pop()
         sweep_line.move_to(start_x)
         same_start_events = [event]
         while events_queue and events_queue.peek().start == start:
