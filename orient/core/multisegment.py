@@ -27,14 +27,14 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
     if start > end:
         start, end = end, start
     for index, sub_segment in enumerate(multisegment):
-        relation_with_edge = relate_segments(sub_segment, segment)
-        if relation_with_edge is Relation.COMPONENT:
+        relation = relate_segments(sub_segment, segment)
+        if relation is Relation.COMPONENT:
             return Relation.COMPONENT
-        elif relation_with_edge is Relation.EQUAL:
+        elif relation is Relation.EQUAL:
             return (Relation.EQUAL
                     if all_components and index == len(multisegment) - 1
                     else Relation.COMPONENT)
-        elif relation_with_edge is Relation.COMPOSITE:
+        elif relation is Relation.COMPOSITE:
             if has_no_overlap:
                 has_no_overlap = False
             if start in sub_segment:
@@ -45,7 +45,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                 segment = start, end
             else:
                 components.append(sort_endpoints(sub_segment))
-        elif relation_with_edge is Relation.OVERLAP:
+        elif relation is Relation.OVERLAP:
             if all_components:
                 all_components = False
             if has_no_overlap:
@@ -56,7 +56,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
             if all_components:
                 all_components = False
             if has_no_overlap:
-                if relation_with_edge is Relation.TOUCH:
+                if relation is Relation.TOUCH:
                     if has_no_touch:
                         has_no_touch = False
                     if has_no_cross:
@@ -67,7 +67,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                                 has_no_cross = False
                             else:
                                 non_endpoints_touch_points.add(intersection)
-                elif has_no_cross and relation_with_edge is Relation.CROSS:
+                elif has_no_cross and relation is Relation.CROSS:
                     has_no_cross = False
     if has_no_overlap:
         return (Relation.DISJOINT
