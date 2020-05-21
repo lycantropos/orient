@@ -22,7 +22,7 @@ class EdgeKind(IntEnum):
 
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
-                 '_relationship', 'in_out', 'other_in_out', 'edge_kind')
+                 'relationship', 'in_out', 'other_in_out', 'edge_kind')
 
     def __init__(self,
                  is_left_endpoint: bool,
@@ -36,7 +36,7 @@ class Event:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
-        self._relationship = relationship
+        self.relationship = relationship
         self.from_test = from_test
         self.edge_kind = edge_kind
         self.in_out = in_out
@@ -52,14 +52,9 @@ class Event:
     def end(self) -> Point:
         return self.complement.start
 
-    @property
-    def relationship(self) -> SegmentsRelationship:
-        return self._relationship
-
-    @relationship.setter
-    def relationship(self, value: SegmentsRelationship) -> None:
-        self._relationship = self.complement._relationship = max(
-                self._relationship, value)
+    def set_both_relationships(self, relationship: SegmentsRelationship
+                               ) -> None:
+        self.relationship = self.complement.relationship = relationship
 
     @property
     def is_vertical(self) -> bool:

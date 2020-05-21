@@ -33,7 +33,8 @@ def sweep(events_queue: EventsQueue,
         if not all_equal(event.from_test
                          for event in same_start_events):
             for event in same_start_events:
-                event.relationship = SegmentsRelationship.TOUCH
+                event.set_both_relationships(max(event.relationship,
+                                                 SegmentsRelationship.TOUCH))
         for event in same_start_events:
             if event.is_left_endpoint:
                 sweep_line.add(event)
@@ -93,28 +94,23 @@ def detect_intersection(below_event: Event,
         if event.from_test is below_event.from_test:
             raise ValueError('Segments of the same object '
                              'should not overlap.')
-        event.relationship = below_event.relationship = relationship
-        sorted_events = []
+
         starts_equal = event.start == below_event.start
         if starts_equal:
-            sorted_events.append(None)
-        elif EventsQueueKey(below_event) > EventsQueueKey(event):
-            sorted_events.append(event)
-            sorted_events.append(below_event)
+            start_min = start_max = None
+        elif EventsQueueKey(event) < EventsQueueKey(below_event):
+            start_min, start_max = event, below_event
         else:
-            sorted_events.append(below_event)
-            sorted_events.append(event)
+            start_min, start_max = below_event, event
 
         ends_equal = event.end == below_event.end
         if ends_equal:
-            sorted_events.append(None)
-        elif (EventsQueueKey(below_event.complement)
-              > EventsQueueKey(event.complement)):
-            sorted_events.append(event.complement)
-            sorted_events.append(below_event.complement)
+            end_min = end_max = None
+        elif (EventsQueueKey(event.complement)
+              < EventsQueueKey(below_event.complement)):
+            end_min, end_max = event.complement, below_event.complement
         else:
-            sorted_events.append(below_event.complement)
-            sorted_events.append(event.complement)
+            end_min, end_max = below_event.complement, event.complement
 
         if starts_equal:
             # both line segments are equal or share the left endpoint
@@ -122,27 +118,45 @@ def detect_intersection(below_event: Event,
             event.edge_kind = (EdgeKind.SAME_TRANSITION
                                if event.in_out is below_event.in_out
                                else EdgeKind.DIFFERENT_TRANSITION)
-            if not ends_equal:
-                events_queue.divide_segment(sorted_events[2].complement,
-                                            sorted_events[1].start)
+            if ends_equal:
+                event.set_both_relationships(relationship)
+                below_event.set_both_relationships(relationship)
+            else:
+                end_min.set_both_relationships(relationship)
+                end_max.complement.relationship = relationship
+                events_queue.divide_segment(end_max.complement, end_min.start)
+            assert event.segment == below_event.segment
+            assert (segments_relationship(event.segment, below_event.segment)
+                    is SegmentsRelationship.OVERLAP)
             return True
         elif ends_equal:
             # the line segments share the right endpoint
-            events_queue.divide_segment(sorted_events[0],
-                                        sorted_events[1].start)
+            start_max.set_both_relationships(relationship)
+            start_min.complement.relationship = relationship
+            events_queue.divide_segment(start_min, start_max.start)
+        elif start_min is end_max.complement:
+            # one line segment includes the other one
+            start_max.set_both_relationships(relationship)
+            start_min_original_relationship = start_min.relationship
+            start_min.relationship = relationship
+            events_queue.divide_segment(start_min, end_min.start)
+            start_min.relationship = start_min_original_relationship
+            start_min.complement.relationship = relationship
+            events_queue.divide_segment(start_min, start_max.start)
+            assert start_max.segment == max(segment, below_segment)
+            assert (segments_relationship(event.segment, below_event.segment)
+                    is SegmentsRelationship.TOUCH)
         else:
-            events_queue.divide_segment(
-                    sorted_events[0]
-                    # one line segment includes the other one
-                    if sorted_events[0] is sorted_events[3].complement
-                    # no line segment includes the other one
-                    else sorted_events[1],
-                    sorted_events[2].start)
-            events_queue.divide_segment(sorted_events[0],
-                                        sorted_events[1].start)
+            # no line segment includes the other one
+            start_max.relationship = relationship
+            events_queue.divide_segment(start_max, end_min.start)
+            start_min.complement.relationship = relationship
+            events_queue.divide_segment(start_min, start_max.start)
     elif relationship is not SegmentsRelationship.NONE:
         if event.from_test is not below_event.from_test:
-            event.relationship = below_event.relationship = relationship
+            event.set_both_relationships(max(event.relationship, relationship))
+            below_event.set_both_relationships(max(below_event.relationship,
+                                                   relationship))
         if below_event.start != event.start and below_event.end != event.end:
             # segments do not intersect at endpoints
             point = segments_intersection(below_segment, segment)
