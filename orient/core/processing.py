@@ -9,8 +9,9 @@ from .sweep import sweep
 def process_linear_queue(events_queue: EventsQueue,
                          stop_x: Coordinate) -> Relation:
     test_is_subset_of_goal = goal_is_subset_of_test = True
-    test_boundary_in_goal_interior = goal_boundary_in_test_interior = False
-    has_cross = has_touch = has_overlap = False
+    test_boundary_not_in_goal_interior = True
+    goal_boundary_not_in_test_interior = True
+    has_no_cross = has_no_touch = has_no_overlap = True
     for event in sweep(events_queue, stop_x):
         if (test_is_subset_of_goal
                 and event.from_test and event.outside):
@@ -18,19 +19,19 @@ def process_linear_queue(events_queue: EventsQueue,
         if (goal_is_subset_of_test
                 and event.from_goal and event.outside):
             goal_is_subset_of_test = False
-        if (not test_boundary_in_goal_interior
+        if (test_boundary_not_in_goal_interior
                 and event.from_test and event.inside):
-            test_boundary_in_goal_interior = True
-        if (not goal_boundary_in_test_interior
+            test_boundary_not_in_goal_interior = False
+        if (goal_boundary_not_in_test_interior
                 and event.from_goal and event.inside):
-            goal_boundary_in_test_interior = True
-        if not has_cross and event.relationship is SegmentsRelationship.CROSS:
-            has_cross = True
-        if (not has_overlap
+            goal_boundary_not_in_test_interior = False
+        if has_no_cross and event.relationship is SegmentsRelationship.CROSS:
+            has_no_cross = False
+        if (has_no_overlap
                 and event.relationship is SegmentsRelationship.OVERLAP):
-            has_overlap = True
-        if not has_touch and event.relationship is SegmentsRelationship.TOUCH:
-            has_touch = True
+            has_no_overlap = False
+        if has_no_touch and event.relationship is SegmentsRelationship.TOUCH:
+            has_no_touch = False
     if events_queue:
         if events_queue.peek().from_test:
             test_is_subset_of_goal = False
@@ -39,31 +40,31 @@ def process_linear_queue(events_queue: EventsQueue,
     if goal_is_subset_of_test:
         return (Relation.EQUAL
                 if test_is_subset_of_goal
-                else ((Relation.OVERLAP
-                       if has_overlap
-                       else (Relation.TOUCH
-                             if has_touch
-                             else Relation.DISJOINT))
-                      if goal_boundary_in_test_interior
-                      else Relation.COMPOSITE))
+                else (Relation.COMPOSITE
+                      if goal_boundary_not_in_test_interior
+                      else ((Relation.DISJOINT
+                             if has_no_touch
+                             else Relation.TOUCH)
+                            if has_no_overlap
+                            else Relation.OVERLAP)))
     elif test_is_subset_of_goal:
-        return ((Relation.OVERLAP
-                 if has_overlap
-                 else (Relation.TOUCH
-                       if has_touch
-                       else Relation.DISJOINT))
-                if test_boundary_in_goal_interior
-                else Relation.COMPONENT)
+        return (Relation.COMPONENT
+                if test_boundary_not_in_goal_interior
+                else ((Relation.DISJOINT
+                       if has_no_touch
+                       else Relation.TOUCH)
+                      if has_no_overlap
+                      else Relation.OVERLAP))
     else:
-        return (Relation.OVERLAP
-                if has_overlap
-                else (Relation.CROSS
-                      if (has_cross
-                          or test_boundary_in_goal_interior
-                          or goal_boundary_in_test_interior)
-                      else (Relation.TOUCH
-                            if has_touch
-                            else Relation.DISJOINT)))
+        return (((Relation.DISJOINT
+                  if has_no_touch
+                  else Relation.TOUCH)
+                 if (has_no_cross
+                     and (test_boundary_not_in_goal_interior
+                          is goal_boundary_not_in_test_interior))
+                 else Relation.CROSS)
+                if has_no_overlap
+                else Relation.OVERLAP)
 
 
 def process_linear_compound_queue(events_queue: EventsQueue,
