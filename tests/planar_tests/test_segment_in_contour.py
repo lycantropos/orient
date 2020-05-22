@@ -2,8 +2,8 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.contour import (edges,
-                                 equal)
+from orient.core.contour import (equal,
+                                 to_segments)
 from orient.hints import (Contour,
                           Segment)
 from orient.planar import (Relation,
@@ -44,7 +44,7 @@ def test_outside(contour_with_segment: Tuple[Contour, Segment]) -> None:
 @given(strategies.contours)
 def test_edges(contour: Contour) -> None:
     assert all(segment_in_contour(edge, contour) is Relation.COMPONENT
-               for edge in edges(contour))
+               for edge in to_segments(contour))
 
 
 @given(strategies.contours)

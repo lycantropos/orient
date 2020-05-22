@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.contour import edges
+from orient.core.contour import to_segments
 from orient.hints import (Contour,
                           Region)
 from orient.planar import (Relation,
@@ -79,7 +79,7 @@ def test_connection_with_segment_in_region(region_with_contour
     result = contour_in_region(contour, region)
 
     edges_relations = [segment_in_region(edge, region)
-                       for edge in edges(contour)]
+                       for edge in to_segments(contour)]
     assert equivalence(result is Relation.DISJOINT,
                        all(edge_relation is Relation.DISJOINT
                            for edge_relation in edges_relations))
