@@ -22,7 +22,7 @@ class EdgeKind(IntEnum):
 
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
-                 'relationship', 'in_out', 'other_in_out', 'edge_kind')
+                 'relationship', 'edge_kind', 'in_out', 'other_in_out')
 
     def __init__(self,
                  is_left_endpoint: bool,
