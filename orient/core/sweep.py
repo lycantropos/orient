@@ -1,8 +1,10 @@
 from abc import abstractmethod
 from itertools import groupby
 from typing import (Any,
+                    Generic,
                     Iterable,
-                    Optional)
+                    Optional,
+                    Type)
 
 from robust.linear import (SegmentsRelationship,
                            segments_intersection,
@@ -20,8 +22,8 @@ from .events_queue import (EventsQueue,
 from .sweep_line import SweepLine
 
 
-class Sweeper:
-    event_cls = Event
+class Sweeper(Generic[Event]):
+    event_cls = None  # type: Type[Event]
 
     def __init__(self) -> None:
         self.events_queue = EventsQueue()
@@ -40,7 +42,7 @@ class Sweeper:
             self.events_queue.push(start_event)
             self.events_queue.push(end_event)
 
-    def divide_segment(self, event: OpenEvent, point: Point) -> None:
+    def divide_segment(self, event: Event, point: Point) -> None:
         left_event = self.event_cls(True, point, event.complement,
                                     event.from_test,
                                     event.complement.relationship)
@@ -57,10 +59,10 @@ class Sweeper:
         """
 
 
-class ClosedSweeper(Sweeper):
+class ClosedSweeper(Sweeper[ClosedEvent]):
     event_cls = ClosedEvent
 
-    def sweep(self, stop_x: Coordinate) -> Iterable[Event]:
+    def sweep(self, stop_x: Coordinate) -> Iterable[ClosedEvent]:
         sweep_line = SweepLine()
         events_queue = self.events_queue
         while events_queue:

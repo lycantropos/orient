@@ -2,7 +2,8 @@ from enum import (IntEnum,
                   unique)
 from reprlib import recursive_repr
 from typing import (List,
-                    Optional)
+                    Optional,
+                    TypeVar)
 
 from reprit.base import generate_repr
 from robust.linear import (SegmentsRelationship,
@@ -13,7 +14,7 @@ from orient.hints import (Coordinate,
                           Segment)
 
 
-class Event:
+class BaseEvent:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
                  'relationship')
 
@@ -75,7 +76,7 @@ class Event:
             return result
 
 
-class OpenEvent(Event):
+class OpenEvent(BaseEvent):
     __slots__ = 'has_next', 'touched_at_start'
 
     def __init__(self,
@@ -106,12 +107,12 @@ class EdgeKind(IntEnum):
     DIFFERENT_TRANSITION = 3
 
 
-class ClosedEvent(Event):
+class ClosedEvent(BaseEvent):
     __slots__ = 'edge_kind', 'in_out', 'other_in_out'
 
     def __init__(self, is_left_endpoint: bool,
                  start: Point,
-                 complement: Optional['Event'],
+                 complement: Optional['ClosedEvent'],
                  from_test: bool,
                  relationship: SegmentsRelationship) -> None:
         super().__init__(is_left_endpoint, start, complement, from_test,
@@ -143,3 +144,6 @@ class ClosedEvent(Event):
         """
         return (not self.in_intersection
                 and self.relationship is not SegmentsRelationship.OVERLAP)
+
+
+Event = TypeVar('Event', OpenEvent, ClosedEvent)
