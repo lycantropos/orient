@@ -13,7 +13,8 @@ from orient.hints import (Contour,
                           Point,
                           Polygon,
                           Segment)
-from tests.strategies import coordinates_strategies
+from tests.strategies import (coordinates_strategies,
+                              rational_coordinates_strategies)
 from tests.utils import (Strategy,
                          to_pairs,
                          to_triplets)
@@ -59,10 +60,8 @@ def chop_segment(segment: Segment, parts_count: int) -> Multisegment:
         return [segment]
     (start_x, start_y), (end_x, end_y) = segment
     delta_x, delta_y = end_x - start_x, end_y - start_y
-    step_x, step_y = ((Fraction(delta_x, parts_count),
-                       Fraction(delta_y, parts_count))
-                      if isinstance(delta_x, int)
-                      else (delta_x / parts_count, delta_y / parts_count))
+    step_x, step_y = (Fraction(delta_x, parts_count),
+                      Fraction(delta_y, parts_count))
     end_x, end_y = start_x + step_x, start_y + step_y
     result = []
     for part_index in range(parts_count):
@@ -72,19 +71,23 @@ def chop_segment(segment: Segment, parts_count: int) -> Multisegment:
     return result
 
 
-def segment_to_multisegments_with_segments(segment: Segment
+def segment_to_multisegments_with_segments(segment: Segment,
+                                           *,
+                                           max_partition_size: int = 100
                                            ) -> Strategy[Tuple[Multisegment,
                                                                Segment]]:
     always_segment = strategies.just(segment)
+    partition_sizes = strategies.integers(1, max_partition_size)
     return strategies.tuples((strategies.builds(chop_segment,
                                                 always_segment,
-                                                strategies.integers(1, 10))
+                                                partition_sizes)
                               .flatmap(strategies.permutations)),
                              always_segment)
 
 
+rational_segments = rational_coordinates_strategies.flatmap(planar.segments)
 multisegments_with_segments |= (
-    segments.flatmap(segment_to_multisegments_with_segments))
+    rational_segments.flatmap(segment_to_multisegments_with_segments))
 multisegments_strategies = coordinates_strategies.map(planar.multisegments)
 multisegments_pairs = multisegments_strategies.flatmap(to_pairs)
 contours = coordinates_strategies.flatmap(planar.contours)
