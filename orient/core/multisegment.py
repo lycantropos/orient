@@ -4,11 +4,11 @@ from orient.hints import (Multisegment,
                           Point,
                           Segment)
 from . import bounding_box
-from .events_queue import EventsQueue
-from .processing import process_linear_queue
+from .processing import process_open_linear_queue
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
+from .sweep import OpenSweeper
 from .utils import flatten
 
 
@@ -125,19 +125,11 @@ def relate_multisegment(goal: Multisegment, test: Multisegment) -> Relation:
         bounding_box.from_points(flatten(test)))
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    events_queue = EventsQueue()
-    register(events_queue, goal,
-             from_test=False)
-    register(events_queue, test,
-             from_test=True)
+    sweeper = OpenSweeper()
+    sweeper.register_segments(goal,
+                              from_test=False)
+    sweeper.register_segments(test,
+                              from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_linear_queue(events_queue, min(goal_max_x, test_max_x))
-
-
-def register(events_queue: EventsQueue, multisegment: Multisegment,
-             *,
-             from_test: bool) -> None:
-    for segment in multisegment:
-        events_queue.register_segment(segment,
-                                      from_test=from_test)
+    return process_open_linear_queue(sweeper, min(goal_max_x, test_max_x))

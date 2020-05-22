@@ -1,17 +1,19 @@
+from typing import Iterable
+
 from orient.hints import (Contour,
                           Multiregion,
                           Point,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import register as register_contour
-from .events_queue import EventsQueue
+from .contour import to_segments as contour_to_segments
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .region import (register as register_region,
-                     relate_point as relate_point_to_region,
-                     relate_segment as relate_segment_to_region)
+from .region import (relate_point as relate_point_to_region,
+                     relate_segment as relate_segment_to_region,
+                     to_segments as region_to_segments)
 from .relation import Relation
+from .sweep import ClosedSweeper
 from .utils import flatten
 
 
@@ -41,7 +43,7 @@ def relate_segment(multiregion: Multiregion, segment: Segment) -> Relation:
 
 def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:
     contour_bounding_box = bounding_box.from_points(contour)
-    disjoint, multiregion_max_x, events_queue = True, None, None
+    disjoint, multiregion_max_x, sweeper = True, None, None
     for region in multiregion:
         region_bounding_box = bounding_box.from_points(region)
         if not bounding_box.disjoint_with(region_bounding_box,
@@ -49,27 +51,27 @@ def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:
             if disjoint:
                 disjoint = False
                 _, multiregion_max_x, _, _ = region_bounding_box
-                events_queue = EventsQueue()
-                register_contour(events_queue, contour,
-                                 from_test=True)
+                sweeper = ClosedSweeper()
+                sweeper.register_segments(contour_to_segments(contour),
+                                          from_test=True)
             else:
                 _, region_max_x, _, _ = region_bounding_box
                 multiregion_max_x = max(multiregion_max_x, region_max_x)
-            register_region(events_queue, region,
-                            from_test=False)
+            sweeper.register_segments(region_to_segments(region),
+                                      from_test=False)
     if disjoint:
         return Relation.DISJOINT
     _, contour_max_x, _, _ = contour_bounding_box
-    return process_linear_compound_queue(events_queue, min(contour_max_x,
-                                                           multiregion_max_x))
+    return process_linear_compound_queue(sweeper, min(contour_max_x,
+                                                      multiregion_max_x))
 
 
 def relate_region(multiregion: Multiregion, region: Region) -> Relation:
     if not multiregion:
         return Relation.DISJOINT
     region_bounding_box = bounding_box.from_points(region)
-    all_disjoint, any_disjoint, multiregion_max_x, events_queue = (True, False,
-                                                                   None, None)
+    all_disjoint, any_disjoint, multiregion_max_x, sweeper = (True, False,
+                                                              None, None)
     for sub_region in multiregion:
         sub_region_bounding_box = bounding_box.from_points(sub_region)
         if bounding_box.disjoint_with(region_bounding_box,
@@ -79,19 +81,19 @@ def relate_region(multiregion: Multiregion, region: Region) -> Relation:
             if all_disjoint:
                 all_disjoint = False
                 _, multiregion_max_x, _, _ = sub_region_bounding_box
-                events_queue = EventsQueue()
-                register_contour(events_queue, region,
-                                 from_test=True)
+                sweeper = ClosedSweeper()
+                sweeper.register_segments(region_to_segments(region),
+                                          from_test=True)
             else:
                 _, sub_region_max_x, _, _ = sub_region_bounding_box
                 multiregion_max_x = max(multiregion_max_x, sub_region_max_x)
-            register_region(events_queue, sub_region,
-                            from_test=False)
+            sweeper.register_segments(region_to_segments(sub_region),
+                                      from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
     _, region_max_x, _, _ = region_bounding_box
-    relation = process_compound_queue(events_queue, min(multiregion_max_x,
-                                                        region_max_x))
+    relation = process_compound_queue(sweeper, min(multiregion_max_x,
+                                                   region_max_x))
     return ((Relation.COMPONENT
              if relation is Relation.EQUAL
              else (Relation.OVERLAP
@@ -111,19 +113,16 @@ def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
         bounding_box.from_points(flatten(test)))
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    events_queue = EventsQueue()
-    register(events_queue, goal,
-             from_test=False)
-    register(events_queue, test,
-             from_test=True)
+    sweeper = ClosedSweeper()
+    sweeper.register_segments(to_segments(goal),
+                              from_test=False)
+    sweeper.register_segments(to_segments(test),
+                              from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_compound_queue(events_queue, min(goal_max_x, test_max_x))
+    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
-def register(events_queue: EventsQueue, multiregion: Multiregion,
-             *,
-             from_test: bool) -> None:
+def to_segments(multiregion: Multiregion) -> Iterable[Segment]:
     for region in multiregion:
-        register_region(events_queue, region,
-                        from_test=from_test)
+        yield from region_to_segments(region)

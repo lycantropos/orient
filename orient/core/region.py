@@ -10,21 +10,20 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import (edges as boundary_edges,
-                      equal as contours_equal,
-                      register as register_contour,
-                      relate_segment as relate_segment_to_contour)
-from .events_queue import EventsQueue
+from .contour import (equal as contours_equal,
+                      relate_segment as relate_segment_to_contour,
+                      to_segments as contour_to_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .relation import Relation
 from .segment import relate_point as relate_point_to_segment
+from .sweep import ClosedSweeper
 
 
 def relate_point(region: Region, point: Point) -> Relation:
     result = False
     _, point_y = point
-    for edge in boundary_edges(region):
+    for edge in to_segments(region):
         if relate_point_to_segment(edge, point) is Relation.COMPONENT:
             return Relation.COMPONENT
         start, end = edge
@@ -63,7 +62,7 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
             start_index = end_index = None
             start_is_not_vertex = end_is_not_vertex = True
             overlaps_with_edges = relation_with_contour is Relation.OVERLAP
-            for index, edge in enumerate(boundary_edges(region)):
+            for index, edge in enumerate(to_segments(region)):
                 if (start_index is None
                         and (relate_point_to_segment(edge, start)
                              is Relation.COMPONENT)):
@@ -216,15 +215,15 @@ def relate_contour(region: Region, contour: Contour) -> Relation:
         return Relation.DISJOINT
     if equal(region, contour):
         return Relation.COMPONENT
-    events_queue = EventsQueue()
-    register(events_queue, region,
-             from_test=False)
-    register_contour(events_queue, contour,
-                     from_test=True)
+    sweeper = ClosedSweeper()
+    sweeper.register_segments(to_segments(region),
+                              from_test=False)
+    sweeper.register_segments(to_segments(contour),
+                              from_test=True)
     (_, contour_max_x, _, _), (_, region_max_x, _, _) = (contour_bounding_box,
                                                          region_bounding_box)
-    return process_linear_compound_queue(events_queue, min(contour_max_x,
-                                                           region_max_x))
+    return process_linear_compound_queue(sweeper, min(contour_max_x,
+                                                      region_max_x))
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
@@ -234,15 +233,15 @@ def relate_region(goal: Region, test: Region) -> Relation:
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL
-    events_queue = EventsQueue()
-    register(events_queue, goal,
-             from_test=False)
-    register(events_queue, test,
-             from_test=True)
+    sweeper = ClosedSweeper()
+    sweeper.register_segments(to_segments(goal),
+                              from_test=False)
+    sweeper.register_segments(to_segments(test),
+                              from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_compound_queue(events_queue, min(goal_max_x, test_max_x))
+    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
 equal = contours_equal
-register = register_contour
+to_segments = contour_to_segments

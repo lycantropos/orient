@@ -1,13 +1,13 @@
+from functools import partial
+from typing import (Callable,
+                    cast)
+
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 from robust.angular import (Orientation,
                             orientation)
-from robust.linear import SegmentsRelationship
 
-from orient.hints import (Point,
-                          Segment)
-from .event import (EdgeKind,
-                    Event)
+from .event import Event
 
 
 class EventsQueueKey:
@@ -53,38 +53,6 @@ class EventsQueueKey:
                 return end_y < other_end_y
 
 
-class EventsQueue:
-    __slots__ = '_queue',
-
-    def __init__(self) -> None:
-        self._queue = PriorityQueue(key=EventsQueueKey)
-
-    def __bool__(self) -> bool:
-        return bool(self._queue)
-
-    def peek(self) -> Event:
-        return self._queue.peek()
-
-    def pop(self) -> Event:
-        return self._queue.pop()
-
-    def register_segment(self, segment: Segment,
-                         *,
-                         from_test: bool) -> None:
-        start, end = sorted(segment)
-        start_event = Event(True, start, None, from_test,
-                            SegmentsRelationship.NONE, EdgeKind.NORMAL)
-        end_event = Event(False, end, start_event, from_test,
-                          SegmentsRelationship.NONE, EdgeKind.NORMAL)
-        start_event.complement = end_event
-        self._queue.push(start_event)
-        self._queue.push(end_event)
-
-    def divide_segment(self, event: Event, point: Point) -> None:
-        left_event = Event(True, point, event.complement, event.from_test,
-                           event.complement.relationship, EdgeKind.NORMAL)
-        right_event = Event(False, point, event, event.from_test,
-                            event.relationship, EdgeKind.NORMAL)
-        event.complement.complement, event.complement = left_event, right_event
-        self._queue.push(left_event)
-        self._queue.push(right_event)
+EventsQueue = cast(Callable[[], PriorityQueue[Event]],
+                   partial(PriorityQueue,
+                           key=EventsQueueKey))

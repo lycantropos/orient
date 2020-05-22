@@ -1,7 +1,8 @@
 from enum import (IntEnum,
                   unique)
 from reprlib import recursive_repr
-from typing import Optional
+from typing import (List,
+                    Optional)
 
 from reprit.base import generate_repr
 from robust.linear import (SegmentsRelationship,
@@ -12,35 +13,21 @@ from orient.hints import (Coordinate,
                           Segment)
 
 
-@unique
-class EdgeKind(IntEnum):
-    NORMAL = 0
-    NON_CONTRIBUTING = 1
-    SAME_TRANSITION = 2
-    DIFFERENT_TRANSITION = 3
-
-
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
-                 'relationship', 'edge_kind', 'in_out', 'other_in_out')
+                 'relationship')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
                  from_test: bool,
-                 relationship: SegmentsRelationship,
-                 edge_kind: EdgeKind,
-                 in_out: Optional[bool] = None,
-                 other_in_out: Optional[bool] = None) -> None:
+                 relationship: SegmentsRelationship) -> None:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
         self.relationship = relationship
         self.from_test = from_test
-        self.edge_kind = edge_kind
-        self.in_out = in_out
-        self.other_in_out = other_in_out
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
@@ -69,10 +56,74 @@ class Event:
         return start_y == end_y
 
     @property
+    def segment(self) -> Segment:
+        return self.start, self.end
+
+    def y_at(self, x: Coordinate) -> Coordinate:
+        if self.is_vertical or self.is_horizontal:
+            _, start_y = self.start
+            return start_y
+        else:
+            start_x, start_y = self.start
+            if x == start_x:
+                return start_y
+            end_x, end_y = self.end
+            if x == end_x:
+                return end_y
+            _, result = segments_intersection(self.segment,
+                                              ((x, start_y), (x, end_y)))
+            return result
+
+
+class OpenEvent(Event):
+    __slots__ = 'has_next', 'touched_at_start'
+
+    def __init__(self,
+                 is_left_endpoint: bool,
+                 start: Point,
+                 complement: Optional['OpenEvent'],
+                 from_test: bool,
+                 relationship: SegmentsRelationship) -> None:
+        super().__init__(is_left_endpoint, start, complement, from_test,
+                         relationship)
+        self.has_next = False
+        self.touched_at_start = []  # type: List[OpenEvent]
+
+    @property
+    def has_prev(self) -> bool:
+        return self.complement.has_next
+
+    @property
+    def touched_at_end(self) -> List['OpenEvent']:
+        return self.complement.touched_at_start
+
+
+@unique
+class EdgeKind(IntEnum):
+    NORMAL = 0
+    NON_CONTRIBUTING = 1
+    SAME_TRANSITION = 2
+    DIFFERENT_TRANSITION = 3
+
+
+class ClosedEvent(Event):
+    __slots__ = 'edge_kind', 'in_out', 'other_in_out'
+
+    def __init__(self, is_left_endpoint: bool,
+                 start: Point,
+                 complement: Optional['Event'],
+                 from_test: bool,
+                 relationship: SegmentsRelationship) -> None:
+        super().__init__(is_left_endpoint, start, complement, from_test,
+                         relationship)
+        self.edge_kind = EdgeKind.NORMAL
+        self.in_out = None
+        self.other_in_out = None
+
+    @property
     def in_intersection(self) -> bool:
-        edge_kind = self.edge_kind
-        return (edge_kind is EdgeKind.NORMAL and not self.other_in_out
-                or edge_kind is EdgeKind.SAME_TRANSITION)
+        return (self.edge_kind is EdgeKind.NORMAL and not self.other_in_out
+                or self.edge_kind is EdgeKind.SAME_TRANSITION)
 
     @property
     def inside(self) -> bool:
@@ -92,22 +143,3 @@ class Event:
         """
         return (not self.in_intersection
                 and self.relationship is not SegmentsRelationship.OVERLAP)
-
-    @property
-    def segment(self) -> Segment:
-        return self.start, self.end
-
-    def y_at(self, x: Coordinate) -> Coordinate:
-        if self.is_vertical or self.is_horizontal:
-            _, start_y = self.start
-            return start_y
-        else:
-            start_x, start_y = self.start
-            if x == start_x:
-                return start_y
-            end_x, end_y = self.end
-            if x == end_x:
-                return end_y
-            _, result = segments_intersection(self.segment,
-                                              ((x, start_y), (x, end_y)))
-            return result

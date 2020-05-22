@@ -9,19 +9,18 @@ from orient.hints import (Contour,
                           Point,
                           Segment)
 from . import bounding_box
-from .events_queue import EventsQueue
-from .multisegment import register as register_multisegment
-from .processing import process_linear_queue
+from .processing import process_closed_linear_queue
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
+from .sweep import ClosedSweeper
 from .utils import flatten
 
 
 def relate_point(contour: Contour, point: Point) -> Relation:
     return (Relation.DISJOINT
             if all(relate_point_to_segment(edge, point) is Relation.DISJOINT
-                   for edge in edges(contour))
+                   for edge in to_segments(contour))
             else Relation.COMPONENT)
 
 
@@ -29,7 +28,7 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
     has_touch = has_cross = False
     previous_touch_index = previous_touch_edge_start = None
     start, end = segment
-    for index, edge in enumerate(edges(contour)):
+    for index, edge in enumerate(to_segments(contour)):
         relation_with_edge = relate_segments(edge, segment)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
@@ -89,15 +88,15 @@ def relate_multisegment(contour: Contour,
     if bounding_box.disjoint_with(contour_bounding_box,
                                   multisegment_bounding_box):
         return Relation.DISJOINT
-    events_queue = EventsQueue()
-    register(events_queue, contour,
-             from_test=False)
-    register_multisegment(events_queue, multisegment,
-                          from_test=True)
+    sweeper = ClosedSweeper()
+    sweeper.register_segments(to_segments(contour),
+                              from_test=False)
+    sweeper.register_segments(multisegment,
+                              from_test=True)
     (_, contour_max_x, _, _), (_, multisegment_max_x, _, _) = (
         contour_bounding_box, multisegment_bounding_box)
-    return process_linear_queue(events_queue,
-                                min(contour_max_x, multisegment_max_x))
+    return process_closed_linear_queue(sweeper,
+                                       min(contour_max_x, multisegment_max_x))
 
 
 def relate_contour(goal: Contour, test: Contour) -> Relation:
@@ -107,14 +106,15 @@ def relate_contour(goal: Contour, test: Contour) -> Relation:
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL
-    events_queue = EventsQueue()
-    register(events_queue, goal,
-             from_test=False)
-    register(events_queue, test,
-             from_test=True)
+    sweeper = ClosedSweeper()
+    sweeper.register_segments(to_segments(goal),
+                              from_test=False)
+    sweeper.register_segments(to_segments(test),
+                              from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_linear_queue(events_queue, min(goal_max_x, test_max_x))
+    return process_closed_linear_queue(sweeper,
+                                       min(goal_max_x, test_max_x))
 
 
 def equal(left: Contour, right: Contour) -> bool:
@@ -142,14 +142,6 @@ def equal(left: Contour, right: Contour) -> bool:
                for left_index, right_index in indices)
 
 
-def register(events_queue: EventsQueue, contour: Contour,
-             *,
-             from_test: bool) -> None:
-    for edge in edges(contour):
-        events_queue.register_segment(edge,
-                                      from_test=from_test)
-
-
 def orientation(contour: Contour) -> Orientation:
     index = min(range(len(contour)),
                 key=contour.__getitem__)
@@ -157,6 +149,6 @@ def orientation(contour: Contour) -> Orientation:
                              contour[(index + 1) % len(contour)])
 
 
-def edges(contour: Contour) -> Iterable[Segment]:
+def to_segments(contour: Contour) -> Iterable[Segment]:
     return ((contour[index - 1], contour[index])
             for index in range(len(contour)))
