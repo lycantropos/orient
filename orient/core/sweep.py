@@ -210,7 +210,7 @@ def all_equal(values: Iterable[Any]) -> bool:
 class OpenSweeper(Sweeper):
     event_cls = OpenEvent
 
-    def sweep(self, stop_x: Coordinate) -> Iterable[Event]:
+    def sweep(self, stop_x: Coordinate) -> Iterable[OpenEvent]:
         sweep_line = SweepLine()
         events_queue = self.events_queue
         while events_queue:
