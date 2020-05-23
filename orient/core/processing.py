@@ -27,13 +27,6 @@ def process_open_linear_queue(sweeper: OpenSweeper,
                 elif event.relationship is SegmentsRelationship.TOUCH:
                     if has_no_touch:
                         has_no_touch = False
-                    if has_no_cross:
-                        if event.has_prev:
-                            if len(event.touched_at_end) > 1:
-                                has_no_cross = False
-                        elif (event.has_next
-                              and len(event.touched_at_start) > 1):
-                            has_no_cross = False
     if sweeper:
         if sweeper.peek().from_test:
             test_is_subset = False

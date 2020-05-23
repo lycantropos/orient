@@ -1,3 +1,4 @@
+import math
 from abc import abstractmethod
 from itertools import groupby
 from typing import (Any,
@@ -7,9 +8,12 @@ from typing import (Any,
                     Type)
 
 from reprit.base import generate_repr
+from robust.angular import (Orientation,
+                            orientation)
 from robust.linear import (SegmentsRelationship,
                            segments_intersection,
                            segments_relationship)
+from robust.projection import signed_length
 
 from orient.hints import (Coordinate,
                           Point,
@@ -211,11 +215,6 @@ class ClosedSweeper(Sweeper[ClosedEvent]):
                                                 below_event.in_out)
 
 
-def all_equal(values: Iterable[Any]) -> bool:
-    groups = groupby(values)
-    return next(groups, True) and not next(groups, False)
-
-
 class OpenSweeper(Sweeper):
     event_cls = OpenEvent
 
@@ -232,25 +231,40 @@ class OpenSweeper(Sweeper):
             events_queue.pop()
             sweep_line.move_to(start_x)
             same_start_events = [event]
-            goal_events, test_events = (([], [event])
-                                        if event.from_test
-                                        else ([event], []))
+            end = event.end
+            largest_angle_event, largest_angle_cosine = (
+                event, points_distance(start, end))
+            from_other_events = []
             while events_queue and events_queue.peek().start == start:
-                next_event = events_queue.pop()
-                same_start_events.append(next_event)
-                ((test_events if next_event.from_test else goal_events)
-                 .append(next_event))
-            for event in goal_events:
-                event.touched_at_start.extend(test_events)
-                event.has_next = len(goal_events) > 1
-            for event in test_events:
-                event.touched_at_start.extend(goal_events)
-                event.has_next = len(test_events) > 1
-            if goal_events and test_events:
+                other_event = events_queue.pop()
+                same_start_events.append(other_event)
+                if other_event.from_test is event.from_test:
+                    cosine = (signed_length(start, end, start, other_event.end)
+                              / points_distance(start, other_event.end))
+                    if cosine < largest_angle_cosine:
+                        largest_angle_event, largest_angle_cosine = (
+                            other_event, cosine)
+                else:
+                    from_other_events.append(other_event)
+            if from_other_events:
+                if (largest_angle_event is not event
+                        and len(from_other_events) > 1):
+                    smallest_cosine_end = largest_angle_event.end
+                    base_orientation = orientation(end, start,
+                                                   smallest_cosine_end)
+                    if all_equal(_point_in_angle(other_event.end,
+                                                 end, start,
+                                                 smallest_cosine_end,
+                                                 base_orientation)
+                                 for other_event in from_other_events):
+                        relationship = SegmentsRelationship.TOUCH
+                    else:
+                        relationship = SegmentsRelationship.CROSS
+                else:
+                    relationship = SegmentsRelationship.TOUCH
                 for event in same_start_events:
-                    event.set_both_relationships(
-                            max(event.relationship,
-                                SegmentsRelationship.TOUCH))
+                    event.set_both_relationships(max(event.relationship,
+                                                     relationship))
             for event in same_start_events:
                 if event.is_left_endpoint:
                     sweep_line.add(event)
@@ -344,3 +358,31 @@ class OpenSweeper(Sweeper):
                                                  relationship))
                 below_event.set_both_relationships(
                         max(below_event.relationship, relationship))
+
+
+def all_equal(values: Iterable[Any]) -> bool:
+    groups = groupby(values)
+    return next(groups, True) and not next(groups, False)
+
+
+def _point_in_angle(point: Point,
+                    first_ray_point: Point,
+                    vertex: Point,
+                    second_ray_point: Point,
+                    angle_orientation: Orientation) -> bool:
+    first_half_orientation = orientation(first_ray_point, vertex, point)
+    second_half_orientation = orientation(vertex, second_ray_point, point)
+    return (second_half_orientation is angle_orientation
+            if first_half_orientation is Orientation.COLLINEAR
+            else (first_half_orientation is angle_orientation
+                  if second_half_orientation is Orientation.COLLINEAR
+                  else (first_half_orientation is second_half_orientation
+                        is (angle_orientation
+                            # if angle is degenerate
+                            or Orientation.COUNTERCLOCKWISE))))
+
+
+def points_distance(start: Point, end: Point) -> Coordinate:
+    (start_x, start_y), (end_x, end_y) = start, end
+    delta_x, delta_y = end_x - start_x, end_y - start_y
+    return math.sqrt(delta_x * delta_x + delta_y * delta_y)

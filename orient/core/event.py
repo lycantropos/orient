@@ -1,8 +1,7 @@
 from enum import (IntEnum,
                   unique)
 from reprlib import recursive_repr
-from typing import (List,
-                    Optional,
+from typing import (Optional,
                     TypeVar)
 
 from reprit.base import generate_repr
@@ -14,7 +13,7 @@ from orient.hints import (Coordinate,
                           Segment)
 
 
-class BaseEvent:
+class OpenEvent:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
                  'relationship')
 
@@ -76,29 +75,6 @@ class BaseEvent:
             return result
 
 
-class OpenEvent(BaseEvent):
-    __slots__ = 'has_next', 'touched_at_start'
-
-    def __init__(self,
-                 is_left_endpoint: bool,
-                 start: Point,
-                 complement: Optional['OpenEvent'],
-                 from_test: bool,
-                 relationship: SegmentsRelationship) -> None:
-        super().__init__(is_left_endpoint, start, complement, from_test,
-                         relationship)
-        self.has_next = False
-        self.touched_at_start = []  # type: List[OpenEvent]
-
-    @property
-    def has_prev(self) -> bool:
-        return self.complement.has_next
-
-    @property
-    def touched_at_end(self) -> List['OpenEvent']:
-        return self.complement.touched_at_start
-
-
 @unique
 class EdgeKind(IntEnum):
     NORMAL = 0
@@ -107,7 +83,7 @@ class EdgeKind(IntEnum):
     DIFFERENT_TRANSITION = 3
 
 
-class ClosedEvent(BaseEvent):
+class ClosedEvent(OpenEvent):
     __slots__ = 'edge_kind', 'in_out', 'other_in_out'
 
     def __init__(self, is_left_endpoint: bool,
