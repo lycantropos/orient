@@ -132,9 +132,6 @@ def to_contours_with_points(coordinates: Strategy[Coordinate]
 
 
 contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
-contours_strategies = coordinates_strategies.map(planar.contours)
-contours_pairs = contours_strategies.flatmap(to_pairs)
-contours_triplets = contours_strategies.flatmap(to_triplets)
 
 
 def to_contours_with_segments(coordinates: Strategy[Coordinate]
@@ -145,6 +142,9 @@ def to_contours_with_segments(coordinates: Strategy[Coordinate]
 
 contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
+contours_strategies = coordinates_strategies.map(planar.contours)
+contours_pairs = contours_strategies.flatmap(to_pairs)
+contours_triplets = contours_strategies.flatmap(to_triplets)
 empty_multicontours = strategies.builds(list)
 multicontours = coordinates_strategies.flatmap(planar.multicontours)
 non_empty_multicontours = (coordinates_strategies
