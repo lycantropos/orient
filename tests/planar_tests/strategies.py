@@ -103,7 +103,25 @@ rational_segments = rational_coordinates_strategies.flatmap(planar.segments)
 multisegments_with_segments |= (
     rational_segments.flatmap(segment_to_multisegments_with_segments))
 multisegments_strategies = coordinates_strategies.map(planar.multisegments)
-multisegments_pairs = multisegments_strategies.flatmap(to_pairs)
+
+
+def to_multisegments_pairs(coordinates: Strategy[Coordinate],
+                           *,
+                           min_size: int = 0,
+                           max_size: Optional[int] = None
+                           ) -> Strategy[Tuple[Multisegment, Multisegment]]:
+    return strategies.tuples(planar.multisegments(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size),
+                             planar.multisegments(coordinates))
+
+
+multisegments_pairs = coordinates_strategies.flatmap(to_multisegments_pairs)
+empty_multisegments_with_multisegments = strategies.tuples(empty_multisegments,
+                                                           multisegments)
+non_empty_multisegments_with_multisegments = (
+    coordinates_strategies.flatmap(partial(to_multisegments_pairs,
+                                           min_size=1)))
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
