@@ -27,8 +27,8 @@ class BaseEvent:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
-        self.relationship = relationship
         self.from_test = from_test
+        self.relationship = relationship
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
