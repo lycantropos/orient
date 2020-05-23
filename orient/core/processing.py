@@ -10,8 +10,7 @@ def process_open_linear_queue(sweeper: OpenSweeper,
                               stop_x: Coordinate) -> Relation:
     test_is_subset = goal_is_subset = True
     has_no_cross = has_no_touch = has_no_overlap = True
-    events = list(sweeper.sweep(stop_x))
-    for event in events:
+    for event in sweeper.sweep(stop_x):
         if event.relationship is SegmentsRelationship.OVERLAP:
             if has_no_overlap:
                 has_no_overlap = False
