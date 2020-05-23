@@ -70,12 +70,17 @@ def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
     assert equivalence(next_result is Relation.DISJOINT,
                        result is Relation.DISJOINT
                        and relation_with_first_segment is Relation.DISJOINT)
-    assert equivalence(next_result is Relation.TOUCH,
+    assert implication(next_result is Relation.TOUCH,
                        result is Relation.TOUCH
                        and (relation_with_first_segment is Relation.DISJOINT
                             or relation_with_first_segment is Relation.TOUCH)
                        or result is Relation.DISJOINT
                        and relation_with_first_segment is Relation.TOUCH)
+    assert implication(result is Relation.TOUCH
+                       and relation_with_first_segment is Relation.DISJOINT
+                       or result is Relation.DISJOINT
+                       and relation_with_first_segment is Relation.TOUCH,
+                       next_result is Relation.TOUCH)
     assert implication(next_result is Relation.CROSS,
                        result is Relation.CROSS
                        and (relation_with_first_segment is Relation.DISJOINT
