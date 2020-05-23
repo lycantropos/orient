@@ -32,6 +32,7 @@ def to_segments_with_points(coordinates: Strategy[Coordinate]
 segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
 segments_strategies = coordinates_strategies.map(planar.segments)
 segments_pairs = segments_strategies.flatmap(to_pairs)
+empty_multisegments = strategies.builds(list)
 multisegments = coordinates_strategies.flatmap(planar.multisegments)
 
 
@@ -43,16 +44,26 @@ def to_multisegments_with_points(coordinates: Strategy[Coordinate]
 
 multisegments_with_points = (coordinates_strategies
                              .flatmap(to_multisegments_with_points))
+empty_multisegments_with_segments = strategies.tuples(empty_multisegments,
+                                                      segments)
 
 
-def to_multisegments_with_segments(coordinates: Strategy[Coordinate]
+def to_multisegments_with_segments(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
                                    ) -> Strategy[Tuple[Multisegment, Segment]]:
-    return strategies.tuples(planar.multisegments(coordinates),
+    return strategies.tuples(planar.multisegments(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size),
                              planar.segments(coordinates))
 
 
 multisegments_with_segments = (coordinates_strategies
                                .flatmap(to_multisegments_with_segments))
+non_empty_multisegments_with_segments = (
+    coordinates_strategies.flatmap(partial(to_multisegments_with_segments,
+                                           min_size=1)))
 
 
 def chop_segment(segment: Segment, parts_count: int) -> Multisegment:
