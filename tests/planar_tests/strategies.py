@@ -126,6 +126,9 @@ contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
 empty_multicontours = strategies.builds(list)
 multicontours = coordinates_strategies.flatmap(planar.multicontours)
+non_empty_multicontours = (coordinates_strategies
+                           .flatmap(partial(planar.multicontours,
+                                            min_size=1)))
 
 
 def to_multicontours_with_points(coordinates: Strategy[Coordinate],

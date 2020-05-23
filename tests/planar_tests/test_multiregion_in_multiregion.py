@@ -32,18 +32,16 @@ def test_self(multiregion: Multiregion) -> None:
                 else Relation.DISJOINT))
 
 
-@given(strategies.multicontours)
+@given(strategies.non_empty_multicontours)
 def test_elements(multiregion: Multiregion) -> None:
-    assert equivalence(bool(multiregion)
-                       and all(multiregion_in_multiregion([element],
-                                                          multiregion)
-                               is Relation.EQUAL
-                               for element in multiregion),
+    assert equivalence(all(multiregion_in_multiregion([region], multiregion)
+                           is Relation.EQUAL
+                           for region in multiregion),
                        len(multiregion) == 1)
-    assert equivalence(all(multiregion_in_multiregion([element], multiregion)
+    assert equivalence(all(multiregion_in_multiregion([region], multiregion)
                            is Relation.COMPONENT
-                           for element in multiregion),
-                       len(multiregion) != 1)
+                           for region in multiregion),
+                       len(multiregion) > 1)
 
 
 @given(strategies.multicontours_pairs)
