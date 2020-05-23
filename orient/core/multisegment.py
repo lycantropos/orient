@@ -1,3 +1,7 @@
+from typing import Dict
+
+from robust.angular import (Orientation,
+                            orientation)
 from robust.linear import segments_intersection
 
 from orient.hints import (Multisegment,
@@ -21,7 +25,9 @@ def relate_point(multisegment: Multisegment, point: Point) -> Relation:
 
 def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
     all_components = has_no_touch = has_no_cross = has_no_overlap = True
-    non_endpoints_touch_points = set()
+    # orientations of multisegment's segments
+    # which touch given segment in the middle
+    middle_touching_orientations = {}  # type: Dict[Point, Orientation]
     components = []
     start, end = segment
     if start > end:
@@ -63,10 +69,22 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                         intersection = segments_intersection(sub_segment,
                                                              segment)
                         if intersection != start and intersection != end:
-                            if intersection in non_endpoints_touch_points:
-                                has_no_cross = False
+                            sub_start, sub_end = sub_segment
+                            non_touched_endpoint = (sub_start
+                                                    if intersection == sub_end
+                                                    else sub_end)
+                            try:
+                                previous_orientation = (
+                                    middle_touching_orientations[intersection])
+                            except KeyError:
+                                middle_touching_orientations[intersection] = (
+                                    orientation(end, start,
+                                                non_touched_endpoint))
                             else:
-                                non_endpoints_touch_points.add(intersection)
+                                if (orientation(end, start,
+                                                non_touched_endpoint)
+                                        is not previous_orientation):
+                                    has_no_cross = False
                 elif has_no_cross and relation is Relation.CROSS:
                     has_no_cross = False
     if has_no_overlap:
