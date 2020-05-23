@@ -9,11 +9,13 @@ from orient.hints import (Contour,
                           Point,
                           Segment)
 from . import bounding_box
-from .processing import process_closed_linear_queue
+from .processing import (process_closed_linear_queue,
+                         process_open_linear_queue)
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
-from .sweep import ClosedSweeper
+from .sweep import (ClosedSweeper,
+                    OpenSweeper)
 from .utils import flatten
 
 
@@ -88,15 +90,15 @@ def relate_multisegment(contour: Contour,
     if bounding_box.disjoint_with(contour_bounding_box,
                                   multisegment_bounding_box):
         return Relation.DISJOINT
-    sweeper = ClosedSweeper()
+    sweeper = OpenSweeper()
     sweeper.register_segments(to_segments(contour),
                               from_test=False)
     sweeper.register_segments(multisegment,
                               from_test=True)
     (_, contour_max_x, _, _), (_, multisegment_max_x, _, _) = (
         contour_bounding_box, multisegment_bounding_box)
-    return process_closed_linear_queue(sweeper,
-                                       min(contour_max_x, multisegment_max_x))
+    return process_open_linear_queue(sweeper,
+                                     min(contour_max_x, multisegment_max_x))
 
 
 def relate_contour(goal: Contour, test: Contour) -> Relation:
