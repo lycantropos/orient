@@ -84,6 +84,8 @@ def _point_vertex_line_divides_angle(point: Point,
 
 def relate_multisegment(contour: Contour,
                         multisegment: Multisegment) -> Relation:
+    if not multisegment:
+        return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
         bounding_box.from_points(contour),
         bounding_box.from_points(flatten(multisegment)))
