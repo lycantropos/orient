@@ -34,6 +34,9 @@ segments_strategies = coordinates_strategies.map(planar.segments)
 segments_pairs = segments_strategies.flatmap(to_pairs)
 empty_multisegments = strategies.builds(list)
 multisegments = coordinates_strategies.flatmap(planar.multisegments)
+non_empty_multisegments = (coordinates_strategies
+                           .flatmap(partial(planar.multisegments,
+                                            min_size=1)))
 
 
 def to_multisegments_with_points(coordinates: Strategy[Coordinate]

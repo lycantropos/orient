@@ -31,6 +31,20 @@ def test_self(multisegment: Multisegment) -> None:
                 else Relation.DISJOINT))
 
 
+@given(strategies.non_empty_multisegments)
+def test_elements(multisegment: Multisegment) -> None:
+    assert equivalence(all(multisegment_in_multisegment([segment],
+                                                        multisegment)
+                           is Relation.EQUAL
+                           for segment in multisegment),
+                       len(multisegment) == 1)
+    assert equivalence(all(multisegment_in_multisegment([segment],
+                                                        multisegment)
+                           is Relation.COMPONENT
+                           for segment in multisegment),
+                       len(multisegment) > 1)
+
+
 @given(strategies.multisegments_pairs)
 def test_symmetric_relations(multisegments_pair: Tuple[Multisegment,
                                                        Multisegment]) -> None:
