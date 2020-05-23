@@ -34,8 +34,8 @@ def process_open_linear_queue(sweeper: OpenSweeper,
                                 has_no_cross = False
                         elif event.has_next and event.touched_at_start:
                             has_no_cross = False
-    if sweeper.events_queue:
-        if sweeper.events_queue.peek().from_test:
+    if sweeper:
+        if sweeper.peek().from_test:
             test_is_subset = False
         else:
             goal_is_subset = False
@@ -81,8 +81,8 @@ def process_closed_linear_queue(sweeper: ClosedSweeper,
             has_no_overlap = False
         if has_no_touch and event.relationship is SegmentsRelationship.TOUCH:
             has_no_touch = False
-    if sweeper.events_queue:
-        if sweeper.events_queue.peek().from_test:
+    if sweeper:
+        if sweeper.peek().from_test:
             test_is_subset_of_goal = False
         else:
             goal_is_subset_of_test = False
@@ -136,8 +136,8 @@ def process_linear_compound_queue(sweeper: ClosedSweeper,
                 and (event.relationship is SegmentsRelationship.TOUCH
                      or event.relationship is SegmentsRelationship.OVERLAP)):
             has_touch = True
-    if sweeper.events_queue:
-        if sweeper.events_queue.peek().from_test:
+    if sweeper:
+        if sweeper.peek().from_test:
             test_is_subset_of_goal = False
         else:
             goal_is_subset_of_test = False
@@ -184,8 +184,8 @@ def process_compound_queue(sweeper: ClosedSweeper,
         if (not goal_boundary_in_test_interior
                 and event.from_goal and event.inside):
             goal_boundary_in_test_interior = True
-    if sweeper.events_queue:
-        if sweeper.events_queue.peek().from_test:
+    if sweeper:
+        if sweeper.peek().from_test:
             test_is_subset_of_goal = False
         else:
             goal_is_subset_of_test = False

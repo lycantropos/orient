@@ -6,6 +6,7 @@ from typing import (Any,
                     Optional,
                     Type)
 
+from reprit.base import generate_repr
 from robust.linear import (SegmentsRelationship,
                            segments_intersection,
                            segments_relationship)
@@ -26,7 +27,15 @@ class Sweeper(Generic[Event]):
     event_cls = None  # type: Type[Event]
 
     def __init__(self) -> None:
-        self.events_queue = EventsQueue()
+        self._events_queue = EventsQueue()
+
+    __repr__ = generate_repr(__init__)
+
+    def __bool__(self) -> bool:
+        return bool(self._events_queue)
+
+    def peek(self) -> Event:
+        return self._events_queue.peek()
 
     def register_segments(self, segments: Iterable[Segment],
                           *,
@@ -39,8 +48,8 @@ class Sweeper(Generic[Event]):
             end_event = self.event_cls(False, end, start_event, from_test,
                                        SegmentsRelationship.NONE)
             start_event.complement = end_event
-            self.events_queue.push(start_event)
-            self.events_queue.push(end_event)
+            self._events_queue.push(start_event)
+            self._events_queue.push(end_event)
 
     def divide_segment(self, event: Event, point: Point) -> None:
         left_event = self.event_cls(True, point, event.complement,
@@ -49,8 +58,8 @@ class Sweeper(Generic[Event]):
         right_event = self.event_cls(False, point, event, event.from_test,
                                      event.relationship)
         event.complement.complement, event.complement = left_event, right_event
-        self.events_queue.push(left_event)
-        self.events_queue.push(right_event)
+        self._events_queue.push(left_event)
+        self._events_queue.push(right_event)
 
     @abstractmethod
     def sweep(self, stop_x: Coordinate) -> Iterable[Event]:
@@ -64,7 +73,7 @@ class ClosedSweeper(Sweeper[ClosedEvent]):
 
     def sweep(self, stop_x: Coordinate) -> Iterable[ClosedEvent]:
         sweep_line = SweepLine()
-        events_queue = self.events_queue
+        events_queue = self._events_queue
         while events_queue:
             event = events_queue.peek()
             start = event.start
@@ -212,7 +221,7 @@ class OpenSweeper(Sweeper):
 
     def sweep(self, stop_x: Coordinate) -> Iterable[OpenEvent]:
         sweep_line = SweepLine()
-        events_queue = self.events_queue
+        events_queue = self._events_queue
         while events_queue:
             event = events_queue.peek()
             start = event.start
