@@ -107,7 +107,7 @@ def point_in_multisegment(point: Point,
     return _multisegment.relate_point(multisegment, point)
 
 
-def segment_in_multisegment(segment: Segment, 
+def segment_in_multisegment(segment: Segment,
                             multisegment: Multisegment) -> Relation:
     """
     Finds relation between segment and multisegment.
@@ -149,7 +149,7 @@ def segment_in_multisegment(segment: Segment,
     return _multisegment.relate_segment(multisegment, segment)
 
 
-def multisegment_in_multisegment(left: Multisegment, 
+def multisegment_in_multisegment(left: Multisegment,
                                  right: Multisegment) -> Relation:
     """
     Finds relation between multisegments.
