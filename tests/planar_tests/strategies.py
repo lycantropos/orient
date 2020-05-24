@@ -142,16 +142,26 @@ def to_contours_with_segments(coordinates: Strategy[Coordinate]
 
 contours_with_segments = (coordinates_strategies
                           .flatmap(to_contours_with_segments))
+contours_with_empty_multisegments = strategies.tuples(contours,
+                                                      empty_multisegments)
 
 
-def to_contours_with_multisegments(coordinates: Strategy[Coordinate]
+def to_contours_with_multisegments(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
                                    ) -> Strategy[Tuple[Contour, Multisegment]]:
     return strategies.tuples(planar.contours(coordinates),
-                             planar.multisegments(coordinates))
+                             planar.multisegments(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
 
 
 contours_with_multisegments = (coordinates_strategies
                                .flatmap(to_contours_with_multisegments))
+contours_with_non_empty_multisegments = (
+    coordinates_strategies.flatmap(partial(to_contours_with_multisegments,
+                                           min_size=1)))
 contours_strategies = coordinates_strategies.map(planar.contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)
