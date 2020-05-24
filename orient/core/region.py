@@ -218,7 +218,7 @@ def relate_contour(region: Region, contour: Contour) -> Relation:
     sweeper = ClosedSweeper()
     sweeper.register_segments(to_segments(region),
                               from_test=False)
-    sweeper.register_segments(to_segments(contour),
+    sweeper.register_segments(contour_to_segments(contour),
                               from_test=True)
     (_, contour_max_x, _, _), (_, region_max_x, _, _) = (contour_bounding_box,
                                                          region_bounding_box)
