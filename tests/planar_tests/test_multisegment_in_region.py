@@ -7,7 +7,8 @@ from orient.hints import (Multisegment,
                           Region)
 from orient.planar import (Relation,
                            multisegment_in_contour,
-                           multisegment_in_region)
+                           multisegment_in_region,
+                           segment_in_region)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
@@ -33,9 +34,72 @@ def test_edges(region: Region) -> None:
                                   region) is Relation.COMPONENT
 
 
+@given(strategies.contours_with_empty_multisegments)
+def test_base(region_with_multisegment: Tuple[Region, Multisegment]) -> None:
+    region, multisegment = region_with_multisegment
+
+    result = multisegment_in_region(multisegment, region)
+
+    assert result is Relation.DISJOINT
+
+
+@given(strategies.contours_with_non_empty_multisegments)
+def test_step(region_with_multisegment: Tuple[Region, Multisegment]) -> None:
+    region, multisegment = region_with_multisegment
+    first_segment, *rest_multisegment = multisegment
+
+    result = multisegment_in_region(rest_multisegment, region)
+    next_result = multisegment_in_region(multisegment, region)
+
+    relation_with_first_segment = segment_in_region(first_segment, region)
+    assert equivalence(next_result is Relation.DISJOINT,
+                       result is relation_with_first_segment
+                       is Relation.DISJOINT)
+    assert implication(next_result is Relation.TOUCH,
+                       result is Relation.TOUCH
+                       and relation_with_first_segment is not Relation.CROSS
+                       or result is Relation.DISJOINT
+                       and relation_with_first_segment is Relation.TOUCH)
+    assert implication(result is Relation.DISJOINT
+                       and relation_with_first_segment is Relation.TOUCH
+                       or result is Relation.TOUCH
+                       and relation_with_first_segment is Relation.DISJOINT,
+                       next_result is Relation.TOUCH)
+    assert equivalence(next_result is Relation.CROSS,
+                       result is Relation.CROSS
+                       or relation_with_first_segment is Relation.CROSS
+                       or (bool(rest_multisegment)
+                           and result is Relation.DISJOINT
+                           or result is Relation.TOUCH)
+                       and (relation_with_first_segment is Relation.ENCLOSED
+                            or relation_with_first_segment is Relation.WITHIN)
+                       or (result is Relation.ENCLOSED
+                           or result is Relation.WITHIN)
+                       and (relation_with_first_segment is Relation.DISJOINT
+                            or relation_with_first_segment is Relation.TOUCH))
+    assert equivalence(next_result is Relation.COMPONENT,
+                       (not rest_multisegment or result is Relation.COMPONENT)
+                       and relation_with_first_segment is Relation.COMPONENT)
+    assert equivalence(next_result is Relation.ENCLOSED,
+                       not rest_multisegment
+                       and relation_with_first_segment is Relation.ENCLOSED
+                       or (result is Relation.COMPONENT
+                           or result is Relation.ENCLOSED)
+                       and (relation_with_first_segment is Relation.ENCLOSED
+                            or relation_with_first_segment is Relation.WITHIN)
+                       or (result is Relation.ENCLOSED
+                           or result is Relation.WITHIN)
+                       and relation_with_first_segment is Relation.COMPONENT
+                       or result is Relation.WITHIN
+                       and relation_with_first_segment is Relation.ENCLOSED)
+    assert equivalence(next_result is Relation.WITHIN,
+                       (not rest_multisegment or result is Relation.WITHIN)
+                       and relation_with_first_segment is Relation.WITHIN)
+
+
 @given(strategies.contours_with_multisegments)
-def test_reversed_multisegment(
-        region_with_multisegment: Tuple[Region, Multisegment]) -> None:
+def test_reversed_multisegment(region_with_multisegment
+                               : Tuple[Region, Multisegment]) -> None:
     region, multisegment = region_with_multisegment
 
     result = multisegment_in_region(multisegment, region)
