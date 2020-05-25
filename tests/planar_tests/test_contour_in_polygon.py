@@ -11,7 +11,12 @@ from orient.planar import (Relation,
                            segment_in_polygon)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
-                         implication)
+                         implication,
+                         reverse_contour,
+                         reverse_polygon_border,
+                         reverse_polygon_holes,
+                         reverse_polygon_holes_contours,
+                         rotations)
 from . import strategies
 
 
@@ -41,6 +46,32 @@ def test_holes(polygon: Polygon) -> None:
     _, holes = polygon
     assert all(contour_in_polygon(hole, polygon) is Relation.COMPONENT
                for hole in holes)
+
+
+@given(strategies.polygons_with_contours)
+def test_reversed(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
+    polygon, contour = polygon_with_contour
+
+    result = contour_in_polygon(contour, polygon)
+
+    assert result is contour_in_polygon(reverse_contour(contour),
+                                        polygon)
+    assert result is contour_in_polygon(contour,
+                                        reverse_polygon_border(polygon))
+    assert result is contour_in_polygon(contour,
+                                        reverse_polygon_holes(polygon))
+    assert result is contour_in_polygon(
+            contour, reverse_polygon_holes_contours(polygon))
+
+
+@given(strategies.polygons_with_contours)
+def test_rotations(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
+    polygon, contour = polygon_with_contour
+
+    result = contour_in_polygon(contour, polygon)
+
+    assert all(result is contour_in_polygon(rotated, polygon)
+               for rotated in rotations(contour))
 
 
 @given(strategies.polygons_with_contours)
