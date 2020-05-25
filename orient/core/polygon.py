@@ -1,14 +1,18 @@
 from orient.hints import (Contour,
                           Multiregion,
+                          Multisegment,
                           Point,
                           Polygon,
                           Region,
                           Segment)
 from .multiregion import (relate_contour as relate_contour_to_multiregion,
                           relate_multiregion as relate_multiregions,
+                          relate_multisegment
+                          as relate_multisegment_to_multiregion,
                           relate_region as relate_region_to_multiregion,
                           relate_segment as relate_segment_to_multiregion)
 from .region import (relate_contour as relate_contour_to_region,
+                     relate_multisegment as relate_multisegment_to_region,
                      relate_point as relate_point_to_region,
                      relate_region as relate_regions,
                      relate_segment as relate_segment_to_region)
@@ -46,6 +50,32 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
             return Relation.TOUCH
         else:
             # segment is within holes
+            return Relation.DISJOINT
+    else:
+        return relation_without_holes
+
+
+def relate_multisegment(polygon: Polygon,
+                        multisegment: Multisegment) -> Relation:
+    border, holes = polygon
+    relation_without_holes = relate_multisegment_to_region(border,
+                                                           multisegment)
+    if (holes and (relation_without_holes is Relation.WITHIN
+                   or relation_without_holes is Relation.ENCLOSED)):
+        relation_with_holes = relate_multisegment_to_multiregion(holes,
+                                                                 multisegment)
+        if relation_with_holes is Relation.DISJOINT:
+            return relation_without_holes
+        elif relation_with_holes is Relation.TOUCH:
+            return Relation.ENCLOSED
+        elif relation_with_holes is Relation.CROSS:
+            return Relation.CROSS
+        elif relation_with_holes is Relation.COMPONENT:
+            return Relation.COMPONENT
+        elif relation_with_holes is Relation.ENCLOSED:
+            return Relation.TOUCH
+        else:
+            # multisegment is within holes
             return Relation.DISJOINT
     else:
         return relation_without_holes
