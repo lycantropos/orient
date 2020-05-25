@@ -33,38 +33,31 @@ def test_vertices(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons_with_points)
-def test_solid(polygon_with_point: Tuple[Polygon, Point]) -> None:
+def test_without_holes(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
 
     result = point_in_polygon(point, polygon)
 
     border, holes = polygon
+    polygon_without_holes = (border, [])
     assert implication(result is Relation.WITHIN,
-                       point_in_polygon(point, (border, []))
+                       point_in_polygon(point, polygon_without_holes)
                        is Relation.WITHIN)
-    assert implication(point_in_polygon(point, (border, []))
+    assert implication(point_in_polygon(point, polygon_without_holes)
                        is Relation.DISJOINT,
                        result is Relation.DISJOINT)
-    assert implication(point_in_polygon(point, (border, []))
+    assert implication(point_in_polygon(point, polygon_without_holes)
                        is Relation.COMPONENT,
                        result is Relation.COMPONENT)
 
 
 @given(strategies.polygons_with_points)
-def test_reversed_contours(polygon_with_point: Tuple[Polygon, Point]) -> None:
+def test_reversed(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
 
     result = point_in_polygon(point, polygon)
 
     assert result is point_in_polygon(point, reverse_polygon_border(polygon))
+    assert result is point_in_polygon(point, reverse_polygon_holes(polygon))
     assert result is point_in_polygon(point,
                                       reverse_polygon_holes_contours(polygon))
-
-
-@given(strategies.polygons_with_points)
-def test_reversed_holes(polygon_with_point: Tuple[Polygon, Point]) -> None:
-    polygon, point = polygon_with_point
-
-    result = point_in_polygon(point, polygon)
-
-    assert result is point_in_polygon(point, reverse_polygon_holes(polygon))
