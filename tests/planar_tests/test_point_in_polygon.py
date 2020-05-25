@@ -52,7 +52,7 @@ def test_without_holes(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
 
 @given(strategies.polygons_with_points)
-def test_reversed(polygon_with_point: Tuple[Polygon, Point]) -> None:
+def test_reversals(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
 
     result = point_in_polygon(point, polygon)

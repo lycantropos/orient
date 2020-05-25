@@ -23,7 +23,8 @@ def test_basic(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
 
 
 @given(strategies.multisegments_with_points)
-def test_reversed(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
+def test_reversals(multisegment_with_point: Tuple[Multisegment, Point]
+                   ) -> None:
     multisegment, point = multisegment_with_point
 
     result = point_in_multisegment(point, multisegment)

@@ -108,8 +108,8 @@ def test_step(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
 
 
 @given(strategies.polygons_with_multicontours)
-def test_reversed(polygon_with_multiregion: Tuple[Polygon, Multiregion]
-                  ) -> None:
+def test_reversals(polygon_with_multiregion: Tuple[Polygon, Multiregion]
+                   ) -> None:
     polygon, multiregion = polygon_with_multiregion
 
     result = multiregion_in_polygon(multiregion, polygon)

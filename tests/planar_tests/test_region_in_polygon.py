@@ -38,7 +38,7 @@ def test_self(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons_with_contours)
-def test_reversed(polygon_with_region: Tuple[Polygon, Region]) -> None:
+def test_reversals(polygon_with_region: Tuple[Polygon, Region]) -> None:
     polygon, region = polygon_with_region
 
     result = region_in_polygon(region, polygon)

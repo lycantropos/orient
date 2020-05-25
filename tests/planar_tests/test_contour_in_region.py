@@ -33,7 +33,7 @@ def test_self(contour: Contour) -> None:
 
 
 @given(strategies.contours_pairs)
-def test_reversed(region_with_contour: Tuple[Region, Contour]) -> None:
+def test_reversals(region_with_contour: Tuple[Region, Contour]) -> None:
     region, contour = region_with_contour
 
     result = contour_in_region(contour, region)

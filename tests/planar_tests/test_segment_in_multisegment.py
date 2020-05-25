@@ -138,8 +138,8 @@ def test_step(multisegment_with_segment: Tuple[Multisegment, Segment]
 
 
 @given(strategies.multisegments_with_segments)
-def test_reversed(multisegment_with_segment: Tuple[Multisegment, Segment]
-                  ) -> None:
+def test_reversals(multisegment_with_segment: Tuple[Multisegment, Segment]
+                   ) -> None:
     multisegment, segment = multisegment_with_segment
 
     result = segment_in_multisegment(segment, multisegment)

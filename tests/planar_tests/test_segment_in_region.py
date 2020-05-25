@@ -53,7 +53,7 @@ def test_convex_region(region: Region) -> None:
 
 
 @given(strategies.contours_with_segments)
-def test_reversed(region_with_segment: Tuple[Region, Segment]) -> None:
+def test_reversals(region_with_segment: Tuple[Region, Segment]) -> None:
     region, segment = region_with_segment
 
     result = segment_in_region(segment, region)

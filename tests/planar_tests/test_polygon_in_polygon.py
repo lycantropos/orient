@@ -67,7 +67,7 @@ def test_without_holes(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons_pairs)
-def test_reversed(polygons_pair: Tuple[Polygon, Polygon]) -> None:
+def test_reversals(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     left, right = polygons_pair
 
     result = polygon_in_polygon(left, right)

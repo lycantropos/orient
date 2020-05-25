@@ -65,8 +65,8 @@ def test_convex_polygon(polygon: Polygon) -> None:
 
 
 @given(strategies.multicontours_with_segments)
-def test_reversed(polygon_with_segment: Tuple[Polygon, Segment]
-                  ) -> None:
+def test_reversals(polygon_with_segment: Tuple[Polygon, Segment]
+                   ) -> None:
     polygon, segment = polygon_with_segment
 
     result = segment_in_polygon(segment, polygon)

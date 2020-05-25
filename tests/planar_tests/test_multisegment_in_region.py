@@ -138,8 +138,8 @@ def test_connection_with_multisegment_in_contour(region_with_multisegment
 
 
 @given(strategies.contours_with_multisegments)
-def test_reversed(region_with_multisegment: Tuple[Region, Multisegment]
-                  ) -> None:
+def test_reversals(region_with_multisegment: Tuple[Region, Multisegment]
+                   ) -> None:
     region, multisegment = region_with_multisegment
 
     result = multisegment_in_region(multisegment, region)

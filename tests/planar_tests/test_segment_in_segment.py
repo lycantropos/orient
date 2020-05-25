@@ -44,7 +44,7 @@ def test_relations(segments_pair: Tuple[Segment, Segment]) -> None:
 
 
 @given(strategies.segments_pairs)
-def test_reversed(segments_pair: Tuple[Segment, Segment]) -> None:
+def test_reversals(segments_pair: Tuple[Segment, Segment]) -> None:
     left_segment, right_segment = segments_pair
 
     result = segment_in_segment(left_segment, right_segment)

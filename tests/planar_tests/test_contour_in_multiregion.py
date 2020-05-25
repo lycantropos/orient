@@ -82,8 +82,8 @@ def test_step(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
 
 
 @given(strategies.multicontours_with_contours)
-def test_reversed(multiregion_with_contour: Tuple[Multiregion, Contour]
-                  ) -> None:
+def test_reversals(multiregion_with_contour: Tuple[Multiregion, Contour]
+                   ) -> None:
     multiregion, contour = multiregion_with_contour
 
     result = contour_in_multiregion(contour, multiregion)

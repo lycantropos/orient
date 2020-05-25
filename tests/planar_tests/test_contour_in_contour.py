@@ -54,7 +54,7 @@ def test_convex_hull(contour: Contour) -> None:
 
 
 @given(strategies.contours_pairs)
-def test_reversed(contours_pair: Tuple[Contour, Contour]) -> None:
+def test_reversals(contours_pair: Tuple[Contour, Contour]) -> None:
     left, right = contours_pair
 
     result = contour_in_contour(left, right)

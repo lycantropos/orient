@@ -103,8 +103,8 @@ def test_step(polygon_with_multisegment: Tuple[Polygon, Multisegment]) -> None:
 
 
 @given(strategies.polygons_with_multisegments)
-def test_reversed(polygon_with_multisegment: Tuple[Polygon, Multisegment]
-                  ) -> None:
+def test_reversals(polygon_with_multisegment: Tuple[Polygon, Multisegment]
+                   ) -> None:
     polygon, multisegment = polygon_with_multisegment
 
     result = multisegment_in_polygon(multisegment, polygon)

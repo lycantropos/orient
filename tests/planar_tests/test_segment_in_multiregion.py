@@ -65,8 +65,8 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
 
 
 @given(strategies.multicontours_with_segments)
-def test_reversed(multiregion_with_segment: Tuple[Multiregion, Segment]
-                  ) -> None:
+def test_reversals(multiregion_with_segment: Tuple[Multiregion, Segment]
+                   ) -> None:
     multiregion, segment = multiregion_with_segment
 
     result = segment_in_multiregion(segment, multiregion)

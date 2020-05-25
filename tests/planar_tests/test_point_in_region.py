@@ -29,7 +29,7 @@ def test_vertices(region: Region) -> None:
 
 
 @given(strategies.contours_with_points)
-def test_reversed(region_with_point: Tuple[Region, Point]) -> None:
+def test_reversals(region_with_point: Tuple[Region, Point]) -> None:
     region, point = region_with_point
 
     result = point_in_region(point, region)

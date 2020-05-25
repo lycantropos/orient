@@ -52,7 +52,7 @@ def test_convex_contour(contour: Contour) -> None:
 
 
 @given(strategies.contours_with_segments)
-def test_reversed(contour_with_segment: Tuple[Contour, Segment]) -> None:
+def test_reversals(contour_with_segment: Tuple[Contour, Segment]) -> None:
     contour, segment = contour_with_segment
 
     result = segment_in_contour(segment, contour)

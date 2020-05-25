@@ -44,7 +44,7 @@ def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
 
 
 @given(strategies.segments_with_points)
-def test_reversed(segment_with_point: Tuple[Segment, Point]) -> None:
+def test_reversals(segment_with_point: Tuple[Segment, Point]) -> None:
     segment, point = segment_with_point
 
     result = point_in_segment(point, segment)

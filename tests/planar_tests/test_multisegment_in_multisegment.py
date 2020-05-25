@@ -165,8 +165,8 @@ def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
 
 
 @given(strategies.multisegments_pairs)
-def test_reversed(multisegments_pair: Tuple[Multisegment, Multisegment]
-                  ) -> None:
+def test_reversals(multisegments_pair: Tuple[Multisegment, Multisegment]
+                   ) -> None:
     left, right = multisegments_pair
 
     result = multisegment_in_multisegment(left, right)
