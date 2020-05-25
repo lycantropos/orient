@@ -168,6 +168,8 @@ def multisegment_in_multisegment(left: Multisegment,
     >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
     >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
     ...                 ((0, 1), (0, 0))]
+    >>> multisegment_in_multisegment([], triangle_edges) is Relation.DISJOINT
+    True
     >>> multisegment_in_multisegment(triangle_edges,
     ...                              triangle_edges) is Relation.EQUAL
     True
