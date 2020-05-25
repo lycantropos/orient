@@ -127,25 +127,14 @@ def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
 
 
 @given(strategies.contours_with_multisegments)
-def test_reversed_multisegment(
-        contour_with_multisegment: Tuple[Contour, Multisegment]
-) -> None:
+def test_reversed(contour_with_multisegment: Tuple[Contour, Multisegment]
+                  ) -> None:
     contour, multisegment = contour_with_multisegment
 
     result = multisegment_in_contour(multisegment, contour)
 
     assert result is multisegment_in_contour(
             reverse_multisegment(multisegment), contour)
-
-
-@given(strategies.contours_with_multisegments)
-def test_reversed_contour(contour_with_multisegment: Tuple[Contour,
-                                                           Multisegment]
-                          ) -> None:
-    contour, multisegment = contour_with_multisegment
-
-    result = multisegment_in_contour(multisegment, contour)
-
     assert result is multisegment_in_contour(multisegment,
                                              reverse_contour(contour))
 
