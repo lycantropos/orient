@@ -391,6 +391,8 @@ def multisegment_in_region(multisegment: Multisegment,
     ...                 ((0, 1), (0, 0))]
     >>> triangle = [(0, 0), (1, 0), (0, 1)]
     >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multisegment_in_region([], triangle) is Relation.DISJOINT
+    True
     >>> multisegment_in_region(triangle_edges, triangle) is Relation.COMPONENT
     True
     >>> multisegment_in_region(triangle_edges, square) is Relation.ENCLOSED
