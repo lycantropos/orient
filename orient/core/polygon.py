@@ -17,15 +17,15 @@ from .relation import Relation
 
 def relate_point(polygon: Polygon, point: Point) -> Relation:
     border, holes = polygon
-    relation_with_border = relate_point_to_region(border, point)
-    if relation_with_border is Relation.WITHIN:
+    relation_without_holes = relate_point_to_region(border, point)
+    if relation_without_holes is Relation.WITHIN:
         for hole in holes:
             relation_with_hole = relate_point_to_region(hole, point)
             if relation_with_hole is Relation.WITHIN:
                 return Relation.DISJOINT
             elif relation_with_hole is Relation.COMPONENT:
                 return Relation.COMPONENT
-    return relation_with_border
+    return relation_without_holes
 
 
 def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
