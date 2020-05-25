@@ -9,7 +9,11 @@ from orient.planar import (Relation,
                            region_in_polygon)
 from tests.utils import (COMPOUND_RELATIONS,
                          equivalence,
-                         implication)
+                         implication,
+                         reverse_contour,
+                         reverse_polygon_border,
+                         reverse_polygon_holes,
+                         reverse_polygon_holes_contours, rotations)
 from . import strategies
 
 
@@ -24,18 +28,36 @@ def test_basic(region_with_polygon: Tuple[Polygon, Region]) -> None:
 
 
 @given(strategies.polygons)
-def test_border(polygon: Polygon) -> None:
+def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert region_in_polygon(border, polygon) is (Relation.ENCLOSES
                                                   if holes
                                                   else Relation.EQUAL)
-
-
-@given(strategies.polygons)
-def test_holes(polygon: Polygon) -> None:
-    _, holes = polygon
     assert all(region_in_polygon(hole, polygon) is Relation.TOUCH
                for hole in holes)
+
+
+@given(strategies.polygons_with_contours)
+def test_reversed(polygon_with_region: Tuple[Polygon, Region]) -> None:
+    polygon, region = polygon_with_region
+
+    result = region_in_polygon(region, polygon)
+
+    assert result is region_in_polygon(reverse_contour(region), polygon)
+    assert result is region_in_polygon(region, reverse_polygon_border(polygon))
+    assert result is region_in_polygon(region, reverse_polygon_holes(polygon))
+    assert result is region_in_polygon(region,
+                                       reverse_polygon_holes_contours(polygon))
+
+
+@given(strategies.polygons_with_contours)
+def test_rotations(polygon_with_region: Tuple[Polygon, Region]) -> None:
+    polygon, region = polygon_with_region
+
+    result = region_in_polygon(region, polygon)
+
+    assert all(result is region_in_polygon(rotated, polygon)
+               for rotated in rotations(region))
 
 
 @given(strategies.polygons_with_contours)
