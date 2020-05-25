@@ -29,18 +29,6 @@ def test_basic(contour_with_segment: Tuple[Contour, Segment]) -> None:
     assert result in LINEAR_RELATIONS
 
 
-@given(strategies.contours_with_segments)
-def test_outside(contour_with_segment: Tuple[Contour, Segment]) -> None:
-    contour, segment = contour_with_segment
-
-    result = segment_in_contour(segment, contour)
-
-    start, end = segment
-    assert implication(result is Relation.DISJOINT,
-                       point_in_contour(start, contour) is Relation.DISJOINT
-                       and point_in_contour(end, contour) is Relation.DISJOINT)
-
-
 @given(strategies.contours)
 def test_edges(contour: Contour) -> None:
     assert all(segment_in_contour(edge, contour) is Relation.COMPONENT
@@ -48,7 +36,7 @@ def test_edges(contour: Contour) -> None:
 
 
 @given(strategies.contours)
-def test_contour_separators(contour: Contour) -> None:
+def test_separators(contour: Contour) -> None:
     assert all(segment_in_contour(segment, contour) in (Relation.TOUCH,
                                                         Relation.CROSS,
                                                         Relation.OVERLAP)
@@ -64,22 +52,12 @@ def test_convex_contour(contour: Contour) -> None:
 
 
 @given(strategies.contours_with_segments)
-def test_reversed_segment(contour_with_segment: Tuple[Contour, Segment]
-                          ) -> None:
+def test_reversed(contour_with_segment: Tuple[Contour, Segment]) -> None:
     contour, segment = contour_with_segment
 
     result = segment_in_contour(segment, contour)
 
     assert result is segment_in_contour(reverse_segment(segment), contour)
-
-
-@given(strategies.contours_with_segments)
-def test_reversed_contour(contour_with_segment: Tuple[Contour, Segment]
-                          ) -> None:
-    contour, segment = contour_with_segment
-
-    result = segment_in_contour(segment, contour)
-
     assert result is segment_in_contour(segment, reverse_contour(contour))
 
 
@@ -91,3 +69,16 @@ def test_rotations(contour_with_segment: Tuple[Contour, Segment]) -> None:
 
     assert all(result is segment_in_contour(segment, rotated)
                for rotated in rotations(contour))
+
+
+@given(strategies.contours_with_segments)
+def test_connection_with_point_in_contour(contour_with_segment
+                                          : Tuple[Contour, Segment]) -> None:
+    contour, segment = contour_with_segment
+
+    result = segment_in_contour(segment, contour)
+
+    start, end = segment
+    assert implication(result is Relation.DISJOINT,
+                       point_in_contour(start, contour) is Relation.DISJOINT
+                       and point_in_contour(end, contour) is Relation.DISJOINT)
