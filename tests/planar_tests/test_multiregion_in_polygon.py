@@ -8,7 +8,12 @@ from orient.planar import (Relation,
                            multiregion_in_polygon,
                            region_in_polygon)
 from tests.utils import (COMPOUND_RELATIONS,
-                         equivalence)
+                         equivalence,
+                         reverse_multicontour,
+                         reverse_polygon_border,
+                         reverse_polygon_holes,
+                         reverse_polygon_holes_contours,
+                         rotations)
 from . import strategies
 
 
@@ -105,3 +110,31 @@ def test_step(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
     assert equivalence(next_result is Relation.WITHIN,
                        (not rest_multiregion or result is Relation.WITHIN)
                        and relation_with_first_region is Relation.WITHIN)
+
+
+@given(strategies.polygons_with_multicontours)
+def test_reversed(polygon_with_multiregion: Tuple[Polygon, Multiregion]
+                  ) -> None:
+    polygon, multiregion = polygon_with_multiregion
+
+    result = multiregion_in_polygon(multiregion, polygon)
+
+    assert result is multiregion_in_polygon(reverse_multicontour(multiregion),
+                                            polygon)
+    assert result is multiregion_in_polygon(multiregion,
+                                            reverse_polygon_border(polygon))
+    assert result is multiregion_in_polygon(multiregion,
+                                            reverse_polygon_holes(polygon))
+    assert result is multiregion_in_polygon(
+            multiregion, reverse_polygon_holes_contours(polygon))
+
+
+@given(strategies.polygons_with_multicontours)
+def test_rotations(polygon_with_multiregion: Tuple[Polygon, Multiregion]
+                   ) -> None:
+    polygon, multiregion = polygon_with_multiregion
+
+    result = multiregion_in_polygon(multiregion, polygon)
+
+    assert all(result is multiregion_in_polygon(rotated, polygon)
+               for rotated in rotations(multiregion))
