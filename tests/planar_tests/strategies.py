@@ -292,6 +292,26 @@ polygons_with_segments = (coordinates_strategies
                           .flatmap(to_polygons_with_segments))
 
 
+def to_polygons_with_multisegments(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
+                                   ) -> Strategy[Tuple[Polygon, Multisegment]]:
+    return strategies.tuples(planar.polygons(coordinates),
+                             planar.multisegments(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
+
+
+polygons_with_multisegments = (
+    coordinates_strategies.flatmap(to_polygons_with_multisegments))
+polygons_with_empty_multisegments = strategies.tuples(polygons,
+                                                      empty_multisegments)
+polygons_with_non_empty_multisegments = (
+    coordinates_strategies.flatmap(partial(to_polygons_with_multisegments,
+                                           min_size=1)))
+
+
 def to_polygons_with_contours(coordinates: Strategy[Coordinate]
                               ) -> Strategy[Tuple[Polygon, Contour]]:
     return strategies.tuples(planar.polygons(coordinates),
