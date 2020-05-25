@@ -36,14 +36,9 @@ def test_self(contour: Contour) -> None:
 
 
 @given(strategies.polygons)
-def test_border(polygon: Polygon) -> None:
+def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert contour_in_polygon(border, polygon) is Relation.COMPONENT
-
-
-@given(strategies.polygons)
-def test_holes(polygon: Polygon) -> None:
-    _, holes = polygon
     assert all(contour_in_polygon(hole, polygon) is Relation.COMPONENT
                for hole in holes)
 
