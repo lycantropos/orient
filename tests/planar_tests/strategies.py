@@ -212,6 +212,27 @@ non_empty_multicontours_with_segments = coordinates_strategies.flatmap(
                 min_size=1))
 
 
+def to_multicontours_with_multisegments(coordinates: Strategy[Coordinate],
+                                        *,
+                                        min_size: int = 0,
+                                        max_size: Optional[int] = None
+                                        ) -> Strategy[Tuple[Multicontour,
+                                                            Multisegment]]:
+    return strategies.tuples(planar.multicontours(coordinates),
+                             planar.multisegments(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
+
+
+multicontours_with_multisegments = (
+    coordinates_strategies.flatmap(to_multicontours_with_multisegments))
+multicontours_with_empty_multisegments = strategies.tuples(multicontours,
+                                                           empty_multisegments)
+multicontours_with_non_empty_multisegments = (
+    coordinates_strategies.flatmap(partial(to_multicontours_with_multisegments,
+                                           min_size=1)))
+
+
 def to_multicontours_with_contours(coordinates: Strategy[Coordinate],
                                    *,
                                    min_size: int = 0,
