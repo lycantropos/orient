@@ -549,11 +549,11 @@ def multisegment_in_multiregion(multisegment: Multisegment,
     Finds relation between multisegment and multiregion.
 
     Time complexity:
-        ``O(vertices_count * log vertices_count)``
+        ``O(segments_count * log segments_count)``
     Memory complexity:
-        ``O(vertices_count)``
+        ``O(segments_count)``
 
-    where ``segments_count = len(multisegment) + len(multiregion).
+    where ``segments_count = len(multisegment) + sum(map(len, multiregion))``.
 
     :param multisegment: multisegment to check for.
     :param multiregion: multiregion to check in.
