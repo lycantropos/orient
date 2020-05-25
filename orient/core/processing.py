@@ -113,45 +113,45 @@ def process_linear_compound_queue(sweeper: ClosedSweeper,
                                   stop_x: Coordinate) -> Relation:
     # ``goal`` is a compound object
     # ``test`` is a linear object
-    test_boundary_in_goal_interior = has_touch = False
-    test_is_subset_of_goal = goal_is_subset_of_test = True
+    test_not_in_goal_interior = has_no_touch = True
+    test_is_subset_of_goal = goal_border_subset_of_test = True
     for event in sweeper.sweep(stop_x):
         if event.relationship is SegmentsRelationship.CROSS:
             return Relation.CROSS
-        if test_is_subset_of_goal and event.from_test and event.outside:
-            test_is_subset_of_goal = False
-        if goal_is_subset_of_test and event.from_goal and event.outside:
-            goal_is_subset_of_test = False
-        if (not test_boundary_in_goal_interior
-                and event.from_test and event.inside):
-            test_boundary_in_goal_interior = True
-        if (not has_touch
-                and (event.relationship is SegmentsRelationship.TOUCH
-                     or event.relationship is SegmentsRelationship.OVERLAP)):
-            has_touch = True
+        elif (has_no_touch
+              and event.relationship is not SegmentsRelationship.NONE):
+            has_no_touch = False
+
+        if event.from_test:
+            if test_is_subset_of_goal and event.outside:
+                test_is_subset_of_goal = False
+            if test_not_in_goal_interior and event.inside:
+                test_not_in_goal_interior = False
+        elif (goal_border_subset_of_test
+              and event.relationship is not SegmentsRelationship.OVERLAP):
+            goal_border_subset_of_test = False
+
     if sweeper:
         if sweeper.peek().from_test:
             test_is_subset_of_goal = False
         else:
-            goal_is_subset_of_test = False
-    if goal_is_subset_of_test:
+            goal_border_subset_of_test = False
+    if goal_border_subset_of_test:
         return (Relation.COMPONENT
                 if test_is_subset_of_goal
-                else (Relation.TOUCH
-                      if has_touch
-                      else Relation.DISJOINT))
+                else Relation.TOUCH)
     elif test_is_subset_of_goal:
-        return ((Relation.ENCLOSED
-                 if has_touch
-                 else Relation.WITHIN)
-                if test_boundary_in_goal_interior
-                else Relation.COMPONENT)
+        return (Relation.COMPONENT
+                if test_not_in_goal_interior
+                else (Relation.WITHIN
+                      if has_no_touch
+                      else Relation.ENCLOSED))
     else:
-        return (Relation.CROSS
-                if test_boundary_in_goal_interior
-                else (Relation.TOUCH
-                      if has_touch
-                      else Relation.DISJOINT))
+        return ((Relation.DISJOINT
+                 if has_no_touch
+                 else Relation.TOUCH)
+                if test_not_in_goal_interior
+                else Relation.CROSS)
 
 
 def process_compound_queue(sweeper: ClosedSweeper,
