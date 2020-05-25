@@ -11,7 +11,6 @@ from orient.planar import (Relation,
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
-                         reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
                          reverse_segment,
@@ -27,20 +26,6 @@ def test_basic(multiregion_with_segment: Tuple[Multiregion, Segment]) -> None:
 
     assert isinstance(result, Relation)
     assert result in LINEAR_COMPOUND_RELATIONS
-
-
-@given(strategies.multicontours_with_segments)
-def test_outside(multiregion_with_segment: Tuple[Multiregion, Segment]
-                 ) -> None:
-    multiregion, segment = multiregion_with_segment
-
-    result = segment_in_multiregion(segment, multiregion)
-
-    start, end = segment
-    assert implication(result is Relation.DISJOINT,
-                       point_in_multiregion(start, multiregion)
-                       is point_in_multiregion(end, multiregion)
-                       is Relation.DISJOINT)
 
 
 @given(strategies.empty_multicontours_with_segments)
@@ -86,32 +71,12 @@ def test_reversed(multiregion_with_segment: Tuple[Multiregion, Segment]
 
     result = segment_in_multiregion(segment, multiregion)
 
-    assert result is segment_in_multiregion(segment,
-                                            reverse_multicontour(multiregion))
-
-
-@given(strategies.multicontours_with_segments)
-def test_reversed_segment(multiregion_with_segment: Tuple[Multiregion, Segment]
-                          ) -> None:
-    multiregion, segment = multiregion_with_segment
-
-    result = segment_in_multiregion(segment, multiregion)
-
     assert result is segment_in_multiregion(reverse_segment(segment),
                                             multiregion)
-
-
-@given(strategies.multicontours_with_segments)
-def test_reversed_regions(multiregion_with_segment: Tuple[Multiregion, Segment]
-                          ) -> None:
-    multiregion, segment = multiregion_with_segment
-
-    result = segment_in_multiregion(segment, multiregion)
-
+    assert result is segment_in_multiregion(segment,
+                                            reverse_multicontour(multiregion))
     assert result is segment_in_multiregion(
             segment, reverse_multicontour_contours(multiregion))
-    assert result is segment_in_multiregion(reverse_contour(segment),
-                                            multiregion)
 
 
 @given(strategies.multicontours_with_segments)
@@ -123,3 +88,18 @@ def test_rotations(multiregion_with_segment: Tuple[Multiregion, Segment]
 
     assert all(result is segment_in_multiregion(segment, rotated)
                for rotated in rotations(multiregion))
+
+
+@given(strategies.multicontours_with_segments)
+def test_connection_with_point_in_multiregion(multiregion_with_segment
+                                              : Tuple[Multiregion, Segment]
+                                              ) -> None:
+    multiregion, segment = multiregion_with_segment
+
+    result = segment_in_multiregion(segment, multiregion)
+
+    start, end = segment
+    assert implication(result is Relation.DISJOINT,
+                       point_in_multiregion(start, multiregion)
+                       is point_in_multiregion(end, multiregion)
+                       is Relation.DISJOINT)
