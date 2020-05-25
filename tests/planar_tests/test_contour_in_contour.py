@@ -11,6 +11,8 @@ from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SYMMETRIC_SAME_LINEAR_RELATIONS,
                          equivalence,
                          implication,
+                         reverse_contour,
+                         rotations,
                          to_convex_hull)
 from . import strategies
 
@@ -61,7 +63,30 @@ def test_convex_hull(contour: Contour) -> None:
 
 
 @given(strategies.contours_pairs)
-def test_vertices(contours_pair: Tuple[Contour, Contour]) -> None:
+def test_reversed(contours_pair: Tuple[Contour, Contour]) -> None:
+    left, right = contours_pair
+
+    result = contour_in_contour(left, right)
+
+    assert result is contour_in_contour(reverse_contour(left), right)
+    assert result is contour_in_contour(left, reverse_contour(right))
+
+
+@given(strategies.contours_pairs)
+def test_rotations(contours_pair: Tuple[Contour, Contour]) -> None:
+    left, right = contours_pair
+
+    result = contour_in_contour(left, right)
+
+    assert all(result is contour_in_contour(rotated, right)
+               for rotated in rotations(left))
+    assert all(result is contour_in_contour(left, rotated)
+               for rotated in rotations(right))
+
+
+@given(strategies.contours_pairs)
+def test_connection_with_point_in_contour(contours_pair
+                                          : Tuple[Contour, Contour]) -> None:
     left_contour, right_contour = contours_pair
 
     assert implication(contour_in_contour(left_contour, right_contour)
