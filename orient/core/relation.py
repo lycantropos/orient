@@ -16,8 +16,9 @@ class Relation(IntEnum):
     #: and only boundaries intersect, but do not cross
     TOUCH = 1
     #: intersection is a strict subset of each of the geometries,
-    #: has dimension less than at least of one of the geometries
-    #: and boundaries cross
+    #: has dimension less than at least of one of the geometries,
+    #: one of the geometries lies in interior & exterior of the other geometry
+    #: or boundaries cross
     CROSS = 2
     #: intersection is a strict subset of each of the geometries
     #: and has the same dimension as geometries
