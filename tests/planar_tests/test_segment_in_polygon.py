@@ -64,15 +64,13 @@ def test_convex_polygon(polygon: Polygon) -> None:
                                for segment in to_contour_separators(border))))
 
 
-@given(strategies.multicontours_with_segments)
-def test_reversals(polygon_with_segment: Tuple[Polygon, Segment]
-                   ) -> None:
+@given(strategies.polygons_with_segments)
+def test_reversals(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
     polygon, segment = polygon_with_segment
 
     result = segment_in_polygon(segment, polygon)
 
-    assert result is segment_in_polygon(reverse_segment(segment),
-                                        polygon)
+    assert result is segment_in_polygon(reverse_segment(segment), polygon)
     assert result is segment_in_polygon(segment,
                                         reverse_polygon_border(polygon))
     assert result is segment_in_polygon(segment,
