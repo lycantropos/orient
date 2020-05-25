@@ -29,7 +29,7 @@ def test_self(segment: Segment) -> None:
 
 
 @given(strategies.segments_pairs)
-def test_symmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
+def test_relations(segments_pair: Tuple[Segment, Segment]) -> None:
     left_segment, right_segment = segments_pair
 
     result = segment_in_segment(left_segment, right_segment)
@@ -37,15 +37,6 @@ def test_symmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
     complement = segment_in_segment(right_segment, left_segment)
     assert equivalence(result is complement,
                        result in SYMMETRIC_SAME_LINEAR_RELATIONS)
-
-
-@given(strategies.segments_pairs)
-def test_asymmetric_relations(segments_pair: Tuple[Segment, Segment]) -> None:
-    left_segment, right_segment = segments_pair
-
-    result = segment_in_segment(left_segment, right_segment)
-
-    complement = segment_in_segment(right_segment, left_segment)
     assert equivalence(result is not complement
                        and result.complement is complement,
                        result in ASYMMETRIC_LINEAR_RELATIONS
