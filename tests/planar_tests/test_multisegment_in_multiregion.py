@@ -104,34 +104,16 @@ def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
 
 
 @given(strategies.multicontours_with_multisegments)
-def test_reversed_multisegment(multiregion_with_multisegment
-                               : Tuple[Multiregion, Multisegment]) -> None:
+def test_reversed(multiregion_with_multisegment
+                  : Tuple[Multiregion, Multisegment]) -> None:
     multiregion, multisegment = multiregion_with_multisegment
 
     result = multisegment_in_multiregion(multisegment, multiregion)
 
     assert result is multisegment_in_multiregion(
             reverse_multisegment(multisegment), multiregion)
-
-
-@given(strategies.multicontours_with_multisegments)
-def test_reversed_multiregion(multiregion_with_multisegment
-                              : Tuple[Multiregion, Multisegment]) -> None:
-    multiregion, multisegment = multiregion_with_multisegment
-
-    result = multisegment_in_multiregion(multisegment, multiregion)
-
     assert result is multisegment_in_multiregion(
             multisegment, reverse_multicontour(multiregion))
-
-
-@given(strategies.multicontours_with_multisegments)
-def test_reversed_regions(multiregion_with_multisegment
-                          : Tuple[Multiregion, Multisegment]) -> None:
-    multiregion, multisegment = multiregion_with_multisegment
-
-    result = multisegment_in_multiregion(multisegment, multiregion)
-
     assert result is multisegment_in_multiregion(
             multisegment, reverse_multicontour_contours(multiregion))
 
