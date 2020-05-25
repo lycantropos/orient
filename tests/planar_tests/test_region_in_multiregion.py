@@ -108,15 +108,6 @@ def test_reversed(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
 
     assert result is region_in_multiregion(region,
                                            reverse_multicontour(multiregion))
-
-
-@given(strategies.multicontours_with_contours)
-def test_reversed_regions(multiregion_with_region: Tuple[Multiregion, Region]
-                          ) -> None:
-    multiregion, region = multiregion_with_region
-
-    result = region_in_multiregion(region, multiregion)
-
     assert result is region_in_multiregion(
             region, reverse_multicontour_contours(multiregion))
     assert result is region_in_multiregion(reverse_contour(region),
