@@ -13,6 +13,9 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_multisegment,
+                         reverse_polygon_border,
+                         reverse_polygon_holes,
+                         reverse_polygon_holes_contours,
                          rotations)
 from . import strategies
 
@@ -100,14 +103,20 @@ def test_step(polygon_with_multisegment: Tuple[Polygon, Multisegment]) -> None:
 
 
 @given(strategies.polygons_with_multisegments)
-def test_reversed_multisegment(polygon_with_multisegment
-                               : Tuple[Polygon, Multisegment]) -> None:
+def test_reversed(polygon_with_multisegment: Tuple[Polygon, Multisegment]
+                  ) -> None:
     polygon, multisegment = polygon_with_multisegment
 
     result = multisegment_in_polygon(multisegment, polygon)
 
     assert result is multisegment_in_polygon(
             reverse_multisegment(multisegment), polygon)
+    assert result is multisegment_in_polygon(
+            multisegment, reverse_polygon_border(polygon))
+    assert result is multisegment_in_polygon(
+            multisegment, reverse_polygon_holes(polygon))
+    assert result is multisegment_in_polygon(
+            multisegment, reverse_polygon_holes_contours(polygon))
 
 
 @given(strategies.polygons_with_multisegments)
