@@ -28,7 +28,7 @@ def relate_point(contour: Contour, point: Point) -> Relation:
 
 def relate_segment(contour: Contour, segment: Segment) -> Relation:
     has_no_touch = has_no_cross = True
-    previous_touch_index = previous_touch_edge_start = None
+    last_touched_edge_index = last_touched_edge_start = None
     start, end = segment
     for index, edge in enumerate(to_segments(contour)):
         relation_with_edge = relate_segments(edge, segment)
@@ -43,19 +43,21 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
             if has_no_touch:
                 has_no_touch = False
             elif (has_no_cross
-                  and index - previous_touch_index == 1
+                  and index - last_touched_edge_index == 1
                   and start not in edge and end not in edge
                   and (angle_orientation(end, start, edge_start)
                        is Orientation.COLLINEAR)
                   and point_vertex_line_divides_angle(
-                            start, previous_touch_edge_start,
+                            start, last_touched_edge_start,
                             edge_start, edge_end)):
                 has_no_cross = False
-            previous_touch_index, previous_touch_edge_start = index, edge_start
+            last_touched_edge_index = index
+            last_touched_edge_start = edge_start
         elif has_no_cross and relation_with_edge is Relation.CROSS:
             has_no_cross = False
     if (has_no_cross
-            and not has_no_touch and previous_touch_index == len(contour) - 1):
+            and not has_no_touch and last_touched_edge_index == len(
+                    contour) - 1):
         first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
         if (relate_segments(first_edge, segment) is Relation.TOUCH
                 and start not in first_edge and end not in first_edge
