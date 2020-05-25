@@ -370,6 +370,39 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
     return _region.relate_segment(region, segment)
 
 
+def multisegment_in_region(multisegment: Multisegment,
+                           region: Region) -> Relation:
+    """
+    Finds relation between multisegment and region.
+
+    Time complexity:
+        ``O(vertices_count * log (vertices_count))``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``segments_count = len(multisegment) + len(region).
+
+    :param multisegment: multisegment to check for.
+    :param region: region to check in.
+    :returns: relation between multisegment and region.
+
+    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
+    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
+    ...                 ((0, 1), (0, 0))]
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multisegment_in_region(triangle_edges, triangle) is Relation.COMPONENT
+    True
+    >>> multisegment_in_region(triangle_edges, square) is Relation.ENCLOSED
+    True
+    >>> multisegment_in_region(square_edges, triangle) is Relation.TOUCH
+    True
+    >>> multisegment_in_region(square_edges, square) is Relation.COMPONENT
+    True
+    """
+    return _region.relate_multisegment(region, multisegment)
+
+
 def contour_in_region(contour: Contour, region: Region) -> Relation:
     """
     Finds relation between contour and region.

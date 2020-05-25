@@ -18,6 +18,7 @@ from .processing import (process_compound_queue,
 from .relation import Relation
 from .segment import relate_point as relate_point_to_segment
 from .sweep import ClosedSweeper
+from .utils import flatten
 
 
 def relate_point(region: Region, point: Point) -> Relation:
@@ -206,6 +207,26 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
             return (Relation.ENCLOSED
                     if first_part_orientation is second_part_orientation
                     else Relation.TOUCH)
+
+
+def relate_multisegment(region: Region, multisegment: Contour) -> Relation:
+    if not multisegment:
+        return Relation.DISJOINT
+    multisegment_bounding_box, region_bounding_box = (
+        bounding_box.from_points(flatten(multisegment)),
+        bounding_box.from_points(region))
+    if bounding_box.disjoint_with(multisegment_bounding_box,
+                                  region_bounding_box):
+        return Relation.DISJOINT
+    sweeper = ClosedSweeper()
+    sweeper.register_segments(to_segments(region),
+                              from_test=False)
+    sweeper.register_segments(multisegment,
+                              from_test=True)
+    (_, multisegment_max_x, _, _), (_, region_max_x, _, _) = (
+        multisegment_bounding_box, region_bounding_box)
+    return process_linear_compound_queue(sweeper, min(multisegment_max_x,
+                                                      region_max_x))
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
