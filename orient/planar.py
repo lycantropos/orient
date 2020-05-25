@@ -265,6 +265,8 @@ def multisegment_in_contour(multisegment: Multisegment,
     ...                 ((0, 1), (0, 0))]
     >>> triangle = [(0, 0), (1, 0), (0, 1)]
     >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multisegment_in_contour([], triangle) is Relation.DISJOINT
+    True
     >>> multisegment_in_contour(triangle_edges, triangle) is Relation.EQUAL
     True
     >>> multisegment_in_contour(triangle_edges, square) is Relation.OVERLAP
