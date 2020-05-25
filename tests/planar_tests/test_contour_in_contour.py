@@ -33,7 +33,7 @@ def test_self(contour: Contour) -> None:
 
 
 @given(strategies.contours_pairs)
-def test_symmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
+def test_relations(contours_pair: Tuple[Contour, Contour]) -> None:
     left_contour, right_contour = contours_pair
 
     result = contour_in_contour(left_contour, right_contour)
@@ -41,15 +41,6 @@ def test_symmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
     complement = contour_in_contour(right_contour, left_contour)
     assert equivalence(result is complement,
                        result in SYMMETRIC_SAME_LINEAR_RELATIONS)
-
-
-@given(strategies.contours_pairs)
-def test_asymmetric_relations(contours_pair: Tuple[Contour, Contour]) -> None:
-    left_contour, right_contour = contours_pair
-
-    result = contour_in_contour(left_contour, right_contour)
-
-    complement = contour_in_contour(right_contour, left_contour)
     assert equivalence(result is not complement
                        and result.complement is complement,
                        result in ASYMMETRIC_LINEAR_RELATIONS
