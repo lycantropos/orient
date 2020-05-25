@@ -12,6 +12,8 @@ from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         reverse_contour,
+                         rotations,
                          to_convex_hull)
 from . import strategies
 
@@ -32,7 +34,7 @@ def test_self(region: Region) -> None:
 
 
 @given(strategies.contours_pairs)
-def test_symmetric_relations(regions_pair: Tuple[Region, Region]) -> None:
+def test_relations(regions_pair: Tuple[Region, Region]) -> None:
     left_region, right_region = regions_pair
 
     result = region_in_region(left_region, right_region)
@@ -40,15 +42,6 @@ def test_symmetric_relations(regions_pair: Tuple[Region, Region]) -> None:
     complement = region_in_region(right_region, left_region)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-
-
-@given(strategies.contours_pairs)
-def test_asymmetric_relations(regions_pair: Tuple[Region, Region]) -> None:
-    left_region, right_region = regions_pair
-
-    result = region_in_region(left_region, right_region)
-
-    complement = region_in_region(right_region, left_region)
     assert equivalence(result is not complement
                        and result.complement is complement,
                        result in ASYMMETRIC_COMPOUND_RELATIONS
@@ -71,6 +64,28 @@ def test_vertices(regions_pair: Tuple[Region, Region]) -> None:
                        all(point_in_region(vertex, right_region)
                            is not Relation.DISJOINT
                            for vertex in left_region))
+
+
+@given(strategies.contours_pairs)
+def test_reversed(regions_pair: Tuple[Region, Region]) -> None:
+    left, right = regions_pair
+
+    result = region_in_region(left, right)
+
+    assert result is region_in_region(reverse_contour(left), right)
+    assert result is region_in_region(left, reverse_contour(right))
+
+
+@given(strategies.contours_pairs)
+def test_rotations(regions_pair: Tuple[Region, Region]) -> None:
+    left, right = regions_pair
+
+    result = region_in_region(left, right)
+
+    assert all(result is region_in_region(rotated, right)
+               for rotated in rotations(left))
+    assert all(result is region_in_region(left, rotated)
+               for rotated in rotations(right))
 
 
 @given(strategies.contours_pairs)
