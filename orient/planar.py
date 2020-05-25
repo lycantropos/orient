@@ -690,7 +690,7 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
 
     where ``vertices_count = len(contour)\
  + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``
+    ``border, holes = polygon``.
 
     :param contour: contour to check for.
     :param polygon: polygon to check in.
@@ -721,7 +721,7 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
 
     where ``vertices_count = len(region)\
  + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``
+    ``border, holes = polygon``.
 
     :param region: region to check for.
     :param polygon: polygon to check in.
@@ -753,7 +753,7 @@ def multiregion_in_polygon(multiregion: Multiregion,
 
     where ``vertices_count = sum(map(len, multiregion))\
  + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``
+    ``border, holes = polygon``.
 
     :param multiregion: multiregion to check for.
     :param polygon: polygon to check in.
