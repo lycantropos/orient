@@ -98,41 +98,6 @@ def test_step(region_with_multisegment: Tuple[Region, Multisegment]) -> None:
 
 
 @given(strategies.contours_with_multisegments)
-def test_reversed_multisegment(region_with_multisegment
-                               : Tuple[Region, Multisegment]) -> None:
-    region, multisegment = region_with_multisegment
-
-    result = multisegment_in_region(multisegment, region)
-
-    assert result is multisegment_in_region(reverse_multisegment(multisegment),
-                                            region)
-
-
-@given(strategies.contours_with_multisegments)
-def test_reversed(region_with_multisegment: Tuple[Region, Multisegment]
-                  ) -> None:
-    region, multisegment = region_with_multisegment
-
-    result = multisegment_in_region(multisegment, region)
-
-    assert result is multisegment_in_region(multisegment,
-                                            reverse_contour(region))
-
-
-@given(strategies.contours_with_multisegments)
-def test_rotations(region_with_multisegment: Tuple[Region, Multisegment]
-                   ) -> None:
-    region, multisegment = region_with_multisegment
-
-    result = multisegment_in_region(multisegment, region)
-
-    assert all(result is multisegment_in_region(multisegment, rotated)
-               for rotated in rotations(region))
-    assert all(result is multisegment_in_region(rotated, region)
-               for rotated in rotations(multisegment))
-
-
-@given(strategies.contours_with_multisegments)
 def test_connection_with_multisegment_in_contour(region_with_multisegment
                                                  : Tuple[Region, Multisegment]
                                                  ) -> None:
@@ -170,3 +135,29 @@ def test_connection_with_multisegment_in_contour(region_with_multisegment
                        result is Relation.TOUCH
                        or result is Relation.CROSS
                        or result is Relation.ENCLOSED)
+
+
+@given(strategies.contours_with_multisegments)
+def test_reversed(region_with_multisegment: Tuple[Region, Multisegment]
+                  ) -> None:
+    region, multisegment = region_with_multisegment
+
+    result = multisegment_in_region(multisegment, region)
+
+    assert result is multisegment_in_region(
+            reverse_multisegment(multisegment), region)
+    assert result is multisegment_in_region(multisegment,
+                                            reverse_contour(region))
+
+
+@given(strategies.contours_with_multisegments)
+def test_rotations(region_with_multisegment: Tuple[Region, Multisegment]
+                   ) -> None:
+    region, multisegment = region_with_multisegment
+
+    result = multisegment_in_region(multisegment, region)
+
+    assert all(result is multisegment_in_region(multisegment, rotated)
+               for rotated in rotations(region))
+    assert all(result is multisegment_in_region(rotated, region)
+               for rotated in rotations(multisegment))
