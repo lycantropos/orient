@@ -11,7 +11,9 @@ from orient.planar import (Relation,
                            segment_in_region)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
-                         implication)
+                         implication,
+                         reverse_contour,
+                         rotations)
 from . import strategies
 
 
@@ -28,6 +30,28 @@ def test_basic(contour_with_region: Tuple[Contour, Region]) -> None:
 @given(strategies.contours)
 def test_self(contour: Contour) -> None:
     assert contour_in_region(contour, contour) is Relation.COMPONENT
+
+
+@given(strategies.contours_pairs)
+def test_reversed(region_with_contour: Tuple[Region, Contour]) -> None:
+    region, contour = region_with_contour
+
+    result = contour_in_region(contour, region)
+
+    assert result is contour_in_region(reverse_contour(contour), region)
+    assert result is contour_in_region(contour, reverse_contour(region))
+
+
+@given(strategies.contours_pairs)
+def test_rotations(region_with_contour: Tuple[Region, Contour]) -> None:
+    region, contour = region_with_contour
+
+    result = contour_in_region(contour, region)
+
+    assert all(result is contour_in_region(rotated, region)
+               for rotated in rotations(contour))
+    assert all(result is contour_in_region(contour, rotated)
+               for rotated in rotations(region))
 
 
 @given(strategies.contours_pairs)
