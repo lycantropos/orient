@@ -28,16 +28,11 @@ def test_basic(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
 
 
 @given(strategies.polygons)
-def test_border(polygon: Polygon) -> None:
+def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert multiregion_in_polygon([border], polygon) is (Relation.ENCLOSES
                                                          if holes
                                                          else Relation.EQUAL)
-
-
-@given(strategies.polygons)
-def test_holes(polygon: Polygon) -> None:
-    _, holes = polygon
     assert multiregion_in_polygon(holes, polygon) is (Relation.TOUCH
                                                       if holes
                                                       else Relation.DISJOINT)
