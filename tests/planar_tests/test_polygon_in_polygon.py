@@ -12,6 +12,9 @@ from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         reverse_polygon_border,
+                         reverse_polygon_holes,
+                         reverse_polygon_holes_contours,
                          to_convex_hull)
 from . import strategies
 
@@ -32,7 +35,7 @@ def test_self(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons_pairs)
-def test_symmetric_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
+def test_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     left_polygon, right_polygon = polygons_pair
 
     result = polygon_in_polygon(left_polygon, right_polygon)
@@ -40,15 +43,6 @@ def test_symmetric_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     complement = polygon_in_polygon(right_polygon, left_polygon)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-
-
-@given(strategies.polygons_pairs)
-def test_asymmetric_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
-    left_polygon, right_polygon = polygons_pair
-
-    result = polygon_in_polygon(left_polygon, right_polygon)
-
-    complement = polygon_in_polygon(right_polygon, left_polygon)
     assert equivalence(result is not complement
                        and result.complement is complement,
                        result in ASYMMETRIC_COMPOUND_RELATIONS
@@ -73,7 +67,24 @@ def test_without_holes(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons_pairs)
-def test_vertices(polygons_pair: Tuple[Polygon, Polygon]) -> None:
+def test_reversed(polygons_pair: Tuple[Polygon, Polygon]) -> None:
+    left, right = polygons_pair
+
+    result = polygon_in_polygon(left, right)
+
+    assert result is polygon_in_polygon(reverse_polygon_border(left), right)
+    assert result is polygon_in_polygon(left, reverse_polygon_border(right))
+    assert result is polygon_in_polygon(reverse_polygon_holes(left), right)
+    assert result is polygon_in_polygon(left, reverse_polygon_holes(right))
+    assert result is polygon_in_polygon(reverse_polygon_holes_contours(left),
+                                        right)
+    assert result is polygon_in_polygon(left,
+                                        reverse_polygon_holes_contours(right))
+
+
+@given(strategies.polygons_pairs)
+def test_connection_with_point_in_polygon(polygons_pair
+                                          : Tuple[Polygon, Polygon]) -> None:
     left_polygon, right_polygon = polygons_pair
 
     left_border, left_holes = left_polygon
