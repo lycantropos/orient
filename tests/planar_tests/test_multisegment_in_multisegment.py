@@ -10,7 +10,9 @@ from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SAME_LINEAR_RELATIONS,
                          SYMMETRIC_SAME_LINEAR_RELATIONS,
                          equivalence,
-                         implication)
+                         implication,
+                         reverse_multisegment,
+                         rotations)
 from . import strategies
 
 
@@ -45,6 +47,24 @@ def test_elements(multisegment: Multisegment) -> None:
                            is Relation.COMPONENT
                            for segment in multisegment),
                        len(multisegment) > 1)
+
+
+@given(strategies.multisegments_pairs)
+def test_relations(multisegments_pair: Tuple[Multisegment, Multisegment]
+                   ) -> None:
+    left_multisegment, right_multisegment = multisegments_pair
+
+    result = multisegment_in_multisegment(left_multisegment,
+                                          right_multisegment)
+
+    complement = multisegment_in_multisegment(right_multisegment,
+                                              left_multisegment)
+    assert equivalence(result is complement,
+                       result in SYMMETRIC_SAME_LINEAR_RELATIONS)
+    assert equivalence(result is not complement
+                       and result.complement is complement,
+                       result in ASYMMETRIC_LINEAR_RELATIONS
+                       and complement in ASYMMETRIC_LINEAR_RELATIONS)
 
 
 @given(strategies.empty_multisegments_with_multisegments)
@@ -145,30 +165,26 @@ def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
 
 
 @given(strategies.multisegments_pairs)
-def test_symmetric_relations(multisegments_pair: Tuple[Multisegment,
-                                                       Multisegment]) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+def test_reversed(multisegments_pair: Tuple[Multisegment, Multisegment]
+                  ) -> None:
+    left, right = multisegments_pair
 
-    result = multisegment_in_multisegment(left_multisegment,
-                                          right_multisegment)
+    result = multisegment_in_multisegment(left, right)
 
-    complement = multisegment_in_multisegment(right_multisegment,
-                                              left_multisegment)
-    assert equivalence(result is complement,
-                       result in SYMMETRIC_SAME_LINEAR_RELATIONS)
+    assert result is multisegment_in_multisegment(reverse_multisegment(left),
+                                                  right)
+    assert result is multisegment_in_multisegment(left,
+                                                  reverse_multisegment(right))
 
 
 @given(strategies.multisegments_pairs)
-def test_asymmetric_relations(multisegments_pair: Tuple[Multisegment,
-                                                        Multisegment]) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+def test_rotations(multisegments_pair: Tuple[Multisegment, Multisegment]
+                   ) -> None:
+    left, right = multisegments_pair
 
-    result = multisegment_in_multisegment(left_multisegment,
-                                          right_multisegment)
+    result = multisegment_in_multisegment(left, right)
 
-    complement = multisegment_in_multisegment(right_multisegment,
-                                              left_multisegment)
-    assert equivalence(result is not complement
-                       and result.complement is complement,
-                       result in ASYMMETRIC_LINEAR_RELATIONS
-                       and complement in ASYMMETRIC_LINEAR_RELATIONS)
+    assert all(result is multisegment_in_multisegment(rotated, right)
+               for rotated in rotations(left))
+    assert all(result is multisegment_in_multisegment(left, rotated)
+               for rotated in rotations(right))
