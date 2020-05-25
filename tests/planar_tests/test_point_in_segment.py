@@ -47,15 +47,8 @@ def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
 def test_reversed(segment_with_point: Tuple[Segment, Point]) -> None:
     segment, point = segment_with_point
 
-    assert (point_in_segment(point, segment)
-            is point_in_segment(point, reverse_segment(segment)))
+    result = point_in_segment(point, segment)
 
-
-@given(strategies.segments_with_points)
-def test_reversed_coordinates(segment_with_point: Tuple[Segment, Point]
-                              ) -> None:
-    segment, point = segment_with_point
-
-    assert (point_in_segment(point, segment)
-            is point_in_segment(reverse_point_coordinates(point),
-                                reverse_segment_coordinates(segment)))
+    assert result is point_in_segment(point, reverse_segment(segment))
+    assert result is point_in_segment(reverse_point_coordinates(point),
+                                      reverse_segment_coordinates(segment))
