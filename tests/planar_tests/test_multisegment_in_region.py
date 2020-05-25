@@ -94,10 +94,13 @@ def test_connection_with_multisegment_in_contour(region_with_multisegment
                        relation_with_contour is Relation.DISJOINT)
     assert implication(relation_with_contour is Relation.DISJOINT,
                        result is Relation.DISJOINT
+                       or result is Relation.CROSS
                        or result is Relation.WITHIN)
     assert implication(relation_with_contour is Relation.TOUCH,
                        result is Relation.TOUCH
+                       or result is Relation.CROSS
                        or result is Relation.ENCLOSED)
     assert implication(relation_with_contour is Relation.OVERLAP,
                        result is Relation.TOUCH
+                       or result is Relation.CROSS
                        or result is Relation.ENCLOSED)
