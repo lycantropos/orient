@@ -38,7 +38,7 @@ def test_edges(region: Region) -> None:
 
 
 @given(strategies.contours)
-def test_contour_separators(region: Region) -> None:
+def test_separators(region: Region) -> None:
     assert all(segment_in_region(segment, region)
                in (Relation.TOUCH, Relation.CROSS, Relation.ENCLOSED)
                for segment in to_contour_separators(region))
@@ -53,20 +53,12 @@ def test_convex_region(region: Region) -> None:
 
 
 @given(strategies.contours_with_segments)
-def test_reversed_segment(region_with_segment: Tuple[Region, Segment]) -> None:
+def test_reversed(region_with_segment: Tuple[Region, Segment]) -> None:
     region, segment = region_with_segment
 
     result = segment_in_region(segment, region)
 
     assert result is segment_in_region(reverse_segment(segment), region)
-
-
-@given(strategies.contours_with_segments)
-def test_reversed_region(region_with_segment: Tuple[Region, Segment]) -> None:
-    region, segment = region_with_segment
-
-    result = segment_in_region(segment, region)
-
     assert result is segment_in_region(segment, reverse_contour(region))
 
 
