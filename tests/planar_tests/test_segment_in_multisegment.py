@@ -37,20 +37,6 @@ def test_self(multisegment: Multisegment) -> None:
                for segment in multisegment)
 
 
-@given(strategies.multisegments_with_segments)
-def test_outside(multisegment_with_segment: Tuple[Multisegment, Segment]
-                 ) -> None:
-    multisegment, segment = multisegment_with_segment
-
-    result = segment_in_multisegment(segment, multisegment)
-
-    start, end = segment
-    assert implication(result is Relation.DISJOINT,
-                       point_in_multisegment(start, multisegment)
-                       is point_in_multisegment(end, multisegment)
-                       is Relation.DISJOINT)
-
-
 @given(strategies.empty_multisegments_with_segments)
 def test_base(multisegment_with_segment: Tuple[Multisegment, Segment]
               ) -> None:
@@ -152,24 +138,14 @@ def test_step(multisegment_with_segment: Tuple[Multisegment, Segment]
 
 
 @given(strategies.multisegments_with_segments)
-def test_reversed_segment(multisegment_with_segment: Tuple[Multisegment,
-                                                           Segment]) -> None:
+def test_reversed(multisegment_with_segment: Tuple[Multisegment, Segment]
+                  ) -> None:
     multisegment, segment = multisegment_with_segment
 
     result = segment_in_multisegment(segment, multisegment)
 
     assert result is segment_in_multisegment(reverse_segment(segment),
                                              multisegment)
-
-
-@given(strategies.multisegments_with_segments)
-def test_reversed_multisegment(multisegment_with_segment: Tuple[Multisegment,
-                                                                Segment]
-                               ) -> None:
-    multisegment, segment = multisegment_with_segment
-
-    result = segment_in_multisegment(segment, multisegment)
-
     assert result is segment_in_multisegment(
             segment, reverse_multisegment(multisegment))
 
@@ -183,3 +159,18 @@ def test_rotations(multisegment_with_segment: Tuple[Multisegment, Segment]
 
     assert all(result is segment_in_multisegment(segment, rotated)
                for rotated in rotations(multisegment))
+
+
+@given(strategies.multisegments_with_segments)
+def test_connection_with_point_in_multisegment(multisegment_with_segment
+                                               : Tuple[Multisegment, Segment]
+                                               ) -> None:
+    multisegment, segment = multisegment_with_segment
+
+    result = segment_in_multisegment(segment, multisegment)
+
+    start, end = segment
+    assert implication(result is Relation.DISJOINT,
+                       point_in_multisegment(start, multisegment)
+                       is point_in_multisegment(end, multisegment)
+                       is Relation.DISJOINT)
