@@ -2,6 +2,7 @@ from typing import Iterable
 
 from orient.hints import (Contour,
                           Multiregion,
+                          Multisegment,
                           Point,
                           Region,
                           Segment)
@@ -39,6 +40,34 @@ def relate_segment(multiregion: Multiregion, segment: Segment) -> Relation:
     return (Relation.DISJOINT
             if do_not_touch
             else Relation.TOUCH)
+
+
+def relate_multisegment(multiregion: Multiregion,
+                        multisegment: Multisegment) -> Relation:
+    if not (multisegment and multiregion):
+        return Relation.DISJOINT
+    multisegment_bounding_box = bounding_box.from_points(flatten(multisegment))
+    disjoint, multiregion_max_x, sweeper = True, None, None
+    for region in multiregion:
+        region_bounding_box = bounding_box.from_points(region)
+        if not bounding_box.disjoint_with(region_bounding_box,
+                                          multisegment_bounding_box):
+            if disjoint:
+                disjoint = False
+                _, multiregion_max_x, _, _ = region_bounding_box
+                sweeper = ClosedSweeper()
+                sweeper.register_segments(multisegment,
+                                          from_test=True)
+            else:
+                _, region_max_x, _, _ = region_bounding_box
+                multiregion_max_x = max(multiregion_max_x, region_max_x)
+            sweeper.register_segments(region_to_segments(region),
+                                      from_test=False)
+    if disjoint:
+        return Relation.DISJOINT
+    _, multisegment_max_x, _, _ = multisegment_bounding_box
+    return process_linear_compound_queue(sweeper, min(multisegment_max_x,
+                                                      multiregion_max_x))
 
 
 def relate_contour(multiregion: Multiregion, contour: Contour) -> Relation:

@@ -543,6 +543,46 @@ def segment_in_multiregion(segment: Segment,
     return _multiregion.relate_segment(multiregion, segment)
 
 
+def multisegment_in_multiregion(multisegment: Multisegment,
+                                multiregion: Multiregion) -> Relation:
+    """
+    Finds relation between multisegment and multiregion.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``segments_count = len(multisegment) + len(multiregion).
+
+    :param multisegment: multisegment to check for.
+    :param multiregion: multiregion to check in.
+    :returns: relation between multisegment and multiregion.
+
+    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
+    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
+    ...                 ((0, 1), (0, 0))]
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multisegment_in_multiregion([], []) is Relation.DISJOINT
+    True
+    >>> multisegment_in_multiregion([], [triangle]) is Relation.DISJOINT
+    True
+    >>> (multisegment_in_multiregion(triangle_edges, [triangle])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (multisegment_in_multiregion(triangle_edges, [square])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> multisegment_in_multiregion(square_edges, [triangle]) is Relation.TOUCH
+    True
+    >>> (multisegment_in_multiregion(square_edges, [square])
+    ...  is Relation.COMPONENT)
+    True
+    """
+    return _multiregion.relate_multisegment(multiregion, multisegment)
+
+
 def contour_in_multiregion(contour: Contour,
                            multiregion: Multiregion) -> Relation:
     """
