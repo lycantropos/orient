@@ -380,9 +380,9 @@ def multisegment_in_region(multisegment: Multisegment,
     Finds relation between multisegment and region.
 
     Time complexity:
-        ``O(vertices_count * log (vertices_count))``
+        ``O(segments_count * log segments_count)``
     Memory complexity:
-        ``O(vertices_count)``
+        ``O(segments_count)``
 
     where ``segments_count = len(multisegment) + len(region).
 
@@ -579,7 +579,7 @@ def region_in_multiregion(region: Region,
     Finds relation between region and multiregion.
 
     Time complexity:
-        ``O(vertices_count * log (vertices_count))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
         ``O(vertices_count)``
 
@@ -723,7 +723,7 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
     Finds relation between contour and polygon.
 
     Time complexity:
-        ``O(vertices_count * log (vertices_count))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
         ``O(vertices_count)``
 
@@ -754,7 +754,7 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
     Finds relation between region and polygon.
 
     Time complexity:
-        ``O(vertices_count * log (vertices_count))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
         ``O(vertices_count)``
 
@@ -786,7 +786,7 @@ def multiregion_in_polygon(multiregion: Multiregion,
     Finds relation between multiregion and polygon.
 
     Time complexity:
-        ``O(vertices_count * log (vertices_count))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
         ``O(vertices_count)``
 
@@ -817,7 +817,7 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     Checks if the polygon fully lies inside the other one.
 
     Time complexity:
-        ``O(vertices_count * log (vertices_count))``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
         ``O(vertices_count)``
 
