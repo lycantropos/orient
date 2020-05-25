@@ -10,8 +10,8 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import (_point_vertex_line_divides_angle,
-                      equal as contours_equal,
+from .contour import (equal as contours_equal,
+                      point_vertex_line_divides_angle,
                       to_segments as contour_to_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
@@ -65,9 +65,9 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment) -> Relation:
                   and start not in edge and end not in edge
                   and (angle_orientation(end, start, edge_start)
                        is Orientation.COLLINEAR)
-                  and _point_vertex_line_divides_angle(start,
-                                                       last_touched_edge_start,
-                                                       edge_start, edge_end)):
+                  and point_vertex_line_divides_angle(start,
+                                                      last_touched_edge_start,
+                                                      edge_start, edge_end)):
                 return Relation.CROSS
             last_touched_edge_index = index
             last_touched_edge_start = edge_start
@@ -79,9 +79,9 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment) -> Relation:
                 and start not in first_edge and end not in first_edge
                 and (angle_orientation(end, start, first_edge_start)
                      is Orientation.COLLINEAR)
-                and _point_vertex_line_divides_angle(start, contour[-2],
-                                                     first_edge_start,
-                                                     first_edge_end)):
+                and point_vertex_line_divides_angle(start, contour[-2],
+                                                    first_edge_start,
+                                                    first_edge_end)):
             return Relation.CROSS
     return ((Relation.DISJOINT
              if has_no_touch

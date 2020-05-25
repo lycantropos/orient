@@ -47,7 +47,7 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
                   and start not in edge and end not in edge
                   and (angle_orientation(end, start, edge_start)
                        is Orientation.COLLINEAR)
-                  and _point_vertex_line_divides_angle(
+                  and point_vertex_line_divides_angle(
                             start, previous_touch_edge_start,
                             edge_start, edge_end)):
                 has_no_cross = False
@@ -61,9 +61,9 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
                 and start not in first_edge and end not in first_edge
                 and (angle_orientation(end, start, first_edge_start)
                      is Orientation.COLLINEAR)
-                and _point_vertex_line_divides_angle(start, contour[-2],
-                                                     first_edge_start,
-                                                     first_edge_end)):
+                and point_vertex_line_divides_angle(start, contour[-2],
+                                                    first_edge_start,
+                                                    first_edge_end)):
             has_no_cross = False
     return ((Relation.DISJOINT
              if has_no_touch
@@ -72,10 +72,10 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
             else Relation.CROSS)
 
 
-def _point_vertex_line_divides_angle(point: Point,
-                                     first_ray_point: Point,
-                                     vertex: Point,
-                                     second_ray_point: Point) -> bool:
+def point_vertex_line_divides_angle(point: Point,
+                                    first_ray_point: Point,
+                                    vertex: Point,
+                                    second_ray_point: Point) -> bool:
     return (angle_orientation(first_ray_point, vertex, point)
             is angle_orientation(point, vertex, second_ray_point))
 
