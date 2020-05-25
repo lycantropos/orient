@@ -10,13 +10,14 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .contour import (equal as contours_equal,
-                      relate_segment as relate_segment_to_contour,
+from .contour import (_point_vertex_line_divides_angle,
+                      equal as contours_equal,
                       to_segments as contour_to_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .relation import Relation
-from .segment import relate_point as relate_point_to_segment
+from .segment import (relate_point as relate_point_to_segment,
+                      relate_segment as relate_segments)
 from .sweep import ClosedSweeper
 from .utils import flatten
 
@@ -38,8 +39,59 @@ def relate_point(region: Region, point: Point) -> Relation:
             else Relation.DISJOINT)
 
 
+def _relate_segment_to_contour(contour: Contour, segment: Segment) -> Relation:
+    # similar to segment-in-contour check
+    # but cross has higher priority over overlap
+    # because cross with contour will be considered as cross with region
+    # whereas overlap with contour can't be an overlap with region
+    # and should be classified by further analysis
+    has_no_touch = has_no_overlap = True
+    last_touched_edge_index = last_touched_edge_start = None
+    start, end = segment
+    for index, edge in enumerate(to_segments(contour)):
+        relation_with_edge = relate_segments(edge, segment)
+        if (relation_with_edge is Relation.COMPONENT
+                or relation_with_edge is Relation.EQUAL):
+            return Relation.COMPONENT
+        elif (relation_with_edge is Relation.OVERLAP
+              or relation_with_edge is Relation.COMPOSITE):
+            if has_no_overlap:
+                has_no_overlap = False
+        elif relation_with_edge is Relation.TOUCH:
+            edge_start, edge_end = edge
+            if has_no_touch:
+                has_no_touch = False
+            elif (index - last_touched_edge_index == 1
+                  and start not in edge and end not in edge
+                  and (angle_orientation(end, start, edge_start)
+                       is Orientation.COLLINEAR)
+                  and _point_vertex_line_divides_angle(start,
+                                                       last_touched_edge_start,
+                                                       edge_start, edge_end)):
+                return Relation.CROSS
+            last_touched_edge_index = index
+            last_touched_edge_start = edge_start
+        elif relation_with_edge is Relation.CROSS:
+            return Relation.CROSS
+    if has_no_touch and last_touched_edge_index == len(contour) - 1:
+        first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
+        if (relate_segments(first_edge, segment) is Relation.TOUCH
+                and start not in first_edge and end not in first_edge
+                and (angle_orientation(end, start, first_edge_start)
+                     is Orientation.COLLINEAR)
+                and _point_vertex_line_divides_angle(start, contour[-2],
+                                                     first_edge_start,
+                                                     first_edge_end)):
+            return Relation.CROSS
+    return ((Relation.DISJOINT
+             if has_no_touch
+             else Relation.TOUCH)
+            if has_no_overlap
+            else Relation.OVERLAP)
+
+
 def relate_segment(region: Region, segment: Segment) -> Relation:
-    relation_with_contour = relate_segment_to_contour(region, segment)
+    relation_with_contour = _relate_segment_to_contour(region, segment)
     if (relation_with_contour is Relation.CROSS
             or relation_with_contour is Relation.COMPONENT):
         return relation_with_contour
