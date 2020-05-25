@@ -10,7 +10,10 @@ from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
-                         implication)
+                         implication,
+                         reverse_multicontour,
+                         reverse_multicontour_contours,
+                         rotations)
 from . import strategies
 
 
@@ -45,8 +48,7 @@ def test_elements(multiregion: Multiregion) -> None:
 
 
 @given(strategies.multicontours_pairs)
-def test_symmetric_relations(multiregions_pair: Tuple[Multiregion, Multiregion]
-                             ) -> None:
+def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
 
     result = multiregion_in_multiregion(left_multiregion, right_multiregion)
@@ -55,17 +57,6 @@ def test_symmetric_relations(multiregions_pair: Tuple[Multiregion, Multiregion]
                                             left_multiregion)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-
-
-@given(strategies.multicontours_pairs)
-def test_asymmetric_relations(multiregions_pair: Tuple[Multiregion,
-                                                       Multiregion]) -> None:
-    left_multiregion, right_multiregion = multiregions_pair
-
-    result = multiregion_in_multiregion(left_multiregion, right_multiregion)
-
-    complement = multiregion_in_multiregion(right_multiregion,
-                                            left_multiregion)
     assert equivalence(result is not complement
                        and result.complement is complement,
                        result in ASYMMETRIC_COMPOUND_RELATIONS
@@ -182,3 +173,31 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     assert equivalence(next_result is Relation.WITHIN,
                        (not rest_left_multiregion or result is Relation.WITHIN)
                        and relation_with_first_region is Relation.WITHIN)
+
+
+@given(strategies.multicontours_pairs)
+def test_reversed(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
+    left, right = multiregions_pair
+
+    result = multiregion_in_multiregion(left, right)
+
+    assert result is multiregion_in_multiregion(reverse_multicontour(left),
+                                                right)
+    assert result is multiregion_in_multiregion(left,
+                                                reverse_multicontour(right))
+    assert result is multiregion_in_multiregion(
+            reverse_multicontour_contours(left), right)
+    assert result is multiregion_in_multiregion(
+            left, reverse_multicontour_contours(right))
+
+
+@given(strategies.multicontours_pairs)
+def test_rotations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
+    left, right = multiregions_pair
+
+    result = multiregion_in_multiregion(left, right)
+
+    assert all(result is multiregion_in_multiregion(rotated, right)
+               for rotated in rotations(left))
+    assert all(result is multiregion_in_multiregion(left, rotated)
+               for rotated in rotations(right))
