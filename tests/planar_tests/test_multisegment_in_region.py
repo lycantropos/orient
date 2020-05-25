@@ -109,8 +109,8 @@ def test_reversed_multisegment(region_with_multisegment
 
 
 @given(strategies.contours_with_multisegments)
-def test_reversed_region(
-        region_with_multisegment: Tuple[Region, Multisegment]) -> None:
+def test_reversed(region_with_multisegment: Tuple[Region, Multisegment]
+                  ) -> None:
     region, multisegment = region_with_multisegment
 
     result = multisegment_in_region(multisegment, region)
@@ -120,14 +120,16 @@ def test_reversed_region(
 
 
 @given(strategies.contours_with_multisegments)
-def test_rotations(
-        region_with_multisegment: Tuple[Region, Multisegment]) -> None:
+def test_rotations(region_with_multisegment: Tuple[Region, Multisegment]
+                   ) -> None:
     region, multisegment = region_with_multisegment
 
     result = multisegment_in_region(multisegment, region)
 
     assert all(result is multisegment_in_region(multisegment, rotated)
                for rotated in rotations(region))
+    assert all(result is multisegment_in_region(rotated, region)
+               for rotated in rotations(multisegment))
 
 
 @given(strategies.contours_with_multisegments)
