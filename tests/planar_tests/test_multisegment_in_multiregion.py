@@ -38,8 +38,8 @@ def test_edges(multiregion: Multiregion) -> None:
 
 
 @given(strategies.multicontours_with_empty_multisegments)
-def test_base(multiregion_with_multisegment: Tuple[
-    Multiregion, Multisegment]) -> None:
+def test_base(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
+              ) -> None:
     multiregion, multisegment = multiregion_with_multisegment
 
     result = multisegment_in_multiregion(multisegment, multiregion)
