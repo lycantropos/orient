@@ -56,8 +56,8 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
         elif has_no_cross and relation_with_edge is Relation.CROSS:
             has_no_cross = False
     if (has_no_cross
-            and not has_no_touch and last_touched_edge_index == len(
-                    contour) - 1):
+            and not has_no_touch
+            and last_touched_edge_index == len(contour) - 1):
         first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
         if (relate_segments(first_edge, segment) is Relation.TOUCH
                 and start not in first_edge and end not in first_edge
