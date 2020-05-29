@@ -1064,3 +1064,36 @@ def multisegment_in_multipolygon(multisegment: Multisegment,
     True
     """
     return _multipolygon.relate_multisegment(multipolygon, multisegment)
+
+
+def contour_in_multipolygon(contour: Contour,
+                            multipolygon: Multipolygon) -> Relation:
+    """
+    Finds relation between contour and multipolygon.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(contour) + multipolygon_vertices_count``,
+    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon)``.
+
+    :param contour: contour to check for.
+    :param multipolygon: multipolygon to check in.
+    :returns: relation between contour and multipolygon.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> (contour_in_multipolygon(triangle, [(triangle, [])])
+    ...  is Relation.COMPONENT)
+    True
+    >>> contour_in_multipolygon(triangle, [(square, [])]) is Relation.ENCLOSED
+    True
+    >>> contour_in_multipolygon(square, [(triangle, [])]) is Relation.TOUCH
+    True
+    >>> contour_in_multipolygon(square, [(square, [])]) is Relation.COMPONENT
+    True
+    """
+    return _multipolygon.relate_contour(multipolygon, contour)

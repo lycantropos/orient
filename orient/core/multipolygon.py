@@ -1,8 +1,10 @@
-from orient.hints import (Multipolygon,
+from orient.hints import (Contour,
+                          Multipolygon,
                           Multisegment,
                           Point,
                           Segment)
 from . import bounding_box
+from .contour import to_segments as contour_to_segments
 from .multiregion import to_segments as multiregion_to_segments
 from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon)
@@ -64,4 +66,31 @@ def relate_multisegment(multipolygon: Multipolygon,
         return Relation.DISJOINT
     _, multisegment_max_x, _, _ = multisegment_bounding_box
     return process_linear_compound_queue(sweeper, min(multisegment_max_x,
+                                                      multipolygon_max_x))
+
+
+def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
+    contour_bounding_box = bounding_box.from_points(contour)
+    disjoint, multipolygon_max_x, sweeper = True, None, None
+    for border, holes in multipolygon:
+        polygon_bounding_box = bounding_box.from_points(border)
+        if not bounding_box.disjoint_with(polygon_bounding_box,
+                                          contour_bounding_box):
+            if disjoint:
+                disjoint = False
+                _, multipolygon_max_x, _, _ = polygon_bounding_box
+                sweeper = ClosedSweeper()
+                sweeper.register_segments(contour_to_segments(contour),
+                                          from_test=True)
+            else:
+                _, polygon_max_x, _, _ = polygon_bounding_box
+                multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
+            sweeper.register_segments(region_to_segments(border),
+                                      from_test=False)
+            sweeper.register_segments(multiregion_to_segments(holes),
+                                      from_test=False)
+    if disjoint:
+        return Relation.DISJOINT
+    _, contour_max_x, _, _ = contour_bounding_box
+    return process_linear_compound_queue(sweeper, min(contour_max_x,
                                                       multipolygon_max_x))
