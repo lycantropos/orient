@@ -974,3 +974,50 @@ def point_in_multipolygon(point: Point,
     True
     """
     return _multipolygon.relate_point(multipolygon, point)
+
+
+def segment_in_multipolygon(segment: Segment,
+                            multipolygon: Multipolygon) -> Relation:
+    """
+    Finds relation between segment and multipolygon.
+
+    Time complexity:
+        ``O(sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon))``
+    Memory complexity:
+        ``O(1)``
+
+    :param segment: segment to check for.
+    :param multipolygon: multipolygon to check in.
+    :returns: relation between segment and multipolygon.
+
+    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
+    >>> (segment_in_multipolygon(((0, 0), (1, 0)), [])
+    ...  is Relation.DISJOINT)
+    True
+    >>> (segment_in_multipolygon(((0, 0), (1, 0)), [(square, [])])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (segment_in_multipolygon(((0, 0), (3, 0)), [(square, [])])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (segment_in_multipolygon(((2, 0), (4, 0)), [(square, [])])
+    ...  is Relation.TOUCH)
+    True
+    >>> (segment_in_multipolygon(((4, 0), (5, 0)), [(square, [])])
+    ...  is Relation.DISJOINT)
+    True
+    >>> (segment_in_multipolygon(((1, 0), (1, 2)), [(square, [])])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (segment_in_multipolygon(((0, 0), (1, 1)), [(square, [])])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (segment_in_multipolygon(((1, 1), (2, 2)), [(square, [])])
+    ...  is Relation.WITHIN)
+    True
+    >>> (segment_in_multipolygon(((2, 2), (4, 4)), [(square, [])])
+    ...  is Relation.CROSS)
+    True
+    """
+    return _multipolygon.relate_segment(multipolygon, segment)
