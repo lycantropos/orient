@@ -9,13 +9,14 @@ from . import bounding_box
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           _relate_multisegment
                           as relate_multisegment_to_multiregion,
+                          _relate_region as _relate_region_to_multiregion,
                           relate_multiregion as relate_multiregions,
                           relate_region as relate_region_to_multiregion,
                           relate_segment as relate_segment_to_multiregion)
 from .region import (_relate_contour as relate_contour_to_region,
                      _relate_multisegment as relate_multisegment_to_region,
+                     _relate_region as relate_regions,
                      relate_point as relate_point_to_region,
-                     relate_region as relate_regions,
                      relate_segment as relate_segment_to_region)
 from .relation import Relation
 
@@ -119,7 +120,10 @@ def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
 
 def relate_region(polygon: Polygon, region: Region) -> Relation:
     border, holes = polygon
-    relation_without_holes = relate_regions(border, region)
+    region_bounding_box = bounding_box.from_points(region)
+    relation_without_holes = relate_regions(border, region,
+                                            bounding_box.from_points(border),
+                                            region_bounding_box)
     if relation_without_holes in (Relation.DISJOINT,
                                   Relation.TOUCH,
                                   Relation.OVERLAP,
@@ -132,7 +136,8 @@ def relate_region(polygon: Polygon, region: Region) -> Relation:
                 if holes
                 else relation_without_holes)
     elif holes:
-        relation_with_holes = relate_region_to_multiregion(holes, region)
+        relation_with_holes = _relate_region_to_multiregion(
+                holes, region, region_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_without_holes
         elif relation_with_holes is Relation.WITHIN:
@@ -189,7 +194,11 @@ def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
     goal_border, goal_holes = goal
     test_border, test_holes = test
-    borders_relation = relate_regions(goal_border, test_border)
+    goal_border_bounding_box = bounding_box.from_points(goal_border)
+    test_border_bounding_box = bounding_box.from_points(test_border)
+    borders_relation = relate_regions(goal_border, test_border,
+                                      goal_border_bounding_box,
+                                      test_border_bounding_box)
     if borders_relation in (Relation.DISJOINT,
                             Relation.TOUCH,
                             Relation.OVERLAP):
@@ -217,8 +226,8 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
                               Relation.ENCLOSED,
                               Relation.COMPONENT):
         if goal_holes:
-            holes_border_relation = relate_region_to_multiregion(goal_holes,
-                                                                 test_border)
+            holes_border_relation = _relate_region_to_multiregion(
+                    goal_holes, test_border, test_border_bounding_box)
             if holes_border_relation is Relation.DISJOINT:
                 return borders_relation
             elif holes_border_relation is Relation.WITHIN:
@@ -247,8 +256,8 @@ def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
                     if test_holes and borders_relation is Relation.COMPONENT
                     else borders_relation)
     elif test_holes:
-        holes_border_relation = relate_region_to_multiregion(test_holes,
-                                                             goal_border)
+        holes_border_relation = _relate_region_to_multiregion(
+                test_holes, goal_border, goal_border_bounding_box)
         if holes_border_relation is Relation.DISJOINT:
             return borders_relation
         elif holes_border_relation is Relation.WITHIN:
