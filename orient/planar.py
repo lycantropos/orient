@@ -1021,3 +1021,46 @@ def segment_in_multipolygon(segment: Segment,
     True
     """
     return _multipolygon.relate_segment(multipolygon, segment)
+
+
+def multisegment_in_multipolygon(multisegment: Multisegment,
+                                 multipolygon: Multipolygon) -> Relation:
+    """
+    Finds relation between multisegment and multipolygon.
+
+    Time complexity:
+        ``O(segments_count * log segments_count)``
+    Memory complexity:
+        ``O(segments_count)``
+
+    where ``segments_count = len(multisegment) + multipolygon_segments_count``,
+    ``multipolygon_segments_count = sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon)``.
+
+    :param multisegment: multisegment to check for.
+    :param multipolygon: multipolygon to check in.
+    :returns: relation between multisegment and multipolygon.
+
+    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
+    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
+    ...                 ((0, 1), (0, 0))]
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multisegment_in_multipolygon([], []) is Relation.DISJOINT
+    True
+    >>> multisegment_in_multipolygon([], [(triangle, [])]) is Relation.DISJOINT
+    True
+    >>> (multisegment_in_multipolygon(triangle_edges, [(triangle, [])])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (multisegment_in_multipolygon(triangle_edges, [(square, [])])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (multisegment_in_multipolygon(square_edges, [(triangle, [])])
+    ...  is Relation.TOUCH)
+    True
+    >>> (multisegment_in_multipolygon(square_edges, [(square, [])])
+    ...  is Relation.COMPONENT)
+    True
+    """
+    return _multipolygon.relate_multisegment(multipolygon, multisegment)
