@@ -313,8 +313,13 @@ def _relate_contour(region: Region,
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
-    goal_bounding_box, test_bounding_box = (bounding_box.from_points(goal),
-                                            bounding_box.from_points(test))
+    return _relate_region(goal, test, bounding_box.from_points(test))
+
+
+def _relate_region(goal: Region,
+                   test: Region,
+                   test_bounding_box: bounding_box.BoundingBox) -> Relation:
+    goal_bounding_box = bounding_box.from_points(goal)
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test):
