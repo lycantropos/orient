@@ -46,7 +46,14 @@ def relate_multisegment(multiregion: Multiregion,
                         multisegment: Multisegment) -> Relation:
     if not (multisegment and multiregion):
         return Relation.DISJOINT
-    multisegment_bounding_box = bounding_box.from_points(flatten(multisegment))
+    return _relate_multisegment(multiregion, multisegment,
+                                bounding_box.from_segments(multisegment))
+
+
+def _relate_multisegment(multiregion: Multiregion,
+                         multisegment: Multisegment,
+                         multisegment_bounding_box: bounding_box.BoundingBox
+                         ) -> Relation:
     disjoint, multiregion_max_x, sweeper = True, None, None
     for region in multiregion:
         region_bounding_box = bounding_box.from_points(region)
