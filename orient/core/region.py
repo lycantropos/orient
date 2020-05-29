@@ -289,8 +289,14 @@ def _relate_multisegment(region: Region,
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
-    contour_bounding_box, region_bounding_box = (
-        bounding_box.from_points(contour), bounding_box.from_points(region))
+    return _relate_contour(region, contour, bounding_box.from_points(contour))
+
+
+def _relate_contour(region: Region,
+                    contour: Contour,
+                    contour_bounding_box: bounding_box.BoundingBox
+                    ) -> Relation:
+    region_bounding_box = bounding_box.from_points(region)
     if bounding_box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour):
