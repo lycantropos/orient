@@ -949,7 +949,7 @@ def point_in_multipolygon(point: Point,
     Finds relation between point and multipolygon.
 
     Time complexity:
-        ``O(sum(len(border) + sum(map(len, holes))\
+        ``O(sum(len(border) = sum(map(len, holes))\
  for border, holes in multipolygon))``
     Memory complexity:
         ``O(1)``
@@ -982,7 +982,7 @@ def segment_in_multipolygon(segment: Segment,
     Finds relation between segment and multipolygon.
 
     Time complexity:
-        ``O(sum(len(border) + sum(map(len, holes))\
+        ``O(sum(len(border) = sum(map(len, holes))\
  for border, holes in multipolygon))``
     Memory complexity:
         ``O(1)``
