@@ -5,14 +5,15 @@ from orient.hints import (Contour,
                           Polygon,
                           Region,
                           Segment)
-from .multiregion import (relate_contour as relate_contour_to_multiregion,
-                          relate_multiregion as relate_multiregions,
-                          relate_multisegment
-                          as relate_multisegment_to_multiregion,
-                          relate_region as relate_region_to_multiregion,
-                          relate_segment as relate_segment_to_multiregion)
-from .region import (relate_contour as relate_contour_to_region,
-                     relate_multisegment as relate_multisegment_to_region,
+from . import bounding_box
+from .multiregion import (
+    _relate_multisegment as relate_multisegment_to_multiregion,
+    relate_contour as relate_contour_to_multiregion,
+    relate_multiregion as relate_multiregions,
+    relate_region as relate_region_to_multiregion,
+    relate_segment as relate_segment_to_multiregion)
+from .region import (_relate_multisegment as relate_multisegment_to_region,
+                     relate_contour as relate_contour_to_region,
                      relate_point as relate_point_to_region,
                      relate_region as relate_regions,
                      relate_segment as relate_segment_to_region)
@@ -57,13 +58,21 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
 
 def relate_multisegment(polygon: Polygon,
                         multisegment: Multisegment) -> Relation:
+    return _relate_multisegment(polygon, multisegment,
+                                bounding_box.from_segments(multisegment))
+
+
+def _relate_multisegment(polygon: Polygon,
+                         multisegment: Multisegment,
+                         multisegment_bounding_box: bounding_box.BoundingBox
+                         ) -> Relation:
     border, holes = polygon
-    relation_without_holes = relate_multisegment_to_region(border,
-                                                           multisegment)
+    relation_without_holes = relate_multisegment_to_region(
+            border, multisegment, multisegment_bounding_box)
     if (holes and (relation_without_holes is Relation.WITHIN
                    or relation_without_holes is Relation.ENCLOSED)):
-        relation_with_holes = relate_multisegment_to_multiregion(holes,
-                                                                 multisegment)
+        relation_with_holes = relate_multisegment_to_multiregion(
+                holes, multisegment, multisegment_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
