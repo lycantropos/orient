@@ -6,14 +6,14 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding_box
-from .multiregion import (
-    _relate_multisegment as relate_multisegment_to_multiregion,
-    relate_contour as relate_contour_to_multiregion,
-    relate_multiregion as relate_multiregions,
-    relate_region as relate_region_to_multiregion,
-    relate_segment as relate_segment_to_multiregion)
-from .region import (_relate_multisegment as relate_multisegment_to_region,
-                     relate_contour as relate_contour_to_region,
+from .multiregion import (_relate_contour as relate_contour_to_multiregion,
+                          _relate_multisegment
+                          as relate_multisegment_to_multiregion,
+                          relate_multiregion as relate_multiregions,
+                          relate_region as relate_region_to_multiregion,
+                          relate_segment as relate_segment_to_multiregion)
+from .region import (_relate_contour as relate_contour_to_region,
+                     _relate_multisegment as relate_multisegment_to_region,
                      relate_point as relate_point_to_region,
                      relate_region as relate_regions,
                      relate_segment as relate_segment_to_region)
@@ -94,10 +94,13 @@ def _relate_multisegment(polygon: Polygon,
 
 def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
     border, holes = polygon
-    relation_without_holes = relate_contour_to_region(border, contour)
+    contour_bounding_box = bounding_box.from_points(contour)
+    relation_without_holes = relate_contour_to_region(border, contour,
+                                                      contour_bounding_box)
     if holes and (relation_without_holes is Relation.ENCLOSED
                   or relation_without_holes is Relation.WITHIN):
-        relation_with_holes = relate_contour_to_multiregion(holes, contour)
+        relation_with_holes = relate_contour_to_multiregion(
+                holes, contour, contour_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
