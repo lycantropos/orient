@@ -191,6 +191,8 @@ empty_multicontours_with_points = strategies.tuples(empty_multicontours,
 non_empty_multicontours_with_points = coordinates_strategies.flatmap(
         partial(to_multicontours_with_points,
                 min_size=1))
+empty_multicontours_with_segments = strategies.tuples(empty_multicontours,
+                                                      segments)
 
 
 def to_multicontours_with_segments(coordinates: Strategy[Coordinate],
@@ -206,8 +208,6 @@ def to_multicontours_with_segments(coordinates: Strategy[Coordinate],
 
 multicontours_with_segments = (coordinates_strategies
                                .flatmap(to_multicontours_with_segments))
-empty_multicontours_with_segments = strategies.tuples(empty_multicontours,
-                                                      segments)
 non_empty_multicontours_with_segments = coordinates_strategies.flatmap(
         partial(to_multicontours_with_segments,
                 min_size=1))
@@ -366,3 +366,23 @@ multipolygons_with_points = (coordinates_strategies
 non_empty_multipolygons_with_points = (
     coordinates_strategies.flatmap(partial(to_multipolygons_with_points,
                                            min_size=1)))
+empty_multipolygons_with_segments = strategies.tuples(empty_multipolygons,
+                                                      segments)
+
+
+def to_multipolygons_with_segments(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
+                                   ) -> Strategy[Tuple[Multipolygon, Segment]]:
+    return strategies.tuples(planar.multipolygons(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size),
+                             planar.segments(coordinates))
+
+
+multipolygons_with_segments = (coordinates_strategies
+                               .flatmap(to_multipolygons_with_segments))
+non_empty_multipolygons_with_segments = coordinates_strategies.flatmap(
+        partial(to_multipolygons_with_segments,
+                min_size=1))
