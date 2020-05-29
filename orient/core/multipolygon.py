@@ -70,6 +70,8 @@ def relate_multisegment(multipolygon: Multipolygon,
 
 
 def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
+    if not multipolygon:
+        return Relation.DISJOINT
     contour_bounding_box = bounding_box.from_points(contour)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for border, holes in multipolygon:
