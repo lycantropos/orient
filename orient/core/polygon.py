@@ -58,8 +58,10 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
 
 def relate_multisegment(polygon: Polygon,
                         multisegment: Multisegment) -> Relation:
-    return _relate_multisegment(polygon, multisegment,
-                                bounding_box.from_segments(multisegment))
+    return (_relate_multisegment(polygon, multisegment,
+                                 bounding_box.from_segments(multisegment))
+            if multisegment
+            else Relation.DISJOINT)
 
 
 def _relate_multisegment(polygon: Polygon,
