@@ -1097,3 +1097,39 @@ def contour_in_multipolygon(contour: Contour,
     True
     """
     return _multipolygon.relate_contour(multipolygon, contour)
+
+
+def region_in_multipolygon(region: Region,
+                           multipolygon: Multipolygon) -> Relation:
+    """
+    Finds relation between region and multipolygon.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = len(region) + multipolygon_vertices_count``,
+    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon)``.
+
+    :param region: region to check for.
+    :param multipolygon: multipolygon to check in.
+    :returns: relation between region and multipolygon.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> region_in_multipolygon(triangle, []) is Relation.DISJOINT
+    True
+    >>> region_in_multipolygon(square, []) is Relation.DISJOINT
+    True
+    >>> region_in_multipolygon(triangle, [(triangle, [])]) is Relation.EQUAL
+    True
+    >>> region_in_multipolygon(square, [(triangle, [])]) is Relation.ENCLOSES
+    True
+    >>> region_in_multipolygon(triangle, [(square, [])]) is Relation.ENCLOSED
+    True
+    >>> region_in_multipolygon(square, [(square, [])]) is Relation.EQUAL
+    True
+    """
+    return _multipolygon.relate_region(multipolygon, region)
