@@ -24,9 +24,8 @@ from . import strategies
 
 
 @given(strategies.multipolygons_with_multisegments)
-def test_basic(
-        multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
-) -> None:
+def test_basic(multipolygon_with_multisegment
+               : Tuple[Multipolygon, Multisegment]) -> None:
     multipolygon, multisegment = multipolygon_with_multisegment
 
     result = multisegment_in_multipolygon(multisegment, multipolygon)
