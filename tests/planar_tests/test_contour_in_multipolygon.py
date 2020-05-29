@@ -35,7 +35,8 @@ def test_basic(
 
 @given(strategies.contours)
 def test_self(contour: Contour) -> None:
-    assert contour_in_multipolygon(contour, [contour]) is Relation.COMPONENT
+    assert (contour_in_multipolygon(contour, [(contour, [])])
+            is Relation.COMPONENT)
 
 
 @given(strategies.multipolygons)
