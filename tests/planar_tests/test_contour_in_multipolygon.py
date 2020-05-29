@@ -23,8 +23,8 @@ from . import strategies
 
 
 @given(strategies.multipolygons_with_contours)
-def test_basic(
-        multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
+def test_basic(multipolygon_with_contour: Tuple[Multipolygon, Contour]
+               ) -> None:
     multipolygon, contour = multipolygon_with_contour
 
     result = contour_in_multipolygon(contour, multipolygon)
@@ -116,8 +116,9 @@ def test_rotations(multipolygon_with_contour: Tuple[Multipolygon, Contour]
 
 
 @given(strategies.multipolygons_with_contours)
-def test_connection_with_point_in_multipolygon(
-        multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
+def test_connection_with_point_in_multipolygon(multipolygon_with_contour
+                                               : Tuple[Multipolygon, Contour]
+                                               ) -> None:
     multipolygon, contour = multipolygon_with_contour
 
     result = contour_in_multipolygon(contour, multipolygon)
@@ -157,8 +158,9 @@ def test_connection_with_point_in_multipolygon(
 
 
 @given(strategies.multipolygons_with_contours)
-def test_connection_with_segment_in_multipolygon(
-        multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
+def test_connection_with_segment_in_multipolygon(multipolygon_with_contour
+                                                 : Tuple[Multipolygon, Contour]
+                                                 ) -> None:
     multipolygon, contour = multipolygon_with_contour
 
     result = contour_in_multipolygon(contour, multipolygon)
