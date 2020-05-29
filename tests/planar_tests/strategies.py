@@ -9,6 +9,7 @@ from hypothesis_geometry import planar
 from orient.hints import (Contour,
                           Coordinate,
                           Multicontour,
+                          Multipolygon,
                           Multisegment,
                           Point,
                           Polygon,
@@ -343,3 +344,25 @@ polygons_with_non_empty_multicontours = (
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
+empty_multipolygons = strategies.builds(list)
+multipolygons = coordinates_strategies.flatmap(planar.multipolygons)
+empty_multipolygons_with_points = strategies.tuples(empty_multipolygons,
+                                                    points)
+
+
+def to_multipolygons_with_points(coordinates: Strategy[Coordinate],
+                                 *,
+                                 min_size: int = 0,
+                                 max_size: Optional[int] = None
+                                 ) -> Strategy[Tuple[Multipolygon, Point]]:
+    return strategies.tuples(planar.multipolygons(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size),
+                             planar.points(coordinates))
+
+
+multipolygons_with_points = (coordinates_strategies
+                             .flatmap(to_multipolygons_with_points))
+non_empty_multipolygons_with_points = (
+    coordinates_strategies.flatmap(partial(to_multipolygons_with_points,
+                                           min_size=1)))
