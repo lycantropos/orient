@@ -110,10 +110,10 @@ def _relate_contour(multiregion: Multiregion,
 
 
 def relate_region(multiregion: Multiregion, region: Region) -> Relation:
-    if not multiregion:
-        return Relation.DISJOINT
-    return _relate_region(multiregion, region,
-                          bounding_box.from_points(region))
+    return (_relate_region(multiregion, region,
+                           bounding_box.from_points(region))
+            if multiregion
+            else Relation.DISJOINT)
 
 
 def _relate_region(multiregion: Multiregion,
