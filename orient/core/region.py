@@ -6,6 +6,7 @@ from robust.linear import (SegmentsRelationship,
                            segments_relationship)
 
 from orient.hints import (Contour,
+                          Multisegment,
                           Point,
                           Region,
                           Segment)
@@ -19,7 +20,6 @@ from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import ClosedSweeper
-from .utils import flatten
 
 
 def relate_point(region: Region, point: Point) -> Relation:
@@ -261,12 +261,19 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
                     else Relation.TOUCH)
 
 
-def relate_multisegment(region: Region, multisegment: Contour) -> Relation:
+def relate_multisegment(region: Region,
+                        multisegment: Multisegment) -> Relation:
     if not multisegment:
         return Relation.DISJOINT
-    multisegment_bounding_box, region_bounding_box = (
-        bounding_box.from_points(flatten(multisegment)),
-        bounding_box.from_points(region))
+    return _relate_multisegment(region, multisegment,
+                                bounding_box.from_segments(multisegment))
+
+
+def _relate_multisegment(region: Region,
+                         multisegment: Multisegment,
+                         multisegment_bounding_box: bounding_box.BoundingBox
+                         ) -> Relation:
+    region_bounding_box = bounding_box.from_points(region)
     if bounding_box.disjoint_with(multisegment_bounding_box,
                                   region_bounding_box):
         return Relation.DISJOINT

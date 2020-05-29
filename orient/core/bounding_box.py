@@ -2,7 +2,9 @@ from typing import (Iterable,
                     Tuple)
 
 from orient.hints import (Coordinate,
-                          Point)
+                          Point,
+                          Segment)
+from .utils import flatten
 
 BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 
@@ -27,3 +29,7 @@ def from_points(points: Iterable[Point]) -> BoundingBox:
         x_min, x_max, y_min, y_max = (min(x_min, x), max(x_max, x),
                                       min(y_min, y), max(y_max, y))
     return x_min, x_max, y_min, y_max
+
+
+def from_segments(segments: Iterable[Segment]) -> BoundingBox:
+    return from_points(flatten(segments))
