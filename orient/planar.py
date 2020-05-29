@@ -1,4 +1,5 @@
 from .core import (contour as _contour,
+                   multipolygon as _multipolygon,
                    multiregion as _multiregion,
                    multisegment as _multisegment,
                    polygon as _polygon,
@@ -6,6 +7,7 @@ from .core import (contour as _contour,
                    segment as _segment)
 from .core.relation import Relation
 from .hints import (Contour,
+                    Multipolygon,
                     Multiregion,
                     Multisegment,
                     Point,
@@ -939,3 +941,36 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     True
     """
     return _polygon.relate_polygon(right, left)
+
+
+def point_in_multipolygon(point: Point,
+                          multipolygon: Multipolygon) -> Relation:
+    """
+    Finds relation between point and multipolygon.
+
+    Time complexity:
+        ``O(sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon))``
+    Memory complexity:
+        ``O(1)``
+
+    :param point: point to check for.
+    :param multipolygon: multipolygon to check in.
+    :returns: relation between point and multipolygon.
+
+    >>> triangle = [(0, 0), (2, 0), (0, 2)]
+    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
+    >>> point_in_multipolygon((0, 0), [(triangle, [])]) is Relation.COMPONENT
+    True
+    >>> point_in_multipolygon((0, 0), [(square, [])]) is Relation.COMPONENT
+    True
+    >>> point_in_multipolygon((1, 1), [(triangle, [])]) is Relation.COMPONENT
+    True
+    >>> point_in_multipolygon((1, 1), [(square, [])]) is Relation.WITHIN
+    True
+    >>> point_in_multipolygon((2, 2), [(triangle, [])]) is Relation.DISJOINT
+    True
+    >>> point_in_multipolygon((2, 2), [(square, [])]) is Relation.COMPONENT
+    True
+    """
+    return _multipolygon.relate_point(multipolygon, point)
