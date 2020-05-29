@@ -263,10 +263,10 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
 
 def relate_multisegment(region: Region,
                         multisegment: Multisegment) -> Relation:
-    if not multisegment:
-        return Relation.DISJOINT
-    return _relate_multisegment(region, multisegment,
-                                bounding_box.from_segments(multisegment))
+    return (_relate_multisegment(region, multisegment,
+                                 bounding_box.from_segments(multisegment))
+            if multisegment
+            else Relation.DISJOINT)
 
 
 def _relate_multisegment(region: Region,
