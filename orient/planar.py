@@ -386,7 +386,7 @@ def multisegment_in_region(multisegment: Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment) + len(region).
+    where ``segments_count = len(multisegment) + len(region)``.
 
     :param multisegment: multisegment to check for.
     :param region: region to check in.
