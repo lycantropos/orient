@@ -1,5 +1,3 @@
-from itertools import chain
-
 from orient.hints import (Multipolygon,
                           Multisegment,
                           Point,
@@ -46,8 +44,7 @@ def relate_multisegment(multipolygon: Multipolygon,
     multisegment_bounding_box = bounding_box.from_points(flatten(multisegment))
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for border, holes in multipolygon:
-        polygon_bounding_box = bounding_box.from_points(chain(border,
-                                                              flatten(holes)))
+        polygon_bounding_box = bounding_box.from_points(border)
         if not bounding_box.disjoint_with(polygon_bounding_box,
                                           multisegment_bounding_box):
             if disjoint:
