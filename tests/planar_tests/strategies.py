@@ -407,3 +407,23 @@ multipolygons_with_multisegments = (
 multipolygons_with_non_empty_multisegments = (
     coordinates_strategies.flatmap(partial(to_multipolygons_with_multisegments,
                                            min_size=1)))
+empty_multipolygons_with_contours = strategies.tuples(empty_multipolygons,
+                                                      contours)
+
+
+def to_multipolygons_with_contours(coordinates: Strategy[Coordinate],
+                                   *,
+                                   min_size: int = 0,
+                                   max_size: Optional[int] = None
+                                   ) -> Strategy[Tuple[Multipolygon, Contour]]:
+    return strategies.tuples(planar.multipolygons(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size),
+                             planar.contours(coordinates))
+
+
+multipolygons_with_contours = (coordinates_strategies
+                               .flatmap(to_multipolygons_with_contours))
+non_empty_multipolygons_with_contours = coordinates_strategies.flatmap(
+        partial(to_multipolygons_with_contours,
+                min_size=1))
