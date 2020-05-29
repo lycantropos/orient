@@ -109,7 +109,6 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     assert implication(result is Relation.OVERLAP
                        and (relation_with_first_region is Relation.DISJOINT
                             or relation_with_first_region is Relation.TOUCH
-                            or relation_with_first_region is Relation.OVERLAP
                             or relation_with_first_region is Relation.ENCLOSED
                             or relation_with_first_region is Relation.WITHIN)
                        or (result is Relation.DISJOINT
@@ -136,7 +135,8 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                        result is Relation.ENCLOSES
                        or relation_with_first_region is Relation.ENCLOSES
                        or result is Relation.OVERLAP
-                       and relation_with_first_region is Relation.COMPONENT
+                       and (relation_with_first_region is Relation.COMPONENT
+                            or relation_with_first_region is Relation.OVERLAP)
                        or result is Relation.COMPONENT
                        and relation_with_first_region is Relation.OVERLAP)
     assert implication(result is Relation.ENCLOSES
