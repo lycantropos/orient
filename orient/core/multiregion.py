@@ -44,10 +44,10 @@ def relate_segment(multiregion: Multiregion, segment: Segment) -> Relation:
 
 def relate_multisegment(multiregion: Multiregion,
                         multisegment: Multisegment) -> Relation:
-    if not (multisegment and multiregion):
-        return Relation.DISJOINT
-    return _relate_multisegment(multiregion, multisegment,
-                                bounding_box.from_segments(multisegment))
+    return (_relate_multisegment(multiregion, multisegment,
+                                 bounding_box.from_segments(multisegment))
+            if multisegment and multiregion
+            else Relation.DISJOINT)
 
 
 def _relate_multisegment(multiregion: Multiregion,
