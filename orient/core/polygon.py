@@ -121,25 +121,25 @@ def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
 def relate_region(polygon: Polygon, region: Region) -> Relation:
     border, holes = polygon
     region_bounding_box = bounding_box.from_points(region)
-    relation_without_holes = relate_regions(border, region,
-                                            bounding_box.from_points(border),
-                                            region_bounding_box)
-    if relation_without_holes in (Relation.DISJOINT,
-                                  Relation.TOUCH,
-                                  Relation.OVERLAP,
-                                  Relation.COVER,
-                                  Relation.ENCLOSES):
-        return relation_without_holes
-    elif (relation_without_holes is Relation.COMPOSITE
-          or relation_without_holes is Relation.EQUAL):
+    relation_with_border = relate_regions(border, region,
+                                          bounding_box.from_points(border),
+                                          region_bounding_box)
+    if relation_with_border in (Relation.DISJOINT,
+                                Relation.TOUCH,
+                                Relation.OVERLAP,
+                                Relation.COVER,
+                                Relation.ENCLOSES):
+        return relation_with_border
+    elif (relation_with_border is Relation.COMPOSITE
+          or relation_with_border is Relation.EQUAL):
         return (Relation.ENCLOSES
                 if holes
-                else relation_without_holes)
-    elif holes:
+                else relation_with_border)
+    else:
         relation_with_holes = _relate_region_to_multiregion(
                 holes, region, region_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
-            return relation_without_holes
+            return relation_with_border
         elif relation_with_holes is Relation.WITHIN:
             return Relation.DISJOINT
         elif relation_with_holes is Relation.TOUCH:
@@ -153,8 +153,6 @@ def relate_region(polygon: Polygon, region: Region) -> Relation:
             return Relation.TOUCH
         else:
             return Relation.OVERLAP
-    else:
-        return relation_without_holes
 
 
 def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
