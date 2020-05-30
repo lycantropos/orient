@@ -321,6 +321,8 @@ def to_polygons_with_contours(coordinates: Strategy[Coordinate]
 
 polygons_with_contours = (coordinates_strategies
                           .flatmap(to_polygons_with_contours))
+polygons_with_empty_multicontours = strategies.tuples(polygons,
+                                                      empty_multicontours)
 
 
 def to_polygons_with_multicontours(coordinates: Strategy[Coordinate],
@@ -336,8 +338,6 @@ def to_polygons_with_multicontours(coordinates: Strategy[Coordinate],
 
 polygons_with_multicontours = (coordinates_strategies
                                .flatmap(to_polygons_with_multicontours))
-polygons_with_empty_multicontours = strategies.tuples(polygons,
-                                                      empty_multicontours)
 polygons_with_non_empty_multicontours = (
     coordinates_strategies.flatmap(partial(to_polygons_with_multicontours,
                                            min_size=1)))
@@ -430,3 +430,24 @@ multipolygons_with_contours = (coordinates_strategies
 non_empty_multipolygons_with_contours = coordinates_strategies.flatmap(
         partial(to_multipolygons_with_contours,
                 min_size=1))
+multipolygons_with_empty_multicontours = strategies.tuples(multipolygons,
+                                                           empty_multicontours)
+
+
+def to_multipolygons_with_multicontours(coordinates: Strategy[Coordinate],
+                                        *,
+                                        min_size: int = 0,
+                                        max_size: Optional[int] = None
+                                        ) -> Strategy[Tuple[Multipolygon,
+                                                            Multicontour]]:
+    return strategies.tuples(planar.multipolygons(coordinates),
+                             planar.multicontours(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size))
+
+
+multipolygons_with_multicontours = (
+    coordinates_strategies.flatmap(to_multipolygons_with_multicontours))
+multipolygons_with_non_empty_multicontours = (
+    coordinates_strategies.flatmap(partial(to_multipolygons_with_multicontours,
+                                           min_size=1)))
