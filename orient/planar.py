@@ -1133,3 +1133,45 @@ def region_in_multipolygon(region: Region,
     True
     """
     return _multipolygon.relate_region(multipolygon, region)
+
+
+def multiregion_in_multipolygon(multiregion: Multiregion,
+                                multipolygon: Multipolygon) -> Relation:
+    """
+    Finds relation between multiregion and multipolygon.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = sum(map(len, multiregion))\
+ + multipolygon_vertices_count``,
+    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon)``.
+
+    :param multiregion: multiregion to check for.
+    :param multipolygon: multipolygon to check in.
+    :returns: relation between multiregion and multipolygon.
+
+    >>> triangle = [(0, 0), (1, 0), (0, 1)]
+    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> multiregion_in_multipolygon([], []) is Relation.DISJOINT
+    True
+    >>> multiregion_in_multipolygon([triangle], []) is Relation.DISJOINT
+    True
+    >>> multiregion_in_multipolygon([square], []) is Relation.DISJOINT
+    True
+    >>> (multiregion_in_multipolygon([triangle], [(triangle, [])])
+    ...  is Relation.EQUAL)
+    True
+    >>> (multiregion_in_multipolygon([square], [(triangle, [])])
+    ...  is Relation.ENCLOSES)
+    True
+    >>> (multiregion_in_multipolygon([triangle], [(square, [])])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> multiregion_in_multipolygon([square], [(square, [])]) is Relation.EQUAL
+    True
+    """
+    return _multipolygon.relate_multiregion(multipolygon, multiregion)

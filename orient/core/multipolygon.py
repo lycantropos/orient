@@ -1,12 +1,14 @@
 from orient.hints import (Contour,
                           Multipolygon,
+                          Multiregion,
                           Multisegment,
                           Point,
                           Region,
                           Segment)
 from . import bounding_box
 from .contour import to_segments as contour_to_segments
-from .multiregion import (_relate_region as relate_region_to_multiregion,
+from .multiregion import (_relate_multiregion as relate_multiregions,
+                          _relate_region as relate_region_to_multiregion,
                           to_segments as multiregion_to_segments)
 from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon)
@@ -137,3 +139,50 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
             return Relation.TOUCH
         else:
             return Relation.OVERLAP
+
+
+def relate_multiregion(multipolygon: Multipolygon,
+                       multiregion: Multiregion) -> Relation:
+    if not (multipolygon and multiregion):
+        return Relation.DISJOINT
+    multiregion_bounding_box = bounding_box.from_iterables(multiregion)
+    relation_with_borders = relate_multiregions(
+            (border for border, _ in multipolygon),
+            multiregion,
+            bounding_box.from_iterables(border for border, _ in multipolygon),
+            multiregion_bounding_box)
+    if relation_with_borders in (Relation.DISJOINT,
+                                 Relation.TOUCH,
+                                 Relation.OVERLAP,
+                                 Relation.COVER,
+                                 Relation.ENCLOSES):
+        return relation_with_borders
+    elif (relation_with_borders is Relation.COMPOSITE
+          or relation_with_borders is Relation.EQUAL):
+        return (Relation.ENCLOSES
+                if any(holes for _, holes in multipolygon)
+                else relation_with_borders)
+    elif any(holes for _, holes in multipolygon):
+        relation_with_holes = relate_multiregions(
+                flatten(holes for _, holes in multipolygon),
+                multiregion,
+                bounding_box.from_iterables(
+                        flatten(holes for _, holes in multipolygon)),
+                multiregion_bounding_box)
+        if relation_with_holes is Relation.DISJOINT:
+            return relation_with_borders
+        elif relation_with_holes is Relation.WITHIN:
+            return Relation.DISJOINT
+        elif relation_with_holes is Relation.TOUCH:
+            return Relation.ENCLOSED
+        elif (relation_with_holes is Relation.OVERLAP
+              or relation_with_holes is Relation.COMPOSITE):
+            return Relation.OVERLAP
+        elif relation_with_holes in (Relation.ENCLOSED,
+                                     Relation.COMPONENT,
+                                     Relation.EQUAL):
+            return Relation.TOUCH
+        else:
+            return Relation.OVERLAP
+    else:
+        return relation_with_borders
