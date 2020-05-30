@@ -346,6 +346,9 @@ polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
 empty_multipolygons = strategies.builds(list)
 multipolygons = coordinates_strategies.flatmap(planar.multipolygons)
+non_empty_multipolygons = (coordinates_strategies
+                           .flatmap(partial(planar.multipolygons,
+                                            min_size=1)))
 empty_multipolygons_with_points = strategies.tuples(empty_multipolygons,
                                                     points)
 
