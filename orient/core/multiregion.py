@@ -157,11 +157,18 @@ def _relate_region(goal_regions: Iterable[Region],
 
 
 def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
-    if not (goal and test):
-        return Relation.DISJOINT
-    goal_bounding_box, test_bounding_box = (
-        bounding_box.from_points(flatten(goal)),
-        bounding_box.from_points(flatten(test)))
+    return (_relate_multiregion(goal, test,
+                                bounding_box.from_points(flatten(goal)),
+                                bounding_box.from_points(flatten(test)))
+            if goal and test
+            else Relation.DISJOINT)
+
+
+def _relate_multiregion(goal: Iterable[Region],
+                        test: Iterable[Region],
+                        goal_bounding_box: bounding_box.BoundingBox,
+                        test_bounding_box: bounding_box.BoundingBox
+                        ) -> Relation:
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     sweeper = ClosedSweeper()
