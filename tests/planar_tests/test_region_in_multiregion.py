@@ -29,7 +29,7 @@ def test_basic(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
 
 
 @given(strategies.multicontours)
-def test_elements(multiregion: Multiregion) -> None:
+def test_self(multiregion: Multiregion) -> None:
     assert equivalence(bool(multiregion)
                        and all(region_in_multiregion(element, multiregion)
                                is Relation.EQUAL
