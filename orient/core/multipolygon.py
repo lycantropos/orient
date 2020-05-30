@@ -6,11 +6,11 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding_box
 from .contour import to_segments as contour_to_segments
-from .multiregion import to_segments as multiregion_to_segments
+from .multiregion import (_relate_region as relate_region_to_multiregion,
+                          to_segments as multiregion_to_segments)
 from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon)
-from .processing import (process_compound_queue,
-                         process_linear_compound_queue)
+from .processing import process_linear_compound_queue
 from .region import to_segments as region_to_segments
 from .relation import Relation
 from .sweep import ClosedSweeper
@@ -104,38 +104,36 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
     region_bounding_box = bounding_box.from_points(region)
-    all_disjoint, any_disjoint, multipolygon_max_x, sweeper = (True, False,
-                                                               None, None)
-    for border, holes in multipolygon:
-        polygon_bounding_box = bounding_box.from_points(border)
-        if bounding_box.disjoint_with(region_bounding_box,
-                                      polygon_bounding_box):
-            any_disjoint = True
+    relation_with_borders = relate_region_to_multiregion(
+            (border for border, _ in multipolygon),
+            region, region_bounding_box)
+    if relation_with_borders in (Relation.DISJOINT,
+                                 Relation.TOUCH,
+                                 Relation.OVERLAP,
+                                 Relation.COVER,
+                                 Relation.ENCLOSES):
+        return relation_with_borders
+    elif (relation_with_borders is Relation.COMPOSITE
+          or relation_with_borders is Relation.EQUAL):
+        return (Relation.ENCLOSES
+                if any(holes for _, holes in multipolygon)
+                else relation_with_borders)
+    else:
+        relation_with_holes = relate_region_to_multiregion(
+                flatten(holes for _, holes in multipolygon),
+                region, region_bounding_box)
+        if relation_with_holes is Relation.DISJOINT:
+            return relation_with_borders
+        elif relation_with_holes is Relation.WITHIN:
+            return Relation.DISJOINT
+        elif relation_with_holes is Relation.TOUCH:
+            return Relation.ENCLOSED
+        elif (relation_with_holes is Relation.OVERLAP
+              or relation_with_holes is Relation.COMPOSITE):
+            return Relation.OVERLAP
+        elif relation_with_holes in (Relation.ENCLOSED,
+                                     Relation.COMPONENT,
+                                     Relation.EQUAL):
+            return Relation.TOUCH
         else:
-            if all_disjoint:
-                all_disjoint = False
-                _, multipolygon_max_x, _, _ = polygon_bounding_box
-                sweeper = ClosedSweeper()
-                sweeper.register_segments(region_to_segments(region),
-                                          from_test=True)
-            else:
-                _, polygon_max_x, _, _ = polygon_bounding_box
-                multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(region_to_segments(border),
-                                      from_test=False)
-            sweeper.register_segments(multiregion_to_segments(holes),
-                                      from_test=False)
-    if all_disjoint:
-        return Relation.DISJOINT
-    _, region_max_x, _, _ = region_bounding_box
-    relation = process_compound_queue(sweeper,
-                                      min(multipolygon_max_x, region_max_x))
-    return ((Relation.COMPONENT
-             if relation is Relation.EQUAL
-             else (Relation.OVERLAP
-                   if relation in (Relation.COVER,
-                                   Relation.ENCLOSES,
-                                   Relation.COMPOSITE)
-                   else relation))
-            if any_disjoint
-            else relation)
+            return Relation.OVERLAP
