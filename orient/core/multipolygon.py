@@ -45,10 +45,10 @@ def relate_multisegment(multipolygon: Multipolygon,
                         multisegment: Multisegment) -> Relation:
     if not (multisegment and multipolygon):
         return Relation.DISJOINT
-    multisegment_bounding_box = bounding_box.from_points(flatten(multisegment))
+    multisegment_bounding_box = bounding_box.from_iterables(multisegment)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for border, holes in multipolygon:
-        polygon_bounding_box = bounding_box.from_points(border)
+        polygon_bounding_box = bounding_box.from_iterable(border)
         if not bounding_box.disjoint_with(polygon_bounding_box,
                                           multisegment_bounding_box):
             if disjoint:
@@ -74,10 +74,10 @@ def relate_multisegment(multipolygon: Multipolygon,
 def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
-    contour_bounding_box = bounding_box.from_points(contour)
+    contour_bounding_box = bounding_box.from_iterable(contour)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for border, holes in multipolygon:
-        polygon_bounding_box = bounding_box.from_points(border)
+        polygon_bounding_box = bounding_box.from_iterable(border)
         if not bounding_box.disjoint_with(polygon_bounding_box,
                                           contour_bounding_box):
             if disjoint:
@@ -103,7 +103,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
 def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
-    region_bounding_box = bounding_box.from_points(region)
+    region_bounding_box = bounding_box.from_iterable(region)
     relation_with_borders = relate_region_to_multiregion(
             (border for border, _ in multipolygon),
             region, region_bounding_box)

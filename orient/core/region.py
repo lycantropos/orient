@@ -264,7 +264,7 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
 def relate_multisegment(region: Region,
                         multisegment: Multisegment) -> Relation:
     return (_relate_multisegment(region, multisegment,
-                                 bounding_box.from_segments(multisegment))
+                                 bounding_box.from_iterables(multisegment))
             if multisegment
             else Relation.DISJOINT)
 
@@ -273,7 +273,7 @@ def _relate_multisegment(region: Region,
                          multisegment: Multisegment,
                          multisegment_bounding_box: bounding_box.BoundingBox
                          ) -> Relation:
-    region_bounding_box = bounding_box.from_points(region)
+    region_bounding_box = bounding_box.from_iterable(region)
     if bounding_box.disjoint_with(multisegment_bounding_box,
                                   region_bounding_box):
         return Relation.DISJOINT
@@ -289,14 +289,15 @@ def _relate_multisegment(region: Region,
 
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
-    return _relate_contour(region, contour, bounding_box.from_points(contour))
+    return _relate_contour(region, contour,
+                           bounding_box.from_iterable(contour))
 
 
 def _relate_contour(region: Region,
                     contour: Contour,
                     contour_bounding_box: bounding_box.BoundingBox
                     ) -> Relation:
-    region_bounding_box = bounding_box.from_points(region)
+    region_bounding_box = bounding_box.from_iterable(region)
     if bounding_box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour):
@@ -313,8 +314,8 @@ def _relate_contour(region: Region,
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
-    return _relate_region(goal, test, bounding_box.from_points(goal),
-                          bounding_box.from_points(test))
+    return _relate_region(goal, test, bounding_box.from_iterable(goal),
+                          bounding_box.from_iterable(test))
 
 
 def _relate_region(goal: Region,

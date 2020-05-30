@@ -16,7 +16,6 @@ from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import (ClosedSweeper,
                     OpenSweeper)
-from .utils import flatten
 
 
 def relate_point(contour: Contour, point: Point) -> Relation:
@@ -87,8 +86,8 @@ def relate_multisegment(contour: Contour,
     if not multisegment:
         return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
-        bounding_box.from_points(contour),
-        bounding_box.from_points(flatten(multisegment)))
+        bounding_box.from_iterable(contour),
+        bounding_box.from_iterables(multisegment))
     if bounding_box.disjoint_with(contour_bounding_box,
                                   multisegment_bounding_box):
         return Relation.DISJOINT
@@ -104,8 +103,8 @@ def relate_multisegment(contour: Contour,
 
 
 def relate_contour(goal: Contour, test: Contour) -> Relation:
-    goal_bounding_box, test_bounding_box = (bounding_box.from_points(goal),
-                                            bounding_box.from_points(test))
+    goal_bounding_box, test_bounding_box = (bounding_box.from_iterable(goal),
+                                            bounding_box.from_iterable(test))
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test):

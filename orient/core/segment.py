@@ -12,8 +12,8 @@ def relate_point(segment: Segment, point: Point) -> Relation:
     return (
         Relation.COMPONENT
         if (point == start or point == end
-            or (bounding_box.contains_point(bounding_box.from_points(segment),
-                                            point)
+            or (bounding_box
+                .contains_point(bounding_box.from_iterable(segment), point)
                 and orientation(end, start, point) is Orientation.COLLINEAR))
         else Relation.DISJOINT)
 

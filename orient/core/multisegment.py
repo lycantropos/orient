@@ -138,9 +138,8 @@ def sort_endpoints(segment: Segment) -> Segment:
 def relate_multisegment(goal: Multisegment, test: Multisegment) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
-    goal_bounding_box, test_bounding_box = (
-        bounding_box.from_points(flatten(goal)),
-        bounding_box.from_points(flatten(test)))
+    goal_bounding_box, test_bounding_box = (bounding_box.from_iterables(goal),
+                                            bounding_box.from_iterables(test))
     if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     sweeper = OpenSweeper()

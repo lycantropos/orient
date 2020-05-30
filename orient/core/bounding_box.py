@@ -2,8 +2,7 @@ from typing import (Iterable,
                     Tuple)
 
 from orient.hints import (Coordinate,
-                          Point,
-                          Segment)
+                          Point)
 from .utils import flatten
 
 BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
@@ -22,7 +21,7 @@ def disjoint_with(goal: BoundingBox, test: BoundingBox) -> bool:
             or goal_y_max < test_y_min or test_y_max < goal_y_min)
 
 
-def from_points(points: Iterable[Point]) -> BoundingBox:
+def from_iterable(points: Iterable[Point]) -> BoundingBox:
     iterator = iter(points)
     x_min, y_min = x_max, y_max = next(iterator)
     for x, y in iterator:
@@ -31,5 +30,5 @@ def from_points(points: Iterable[Point]) -> BoundingBox:
     return x_min, x_max, y_min, y_max
 
 
-def from_segments(segments: Iterable[Segment]) -> BoundingBox:
-    return from_points(flatten(segments))
+def from_iterables(iterables: Iterable[Iterable[Point]]) -> BoundingBox:
+    return from_iterable(flatten(iterables))

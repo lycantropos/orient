@@ -60,7 +60,7 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
 def relate_multisegment(polygon: Polygon,
                         multisegment: Multisegment) -> Relation:
     return (_relate_multisegment(polygon, multisegment,
-                                 bounding_box.from_segments(multisegment))
+                                 bounding_box.from_iterables(multisegment))
             if multisegment
             else Relation.DISJOINT)
 
@@ -95,7 +95,7 @@ def _relate_multisegment(polygon: Polygon,
 
 def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
     border, holes = polygon
-    contour_bounding_box = bounding_box.from_points(contour)
+    contour_bounding_box = bounding_box.from_iterable(contour)
     relation_without_holes = relate_contour_to_region(border, contour,
                                                       contour_bounding_box)
     if holes and (relation_without_holes is Relation.ENCLOSED
@@ -120,9 +120,9 @@ def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
 
 def relate_region(polygon: Polygon, region: Region) -> Relation:
     border, holes = polygon
-    region_bounding_box = bounding_box.from_points(region)
+    region_bounding_box = bounding_box.from_iterable(region)
     relation_with_border = relate_regions(border, region,
-                                          bounding_box.from_points(border),
+                                          bounding_box.from_iterable(border),
                                           region_bounding_box)
     if relation_with_border in (Relation.DISJOINT,
                                 Relation.TOUCH,
@@ -192,8 +192,8 @@ def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
     goal_border, goal_holes = goal
     test_border, test_holes = test
-    goal_border_bounding_box = bounding_box.from_points(goal_border)
-    test_border_bounding_box = bounding_box.from_points(test_border)
+    goal_border_bounding_box = bounding_box.from_iterable(goal_border)
+    test_border_bounding_box = bounding_box.from_iterable(test_border)
     borders_relation = relate_regions(goal_border, test_border,
                                       goal_border_bounding_box,
                                       test_border_bounding_box)
