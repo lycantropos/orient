@@ -118,32 +118,32 @@ def relate_region(multiregion: Multiregion, region: Region) -> Relation:
             else Relation.DISJOINT)
 
 
-def _relate_region(multiregion: Multiregion,
+def _relate_region(goal_regions: Iterable[Region],
                    region: Region,
                    region_bounding_box: bounding_box.BoundingBox) -> Relation:
-    all_disjoint, any_disjoint, multiregion_max_x, sweeper = (True, False,
-                                                              None, None)
-    for sub_region in multiregion:
-        sub_region_bounding_box = bounding_box.from_points(sub_region)
+    all_disjoint, any_disjoint, goal_regions_max_x, sweeper = (True, False,
+                                                               None, None)
+    for goal_region in goal_regions:
+        goal_region_bounding_box = bounding_box.from_points(goal_region)
         if bounding_box.disjoint_with(region_bounding_box,
-                                      sub_region_bounding_box):
+                                      goal_region_bounding_box):
             any_disjoint = True
         else:
             if all_disjoint:
                 all_disjoint = False
-                _, multiregion_max_x, _, _ = sub_region_bounding_box
+                _, goal_regions_max_x, _, _ = goal_region_bounding_box
                 sweeper = ClosedSweeper()
                 sweeper.register_segments(region_to_segments(region),
                                           from_test=True)
             else:
-                _, sub_region_max_x, _, _ = sub_region_bounding_box
-                multiregion_max_x = max(multiregion_max_x, sub_region_max_x)
-            sweeper.register_segments(region_to_segments(sub_region),
+                _, goal_region_max_x, _, _ = goal_region_bounding_box
+                goal_regions_max_x = max(goal_regions_max_x, goal_region_max_x)
+            sweeper.register_segments(region_to_segments(goal_region),
                                       from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
     _, region_max_x, _, _ = region_bounding_box
-    relation = process_compound_queue(sweeper, min(multiregion_max_x,
+    relation = process_compound_queue(sweeper, min(goal_regions_max_x,
                                                    region_max_x))
     return ((Relation.COMPONENT
              if relation is Relation.EQUAL
@@ -174,6 +174,6 @@ def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
     return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
-def to_segments(multiregion: Multiregion) -> Iterable[Segment]:
-    for region in multiregion:
+def to_segments(regions: Iterable[Region]) -> Iterable[Segment]:
+    for region in regions:
         yield from region_to_segments(region)
