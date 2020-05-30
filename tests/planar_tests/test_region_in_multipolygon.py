@@ -30,6 +30,27 @@ def test_basic(multipolygon_with_region: Tuple[Multipolygon, Region]) -> None:
     assert result in COMPOUND_RELATIONS
 
 
+@given(strategies.non_empty_multipolygons)
+def test_self(multipolygon: Multipolygon) -> None:
+    has_holes = any(holes for _, holes in multipolygon)
+    assert equivalence(any(region_in_multipolygon(border, multipolygon)
+                           is Relation.EQUAL
+                           for border, _ in multipolygon),
+                       not has_holes and len(multipolygon) == 1)
+    assert equivalence(all(region_in_multipolygon(border, multipolygon)
+                           is Relation.COMPONENT
+                           for border, holes in multipolygon),
+                       not has_holes and len(multipolygon) > 1)
+    assert equivalence(any(region_in_multipolygon(border, multipolygon)
+                           is Relation.ENCLOSES
+                           for border, _ in multipolygon),
+                       has_holes and len(multipolygon) == 1)
+    assert equivalence(any(region_in_multipolygon(border, multipolygon)
+                           is Relation.OVERLAP
+                           for border, _ in multipolygon),
+                       has_holes and len(multipolygon) > 1)
+
+
 @given(strategies.empty_multipolygons_with_contours)
 def test_base(multipolygon_with_region: Tuple[Multipolygon, Region]) -> None:
     multipolygon, region = multipolygon_with_region
