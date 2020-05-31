@@ -26,7 +26,7 @@ def test_basic(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
 
 @given(strategies.polygons)
-def test_vertices(polygon: Polygon) -> None:
+def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(point_in_polygon(vertex, polygon) is Relation.COMPONENT
                for vertex in chain(border, *holes))
