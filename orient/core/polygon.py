@@ -192,8 +192,19 @@ def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
     goal_border, goal_holes = goal
     test_border, test_holes = test
-    goal_border_bounding_box = bounding_box.from_iterable(goal_border)
-    test_border_bounding_box = bounding_box.from_iterable(test_border)
+    return _relate_polygon(goal_border, goal_holes,
+                           bounding_box.from_iterable(goal_border),
+                           test_border, test_holes,
+                           bounding_box.from_iterable(test_border))
+
+
+def _relate_polygon(goal_border: Region,
+                    goal_holes: Multiregion,
+                    goal_border_bounding_box: bounding_box.BoundingBox,
+                    test_border: Region,
+                    test_holes: Multiregion,
+                    test_border_bounding_box: bounding_box.BoundingBox
+                    ) -> Relation:
     borders_relation = relate_regions(goal_border, test_border,
                                       goal_border_bounding_box,
                                       test_border_bounding_box)
