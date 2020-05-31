@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import Tuple
 
 from hypothesis import given
@@ -34,18 +33,15 @@ def test_basic(multipolygon_with_contour: Tuple[Multipolygon, Contour]
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.contours)
-def test_self(contour: Contour) -> None:
-    assert (contour_in_multipolygon(contour, [(contour, [])])
-            is Relation.COMPONENT)
-
-
 @given(strategies.multipolygons)
-def test_subcontours(multipolygon: Multipolygon) -> None:
-    assert all(contour_in_multipolygon(contour, multipolygon)
+def test_self(multipolygon: Multipolygon) -> None:
+    assert all(contour_in_multipolygon(border, multipolygon)
                is Relation.COMPONENT
-               for border, holes in multipolygon
-               for contour in chain([border], holes))
+               for border, _ in multipolygon)
+    assert all(contour_in_multipolygon(hole, multipolygon)
+               is Relation.COMPONENT
+               for _, holes in multipolygon
+               for hole in holes)
 
 
 @given(strategies.empty_multipolygons_with_contours)
