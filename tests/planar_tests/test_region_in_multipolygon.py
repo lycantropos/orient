@@ -39,7 +39,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                        not has_holes and len(multipolygon) == 1)
     assert equivalence(all(region_in_multipolygon(border, multipolygon)
                            is Relation.COMPONENT
-                           for border, holes in multipolygon),
+                           for border, _ in multipolygon),
                        not has_holes and len(multipolygon) > 1)
     assert equivalence(any(region_in_multipolygon(border, multipolygon)
                            is Relation.ENCLOSES
