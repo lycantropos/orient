@@ -27,7 +27,7 @@ def test_basic(segment_with_point: Tuple[Segment, Point]) -> None:
 
 
 @given(strategies.segments)
-def test_endpoints(segment: Segment) -> None:
+def test_self(segment: Segment) -> None:
     start, end = segment
 
     assert point_in_segment(start, segment) is Relation.COMPONENT
