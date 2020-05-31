@@ -163,7 +163,8 @@ def test_connection_with_contour_in_multipolygon(multipolygon_with_polygon
 
     result = polygon_in_multipolygon(polygon, multipolygon)
 
-    contour_relation = contour_in_multipolygon(polygon, multipolygon)
+    border, _ = polygon
+    contour_relation = contour_in_multipolygon(border, multipolygon)
     assert implication(result is Relation.DISJOINT
                        or result is Relation.COVER,
                        contour_relation is Relation.DISJOINT)
