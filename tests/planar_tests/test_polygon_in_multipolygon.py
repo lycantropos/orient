@@ -5,12 +5,10 @@ from hypothesis import given
 from orient.hints import (Multipolygon,
                           Polygon)
 from orient.planar import (Relation,
-                           contour_in_multipolygon,
                            polygon_in_multipolygon,
                            polygon_in_polygon)
 from tests.utils import (COMPOUND_RELATIONS,
                          equivalence,
-                         implication,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
@@ -153,44 +151,3 @@ def test_rotations(multipolygon_with_polygon: Tuple[Multipolygon, Polygon]
 
     assert all(result is polygon_in_multipolygon(polygon, rotated)
                for rotated in rotations(multipolygon))
-
-
-@given(strategies.multipolygons_with_polygons)
-def test_connection_with_contour_in_multipolygon(multipolygon_with_polygon
-                                                 : Tuple[Multipolygon, Polygon]
-                                                 ) -> None:
-    multipolygon, polygon = multipolygon_with_polygon
-
-    result = polygon_in_multipolygon(polygon, multipolygon)
-
-    border, _ = polygon
-    contour_relation = contour_in_multipolygon(border, multipolygon)
-    assert implication(result is Relation.DISJOINT
-                       or result is Relation.COVER,
-                       contour_relation is Relation.DISJOINT)
-    assert implication(contour_relation is Relation.DISJOINT,
-                       result is Relation.DISJOINT
-                       or result is Relation.OVERLAP
-                       or result is Relation.COVER)
-    assert implication(result is Relation.TOUCH
-                       or result is Relation.ENCLOSES
-                       or result is Relation.COMPOSITE,
-                       contour_relation is Relation.TOUCH)
-    assert implication(contour_relation is Relation.TOUCH,
-                       result is Relation.TOUCH
-                       or result is Relation.ENCLOSES
-                       or result is Relation.OVERLAP
-                       or result is Relation.COMPOSITE)
-    assert implication(result is Relation.OVERLAP,
-                       contour_relation is Relation.DISJOINT
-                       or contour_relation is Relation.CROSS
-                       or contour_relation is Relation.TOUCH)
-    assert implication(contour_relation is Relation.CROSS,
-                       result is Relation.OVERLAP)
-    assert equivalence(result is Relation.COMPONENT
-                       or result is Relation.EQUAL,
-                       contour_relation is Relation.COMPONENT)
-    assert equivalence(result is Relation.ENCLOSED,
-                       contour_relation is Relation.ENCLOSED)
-    assert equivalence(result is Relation.WITHIN,
-                       contour_relation is Relation.WITHIN)
