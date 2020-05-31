@@ -188,15 +188,22 @@ def relate_multiregion(multipolygon: Multipolygon,
 
 
 def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
-    if not multipolygon:
-        return Relation.DISJOINT
     border, holes = polygon
-    polygon_border_bounding_box = bounding_box.from_iterable(border)
+    return (_relate_polygon(multipolygon, border, holes,
+                            bounding_box.from_iterable(border))
+            if multipolygon
+            else Relation.DISJOINT)
+
+
+def _relate_polygon(multipolygon: Multipolygon,
+                    border: Region,
+                    holes: Multiregion,
+                    border_bounding_box: bounding_box.BoundingBox) -> Relation:
     last_relation = None
     for sub_border, sub_holes in multipolygon:
         relation = relate_polygon_to_polygon(
                 sub_border, sub_holes, bounding_box.from_iterable(sub_border),
-                border, holes, polygon_border_bounding_box)
+                border, holes, border_bounding_box)
         if relation is Relation.DISJOINT:
             if last_relation is None:
                 last_relation = relation
@@ -206,6 +213,8 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
         elif relation is Relation.TOUCH:
             if last_relation is None or last_relation is Relation.DISJOINT:
                 last_relation = relation
+            elif last_relation is not Relation.TOUCH:
+                return Relation.OVERLAP
         elif relation in (Relation.OVERLAP,
                           Relation.COMPONENT,
                           Relation.ENCLOSED,
@@ -224,7 +233,7 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
               and last_relation is not Relation.ENCLOSES):
             last_relation = Relation.ENCLOSES
     return (relate_region_to_multiregion(_to_borders(multipolygon), border,
-                                         polygon_border_bounding_box)
+                                         border_bounding_box)
             if last_relation is Relation.COMPOSITE
             else last_relation)
 
