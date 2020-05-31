@@ -238,6 +238,45 @@ def _relate_polygon(multipolygon: Multipolygon,
             else last_relation)
 
 
+def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
+    if not (goal and test):
+        return Relation.DISJOINT
+    last_relation = None
+    for test_border, test_holes in test:
+        relation = _relate_polygon(goal, test_border, test_holes,
+                                   bounding_box.from_iterable(test_border))
+        if relation is Relation.DISJOINT:
+            if last_relation is None:
+                last_relation = relation
+        elif relation is Relation.TOUCH:
+            if last_relation is None or last_relation is Relation.DISJOINT:
+                last_relation = relation
+            elif last_relation is not Relation.TOUCH:
+                return Relation.OVERLAP
+        elif relation in (Relation.OVERLAP,
+                          Relation.COVER,
+                          Relation.ENCLOSES,
+                          Relation.COMPOSITE):
+            return relation
+        elif relation is Relation.EQUAL:
+            return (relation
+                    if len(test) == 1
+                    else Relation.COMPOSITE)
+        elif last_relation is None:
+            last_relation = relation
+        elif (last_relation is Relation.DISJOINT
+              or last_relation is Relation.TOUCH):
+            return Relation.OVERLAP
+        elif (relation is not last_relation
+              and last_relation is not Relation.ENCLOSED):
+            last_relation = Relation.ENCLOSED
+    return (relate_multiregions(_to_borders(goal), _to_borders(test),
+                                bounding_box.from_iterables(_to_borders(goal)),
+                                bounding_box.from_iterables(_to_borders(test)))
+            if last_relation is Relation.COMPONENT
+            else last_relation)
+
+
 def has_holes(multipolygon: Multipolygon) -> bool:
     return any(holes for _, holes in multipolygon)
 

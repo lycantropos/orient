@@ -1216,3 +1216,49 @@ def polygon_in_multipolygon(polygon: Polygon,
     True
     """
     return _multipolygon.relate_polygon(multipolygon, polygon)
+
+
+def multipolygon_in_multipolygon(left: Multipolygon,
+                                 right: Multipolygon) -> Relation:
+    """
+    Finds relation between multipolygons.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)``
+    Memory complexity:
+        ``O(vertices_count)``
+
+    where ``vertices_count = left_multipolygon_vertices_count\
+ + right_multipolygon_vertices_count ``,
+    ``left_multipolygon_vertices_count = sum(len(border)\
+ + sum(map(len, holes)) for border, holes in multipolygon)``.
+    ``right_multipolygon_vertices_count = sum(len(border)\
+ + sum(map(len, holes)) for border, holes in multipolygon)``.
+
+    :param left: multipolygon to check for.
+    :param right: multipolygon to check in.
+    :returns: relation between multipolygons.
+
+    >>> outer_square = [(0, 0), (3, 0), (3, 3), (0, 3)]
+    >>> inner_square = [(1, 1), (2, 1), (2, 2), (1, 2)]
+    >>> multipolygon_in_multipolygon([], []) is Relation.DISJOINT
+    True
+    >>> (multipolygon_in_multipolygon([(inner_square, [])], [])
+    ...  is Relation.DISJOINT)
+    True
+    >>> multipolygon_in_multipolygon([(inner_square, [])],
+    ...                              [(inner_square, [])]) is Relation.EQUAL
+    True
+    >>> multipolygon_in_multipolygon([(inner_square, [])],
+    ...                              [(outer_square, [])]) is Relation.WITHIN
+    True
+    >>> (multipolygon_in_multipolygon([(inner_square, [])],
+    ...                               [(outer_square, [inner_square])])
+    ...  is Relation.TOUCH)
+    True
+    >>> (multipolygon_in_multipolygon([(outer_square, [inner_square])],
+    ...                               [(outer_square, [])])
+    ...  is Relation.ENCLOSED)
+    True
+    """
+    return _multipolygon.relate_multipolygon(right, left)
