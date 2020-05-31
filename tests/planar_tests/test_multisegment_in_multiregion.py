@@ -30,7 +30,7 @@ def test_basic(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
 
 
 @given(strategies.multicontours)
-def test_edges(multiregion: Multiregion) -> None:
+def test_self(multiregion: Multiregion) -> None:
     assert multisegment_in_multiregion(list(to_segments(multiregion)),
                                        multiregion) is (Relation.COMPONENT
                                                         if multiregion
