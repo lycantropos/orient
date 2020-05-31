@@ -1,3 +1,5 @@
+from typing import Iterator
+
 from orient.hints import (Contour,
                           Multipolygon,
                           Multiregion,
@@ -109,8 +111,7 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
         return Relation.DISJOINT
     region_bounding_box = bounding_box.from_iterable(region)
     relation_with_borders = relate_region_to_multiregion(
-            (border for border, _ in multipolygon),
-            region, region_bounding_box)
+            _to_borders(multipolygon), region, region_bounding_box)
     if relation_with_borders in (Relation.DISJOINT,
                                  Relation.TOUCH,
                                  Relation.OVERLAP,
@@ -120,12 +121,11 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
     elif (relation_with_borders is Relation.COMPOSITE
           or relation_with_borders is Relation.EQUAL):
         return (Relation.ENCLOSES
-                if any(holes for _, holes in multipolygon)
+                if has_holes(multipolygon)
                 else relation_with_borders)
     else:
         relation_with_holes = relate_region_to_multiregion(
-                flatten(holes for _, holes in multipolygon),
-                region, region_bounding_box)
+                _to_holes(multipolygon), region, region_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_with_borders
         elif relation_with_holes is Relation.WITHIN:
@@ -149,9 +149,8 @@ def relate_multiregion(multipolygon: Multipolygon,
         return Relation.DISJOINT
     multiregion_bounding_box = bounding_box.from_iterables(multiregion)
     relation_with_borders = relate_multiregions(
-            (border for border, _ in multipolygon),
-            multiregion,
-            bounding_box.from_iterables(border for border, _ in multipolygon),
+            _to_borders(multipolygon), multiregion,
+            bounding_box.from_iterables(_to_borders(multipolygon)),
             multiregion_bounding_box)
     if relation_with_borders in (Relation.DISJOINT,
                                  Relation.TOUCH,
@@ -162,14 +161,12 @@ def relate_multiregion(multipolygon: Multipolygon,
     elif (relation_with_borders is Relation.COMPOSITE
           or relation_with_borders is Relation.EQUAL):
         return (Relation.ENCLOSES
-                if any(holes for _, holes in multipolygon)
+                if has_holes(multipolygon)
                 else relation_with_borders)
-    elif any(holes for _, holes in multipolygon):
+    elif has_holes(multipolygon):
         relation_with_holes = relate_multiregions(
-                flatten(holes for _, holes in multipolygon),
-                multiregion,
-                bounding_box.from_iterables(
-                        flatten(holes for _, holes in multipolygon)),
+                _to_holes(multipolygon), multiregion,
+                bounding_box.from_iterables(_to_holes(multipolygon)),
                 multiregion_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_with_borders
@@ -226,8 +223,19 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
         elif (relation is not last_relation
               and last_relation is not Relation.ENCLOSES):
             last_relation = Relation.ENCLOSES
-    return (relate_region_to_multiregion(
-            (border for border, _ in multipolygon), border,
-            polygon_border_bounding_box)
+    return (relate_region_to_multiregion(_to_borders(multipolygon), border,
+                                         polygon_border_bounding_box)
             if last_relation is Relation.COMPOSITE
             else last_relation)
+
+
+def has_holes(multipolygon: Multipolygon) -> bool:
+    return any(holes for _, holes in multipolygon)
+
+
+def _to_borders(multipolygon: Multipolygon) -> Iterator[Region]:
+    return (border for border, _ in multipolygon)
+
+
+def _to_holes(multipolygon: Multipolygon) -> Iterator[Region]:
+    return flatten(holes for _, holes in multipolygon)
