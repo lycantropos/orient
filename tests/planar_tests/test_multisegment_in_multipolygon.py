@@ -35,7 +35,7 @@ def test_basic(multipolygon_with_multisegment
 
 
 @given(strategies.multipolygons)
-def test_edges(multipolygon: Multipolygon) -> None:
+def test_self(multipolygon: Multipolygon) -> None:
     assert multisegment_in_multipolygon(
             list(flatten(chain(region_to_segments(border),
                                multiregion_to_segments(holes))
