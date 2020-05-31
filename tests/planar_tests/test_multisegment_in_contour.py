@@ -29,7 +29,7 @@ def test_basic(contour_with_multisegment: Tuple[Contour, Multisegment]
 
 
 @given(strategies.contours)
-def test_edges(contour: Contour) -> None:
+def test_self(contour: Contour) -> None:
     assert multisegment_in_contour(list(to_segments(contour)),
                                    contour) is Relation.EQUAL
 
