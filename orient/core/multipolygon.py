@@ -3,6 +3,7 @@ from orient.hints import (Contour,
                           Multiregion,
                           Multisegment,
                           Point,
+                          Polygon,
                           Region,
                           Segment)
 from . import bounding_box
@@ -10,7 +11,8 @@ from .contour import to_segments as contour_to_segments
 from .multiregion import (_relate_multiregion as relate_multiregions,
                           _relate_region as relate_region_to_multiregion,
                           to_segments as multiregion_to_segments)
-from .polygon import (relate_point as relate_point_to_polygon,
+from .polygon import (_relate_polygon as relate_polygon_to_polygon,
+                      relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon)
 from .processing import process_linear_compound_queue
 from .region import to_segments as region_to_segments
@@ -186,3 +188,46 @@ def relate_multiregion(multipolygon: Multipolygon,
             return Relation.OVERLAP
     else:
         return relation_with_borders
+
+
+def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
+    if not multipolygon:
+        return Relation.DISJOINT
+    border, holes = polygon
+    polygon_border_bounding_box = bounding_box.from_iterable(border)
+    last_relation = None
+    for sub_border, sub_holes in multipolygon:
+        relation = relate_polygon_to_polygon(
+                sub_border, sub_holes, bounding_box.from_iterable(sub_border),
+                border, holes, polygon_border_bounding_box)
+        if relation is Relation.DISJOINT:
+            if last_relation is None:
+                last_relation = relation
+            elif (last_relation is not Relation.DISJOINT
+                  and last_relation is not Relation.TOUCH):
+                return Relation.OVERLAP
+        elif relation is Relation.TOUCH:
+            if last_relation is None or last_relation is Relation.DISJOINT:
+                last_relation = relation
+        elif relation in (Relation.OVERLAP,
+                          Relation.COMPONENT,
+                          Relation.ENCLOSED,
+                          Relation.WITHIN):
+            return relation
+        elif relation is Relation.EQUAL:
+            return (relation
+                    if len(multipolygon) == 1
+                    else Relation.COMPONENT)
+        elif last_relation is None:
+            last_relation = relation
+        elif (last_relation is Relation.DISJOINT
+              or last_relation is Relation.TOUCH):
+            return Relation.OVERLAP
+        elif (relation is not last_relation
+              and last_relation is not Relation.ENCLOSES):
+            last_relation = Relation.ENCLOSES
+    return (relate_region_to_multiregion(
+            (border for border, _ in multipolygon), border,
+            polygon_border_bounding_box)
+            if last_relation is Relation.COMPOSITE
+            else last_relation)
