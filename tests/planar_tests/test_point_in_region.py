@@ -23,7 +23,7 @@ def test_basic(region_with_point: Tuple[Region, Point]) -> None:
 
 
 @given(strategies.contours)
-def test_vertices(region: Region) -> None:
+def test_self(region: Region) -> None:
     assert all(point_in_region(vertex, region) is Relation.COMPONENT
                for vertex in region)
 
