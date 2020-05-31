@@ -252,6 +252,8 @@ empty_multicontours_with_contours = strategies.tuples(empty_multicontours,
 non_empty_multicontours_with_contours = coordinates_strategies.flatmap(
         partial(to_multicontours_with_contours,
                 min_size=1))
+empty_multicontours_with_multicontours = strategies.tuples(empty_multicontours,
+                                                           multicontours)
 
 
 def to_multicontours_pairs(coordinates: Strategy[Coordinate],
@@ -266,8 +268,6 @@ def to_multicontours_pairs(coordinates: Strategy[Coordinate],
 
 
 multicontours_pairs = coordinates_strategies.flatmap(to_multicontours_pairs)
-empty_multicontours_with_multicontours = strategies.tuples(empty_multicontours,
-                                                           multicontours)
 non_empty_multicontours_with_multicontours = (
     coordinates_strategies.flatmap(partial(to_multicontours_pairs,
                                            min_size=1)))
@@ -471,3 +471,22 @@ multipolygons_with_polygons = (coordinates_strategies
 non_empty_multipolygons_with_polygons = coordinates_strategies.flatmap(
         partial(to_multipolygons_with_polygons,
                 min_size=1))
+empty_multipolygons_with_multipolygons = strategies.tuples(empty_multipolygons,
+                                                           multipolygons)
+
+
+def to_multipolygons_pairs(coordinates: Strategy[Coordinate],
+                           *,
+                           min_size: int = 0,
+                           max_size: Optional[int] = None
+                           ) -> Strategy[Tuple[Multipolygon, Multipolygon]]:
+    return strategies.tuples(planar.multipolygons(coordinates,
+                                                  min_size=min_size,
+                                                  max_size=max_size),
+                             planar.multipolygons(coordinates))
+
+
+multipolygons_pairs = coordinates_strategies.flatmap(to_multipolygons_pairs)
+non_empty_multipolygons_with_multipolygons = (
+    coordinates_strategies.flatmap(partial(to_multipolygons_pairs,
+                                           min_size=1)))
