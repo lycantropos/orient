@@ -55,18 +55,6 @@ def test_convex_hull(region: Region) -> None:
 
 
 @given(strategies.contours_pairs)
-def test_vertices(regions_pair: Tuple[Region, Region]) -> None:
-    left_region, right_region = regions_pair
-
-    assert implication(region_in_region(left_region, right_region)
-                       in (Relation.EQUAL, Relation.COMPONENT,
-                           Relation.ENCLOSED, Relation.WITHIN),
-                       all(point_in_region(vertex, right_region)
-                           is not Relation.DISJOINT
-                           for vertex in left_region))
-
-
-@given(strategies.contours_pairs)
 def test_reversals(regions_pair: Tuple[Region, Region]) -> None:
     left, right = regions_pair
 
@@ -86,6 +74,19 @@ def test_rotations(regions_pair: Tuple[Region, Region]) -> None:
                for rotated in rotations(left))
     assert all(result is region_in_region(left, rotated)
                for rotated in rotations(right))
+
+
+@given(strategies.contours_pairs)
+def test_connection_with_point_in_region(regions_pair: Tuple[Region, Region]
+                                         ) -> None:
+    left_region, right_region = regions_pair
+
+    assert implication(region_in_region(left_region, right_region)
+                       in (Relation.EQUAL, Relation.COMPONENT,
+                           Relation.ENCLOSED, Relation.WITHIN),
+                       all(point_in_region(vertex, right_region)
+                           is not Relation.DISJOINT
+                           for vertex in left_region))
 
 
 @given(strategies.contours_pairs)
