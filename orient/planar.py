@@ -897,7 +897,7 @@ def multiregion_in_polygon(multiregion: Multiregion,
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     """
-    Checks if the polygon fully lies inside the other one.
+    Finds relation between polygons.
 
     Time complexity:
         ``O(vertices_count * log vertices_count)``
@@ -910,8 +910,7 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
 
     :param left: polygon to check for.
     :param right: polygon to check in.
-    :returns:
-        true if the left polygon lies inside the right one, false otherwise.
+    :returns: relation between polygons.
 
     >>> outer_square = [(0, 0), (3, 0), (3, 3), (0, 3)]
     >>> inner_square = [(1, 1), (2, 1), (2, 2), (1, 2)]
