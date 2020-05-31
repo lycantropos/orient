@@ -32,7 +32,7 @@ def test_basic(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
 
 
 @given(strategies.polygons)
-def test_edges(polygon: Polygon) -> None:
+def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
                for edge in to_segments(border))
