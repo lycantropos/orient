@@ -32,7 +32,7 @@ def test_basic(region_with_segment: Tuple[Region, Segment]) -> None:
 
 
 @given(strategies.contours)
-def test_edges(region: Region) -> None:
+def test_self(region: Region) -> None:
     assert all(segment_in_region(edge, region) is Relation.COMPONENT
                for edge in to_segments(region))
 
