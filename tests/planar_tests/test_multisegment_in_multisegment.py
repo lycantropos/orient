@@ -27,16 +27,10 @@ def test_basic(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
     assert result in SAME_LINEAR_RELATIONS
 
 
-@given(strategies.multisegments)
+@given(strategies.non_empty_multisegments)
 def test_self(multisegment: Multisegment) -> None:
     assert (multisegment_in_multisegment(multisegment, multisegment)
-            is (Relation.EQUAL
-                if multisegment
-                else Relation.DISJOINT))
-
-
-@given(strategies.non_empty_multisegments)
-def test_elements(multisegment: Multisegment) -> None:
+            is Relation.EQUAL)
     assert equivalence(all(multisegment_in_multisegment([segment],
                                                         multisegment)
                            is Relation.EQUAL
