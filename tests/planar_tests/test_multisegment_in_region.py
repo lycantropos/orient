@@ -29,7 +29,7 @@ def test_basic(region_with_multisegment: Tuple[Region, Multisegment]) -> None:
 
 
 @given(strategies.contours)
-def test_edges(region: Region) -> None:
+def test_self(region: Region) -> None:
     assert multisegment_in_region(list(to_segments(region)),
                                   region) is Relation.COMPONENT
 
