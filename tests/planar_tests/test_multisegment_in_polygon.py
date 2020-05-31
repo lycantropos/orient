@@ -32,7 +32,7 @@ def test_basic(polygon_with_multisegment: Tuple[Polygon, Multisegment]
 
 
 @given(strategies.polygons)
-def test_edges(polygon: Polygon) -> None:
+def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert multisegment_in_polygon(list(region_to_segments(border))
                                    + list(multiregion_to_segments(holes)),
