@@ -30,7 +30,7 @@ def test_basic(contour_with_segment: Tuple[Contour, Segment]) -> None:
 
 
 @given(strategies.contours)
-def test_edges(contour: Contour) -> None:
+def test_self(contour: Contour) -> None:
     assert all(segment_in_contour(edge, contour) is Relation.COMPONENT
                for edge in to_segments(contour))
 
