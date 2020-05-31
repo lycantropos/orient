@@ -23,7 +23,7 @@ def test_basic(contour_with_point: Tuple[Contour, Point]) -> None:
 
 
 @given(strategies.contours)
-def test_vertices(contour: Contour) -> None:
+def test_self(contour: Contour) -> None:
     assert all(point_in_contour(vertex, contour) is Relation.COMPONENT
                for vertex in contour)
 
