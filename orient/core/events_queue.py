@@ -40,17 +40,13 @@ class EventsQueueKey:
         else:
             other_end_orientation = orientation(event.end, event.start,
                                                 other_event.end)
-            # the lowest segment is processed first
-            if other_end_orientation is not Orientation.COLLINEAR:
-                return other_end_orientation is (Orientation.COUNTERCLOCKWISE
-                                                 if event.is_left_endpoint
-                                                 else Orientation.CLOCKWISE)
-            elif event.from_test is not other_event.from_test:
-                return other_event.from_test
-            else:
-                end_x, end_y = event.end
-                other_end_x, other_end_y = other_event.end
-                return end_y < other_end_y
+            return (other_event.from_test
+                    if other_end_orientation is Orientation.COLLINEAR
+                    else (other_end_orientation
+                          # the lowest segment is processed first
+                          is (Orientation.COUNTERCLOCKWISE
+                              if event.is_left_endpoint
+                              else Orientation.CLOCKWISE)))
 
 
 EventsQueue = cast(Callable[[], PriorityQueue[Event]],
