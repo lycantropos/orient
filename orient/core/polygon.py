@@ -139,17 +139,14 @@ def relate_region(polygon: Polygon, region: Region) -> Relation:
                 holes, region, region_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_with_border
-        elif relation_with_holes is Relation.WITHIN:
-            return Relation.DISJOINT
         elif relation_with_holes is Relation.TOUCH:
             return Relation.ENCLOSED
-        elif (relation_with_holes is Relation.OVERLAP
-              or relation_with_holes is Relation.COMPOSITE):
-            return Relation.OVERLAP
-        elif relation_with_holes in (Relation.ENCLOSED,
+        elif relation_with_holes in (Relation.EQUAL,
                                      Relation.COMPONENT,
-                                     Relation.EQUAL):
+                                     Relation.ENCLOSED):
             return Relation.TOUCH
+        elif relation_with_holes is Relation.WITHIN:
+            return Relation.DISJOINT
         else:
             return Relation.OVERLAP
 
