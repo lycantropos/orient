@@ -9,7 +9,7 @@ from . import bounding_box
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           _relate_multisegment
                           as relate_multisegment_to_multiregion,
-                          _relate_region as _relate_region_to_multiregion,
+                          _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
                           relate_segment as relate_segment_to_multiregion)
 from .region import (_relate_contour as relate_contour_to_region,
@@ -134,8 +134,8 @@ def relate_region(polygon: Polygon, region: Region) -> Relation:
                 if holes
                 else relation_with_border)
     else:
-        relation_with_holes = _relate_region_to_multiregion(
-                holes, region, region_bounding_box)
+        relation_with_holes = relate_region_to_regions(holes, region,
+                                                       region_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_with_border
         elif relation_with_holes is Relation.TOUCH:
@@ -161,8 +161,8 @@ def _relate_multiregion(polygon: Polygon,
     border, holes = polygon
     border_bounding_box = bounding_box.from_iterable(border)
     if not holes:
-        return _relate_region_to_multiregion(multiregion, border,
-                                             border_bounding_box).complement
+        return relate_region_to_regions(multiregion, border,
+                                        border_bounding_box).complement
     none_touch = True
     subsets_regions_indices = []
     for region_index, region in enumerate(multiregion):
@@ -175,14 +175,9 @@ def _relate_multiregion(polygon: Polygon,
                                  Relation.COVER,
                                  Relation.ENCLOSES):
             return region_relation
-        elif region_relation is Relation.COMPOSITE:
-            return Relation.ENCLOSES if holes else region_relation
-        elif region_relation is Relation.EQUAL:
-            return (Relation.ENCLOSES
-                    if holes
-                    else (Relation.COMPOSITE
-                          if len(multiregion) > 1
-                          else region_relation))
+        elif (region_relation is Relation.COMPOSITE
+              or region_relation is Relation.EQUAL):
+            return Relation.ENCLOSES
         elif region_relation is not Relation.DISJOINT:
             if none_touch and (region_relation is Relation.ENCLOSED
                                or region_relation is Relation.COMPONENT):
