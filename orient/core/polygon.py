@@ -160,14 +160,14 @@ def relate_multiregion(polygon: Polygon, multiregion: Multiregion) -> Relation:
 def _relate_multiregion(polygon: Polygon,
                         multiregion: Multiregion) -> Relation:
     border, holes = polygon
-    polygon_bounding_box = bounding_box.from_iterable(border)
+    border_bounding_box = bounding_box.from_iterable(border)
     if not holes:
         return _relate_region_to_multiregion(multiregion, border,
-                                             polygon_bounding_box).complement
+                                             border_bounding_box).complement
     none_touch = True
     subsets_regions_indices = []
     for region_index, region in enumerate(multiregion):
-        region_relation = relate_regions(border, region, polygon_bounding_box,
+        region_relation = relate_regions(border, region, border_bounding_box,
                                          bounding_box.from_iterable(region))
         if region_relation is Relation.TOUCH:
             if none_touch:
