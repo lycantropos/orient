@@ -1,5 +1,6 @@
 from itertools import chain
-from operator import itemgetter
+from operator import (getitem,
+                      itemgetter)
 from typing import (Any,
                     Callable,
                     Iterable,
@@ -71,6 +72,12 @@ def normalize_contour(contour: Contour) -> Contour:
     return _to_counterclockwise_contour(
             rotate_sequence(contour, min(range(len(contour)),
                                          key=contour.__getitem__)))
+
+
+def sub_lists(sequence: Sequence[Domain]) -> Strategy[List[Domain]]:
+    return strategies.builds(getitem,
+                             strategies.permutations(sequence),
+                             strategies.slices(len(sequence)))
 
 
 def rotations(sequence: Domain) -> Iterable[Domain]:

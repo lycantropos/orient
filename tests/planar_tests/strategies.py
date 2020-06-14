@@ -17,6 +17,7 @@ from orient.hints import (Contour,
 from tests.strategies import (coordinates_strategies,
                               rational_coordinates_strategies)
 from tests.utils import (Strategy,
+                         sub_lists,
                          to_pairs,
                          to_triplets)
 
@@ -336,8 +337,16 @@ def to_polygons_with_multicontours(coordinates: Strategy[Coordinate],
                                                   max_size=max_size))
 
 
-polygons_with_multicontours = (coordinates_strategies
-                               .flatmap(to_polygons_with_multicontours))
+def polygon_to_polygon_with_multicontours(polygon: Polygon
+                                          ) -> Strategy[Tuple[Polygon,
+                                                              Multicontour]]:
+    _, holes = polygon
+    return strategies.tuples(strategies.just(polygon), sub_lists(holes))
+
+
+polygons_with_multicontours = (
+        polygons.flatmap(polygon_to_polygon_with_multicontours)
+        | coordinates_strategies.flatmap(to_polygons_with_multicontours))
 polygons_with_non_empty_multicontours = (
     coordinates_strategies.flatmap(partial(to_polygons_with_multicontours,
                                            min_size=1)))
