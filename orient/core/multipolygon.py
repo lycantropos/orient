@@ -107,9 +107,15 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
 
 
 def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
-    if not multipolygon:
-        return Relation.DISJOINT
-    region_bounding_box = bounding_box.from_iterable(region)
+    return (_relate_region(multipolygon, region,
+                           bounding_box.from_iterable(region))
+            if multipolygon
+            else Relation.DISJOINT)
+
+
+def _relate_region(multipolygon: Multipolygon,
+                   region: Region,
+                   region_bounding_box: bounding_box.BoundingBox) -> Relation:
     relation_with_borders = relate_region_to_multiregion(
             _to_borders(multipolygon), region, region_bounding_box)
     if relation_with_borders in (Relation.DISJOINT,
