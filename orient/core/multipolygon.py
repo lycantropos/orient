@@ -174,9 +174,6 @@ def relate_multiregion(multipolygon: Multipolygon,
             return Relation.DISJOINT
         elif relation_with_holes is Relation.TOUCH:
             return Relation.ENCLOSED
-        elif (relation_with_holes is Relation.OVERLAP
-              or relation_with_holes is Relation.COMPOSITE):
-            return Relation.OVERLAP
         elif relation_with_holes in (Relation.ENCLOSED,
                                      Relation.COMPONENT,
                                      Relation.EQUAL):
