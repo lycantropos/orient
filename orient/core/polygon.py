@@ -80,10 +80,9 @@ def _relate_multisegment(polygon: Polygon,
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
             return Relation.ENCLOSED
-        elif relation_with_holes is Relation.CROSS:
-            return Relation.CROSS
-        elif relation_with_holes is Relation.COMPONENT:
-            return Relation.COMPONENT
+        elif (relation_with_holes is Relation.CROSS
+              or relation_with_holes is Relation.COMPONENT):
+            return relation_with_holes
         elif relation_with_holes is Relation.ENCLOSED:
             return Relation.TOUCH
         else:
