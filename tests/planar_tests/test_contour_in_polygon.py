@@ -30,11 +30,6 @@ def test_basic(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.contours)
-def test_self(contour: Contour) -> None:
-    assert contour_in_polygon(contour, (contour, [])) is Relation.COMPONENT
-
-
 @given(strategies.polygons)
 def test_self(polygon: Polygon) -> None:
     border, holes = polygon
