@@ -128,13 +128,14 @@ def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
     assert implication(next_result is Relation.COMPOSITE,
                        result is Relation.COMPOSITE
                        or relation_with_first_segment is Relation.COMPOSITE
+                       or result is Relation.OVERLAP
+                       and (relation_with_first_segment is Relation.COMPONENT
+                            or relation_with_first_segment is Relation.OVERLAP)
                        or bool(rest_left_multisegment)
                        and relation_with_first_segment is Relation.EQUAL
                        or result is Relation.EQUAL
                        or result is Relation.COMPONENT
-                       and relation_with_first_segment is Relation.OVERLAP
-                       or result is Relation.OVERLAP
-                       and relation_with_first_segment is Relation.COMPONENT)
+                       and relation_with_first_segment is Relation.OVERLAP)
     assert implication(result is Relation.COMPOSITE
                        or relation_with_first_segment is Relation.COMPOSITE
                        or bool(rest_left_multisegment)
