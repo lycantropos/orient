@@ -18,7 +18,7 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
 from . import strategies
 
 
-@given(strategies.multicontours_with_segments)
+@given(strategies.multiregions_with_segments)
 def test_basic(multiregion_with_segment: Tuple[Multiregion, Segment]) -> None:
     multiregion, segment = multiregion_with_segment
 
@@ -28,14 +28,14 @@ def test_basic(multiregion_with_segment: Tuple[Multiregion, Segment]) -> None:
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.empty_multicontours_with_segments)
+@given(strategies.empty_multiregions_with_segments)
 def test_base(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
     multiregion, segment = multiregion_with_region
 
     assert segment_in_multiregion(segment, multiregion) is Relation.DISJOINT
 
 
-@given(strategies.non_empty_multicontours_with_segments)
+@given(strategies.non_empty_multiregions_with_segments)
 def test_step(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
     multiregion, segment = multiregion_with_region
     first_region, *rest_multiregion = multiregion
@@ -64,7 +64,7 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
                        and relation_with_first_region is Relation.TOUCH)
 
 
-@given(strategies.multicontours_with_segments)
+@given(strategies.multiregions_with_segments)
 def test_reversals(multiregion_with_segment: Tuple[Multiregion, Segment]
                    ) -> None:
     multiregion, segment = multiregion_with_segment
@@ -79,7 +79,7 @@ def test_reversals(multiregion_with_segment: Tuple[Multiregion, Segment]
             segment, reverse_multicontour_contours(multiregion))
 
 
-@given(strategies.multicontours_with_segments)
+@given(strategies.multiregions_with_segments)
 def test_rotations(multiregion_with_segment: Tuple[Multiregion, Segment]
                    ) -> None:
     multiregion, segment = multiregion_with_segment
@@ -90,7 +90,7 @@ def test_rotations(multiregion_with_segment: Tuple[Multiregion, Segment]
                for rotated in rotations(multiregion))
 
 
-@given(strategies.multicontours_with_segments)
+@given(strategies.multiregions_with_segments)
 def test_connection_with_point_in_multiregion(multiregion_with_segment
                                               : Tuple[Multiregion, Segment]
                                               ) -> None:

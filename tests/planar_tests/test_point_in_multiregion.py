@@ -15,7 +15,7 @@ from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
 from . import strategies
 
 
-@given(strategies.multicontours_with_points)
+@given(strategies.multiregions_with_points)
 def test_basic(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_point
 
@@ -25,21 +25,21 @@ def test_basic(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
     assert result in PRIMITIVE_COMPOUND_RELATIONS
 
 
-@given(strategies.multicontours)
+@given(strategies.multiregions)
 def test_vertices(multiregion: Multiregion) -> None:
     assert all(point_in_multiregion(vertex, multiregion) is Relation.COMPONENT
                for contour in multiregion
                for vertex in contour)
 
 
-@given(strategies.empty_multicontours_with_points)
+@given(strategies.empty_multiregions_with_points)
 def test_base(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_region
 
     assert point_in_multiregion(point, multiregion) is Relation.DISJOINT
 
 
-@given(strategies.non_empty_multicontours_with_points)
+@given(strategies.non_empty_multiregions_with_points)
 def test_step(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_region
     first_region, *rest_multiregion = multiregion
@@ -59,7 +59,7 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
                        or relation_with_first_region is Relation.COMPONENT)
 
 
-@given(strategies.multicontours_with_points)
+@given(strategies.multiregions_with_points)
 def test_reversals(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_point
 
@@ -71,7 +71,7 @@ def test_reversals(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
             point, reverse_multicontour_contours(multiregion))
 
 
-@given(strategies.multicontours_with_points)
+@given(strategies.multiregions_with_points)
 def test_rotations(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_point
 

@@ -17,7 +17,7 @@ from tests.utils import (COMPOUND_RELATIONS,
 from . import strategies
 
 
-@given(strategies.polygons_with_multicontours)
+@given(strategies.polygons_with_multiregions)
 def test_basic(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
     polygon, multiregion = multiregion_with_polygon
 
@@ -38,14 +38,14 @@ def test_self(polygon: Polygon) -> None:
                                                       else Relation.DISJOINT)
 
 
-@given(strategies.polygons_with_empty_multicontours)
+@given(strategies.polygons_with_empty_multiregions)
 def test_base(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
     polygon, multiregion = multiregion_with_polygon
 
     assert multiregion_in_polygon(multiregion, polygon) is Relation.DISJOINT
 
 
-@given(strategies.polygons_with_non_empty_multicontours)
+@given(strategies.polygons_with_non_empty_multiregions)
 def test_step(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
     polygon, multiregion = multiregion_with_polygon
     first_region, *rest_multiregion = multiregion
@@ -107,7 +107,7 @@ def test_step(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
                        and relation_with_first_region is Relation.WITHIN)
 
 
-@given(strategies.polygons_with_multicontours)
+@given(strategies.polygons_with_multiregions)
 def test_reversals(polygon_with_multiregion: Tuple[Polygon, Multiregion]
                    ) -> None:
     polygon, multiregion = polygon_with_multiregion
@@ -124,7 +124,7 @@ def test_reversals(polygon_with_multiregion: Tuple[Polygon, Multiregion]
             multiregion, reverse_polygon_holes_contours(polygon))
 
 
-@given(strategies.polygons_with_multicontours)
+@given(strategies.polygons_with_multiregions)
 def test_rotations(polygon_with_multiregion: Tuple[Polygon, Multiregion]
                    ) -> None:
     polygon, multiregion = polygon_with_multiregion

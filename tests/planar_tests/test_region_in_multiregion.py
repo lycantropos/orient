@@ -18,7 +18,7 @@ from tests.utils import (COMPOUND_RELATIONS,
 from . import strategies
 
 
-@given(strategies.multicontours_with_contours)
+@given(strategies.multiregions_with_contours)
 def test_basic(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     multiregion, region = multiregion_with_region
 
@@ -28,7 +28,7 @@ def test_basic(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     assert result in COMPOUND_RELATIONS
 
 
-@given(strategies.multicontours)
+@given(strategies.multiregions)
 def test_self(multiregion: Multiregion) -> None:
     assert equivalence(bool(multiregion)
                        and all(region_in_multiregion(element, multiregion)
@@ -41,14 +41,14 @@ def test_self(multiregion: Multiregion) -> None:
                        len(multiregion) != 1)
 
 
-@given(strategies.empty_multicontours_with_contours)
+@given(strategies.empty_multiregions_with_contours)
 def test_base(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     multiregion, region = multiregion_with_region
 
     assert region_in_multiregion(region, multiregion) is Relation.DISJOINT
 
 
-@given(strategies.non_empty_multicontours_with_contours)
+@given(strategies.non_empty_multiregions_with_contours)
 def test_step(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     multiregion, region = multiregion_with_region
     first_region, *rest_multiregion = multiregion
@@ -100,7 +100,7 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
                        or relation_with_first_region is Relation.WITHIN)
 
 
-@given(strategies.multicontours_with_contours)
+@given(strategies.multiregions_with_contours)
 def test_reversals(multiregion_with_region: Tuple[Multiregion, Region]
                    ) -> None:
     multiregion, region = multiregion_with_region
@@ -115,7 +115,7 @@ def test_reversals(multiregion_with_region: Tuple[Multiregion, Region]
             region, reverse_multicontour_contours(multiregion))
 
 
-@given(strategies.multicontours_with_contours)
+@given(strategies.multiregions_with_contours)
 def test_rotations(multiregion_with_region: Tuple[Multiregion, Region]
                    ) -> None:
     multiregion, region = multiregion_with_region
@@ -126,7 +126,7 @@ def test_rotations(multiregion_with_region: Tuple[Multiregion, Region]
                for rotated in rotations(multiregion))
 
 
-@given(strategies.multicontours_with_contours)
+@given(strategies.multiregions_with_contours)
 def test_connection_with_contour_in_multiregion(multiregion_with_region
                                                 : Tuple[Multiregion, Region]
                                                 ) -> None:

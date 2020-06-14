@@ -18,7 +18,7 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
 from . import strategies
 
 
-@given(strategies.multicontours_with_multisegments)
+@given(strategies.multiregions_with_multisegments)
 def test_basic(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
                ) -> None:
     multiregion, multisegment = multiregion_with_multisegment
@@ -29,7 +29,7 @@ def test_basic(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.multicontours)
+@given(strategies.multiregions)
 def test_self(multiregion: Multiregion) -> None:
     assert multisegment_in_multiregion(list(to_segments(multiregion)),
                                        multiregion) is (Relation.COMPONENT
@@ -37,7 +37,7 @@ def test_self(multiregion: Multiregion) -> None:
                                                         else Relation.DISJOINT)
 
 
-@given(strategies.multicontours_with_empty_multisegments)
+@given(strategies.multiregions_with_empty_multisegments)
 def test_base(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
               ) -> None:
     multiregion, multisegment = multiregion_with_multisegment
@@ -47,7 +47,7 @@ def test_base(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
     assert result is Relation.DISJOINT
 
 
-@given(strategies.multicontours_with_non_empty_multisegments)
+@given(strategies.multiregions_with_non_empty_multisegments)
 def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
               ) -> None:
     multiregion, multisegment = multiregion_with_multisegment
@@ -103,7 +103,7 @@ def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
                        and relation_with_first_segment is Relation.WITHIN)
 
 
-@given(strategies.multicontours_with_multisegments)
+@given(strategies.multiregions_with_multisegments)
 def test_reversals(multiregion_with_multisegment
                    : Tuple[Multiregion, Multisegment]) -> None:
     multiregion, multisegment = multiregion_with_multisegment
@@ -118,7 +118,7 @@ def test_reversals(multiregion_with_multisegment
             multisegment, reverse_multicontour_contours(multiregion))
 
 
-@given(strategies.multicontours_with_multisegments)
+@given(strategies.multiregions_with_multisegments)
 def test_rotations(multiregion_with_multisegment
                    : Tuple[Multiregion, Multisegment]) -> None:
     multiregion, multisegment = multiregion_with_multisegment

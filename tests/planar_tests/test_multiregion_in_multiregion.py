@@ -17,7 +17,7 @@ from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
 from . import strategies
 
 
-@given(strategies.multicontours_pairs)
+@given(strategies.multiregions_pairs)
 def test_basic(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     multiregion, multiregion = multiregions_pair
 
@@ -27,7 +27,7 @@ def test_basic(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     assert result in COMPOUND_RELATIONS
 
 
-@given(strategies.non_empty_multicontours)
+@given(strategies.non_empty_multiregions)
 def test_self(multiregion: Multiregion) -> None:
     assert (multiregion_in_multiregion(multiregion, multiregion)
             is Relation.EQUAL)
@@ -41,7 +41,7 @@ def test_self(multiregion: Multiregion) -> None:
                        len(multiregion) > 1)
 
 
-@given(strategies.multicontours_pairs)
+@given(strategies.multiregions_pairs)
 def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
 
@@ -57,7 +57,7 @@ def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                        and complement in ASYMMETRIC_COMPOUND_RELATIONS)
 
 
-@given(strategies.empty_multicontours_with_multicontours)
+@given(strategies.empty_multiregions_with_multiregions)
 def test_base(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
 
@@ -65,7 +65,7 @@ def test_base(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                                       right_multiregion) is Relation.DISJOINT
 
 
-@given(strategies.non_empty_multicontours_with_multicontours)
+@given(strategies.non_empty_multiregions_with_multiregions)
 def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
     first_region, *rest_left_multiregion = left_multiregion
@@ -169,7 +169,7 @@ def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                        and relation_with_first_region is Relation.WITHIN)
 
 
-@given(strategies.multicontours_pairs)
+@given(strategies.multiregions_pairs)
 def test_reversals(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left, right = multiregions_pair
 
@@ -185,7 +185,7 @@ def test_reversals(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
             left, reverse_multicontour_contours(right))
 
 
-@given(strategies.multicontours_pairs)
+@given(strategies.multiregions_pairs)
 def test_rotations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left, right = multiregions_pair
 

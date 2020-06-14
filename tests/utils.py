@@ -14,9 +14,11 @@ from hypothesis.strategies import SearchStrategy
 from robust.angular import (Orientation,
                             orientation)
 
+from orient.core.contour import to_segments
+from orient.core.utils import flatten
 from orient.hints import (Contour,
-                          Multicontour,
                           Multipolygon,
+                          Multiregion,
                           Multisegment,
                           Point,
                           Polygon,
@@ -101,11 +103,11 @@ def reverse_polygon_holes_contours(polygon: Polygon) -> Polygon:
     return border, reverse_multicontour_contours(holes)
 
 
-def reverse_multicontour(multicontour: Multicontour) -> Multicontour:
+def reverse_multicontour(multicontour: Multiregion) -> Multiregion:
     return multicontour[::-1]
 
 
-def reverse_multicontour_contours(multicontour: Multicontour) -> Multicontour:
+def reverse_multicontour_contours(multicontour: Multiregion) -> Multiregion:
     return [reverse_contour(contour) for contour in multicontour]
 
 
@@ -189,6 +191,11 @@ def to_contour_separators(contour: Contour) -> Iterable[Segment]:
                                     range(index + 2,
                                           min(len(contour) + index - 1,
                                               len(contour)))))
+
+
+def polygon_to_edges(polygon: Polygon) -> Iterable[Segment]:
+    border, holes = polygon
+    return chain(to_segments(border), flatten(map(to_segments, holes)))
 
 
 def reverse_segment(segment: Segment) -> Segment:
