@@ -218,12 +218,14 @@ def _relate_polygon(goal_border: Region,
                                   Relation.TOUCH,
                                   Relation.OVERLAP):
                 return Relation.OVERLAP
-            elif holes_relation is Relation.COVER:
+            elif holes_relation in (Relation.COVER,
+                                    Relation.ENCLOSES,
+                                    Relation.COMPOSITE):
                 return Relation.ENCLOSES
-            elif holes_relation is Relation.WITHIN:
-                return Relation.ENCLOSED
+            elif holes_relation is Relation.EQUAL:
+                return borders_relation
             else:
-                return holes_relation
+                return Relation.ENCLOSED
         else:
             return (Relation.ENCLOSES
                     if goal_holes
