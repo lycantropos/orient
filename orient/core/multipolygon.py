@@ -199,8 +199,8 @@ def _relate_polygon(multipolygon: Multipolygon,
     last_relation = None
     for sub_border, sub_holes in multipolygon:
         relation = relate_polygon_to_polygon(
-                sub_border, sub_holes, bounding_box.from_iterable(sub_border),
-                border, holes, border_bounding_box)
+                sub_border, sub_holes, border, holes,
+                bounding_box.from_iterable(sub_border), border_bounding_box)
         if relation is Relation.DISJOINT:
             if last_relation is None:
                 last_relation = relation

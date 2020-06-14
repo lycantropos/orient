@@ -11,7 +11,6 @@ from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           as relate_multisegment_to_multiregion,
                           _relate_region as _relate_region_to_multiregion,
                           relate_multiregion as relate_multiregions,
-                          relate_region as relate_region_to_multiregion,
                           relate_segment as relate_segment_to_multiregion)
 from .region import (_relate_contour as relate_contour_to_region,
                      _relate_multisegment as relate_multisegment_to_region,
@@ -227,17 +226,16 @@ def _relate_multiregion(polygon: Polygon,
 def relate_polygon(goal: Polygon, test: Polygon) -> Relation:
     goal_border, goal_holes = goal
     test_border, test_holes = test
-    return _relate_polygon(goal_border, goal_holes,
+    return _relate_polygon(goal_border, goal_holes, test_border, test_holes,
                            bounding_box.from_iterable(goal_border),
-                           test_border, test_holes,
                            bounding_box.from_iterable(test_border))
 
 
 def _relate_polygon(goal_border: Region,
                     goal_holes: Multiregion,
-                    goal_border_bounding_box: bounding_box.BoundingBox,
                     test_border: Region,
                     test_holes: Multiregion,
+                    goal_border_bounding_box: bounding_box.BoundingBox,
                     test_border_bounding_box: bounding_box.BoundingBox
                     ) -> Relation:
     borders_relation = relate_regions(goal_border, test_border,
