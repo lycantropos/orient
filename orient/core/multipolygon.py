@@ -202,6 +202,8 @@ def _relate_polygon(multipolygon: Multipolygon,
                     border: Region,
                     holes: Multiregion,
                     border_bounding_box: bounding_box.BoundingBox) -> Relation:
+    if not holes:
+        return _relate_region(multipolygon, border, border_bounding_box)
     last_relation = None
     for sub_border, sub_holes in multipolygon:
         relation = relate_polygon_to_polygon(
