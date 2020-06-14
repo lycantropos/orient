@@ -77,7 +77,7 @@ def normalize_contour(contour: Contour) -> Contour:
 def sub_lists(sequence: Sequence[Domain]) -> Strategy[List[Domain]]:
     return strategies.builds(getitem,
                              strategies.permutations(sequence),
-                             strategies.slices(len(sequence)))
+                             strategies.slices(max(len(sequence), 1)))
 
 
 def rotations(sequence: Domain) -> Iterable[Domain]:
