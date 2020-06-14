@@ -235,61 +235,87 @@ def _relate_polygon(goal_border: Region,
                               Relation.ENCLOSED,
                               Relation.COMPONENT):
         if goal_holes:
-            holes_border_relation = _relate_region_to_multiregion(
-                    goal_holes, test_border, test_border_bounding_box)
-            if holes_border_relation is Relation.DISJOINT:
-                return borders_relation
-            elif holes_border_relation is Relation.WITHIN:
-                return Relation.DISJOINT
-            elif holes_border_relation in (Relation.ENCLOSED,
-                                           Relation.COMPONENT,
-                                           Relation.EQUAL):
-                return Relation.TOUCH
-            elif (holes_border_relation is Relation.OVERLAP
-                  or holes_border_relation is Relation.COMPOSITE):
-                return Relation.OVERLAP
-            elif holes_border_relation is Relation.TOUCH:
-                return Relation.ENCLOSED
-            elif test_holes:
-                holes_relation = relate_multiregions(test_holes, goal_holes)
-                return (borders_relation
-                        if holes_relation in (Relation.EQUAL,
-                                              Relation.COMPONENT,
-                                              Relation.ENCLOSED,
-                                              Relation.WITHIN)
-                        else Relation.OVERLAP)
+            none_touch = True
+            subsets_ids = []
+            for hole_index, hole in enumerate(goal_holes):
+                hole_relation = relate_regions(
+                        test_border, hole, test_border_bounding_box,
+                        bounding_box.from_iterable(hole))
+                if hole_relation is Relation.TOUCH:
+                    if none_touch:
+                        none_touch = False
+                elif hole_relation is Relation.OVERLAP:
+                    return hole_relation
+                elif hole_relation is Relation.COVER:
+                    return Relation.DISJOINT
+                elif hole_relation in (Relation.ENCLOSES,
+                                       Relation.COMPOSITE,
+                                       Relation.EQUAL):
+                    return Relation.TOUCH
+                elif hole_relation is not Relation.DISJOINT:
+                    subsets_ids.append(hole_index)
+            if subsets_ids:
+                holes_relation = relate_multiregions(
+                        test_holes,
+                        [goal_holes[index] for index in subsets_ids])
+                if holes_relation is Relation.EQUAL:
+                    return (Relation.ENCLOSED
+                            if borders_relation is Relation.WITHIN
+                            else borders_relation)
+                elif (holes_relation is Relation.COMPONENT
+                      or holes_relation is Relation.ENCLOSED):
+                    return Relation.ENCLOSED
+                elif holes_relation is Relation.WITHIN:
+                    return borders_relation
+                else:
+                    return Relation.OVERLAP
             else:
-                return Relation.OVERLAP
+                return (Relation.DISJOINT
+                        if none_touch
+                        else Relation.TOUCH)
         else:
             return (Relation.ENCLOSED
                     if test_holes and borders_relation is Relation.COMPONENT
                     else borders_relation)
     elif test_holes:
-        holes_border_relation = _relate_region_to_multiregion(
-                test_holes, goal_border, goal_border_bounding_box)
-        if holes_border_relation is Relation.DISJOINT:
-            return borders_relation
-        elif holes_border_relation is Relation.WITHIN:
-            return Relation.DISJOINT
-        elif holes_border_relation in (Relation.ENCLOSED,
-                                       Relation.COMPONENT,
-                                       Relation.EQUAL):
-            return Relation.TOUCH
-        elif (holes_border_relation is Relation.OVERLAP
-              or holes_border_relation is Relation.COMPOSITE):
-            return Relation.OVERLAP
-        elif holes_border_relation is Relation.TOUCH:
-            return Relation.ENCLOSES
-        elif goal_holes:
-            holes_relation = relate_multiregions(goal_holes, test_holes)
-            return (borders_relation
-                    if holes_relation in (Relation.EQUAL,
-                                          Relation.COMPONENT,
-                                          Relation.ENCLOSED,
-                                          Relation.WITHIN)
-                    else Relation.OVERLAP)
+        none_touch = True
+        subsets_ids = []
+        for hole_index, hole in enumerate(test_holes):
+            hole_relation = relate_regions(
+                    goal_border, hole, goal_border_bounding_box,
+                    bounding_box.from_iterable(hole))
+            if hole_relation is Relation.TOUCH:
+                if none_touch:
+                    none_touch = False
+            elif hole_relation is Relation.OVERLAP:
+                return hole_relation
+            elif hole_relation is Relation.COVER:
+                return Relation.DISJOINT
+            elif hole_relation in (Relation.ENCLOSES,
+                                   Relation.COMPOSITE,
+                                   Relation.EQUAL):
+                return Relation.TOUCH
+            elif hole_relation is not Relation.DISJOINT:
+                subsets_ids.append(hole_index)
+        if subsets_ids:
+            holes_relation = relate_multiregions(
+                    goal_holes,
+                    [test_holes[index] for index in subsets_ids])
+            if holes_relation is Relation.EQUAL:
+                return (Relation.ENCLOSES
+                        if borders_relation is Relation.COVER
+                        else borders_relation)
+            elif (holes_relation is Relation.COMPONENT
+                  or holes_relation is Relation.ENCLOSED):
+                return Relation.ENCLOSES
+            elif holes_relation is Relation.WITHIN:
+                return borders_relation
+            else:
+                return Relation.OVERLAP
         else:
-            return Relation.OVERLAP
+            return (Relation.DISJOINT
+                    if none_touch
+                    else Relation.TOUCH)
     else:
         return (Relation.ENCLOSES
                 if goal_holes and borders_relation is Relation.COMPOSITE
