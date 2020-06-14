@@ -120,13 +120,14 @@ def relate_region(multiregion: Multiregion, region: Region) -> Relation:
 def _relate_region(goal_regions: Iterable[Region],
                    region: Region,
                    region_bounding_box: bounding_box.BoundingBox) -> Relation:
-    all_disjoint, any_disjoint, goal_regions_max_x, sweeper = (True, False,
-                                                               None, None)
+    all_disjoint, none_disjoint, goal_regions_max_x, sweeper = (True, True,
+                                                                None, None)
     for goal_region in goal_regions:
         goal_region_bounding_box = bounding_box.from_iterable(goal_region)
         if bounding_box.disjoint_with(region_bounding_box,
                                       goal_region_bounding_box):
-            any_disjoint = True
+            if none_disjoint:
+                none_disjoint = False
         else:
             if all_disjoint:
                 all_disjoint = False
@@ -144,15 +145,15 @@ def _relate_region(goal_regions: Iterable[Region],
     _, region_max_x, _, _ = region_bounding_box
     relation = process_compound_queue(sweeper, min(goal_regions_max_x,
                                                    region_max_x))
-    return ((Relation.COMPONENT
-             if relation is Relation.EQUAL
-             else (Relation.OVERLAP
-                   if relation in (Relation.COVER,
-                                   Relation.ENCLOSES,
-                                   Relation.COMPOSITE)
-                   else relation))
-            if any_disjoint
-            else relation)
+    return (relation
+            if none_disjoint
+            else (Relation.COMPONENT
+                  if relation is Relation.EQUAL
+                  else (Relation.OVERLAP
+                        if relation in (Relation.COVER,
+                                        Relation.ENCLOSES,
+                                        Relation.COMPOSITE)
+                        else relation)))
 
 
 def relate_multiregion(goal: Multiregion, test: Multiregion) -> Relation:
