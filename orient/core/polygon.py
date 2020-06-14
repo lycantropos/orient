@@ -297,7 +297,10 @@ def _relate_polygon(goal_border: Region,
             if subsets_holes_indices:
                 holes_relation = relate_multiregions(
                         test_holes,
-                        [goal_holes[index] for index in subsets_holes_indices])
+                        goal_holes
+                        if len(subsets_holes_indices) == len(goal_holes)
+                        else [goal_holes[index]
+                              for index in subsets_holes_indices])
                 if holes_relation is Relation.EQUAL:
                     return (Relation.ENCLOSED
                             if borders_relation is Relation.WITHIN
@@ -340,7 +343,10 @@ def _relate_polygon(goal_border: Region,
         if subsets_holes_indices:
             holes_relation = relate_multiregions(
                     goal_holes,
-                    [test_holes[index] for index in subsets_holes_indices])
+                    test_holes
+                    if len(subsets_holes_indices) == len(test_holes)
+                    else [test_holes[index]
+                          for index in subsets_holes_indices])
             if holes_relation is Relation.EQUAL:
                 return (Relation.ENCLOSES
                         if borders_relation is Relation.COVER
