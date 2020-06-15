@@ -912,31 +912,66 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     :param right: polygon to check in.
     :returns: relation between polygons.
 
-    >>> outer_square = [(0, 0), (3, 0), (3, 3), (0, 3)]
-    >>> inner_square = [(1, 1), (2, 1), (2, 2), (1, 2)]
-    >>> (polygon_in_polygon((outer_square, []), (outer_square, []))
-    ...  is Relation.EQUAL)
-    True
-    >>> (polygon_in_polygon((inner_square, []), (inner_square, []))
-    ...  is Relation.EQUAL)
-    True
-    >>> (polygon_in_polygon((inner_square, []), (outer_square, []))
-    ...  is Relation.WITHIN)
-    True
-    >>> (polygon_in_polygon((outer_square, []), (inner_square, []))
-    ...  is Relation.COVER)
+    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
+    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
+    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
+    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
+    >>> (polygon_in_polygon((outer_square, [inner_square]),
+    ...                     (innermore_square, []))
+    ...  is polygon_in_polygon((innermore_square, []),
+    ...                        (outer_square, [inner_square]))
+    ...  is polygon_in_polygon((outer_square, [inner_square]),
+    ...                        (innermore_square, [innermost_square]))
+    ...  is polygon_in_polygon((innermore_square, [innermost_square]),
+    ...                        (outer_square, [inner_square]))
+    ...  is Relation.DISJOINT)
     True
     >>> (polygon_in_polygon((inner_square, []), (outer_square, [inner_square]))
+    ...  is polygon_in_polygon((outer_square, [inner_square]),
+    ...                        (inner_square, []))
+    ...  is polygon_in_polygon((outer_square, [inner_square]),
+    ...                        (inner_square, [innermore_square]))
+    ...  is polygon_in_polygon((inner_square, [innermore_square]),
+    ...                        (outer_square, [inner_square]))
     ...  is Relation.TOUCH)
+    True
+    >>> (polygon_in_polygon((inner_square, []),
+    ...                     (outer_square, [innermore_square]))
+    ...  is polygon_in_polygon((outer_square, [innermore_square]),
+    ...                        (inner_square, []))
+    ...  is polygon_in_polygon((outer_square, [innermore_square]),
+    ...                        (inner_square, [innermost_square]))
+    ...  is polygon_in_polygon((inner_square, [innermost_square]),
+    ...                        (outer_square, [innermore_square]))
+    ...  is Relation.OVERLAP)
+    True
+    >>> (polygon_in_polygon((outer_square, []), (inner_square, []))
+    ...  is polygon_in_polygon((outer_square, [innermost_square]),
+    ...                        (inner_square, [innermore_square]))
+    ...  is Relation.COVER)
     True
     >>> (polygon_in_polygon((outer_square, []), (outer_square, [inner_square]))
+    ...  is polygon_in_polygon((outer_square, [innermore_square]),
+    ...                        (outer_square, [inner_square]))
+    ...  is polygon_in_polygon((outer_square, [innermore_square]),
+    ...                        (inner_square, [innermore_square]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (polygon_in_polygon((outer_square, [inner_square]), (inner_square, []))
-    ...  is Relation.TOUCH)
+    >>> (polygon_in_polygon((outer_square, []), (outer_square, []))
+    ...  is polygon_in_polygon((inner_square, []), (inner_square, []))
+    ...  is Relation.EQUAL)
     True
     >>> (polygon_in_polygon((outer_square, [inner_square]), (outer_square, []))
+    ...  is polygon_in_polygon((outer_square, [inner_square]),
+    ...                        (outer_square, [innermore_square]))
+    ...  is polygon_in_polygon((inner_square, [innermore_square]),
+    ...                        (outer_square, [innermore_square]))
     ...  is Relation.ENCLOSED)
+    True
+    >>> (polygon_in_polygon((inner_square, []), (outer_square, []))
+    ...  is polygon_in_polygon((inner_square, [innermore_square]),
+    ...                        (outer_square, [innermost_square]))
+    ...  is Relation.WITHIN)
     True
     """
     return _polygon.relate_polygon(right, left)
