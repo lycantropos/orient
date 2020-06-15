@@ -303,9 +303,9 @@ def _relate_polygon(goal_border: Region,
                 else:
                     return Relation.OVERLAP
             else:
-                return (Relation.DISJOINT
+                return (borders_relation
                         if none_touch
-                        else Relation.TOUCH)
+                        else Relation.ENCLOSED)
         else:
             return (Relation.ENCLOSED
                     if test_holes and borders_relation is Relation.COMPONENT
@@ -349,9 +349,9 @@ def _relate_polygon(goal_border: Region,
             else:
                 return Relation.OVERLAP
         else:
-            return (Relation.DISJOINT
+            return (borders_relation
                     if none_touch
-                    else Relation.TOUCH)
+                    else Relation.ENCLOSES)
     else:
         return (Relation.ENCLOSES
                 if goal_holes and borders_relation is Relation.COMPOSITE
