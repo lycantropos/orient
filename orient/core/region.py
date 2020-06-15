@@ -10,7 +10,7 @@ from orient.hints import (Contour,
                           Point,
                           Region,
                           Segment)
-from . import bounding_box
+from . import bounding
 from .contour import (equal as contours_equal,
                       point_vertex_line_divides_angle,
                       to_segments as contour_to_segments)
@@ -264,17 +264,17 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
 def relate_multisegment(region: Region,
                         multisegment: Multisegment) -> Relation:
     return (_relate_multisegment(region, multisegment,
-                                 bounding_box.from_iterables(multisegment))
+                                 bounding.box_from_iterables(multisegment))
             if multisegment
             else Relation.DISJOINT)
 
 
 def _relate_multisegment(region: Region,
                          multisegment: Multisegment,
-                         multisegment_bounding_box: bounding_box.BoundingBox
+                         multisegment_bounding_box: bounding.Box
                          ) -> Relation:
-    region_bounding_box = bounding_box.from_iterable(region)
-    if bounding_box.disjoint_with(multisegment_bounding_box,
+    region_bounding_box = bounding.box_from_iterable(region)
+    if bounding.box_disjoint_with(multisegment_bounding_box,
                                   region_bounding_box):
         return Relation.DISJOINT
     sweeper = ClosedSweeper()
@@ -290,15 +290,15 @@ def _relate_multisegment(region: Region,
 
 def relate_contour(region: Region, contour: Contour) -> Relation:
     return _relate_contour(region, contour,
-                           bounding_box.from_iterable(contour))
+                           bounding.box_from_iterable(contour))
 
 
 def _relate_contour(region: Region,
                     contour: Contour,
-                    contour_bounding_box: bounding_box.BoundingBox
+                    contour_bounding_box: bounding.Box
                     ) -> Relation:
-    region_bounding_box = bounding_box.from_iterable(region)
-    if bounding_box.disjoint_with(contour_bounding_box, region_bounding_box):
+    region_bounding_box = bounding.box_from_iterable(region)
+    if bounding.box_disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour):
         return Relation.COMPONENT
@@ -314,15 +314,15 @@ def _relate_contour(region: Region,
 
 
 def relate_region(goal: Region, test: Region) -> Relation:
-    return _relate_region(goal, test, bounding_box.from_iterable(goal),
-                          bounding_box.from_iterable(test))
+    return _relate_region(goal, test, bounding.box_from_iterable(goal),
+                          bounding.box_from_iterable(test))
 
 
 def _relate_region(goal: Region,
                    test: Region,
-                   goal_bounding_box: bounding_box.BoundingBox,
-                   test_bounding_box: bounding_box.BoundingBox) -> Relation:
-    if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
+                   goal_bounding_box: bounding.Box,
+                   test_bounding_box: bounding.Box) -> Relation:
+    if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL

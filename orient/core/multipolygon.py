@@ -8,7 +8,7 @@ from orient.hints import (Contour,
                           Polygon,
                           Region,
                           Segment)
-from . import bounding_box
+from . import bounding
 from .contour import to_segments as contour_to_segments
 from .multiregion import (_relate_multiregion as relate_multiregions,
                           _relate_region as relate_region_to_multiregion,
@@ -51,11 +51,11 @@ def relate_multisegment(multipolygon: Multipolygon,
                         multisegment: Multisegment) -> Relation:
     if not (multisegment and multipolygon):
         return Relation.DISJOINT
-    multisegment_bounding_box = bounding_box.from_iterables(multisegment)
+    multisegment_bounding_box = bounding.box_from_iterables(multisegment)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for border, holes in multipolygon:
-        polygon_bounding_box = bounding_box.from_iterable(border)
-        if not bounding_box.disjoint_with(polygon_bounding_box,
+        polygon_bounding_box = bounding.box_from_iterable(border)
+        if not bounding.box_disjoint_with(polygon_bounding_box,
                                           multisegment_bounding_box):
             if disjoint:
                 disjoint = False
@@ -80,11 +80,11 @@ def relate_multisegment(multipolygon: Multipolygon,
 def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
-    contour_bounding_box = bounding_box.from_iterable(contour)
+    contour_bounding_box = bounding.box_from_iterable(contour)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for border, holes in multipolygon:
-        polygon_bounding_box = bounding_box.from_iterable(border)
-        if not bounding_box.disjoint_with(polygon_bounding_box,
+        polygon_bounding_box = bounding.box_from_iterable(border)
+        if not bounding.box_disjoint_with(polygon_bounding_box,
                                           contour_bounding_box):
             if disjoint:
                 disjoint = False
@@ -108,14 +108,14 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
 
 def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
     return (_relate_region(multipolygon, region,
-                           bounding_box.from_iterable(region))
+                           bounding.box_from_iterable(region))
             if multipolygon
             else Relation.DISJOINT)
 
 
 def _relate_region(multipolygon: Multipolygon,
                    region: Region,
-                   region_bounding_box: bounding_box.BoundingBox) -> Relation:
+                   region_bounding_box: bounding.Box) -> Relation:
     relation_with_borders = relate_region_to_multiregion(
             _to_borders(multipolygon), region, region_bounding_box)
     if relation_with_borders in (Relation.DISJOINT,
@@ -153,10 +153,10 @@ def relate_multiregion(multipolygon: Multipolygon,
                        multiregion: Multiregion) -> Relation:
     if not (multipolygon and multiregion):
         return Relation.DISJOINT
-    multiregion_bounding_box = bounding_box.from_iterables(multiregion)
+    multiregion_bounding_box = bounding.box_from_iterables(multiregion)
     relation_with_borders = relate_multiregions(
             _to_borders(multipolygon), multiregion,
-            bounding_box.from_iterables(_to_borders(multipolygon)),
+            bounding.box_from_iterables(_to_borders(multipolygon)),
             multiregion_bounding_box)
     if relation_with_borders in (Relation.DISJOINT,
                                  Relation.TOUCH,
@@ -172,7 +172,7 @@ def relate_multiregion(multipolygon: Multipolygon,
     elif has_holes(multipolygon):
         relation_with_holes = relate_multiregions(
                 _to_holes(multipolygon), multiregion,
-                bounding_box.from_iterables(_to_holes(multipolygon)),
+                bounding.box_from_iterables(_to_holes(multipolygon)),
                 multiregion_bounding_box)
         if relation_with_holes is Relation.DISJOINT:
             return relation_with_borders
@@ -193,7 +193,7 @@ def relate_multiregion(multipolygon: Multipolygon,
 def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
     border, holes = polygon
     return (_relate_polygon(multipolygon, border, holes,
-                            bounding_box.from_iterable(border))
+                            bounding.box_from_iterable(border))
             if multipolygon
             else Relation.DISJOINT)
 
@@ -201,14 +201,14 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
 def _relate_polygon(multipolygon: Multipolygon,
                     border: Region,
                     holes: Multiregion,
-                    border_bounding_box: bounding_box.BoundingBox) -> Relation:
+                    border_bounding_box: bounding.Box) -> Relation:
     if not holes:
         return _relate_region(multipolygon, border, border_bounding_box)
     last_relation = None
     for sub_border, sub_holes in multipolygon:
         relation = relate_polygon_to_polygon(
                 sub_border, sub_holes, border, holes,
-                bounding_box.from_iterable(sub_border), border_bounding_box)
+                bounding.box_from_iterable(sub_border), border_bounding_box)
         if relation is Relation.DISJOINT:
             if last_relation is None:
                 last_relation = relation
@@ -246,8 +246,8 @@ def _relate_polygon(multipolygon: Multipolygon,
 def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
-    goal_bounding_box = bounding_box.from_iterables(_to_borders(goal))
-    test_bounding_box = bounding_box.from_iterables(_to_borders(test))
+    goal_bounding_box = bounding.box_from_iterables(_to_borders(goal))
+    test_bounding_box = bounding.box_from_iterables(_to_borders(test))
     borders_relation = relate_multiregions(
             _to_borders(goal), _to_borders(test), goal_bounding_box,
             test_bounding_box)
@@ -261,8 +261,8 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
         if goal_has_holes and test_has_holes:
             holes_relation = relate_multiregions(
                     _to_holes(test), _to_holes(goal),
-                    bounding_box.from_iterables(_to_holes(test)),
-                    bounding_box.from_iterables(_to_holes(goal)))
+                    bounding.box_from_iterables(_to_holes(test)),
+                    bounding.box_from_iterables(_to_holes(goal)))
             if holes_relation in (Relation.DISJOINT,
                                   Relation.TOUCH,
                                   Relation.OVERLAP):
@@ -291,7 +291,7 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
             goal_holes = list(_to_holes(goal))
             for hole_index, hole in enumerate(goal_holes):
                 hole_relation = relate_region_to_multiregion(
-                        test_borders, hole, bounding_box.from_iterable(hole))
+                        test_borders, hole, bounding.box_from_iterable(hole))
                 if hole_relation is Relation.TOUCH:
                     if none_touch:
                         none_touch = False
@@ -318,8 +318,8 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
                 holes_relation = (
                     relate_multiregions(
                             _to_holes(test), subsets_holes,
-                            bounding_box.from_iterables(_to_holes(test)),
-                            bounding_box.from_iterables(subsets_holes))
+                            bounding.box_from_iterables(_to_holes(test)),
+                            bounding.box_from_iterables(subsets_holes))
                     if has_holes(test)
                     else Relation.DISJOINT)
                 if holes_relation is Relation.EQUAL:
@@ -353,7 +353,7 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
         test_holes = list(_to_holes(test))
         for hole_index, hole in enumerate(test_holes):
             hole_relation = relate_region_to_multiregion(
-                    goal_borders, hole, bounding_box.from_iterable(hole))
+                    goal_borders, hole, bounding.box_from_iterable(hole))
             if hole_relation is Relation.TOUCH:
                 if none_touch:
                     none_touch = False
@@ -380,8 +380,8 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
             holes_relation = (
                 relate_multiregions(
                         _to_holes(goal), subsets_holes,
-                        bounding_box.from_iterables(_to_holes(goal)),
-                        bounding_box.from_iterables(subsets_holes))
+                        bounding.box_from_iterables(_to_holes(goal)),
+                        bounding.box_from_iterables(subsets_holes))
                 if has_holes(goal)
                 else Relation.DISJOINT)
             if holes_relation is Relation.EQUAL:

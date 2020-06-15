@@ -7,13 +7,12 @@ from robust.linear import segments_intersection
 from orient.hints import (Multisegment,
                           Point,
                           Segment)
-from . import bounding_box
+from . import bounding
 from .processing import process_open_linear_queue
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import OpenSweeper
-from .utils import flatten
 
 
 def relate_point(multisegment: Multisegment, point: Point) -> Relation:
@@ -138,9 +137,9 @@ def sort_endpoints(segment: Segment) -> Segment:
 def relate_multisegment(goal: Multisegment, test: Multisegment) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
-    goal_bounding_box, test_bounding_box = (bounding_box.from_iterables(goal),
-                                            bounding_box.from_iterables(test))
-    if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
+    goal_bounding_box, test_bounding_box = (bounding.box_from_iterables(goal),
+                                            bounding.box_from_iterables(test))
+    if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     sweeper = OpenSweeper()
     sweeper.register_segments(goal,

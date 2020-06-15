@@ -8,7 +8,7 @@ from orient.hints import (Contour,
                           Multisegment,
                           Point,
                           Segment)
-from . import bounding_box
+from . import bounding
 from .processing import (process_closed_linear_queue,
                          process_open_linear_queue)
 from .relation import Relation
@@ -86,9 +86,9 @@ def relate_multisegment(contour: Contour,
     if not multisegment:
         return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
-        bounding_box.from_iterable(contour),
-        bounding_box.from_iterables(multisegment))
-    if bounding_box.disjoint_with(contour_bounding_box,
+        bounding.box_from_iterable(contour),
+        bounding.box_from_iterables(multisegment))
+    if bounding.box_disjoint_with(contour_bounding_box,
                                   multisegment_bounding_box):
         return Relation.DISJOINT
     sweeper = OpenSweeper()
@@ -103,9 +103,9 @@ def relate_multisegment(contour: Contour,
 
 
 def relate_contour(goal: Contour, test: Contour) -> Relation:
-    goal_bounding_box, test_bounding_box = (bounding_box.from_iterable(goal),
-                                            bounding_box.from_iterable(test))
-    if bounding_box.disjoint_with(goal_bounding_box, test_bounding_box):
+    goal_bounding_box, test_bounding_box = (bounding.box_from_iterable(goal),
+                                            bounding.box_from_iterable(test))
+    if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL

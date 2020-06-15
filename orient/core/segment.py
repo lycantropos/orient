@@ -3,7 +3,7 @@ from robust.angular import (Orientation,
 
 from orient.hints import (Point,
                           Segment)
-from . import bounding_box
+from . import bounding
 from .relation import Relation
 
 
@@ -12,8 +12,8 @@ def relate_point(segment: Segment, point: Point) -> Relation:
     return (
         Relation.COMPONENT
         if (point == start or point == end
-            or (bounding_box
-                .contains_point(bounding_box.from_iterable(segment), point)
+            or (bounding
+                .box_contains_point(bounding.box_from_iterable(segment), point)
                 and orientation(end, start, point) is Orientation.COLLINEAR))
         else Relation.DISJOINT)
 

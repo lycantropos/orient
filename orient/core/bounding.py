@@ -5,23 +5,23 @@ from orient.hints import (Coordinate,
                           Point)
 from .utils import flatten
 
-BoundingBox = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
+Box = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 
 
-def contains_point(bounding_box: BoundingBox, point: Point) -> bool:
-    x_min, x_max, y_min, y_max = bounding_box
+def box_contains_point(box: Box, point: Point) -> bool:
+    x_min, x_max, y_min, y_max = box
     point_x, point_y = point
     return x_min <= point_x <= x_max and y_min <= point_y <= y_max
 
 
-def disjoint_with(goal: BoundingBox, test: BoundingBox) -> bool:
+def box_disjoint_with(goal: Box, test: Box) -> bool:
     ((goal_x_min, goal_x_max, goal_y_min, goal_y_max),
      (test_x_min, test_x_max, test_y_min, test_y_max)) = goal, test
     return (goal_x_max < test_x_min or test_x_max < goal_x_min
             or goal_y_max < test_y_min or test_y_max < goal_y_min)
 
 
-def from_iterable(points: Iterable[Point]) -> BoundingBox:
+def box_from_iterable(points: Iterable[Point]) -> Box:
     iterator = iter(points)
     x_min, y_min = x_max, y_max = next(iterator)
     for x, y in iterator:
@@ -30,5 +30,5 @@ def from_iterable(points: Iterable[Point]) -> BoundingBox:
     return x_min, x_max, y_min, y_max
 
 
-def from_iterables(iterables: Iterable[Iterable[Point]]) -> BoundingBox:
-    return from_iterable(flatten(iterables))
+def box_from_iterables(iterables: Iterable[Iterable[Point]]) -> Box:
+    return box_from_iterable(flatten(iterables))
