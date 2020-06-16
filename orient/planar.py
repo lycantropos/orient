@@ -1189,24 +1189,55 @@ def multiregion_in_multipolygon(multiregion: Multiregion,
     :param multipolygon: multipolygon to check in.
     :returns: relation between multiregion and multipolygon.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> multiregion_in_multipolygon([], []) is Relation.DISJOINT
+    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
+    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
+    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
+    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
+    >>> (multiregion_in_multipolygon([], [])
+    ...  is multiregion_in_multipolygon([], [(outer_square, [])])
+    ...  is multiregion_in_multipolygon([outer_square], [])
+    ...  is multiregion_in_multipolygon([innermore_square],
+    ...                                 [(outer_square, [inner_square])])
+    ...  is Relation.DISJOINT)
     True
-    >>> multiregion_in_multipolygon([triangle], []) is Relation.DISJOINT
+    >>> (multiregion_in_multipolygon([inner_square],
+    ...                              [(outer_square, [inner_square])])
+    ...  is multiregion_in_multipolygon([innermost_square],
+    ...                                 [(outer_square, [inner_square]),
+    ...                                  (innermore_square,
+    ...                                   [innermost_square])])
+    ...  is Relation.TOUCH)
     True
-    >>> multiregion_in_multipolygon([square], []) is Relation.DISJOINT
+    >>> (multiregion_in_multipolygon([inner_square],
+    ...                              [(outer_square, [innermore_square])])
+    ...  is multiregion_in_multipolygon([innermore_square],
+    ...                                 [(outer_square, [inner_square]),
+    ...                                  (inner_square, [innermost_square])])
+    ...  is Relation.OVERLAP)
     True
-    >>> (multiregion_in_multipolygon([triangle], [(triangle, [])])
-    ...  is Relation.EQUAL)
+    >>> (multiregion_in_multipolygon([outer_square], [(inner_square, [])])
+    ...  is Relation.COVER)
     True
-    >>> (multiregion_in_multipolygon([square], [(triangle, [])])
+    >>> (multiregion_in_multipolygon([outer_square],
+    ...                              [(outer_square, [inner_square])])
+    ...  is multiregion_in_multipolygon([outer_square],
+    ...                                 [(outer_square, [inner_square]),
+    ...                                  (inner_square, [innermost_square])])
     ...  is Relation.ENCLOSES)
     True
-    >>> (multiregion_in_multipolygon([triangle], [(square, [])])
-    ...  is Relation.ENCLOSED)
+    >>> (multiregion_in_multipolygon([outer_square], [(outer_square, [])])
+    ...  is Relation.EQUAL)
     True
-    >>> multiregion_in_multipolygon([square], [(square, [])]) is Relation.EQUAL
+    >>> (multiregion_in_multipolygon([innermore_square],
+    ...                              [(outer_square, [inner_square]),
+    ...                               (innermore_square, [])])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (multiregion_in_multipolygon([inner_square], [(outer_square, [])])
+    ...  is multiregion_in_multipolygon([innermost_square],
+    ...                                 [(outer_square, [inner_square]),
+    ...                                  (innermore_square, [])])
+    ...  is Relation.WITHIN)
     True
     """
     return _multipolygon.relate_multiregion(multipolygon, multiregion)
