@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Iterable
 
 from orient.hints import (Contour,
                           Multipolygon,
@@ -15,7 +15,8 @@ from .multiregion import (_relate_multiregion as relate_multiregions,
                           to_segments as multiregion_to_segments)
 from .polygon import (_relate_polygon as relate_polygon_to_polygon,
                       relate_point as relate_point_to_polygon,
-                      relate_segment as relate_segment_to_polygon)
+                      relate_segment as relate_segment_to_polygon,
+                      to_segments as polygon_to_segments)
 from .processing import (process_complex_compound_queue,
                          process_linear_compound_queue)
 from .region import to_segments as region_to_segments
@@ -250,28 +251,27 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
     goal_bounding_box = bounding.box_from_iterables(_to_borders(goal))
     test_bounding_box = bounding.box_from_iterables(_to_borders(test))
     sweeper = CompoundSweeper()
-    for border, holes in goal:
-        sweeper.register_segments(region_to_segments(border),
-                                  from_test=False)
-        sweeper.register_segments(multiregion_to_segments(holes),
-                                  from_test=False)
-    for border, holes in test:
-        sweeper.register_segments(region_to_segments(border),
-                                  from_test=True)
-        sweeper.register_segments(multiregion_to_segments(holes),
-                                  from_test=True)
+    sweeper.register_segments(to_segments(goal),
+                              from_test=False)
+    sweeper.register_segments(to_segments(test),
+                              from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
     return process_complex_compound_queue(sweeper, min(goal_max_x, test_max_x))
+
+
+def to_segments(polygons: Iterable[Polygon]) -> Iterable[Segment]:
+    for polygon in polygons:
+        yield from polygon_to_segments(polygon)
 
 
 def has_holes(multipolygon: Multipolygon) -> bool:
     return any(holes for _, holes in multipolygon)
 
 
-def _to_borders(multipolygon: Multipolygon) -> Iterator[Region]:
+def _to_borders(multipolygon: Multipolygon) -> Iterable[Region]:
     return (border for border, _ in multipolygon)
 
 
-def _to_holes(multipolygon: Multipolygon) -> Iterator[Region]:
+def _to_holes(multipolygon: Multipolygon) -> Iterable[Region]:
     return flatten(holes for _, holes in multipolygon)

@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from orient.hints import (Contour,
                           Multiregion,
                           Multisegment,
@@ -11,12 +13,14 @@ from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           as relate_multisegment_to_multiregion,
                           _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
-                          relate_segment as relate_segment_to_multiregion)
+                          relate_segment as relate_segment_to_multiregion,
+                          to_segments as multiregion_to_segments)
 from .region import (_relate_contour as relate_contour_to_region,
                      _relate_multisegment as relate_multisegment_to_region,
                      _relate_region as relate_regions,
                      relate_point as relate_point_to_region,
-                     relate_segment as relate_segment_to_region)
+                     relate_segment as relate_segment_to_region,
+                     to_segments as region_to_segments)
 from .relation import Relation
 
 
@@ -356,3 +360,9 @@ def _relate_polygon(goal_border: Region,
         return (Relation.ENCLOSES
                 if goal_holes and borders_relation is Relation.COMPOSITE
                 else borders_relation)
+
+
+def to_segments(polygon: Polygon) -> Iterable[Segment]:
+    border, holes = polygon
+    yield from region_to_segments(border)
+    yield from multiregion_to_segments(holes)
