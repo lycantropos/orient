@@ -103,17 +103,14 @@ class CompoundEvent(LinearEvent):
         Checks if the segment lies on the boundary of the components
         which intersect in region.
         """
-        return (self.in_intersection
-                and self.relationship is SegmentsRelationship.OVERLAP)
+        return self.overlap_transition is OverlapTransition.SAME
 
     @property
     def contours_overlap(self) -> bool:
         """
         Checks if the segment is a separate component of the intersection.
         """
-        return (not self.in_intersection
-                and self.relationship is SegmentsRelationship.OVERLAP
-                and self.overlap_transition is OverlapTransition.DIFFERENT)
+        return self.overlap_transition is OverlapTransition.DIFFERENT
 
     @property
     def inside(self) -> bool:
@@ -121,18 +118,8 @@ class CompoundEvent(LinearEvent):
         Checks if the segment enclosed by
         or lies within the region of the intersection.
         """
-        return (self.in_intersection
-                and (self.relationship is SegmentsRelationship.NONE
-                     or self.relationship is SegmentsRelationship.TOUCH))
-
-    @property
-    def in_intersection(self) -> bool:
-        """
-        Checks if the segment lies on the boundary of the intersection.
-        """
-        return (self.overlap_transition is OverlapTransition.NONE
-                and not self.other_in_out
-                or self.overlap_transition is OverlapTransition.SAME)
+        return (not self.other_in_out
+                and self.overlap_transition is OverlapTransition.NONE)
 
     @property
     def outside(self) -> bool:
@@ -140,8 +127,8 @@ class CompoundEvent(LinearEvent):
         Checks if the segment touches
         or disjoint with the region of the intersection.
         """
-        return (not self.in_intersection
-                and self.relationship is not SegmentsRelationship.OVERLAP)
+        return (self.other_in_out
+                and self.overlap_transition is OverlapTransition.NONE)
 
 
 Event = TypeVar('Event', LinearEvent, CompoundEvent)
