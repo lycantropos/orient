@@ -164,8 +164,8 @@ def process_compound_queue(sweeper: CompoundSweeper,
     for event in sweeper.sweep(stop_x):
         if event.relationship is SegmentsRelationship.CROSS:
             return Relation.OVERLAP
-        if (boundaries_do_not_intersect
-                and event.relationship is not SegmentsRelationship.NONE):
+        elif (boundaries_do_not_intersect
+              and event.relationship is not SegmentsRelationship.NONE):
             boundaries_do_not_intersect = False
         if event.common_boundary:
             if none_overlapping_components:
@@ -195,36 +195,23 @@ def process_compound_queue(sweeper: CompoundSweeper,
         elif goal_is_subset_of_test:
             goal_is_subset_of_test = False
     if boundaries_do_not_intersect:
-        return ((Relation.WITHIN
-                 if goal_boundary_not_in_test_interior
-                 else Relation.OVERLAP)
+        return (Relation.WITHIN
                 if test_is_subset_of_goal
-                else ((Relation.COVER
-                       if test_boundary_not_in_goal_interior
-                       else Relation.OVERLAP)
+                else (Relation.COVER
                       if goal_is_subset_of_test
                       else (Relation.DISJOINT
-                            if (test_boundary_not_in_goal_interior
-                                and goal_boundary_not_in_test_interior)
+                            if none_overlapping_components
                             else Relation.OVERLAP)))
     elif test_is_subset_of_goal:
         return (Relation.EQUAL
                 if goal_is_subset_of_test
-                else ((Relation.COMPONENT
-                       if goal_boundary_not_in_test_interior
-                       else Relation.OVERLAP)
+                else (Relation.COMPONENT
                       if test_boundary_not_in_goal_interior
-                      else (Relation.ENCLOSED
-                            if goal_boundary_not_in_test_interior
-                            else Relation.OVERLAP)))
+                      else Relation.ENCLOSED))
     elif goal_is_subset_of_test:
-        return ((Relation.COMPOSITE
-                 if test_boundary_not_in_goal_interior
-                 else Relation.OVERLAP)
+        return (Relation.COMPOSITE
                 if goal_boundary_not_in_test_interior
-                else (Relation.ENCLOSES
-                      if test_boundary_not_in_goal_interior
-                      else Relation.OVERLAP))
+                else Relation.ENCLOSES)
     else:
         return (Relation.TOUCH
                 if none_overlapping_components
