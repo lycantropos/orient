@@ -19,7 +19,6 @@ from .processing import (process_compound_queue,
 from .region import to_segments as region_to_segments
 from .relation import Relation
 from .sweep import CompoundSweeper
-from .utils import flatten
 
 
 def relate_point(multipolygon: Multipolygon, point: Point) -> Relation:
@@ -237,13 +236,5 @@ def to_segments(polygons: Iterable[Polygon]) -> Iterable[Segment]:
         yield from polygon_to_segments(polygon)
 
 
-def has_holes(multipolygon: Multipolygon) -> bool:
-    return any(holes for _, holes in multipolygon)
-
-
 def _to_borders(multipolygon: Multipolygon) -> Iterable[Region]:
     return (border for border, _ in multipolygon)
-
-
-def _to_holes(multipolygon: Multipolygon) -> Iterable[Region]:
-    return flatten(holes for _, holes in multipolygon)

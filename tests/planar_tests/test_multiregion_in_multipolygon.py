@@ -2,7 +2,6 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.multipolygon import has_holes
 from orient.hints import (Multipolygon,
                           Multiregion)
 from orient.planar import (Relation,
@@ -31,7 +30,7 @@ def test_basic(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
 
 @given(strategies.non_empty_multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
-    multipolygon_has_holes = has_holes(multipolygon)
+    multipolygon_has_holes = any(holes for _, holes in multipolygon)
     assert (multiregion_in_multipolygon([border for border, _ in multipolygon],
                                         multipolygon)
             is (Relation.ENCLOSES
