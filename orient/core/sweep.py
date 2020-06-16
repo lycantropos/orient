@@ -22,9 +22,9 @@ from orient.hints import (Coordinate,
                           Segment)
 from .event import (ComplexCompoundEvent,
                     CompoundEvent,
-                    EdgeKind,
                     Event,
-                    LinearEvent)
+                    LinearEvent,
+                    OverlapTransition)
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
@@ -158,10 +158,10 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
 
             if starts_equal:
                 # both line segments are equal or share the left endpoint
-                below_event.edge_kind = EdgeKind.NON_CONTRIBUTING
-                event.edge_kind = (EdgeKind.SAME_TRANSITION
-                                   if event.in_out is below_event.in_out
-                                   else EdgeKind.DIFFERENT_TRANSITION)
+                below_event.overlap_transition = event.overlap_transition = (
+                    OverlapTransition.SAME
+                    if event.in_out is below_event.in_out
+                    else OverlapTransition.DIFFERENT)
                 if ends_equal:
                     event.set_both_relationships(relationship)
                     below_event.set_both_relationships(relationship)

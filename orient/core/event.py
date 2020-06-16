@@ -76,15 +76,14 @@ class LinearEvent:
 
 
 @unique
-class EdgeKind(IntEnum):
-    NORMAL = 0
-    NON_CONTRIBUTING = 1
-    SAME_TRANSITION = 2
-    DIFFERENT_TRANSITION = 3
+class OverlapTransition(IntEnum):
+    NONE = 0
+    SAME = 1
+    DIFFERENT = 2
 
 
 class CompoundEvent(LinearEvent):
-    __slots__ = 'edge_kind', 'in_out', 'other_in_out'
+    __slots__ = 'overlap_transition', 'in_out', 'other_in_out'
 
     def __init__(self,
                  is_left_endpoint: bool,
@@ -94,14 +93,15 @@ class CompoundEvent(LinearEvent):
                  relationship: SegmentsRelationship) -> None:
         super().__init__(is_left_endpoint, start, complement, from_test,
                          relationship)
-        self.edge_kind = EdgeKind.NORMAL
+        self.overlap_transition = OverlapTransition.NONE
         self.in_out = None
         self.other_in_out = None
 
     @property
     def in_intersection(self) -> bool:
-        return (self.edge_kind is EdgeKind.NORMAL and not self.other_in_out
-                or self.edge_kind is EdgeKind.SAME_TRANSITION)
+        return (self.overlap_transition is OverlapTransition.NONE
+                and not self.other_in_out
+                or self.overlap_transition is OverlapTransition.SAME)
 
     @property
     def inside(self) -> bool:
