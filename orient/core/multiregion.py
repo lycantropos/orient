@@ -8,13 +8,15 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding
 from .contour import to_segments as contour_to_segments
-from .processing import (process_compound_queue,
+from .processing import (process_complex_compound_queue,
+                         process_compound_queue,
                          process_linear_compound_queue)
 from .region import (relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
                      to_segments as region_to_segments)
 from .relation import Relation
-from .sweep import CompoundSweeper
+from .sweep import (ComplexCompoundSweeper,
+                    CompoundSweeper)
 
 
 def relate_point(multiregion: Multiregion, point: Point) -> Relation:
@@ -168,14 +170,19 @@ def _relate_multiregion(goal: Iterable[Region],
                         test_bounding_box: bounding.Box) -> Relation:
     if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(goal),
-                              from_test=False)
-    sweeper.register_segments(to_segments(test),
-                              from_test=True)
+    sweeper = ComplexCompoundSweeper()
+    for region_id, region in enumerate(goal):
+        sweeper.register_segments(region_to_segments(region),
+                                  from_test=False,
+                                  component_id=region_id)
+    for region_id, region in enumerate(test):
+        sweeper.register_segments(region_to_segments(region),
+                                  from_test=True,
+                                  component_id=region_id)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
+    return process_complex_compound_queue(sweeper, min(goal_max_x, test_max_x),
+                                          [len(region) for region in test])
 
 
 def to_segments(regions: Iterable[Region]) -> Iterable[Segment]:

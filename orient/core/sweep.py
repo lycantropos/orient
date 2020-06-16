@@ -20,7 +20,8 @@ from robust.projection import signed_length
 from orient.hints import (Coordinate,
                           Point,
                           Segment)
-from .event import (CompoundEvent,
+from .event import (ComplexCompoundEvent,
+                    CompoundEvent,
                     EdgeKind,
                     Event,
                     LinearEvent)
@@ -45,14 +46,15 @@ class Sweeper(Generic[Event]):
 
     def register_segments(self, segments: Iterable[Segment],
                           *,
-                          from_test: bool) -> None:
+                          from_test: bool,
+                          **kwargs: Any) -> None:
         for start, end in segments:
             if start > end:
                 start, end = end, start
             start_event = self.event_cls(True, start, None, from_test,
-                                         SegmentsRelationship.NONE)
+                                         SegmentsRelationship.NONE, **kwargs)
             end_event = self.event_cls(False, end, start_event, from_test,
-                                       SegmentsRelationship.NONE)
+                                       SegmentsRelationship.NONE, **kwargs)
             start_event.complement = end_event
             self._events_queue.push(start_event)
             self._events_queue.push(end_event)
@@ -215,6 +217,22 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         else:
             event.in_out, event.other_in_out = (not below_event.other_in_out,
                                                 below_event.in_out)
+
+
+class ComplexCompoundSweeper(CompoundSweeper):
+    event_cls = ComplexCompoundEvent
+
+    def divide_segment(self, event: ComplexCompoundEvent, point: Point,
+                       **kwargs: Any) -> None:
+        left_event = self.event_cls(True, point, event.complement,
+                                    event.from_test,
+                                    event.complement.relationship,
+                                    event.component_id)
+        right_event = self.event_cls(False, point, event, event.from_test,
+                                     event.relationship, event.component_id)
+        event.complement.complement, event.complement = left_event, right_event
+        self._events_queue.push(left_event)
+        self._events_queue.push(right_event)
 
 
 class LinearSweeper(Sweeper[LinearEvent]):

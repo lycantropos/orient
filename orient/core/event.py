@@ -86,7 +86,8 @@ class EdgeKind(IntEnum):
 class CompoundEvent(LinearEvent):
     __slots__ = 'edge_kind', 'in_out', 'other_in_out'
 
-    def __init__(self, is_left_endpoint: bool,
+    def __init__(self,
+                 is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['CompoundEvent'],
                  from_test: bool,
@@ -113,6 +114,14 @@ class CompoundEvent(LinearEvent):
                      or self.relationship is SegmentsRelationship.TOUCH))
 
     @property
+    def boundary(self) -> bool:
+        """
+        Checks if the segment lies on the boundary of the intersection.
+        """
+        return (self.in_intersection
+                and self.relationship is SegmentsRelationship.OVERLAP)
+
+    @property
     def outside(self) -> bool:
         """
         Checks if the segment touches
@@ -122,4 +131,19 @@ class CompoundEvent(LinearEvent):
                 and self.relationship is not SegmentsRelationship.OVERLAP)
 
 
-Event = TypeVar('Event', LinearEvent, CompoundEvent)
+class ComplexCompoundEvent(CompoundEvent):
+    __slots__ = 'component_id',
+
+    def __init__(self,
+                 is_left_endpoint: bool,
+                 start: Point,
+                 complement: Optional['CompoundEvent'],
+                 from_test: bool,
+                 relationship: SegmentsRelationship,
+                 component_id: int) -> None:
+        super().__init__(is_left_endpoint, start, complement, from_test,
+                         relationship)
+        self.component_id = component_id
+
+
+Event = TypeVar('Event', LinearEvent, CompoundEvent, ComplexCompoundEvent)
