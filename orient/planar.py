@@ -1336,8 +1336,18 @@ def multipolygon_in_multipolygon(left: Multipolygon,
     True
     >>> (multipolygon_in_multipolygon([(outer_square, [])],
     ...                               [(outer_square, [])])
-    ...  is multipolygon_in_multipolygon([(inner_square, [])],
-    ...                                  [(inner_square, [])])
+    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square])],
+    ...                                  [(outer_square, [inner_square])])
+    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square]),
+    ...                                   (innermore_square, [])],
+    ...                                  [(outer_square, [inner_square]),
+    ...                                   (innermore_square, [])])
+    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square]),
+    ...                                   (innermore_square,
+    ...                                    [innermost_square])],
+    ...                                  [(outer_square, [inner_square]),
+    ...                                   (innermore_square,
+    ...                                    [innermost_square])])
     ...  is Relation.EQUAL)
     True
     >>> (multipolygon_in_multipolygon([(innermore_square, [])],
