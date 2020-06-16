@@ -10,11 +10,8 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding
 from .contour import to_segments as contour_to_segments
-from .multiregion import (_relate_multiregion as relate_multiregions,
-                          _relate_region as relate_region_to_multiregion,
-                          to_segments as multiregion_to_segments)
-from .polygon import (_relate_polygon as relate_polygon_to_polygon,
-                      relate_point as relate_point_to_polygon,
+from .multiregion import to_segments as multiregion_to_segments
+from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon,
                       to_segments as polygon_to_segments)
 from .processing import (process_compound_queue,
@@ -109,46 +106,45 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
 
 
 def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
-    return (_relate_region(multipolygon, region,
-                           bounding.box_from_iterable(region))
-            if multipolygon
-            else Relation.DISJOINT)
-
-
-def _relate_region(multipolygon: Multipolygon,
-                   region: Region,
-                   region_bounding_box: bounding.Box) -> Relation:
-    relation_with_borders = relate_region_to_multiregion(
-            _to_borders(multipolygon), region, region_bounding_box)
-    if relation_with_borders in (Relation.DISJOINT,
-                                 Relation.TOUCH,
-                                 Relation.OVERLAP,
-                                 Relation.COVER,
-                                 Relation.ENCLOSES):
-        return relation_with_borders
-    elif (relation_with_borders is Relation.COMPOSITE
-          or relation_with_borders is Relation.EQUAL):
-        return (Relation.ENCLOSES
-                if has_holes(multipolygon)
-                else relation_with_borders)
-    else:
-        relation_with_holes = relate_region_to_multiregion(
-                _to_holes(multipolygon), region, region_bounding_box)
-        if relation_with_holes is Relation.DISJOINT:
-            return relation_with_borders
-        elif relation_with_holes is Relation.WITHIN:
-            return Relation.DISJOINT
-        elif relation_with_holes is Relation.TOUCH:
-            return Relation.ENCLOSED
-        elif (relation_with_holes is Relation.OVERLAP
-              or relation_with_holes is Relation.COMPOSITE):
-            return Relation.OVERLAP
-        elif relation_with_holes in (Relation.ENCLOSED,
-                                     Relation.COMPONENT,
-                                     Relation.EQUAL):
-            return Relation.TOUCH
+    if not multipolygon:
+        return Relation.DISJOINT
+    region_bounding_box = bounding.box_from_iterable(region)
+    all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
+                                                                None, None)
+    for border, holes in multipolygon:
+        polygon_bounding_box = bounding.box_from_iterable(border)
+        if bounding.box_disjoint_with(region_bounding_box,
+                                      polygon_bounding_box):
+            if none_disjoint:
+                none_disjoint = False
         else:
-            return Relation.OVERLAP
+            if all_disjoint:
+                all_disjoint = False
+                _, multipolygon_max_x, _, _ = polygon_bounding_box
+                sweeper = CompoundSweeper()
+                sweeper.register_segments(region_to_segments(region),
+                                          from_test=True)
+            else:
+                _, polygon_max_x, _, _ = polygon_bounding_box
+                multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
+            sweeper.register_segments(region_to_segments(border),
+                                      from_test=False)
+            sweeper.register_segments(multiregion_to_segments(holes),
+                                      from_test=False)
+    if all_disjoint:
+        return Relation.DISJOINT
+    _, region_max_x, _, _ = region_bounding_box
+    relation = process_compound_queue(sweeper, min(multipolygon_max_x,
+                                                   region_max_x))
+    return (relation
+            if none_disjoint
+            else (Relation.COMPONENT
+                  if relation is Relation.EQUAL
+                  else (Relation.OVERLAP
+                        if relation in (Relation.COVER,
+                                        Relation.ENCLOSES,
+                                        Relation.COMPOSITE)
+                        else relation)))
 
 
 def relate_multiregion(multipolygon: Multipolygon,
@@ -156,93 +152,37 @@ def relate_multiregion(multipolygon: Multipolygon,
     if not (multipolygon and multiregion):
         return Relation.DISJOINT
     multiregion_bounding_box = bounding.box_from_iterables(multiregion)
-    relation_with_borders = relate_multiregions(
-            _to_borders(multipolygon), multiregion,
-            bounding.box_from_iterables(_to_borders(multipolygon)),
-            multiregion_bounding_box)
-    if relation_with_borders in (Relation.DISJOINT,
-                                 Relation.TOUCH,
-                                 Relation.OVERLAP,
-                                 Relation.COVER,
-                                 Relation.ENCLOSES):
-        return relation_with_borders
-    elif (relation_with_borders is Relation.COMPOSITE
-          or relation_with_borders is Relation.EQUAL):
-        return (Relation.ENCLOSES
-                if has_holes(multipolygon)
-                else relation_with_borders)
-    elif has_holes(multipolygon):
-        relation_with_holes = relate_multiregions(
-                _to_holes(multipolygon), multiregion,
-                bounding.box_from_iterables(_to_holes(multipolygon)),
-                multiregion_bounding_box)
-        if relation_with_holes is Relation.DISJOINT:
-            return relation_with_borders
-        elif relation_with_holes is Relation.WITHIN:
-            return Relation.DISJOINT
-        elif relation_with_holes is Relation.TOUCH:
-            return Relation.ENCLOSED
-        elif relation_with_holes in (Relation.ENCLOSED,
-                                     Relation.COMPONENT,
-                                     Relation.EQUAL):
-            return Relation.TOUCH
-        else:
-            return Relation.OVERLAP
-    else:
-        return relation_with_borders
+    multipolygon_bounding_box = bounding.box_from_iterables(
+            _to_borders(multipolygon))
+    if bounding.box_disjoint_with(multipolygon_bounding_box,
+                                  multiregion_bounding_box):
+        return Relation.DISJOINT
+    sweeper = CompoundSweeper()
+    sweeper.register_segments(to_segments(multipolygon),
+                              from_test=False)
+    sweeper.register_segments(multiregion_to_segments(multiregion),
+                              from_test=True)
+    (_, goal_max_x, _, _), (_, test_max_x, _, _) = (multipolygon_bounding_box,
+                                                    multiregion_bounding_box)
+    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
 def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
-    border, holes = polygon
-    return (_relate_polygon(multipolygon, border, holes,
-                            bounding.box_from_iterable(border))
-            if multipolygon
-            else Relation.DISJOINT)
-
-
-def _relate_polygon(multipolygon: Multipolygon,
-                    border: Region,
-                    holes: Multiregion,
-                    border_bounding_box: bounding.Box) -> Relation:
-    if not holes:
-        return _relate_region(multipolygon, border, border_bounding_box)
-    last_relation = None
-    for sub_border, sub_holes in multipolygon:
-        relation = relate_polygon_to_polygon(
-                sub_border, sub_holes, border, holes,
-                bounding.box_from_iterable(sub_border), border_bounding_box)
-        if relation is Relation.DISJOINT:
-            if last_relation is None:
-                last_relation = relation
-            elif (last_relation is not Relation.DISJOINT
-                  and last_relation is not Relation.TOUCH):
-                return Relation.OVERLAP
-        elif relation is Relation.TOUCH:
-            if last_relation is None or last_relation is Relation.DISJOINT:
-                last_relation = relation
-            elif last_relation is not Relation.TOUCH:
-                return Relation.OVERLAP
-        elif relation in (Relation.OVERLAP,
-                          Relation.COMPONENT,
-                          Relation.ENCLOSED,
-                          Relation.WITHIN):
-            return relation
-        elif relation is Relation.EQUAL:
-            return (relation
-                    if len(multipolygon) == 1
-                    else Relation.COMPONENT)
-        elif last_relation is None:
-            last_relation = relation
-        elif (last_relation is Relation.DISJOINT
-              or last_relation is Relation.TOUCH):
-            return Relation.OVERLAP
-        elif (relation is not last_relation
-              and last_relation is not Relation.ENCLOSES):
-            last_relation = Relation.ENCLOSES
-    return (relate_region_to_multiregion(_to_borders(multipolygon), border,
-                                         border_bounding_box)
-            if last_relation is Relation.COMPOSITE
-            else last_relation)
+    border, _ = polygon
+    multipolygon_bounding_box = bounding.box_from_iterables(
+            _to_borders(multipolygon))
+    polygon_bounding_box = bounding.box_from_iterable(border)
+    if bounding.box_disjoint_with(multipolygon_bounding_box,
+                                  polygon_bounding_box):
+        return Relation.DISJOINT
+    sweeper = CompoundSweeper()
+    sweeper.register_segments(to_segments(multipolygon),
+                              from_test=False)
+    sweeper.register_segments(polygon_to_segments(polygon),
+                              from_test=True)
+    (_, goal_max_x, _, _), (_, test_max_x, _, _) = (multipolygon_bounding_box,
+                                                    polygon_bounding_box)
+    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
 def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
