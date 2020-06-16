@@ -144,19 +144,4 @@ class CompoundEvent(LinearEvent):
                 and self.relationship is not SegmentsRelationship.OVERLAP)
 
 
-class ComplexCompoundEvent(CompoundEvent):
-    __slots__ = 'component_id',
-
-    def __init__(self,
-                 is_left_endpoint: bool,
-                 start: Point,
-                 complement: Optional['CompoundEvent'],
-                 from_test: bool,
-                 relationship: SegmentsRelationship,
-                 component_id: int) -> None:
-        super().__init__(is_left_endpoint, start, complement, from_test,
-                         relationship)
-        self.component_id = component_id
-
-
-Event = TypeVar('Event', LinearEvent, CompoundEvent, ComplexCompoundEvent)
+Event = TypeVar('Event', LinearEvent, CompoundEvent)

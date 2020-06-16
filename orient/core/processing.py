@@ -5,7 +5,7 @@ from robust.linear import SegmentsRelationship
 
 from orient.hints import Coordinate
 from .relation import Relation
-from .sweep import (ComplexCompoundSweeper,
+from .sweep import (CompoundSweeper,
                     CompoundSweeper,
                     LinearSweeper)
 
@@ -224,15 +224,13 @@ def process_compound_queue(sweeper: CompoundSweeper,
                 else Relation.OVERLAP)
 
 
-def process_complex_compound_queue(sweeper: ComplexCompoundSweeper,
-                                   stop_x: Coordinate,
-                                   test_components_sizes: List[int]
-                                   ) -> Relation:
+def process_complex_compound_queue(sweeper: CompoundSweeper,
+                                   stop_x: Coordinate) -> Relation:
     test_boundary_not_in_goal_interior = True
     goal_boundary_not_in_test_interior = True
     boundaries_do_not_intersect = True
+    none_overlapping_components = True
     test_is_subset_of_goal = goal_is_subset_of_test = True
-    common_boundary_segments_counts = defaultdict(int)
     for event in sweeper.sweep(stop_x):
         if event.relationship is SegmentsRelationship.CROSS:
             return Relation.OVERLAP
@@ -240,9 +238,11 @@ def process_complex_compound_queue(sweeper: ComplexCompoundSweeper,
                 and event.relationship is not SegmentsRelationship.NONE):
             boundaries_do_not_intersect = False
         if event.common_boundary:
-            if event.from_test:
-                common_boundary_segments_counts[event.component_id] += 1
+            if none_overlapping_components:
+                none_overlapping_components = False
         elif event.inside:
+            if none_overlapping_components:
+                none_overlapping_components = False
             if test_boundary_not_in_goal_interior and event.from_test:
                 test_boundary_not_in_goal_interior = False
             if goal_boundary_not_in_test_interior and event.from_goal:
@@ -291,9 +291,5 @@ def process_complex_compound_queue(sweeper: ComplexCompoundSweeper,
                       else Relation.OVERLAP))
     else:
         return (Relation.TOUCH
-                if (test_boundary_not_in_goal_interior
-                    and goal_boundary_not_in_test_interior
-                    and all(count < test_components_sizes[component_id]
-                            for component_id, count
-                            in common_boundary_segments_counts.items()))
+                if none_overlapping_components
                 else Relation.OVERLAP)

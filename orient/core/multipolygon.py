@@ -20,8 +20,7 @@ from .processing import (process_complex_compound_queue,
                          process_linear_compound_queue)
 from .region import to_segments as region_to_segments
 from .relation import Relation
-from .sweep import (ComplexCompoundSweeper,
-                    CompoundSweeper)
+from .sweep import CompoundSweeper
 from .utils import flatten
 
 
@@ -250,26 +249,20 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
         return Relation.DISJOINT
     goal_bounding_box = bounding.box_from_iterables(_to_borders(goal))
     test_bounding_box = bounding.box_from_iterables(_to_borders(test))
-    sweeper = ComplexCompoundSweeper()
-    for polygon_id, (border, holes) in enumerate(goal):
+    sweeper = CompoundSweeper()
+    for border, holes in goal:
         sweeper.register_segments(region_to_segments(border),
-                                  from_test=False,
-                                  component_id=polygon_id)
+                                  from_test=False)
         sweeper.register_segments(multiregion_to_segments(holes),
-                                  from_test=False,
-                                  component_id=None)
-    for polygon_id, (border, holes) in enumerate(test):
+                                  from_test=False)
+    for border, holes in test:
         sweeper.register_segments(region_to_segments(border),
-                                  from_test=True,
-                                  component_id=polygon_id)
+                                  from_test=True)
         sweeper.register_segments(multiregion_to_segments(holes),
-                                  from_test=True,
-                                  component_id=None)
+                                  from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_complex_compound_queue(sweeper, min(goal_max_x, test_max_x),
-                                          [len(boundary)
-                                           for boundary, _ in test])
+    return process_complex_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
 def has_holes(multipolygon: Multipolygon) -> bool:
