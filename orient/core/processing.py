@@ -121,7 +121,6 @@ def process_linear_compound_queue(sweeper: CompoundSweeper,
         elif (has_no_touch
               and event.relationship is not SegmentsRelationship.NONE):
             has_no_touch = False
-
         if event.from_test:
             if test_is_subset_of_goal and event.outside:
                 test_is_subset_of_goal = False
@@ -130,11 +129,11 @@ def process_linear_compound_queue(sweeper: CompoundSweeper,
         elif (goal_border_subset_of_test
               and event.relationship is not SegmentsRelationship.OVERLAP):
             goal_border_subset_of_test = False
-
     if sweeper:
         if sweeper.peek().from_test:
-            test_is_subset_of_goal = False
-        else:
+            if test_is_subset_of_goal:
+                test_is_subset_of_goal = False
+        elif goal_border_subset_of_test:
             goal_border_subset_of_test = False
     if goal_border_subset_of_test:
         return (Relation.COMPONENT
