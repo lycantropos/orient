@@ -958,7 +958,8 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     ...  is Relation.ENCLOSES)
     True
     >>> (polygon_in_polygon((outer_square, []), (outer_square, []))
-    ...  is polygon_in_polygon((inner_square, []), (inner_square, []))
+    ...  is polygon_in_polygon((outer_square, [inner_square]),
+    ...                        (outer_square, [inner_square]))
     ...  is Relation.EQUAL)
     True
     >>> (polygon_in_polygon((outer_square, [inner_square]), (outer_square, []))
