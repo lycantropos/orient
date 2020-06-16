@@ -98,10 +98,22 @@ class CompoundEvent(LinearEvent):
         self.other_in_out = None
 
     @property
-    def in_intersection(self) -> bool:
-        return (self.overlap_transition is OverlapTransition.NONE
-                and not self.other_in_out
-                or self.overlap_transition is OverlapTransition.SAME)
+    def common_boundary(self) -> bool:
+        """
+        Checks if the segment lies on the boundary of the components
+        which intersect in region.
+        """
+        return (self.in_intersection
+                and self.relationship is SegmentsRelationship.OVERLAP)
+
+    @property
+    def contours_overlap(self) -> bool:
+        """
+        Checks if the segment is a separate component of the intersection.
+        """
+        return (not self.in_intersection
+                and self.relationship is SegmentsRelationship.OVERLAP
+                and self.overlap_transition is OverlapTransition.DIFFERENT)
 
     @property
     def inside(self) -> bool:
@@ -114,12 +126,13 @@ class CompoundEvent(LinearEvent):
                      or self.relationship is SegmentsRelationship.TOUCH))
 
     @property
-    def boundary(self) -> bool:
+    def in_intersection(self) -> bool:
         """
         Checks if the segment lies on the boundary of the intersection.
         """
-        return (self.in_intersection
-                and self.relationship is SegmentsRelationship.OVERLAP)
+        return (self.overlap_transition is OverlapTransition.NONE
+                and not self.other_in_out
+                or self.overlap_transition is OverlapTransition.SAME)
 
     @property
     def outside(self) -> bool:
