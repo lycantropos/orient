@@ -13,7 +13,7 @@ from orient.hints import (Coordinate,
                           Segment)
 
 
-class OpenEvent:
+class LinearEvent:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
                  'relationship')
 
@@ -83,12 +83,12 @@ class EdgeKind(IntEnum):
     DIFFERENT_TRANSITION = 3
 
 
-class ClosedEvent(OpenEvent):
+class CompoundEvent(LinearEvent):
     __slots__ = 'edge_kind', 'in_out', 'other_in_out'
 
     def __init__(self, is_left_endpoint: bool,
                  start: Point,
-                 complement: Optional['ClosedEvent'],
+                 complement: Optional['CompoundEvent'],
                  from_test: bool,
                  relationship: SegmentsRelationship) -> None:
         super().__init__(is_left_endpoint, start, complement, from_test,
@@ -122,4 +122,4 @@ class ClosedEvent(OpenEvent):
                 and self.relationship is not SegmentsRelationship.OVERLAP)
 
 
-Event = TypeVar('Event', OpenEvent, ClosedEvent)
+Event = TypeVar('Event', LinearEvent, CompoundEvent)

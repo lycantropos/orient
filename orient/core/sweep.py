@@ -20,10 +20,10 @@ from robust.projection import signed_length
 from orient.hints import (Coordinate,
                           Point,
                           Segment)
-from .event import (ClosedEvent,
+from .event import (CompoundEvent,
                     EdgeKind,
                     Event,
-                    OpenEvent)
+                    LinearEvent)
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
@@ -74,10 +74,10 @@ class Sweeper(Generic[Event]):
         """
 
 
-class ClosedSweeper(Sweeper[ClosedEvent]):
-    event_cls = ClosedEvent
+class CompoundSweeper(Sweeper[CompoundEvent]):
+    event_cls = CompoundEvent
 
-    def sweep(self, stop_x: Coordinate) -> Iterable[ClosedEvent]:
+    def sweep(self, stop_x: Coordinate) -> Iterable[CompoundEvent]:
         sweep_line = SweepLine()
         events_queue = self._events_queue
         while events_queue:
@@ -123,8 +123,8 @@ class ClosedSweeper(Sweeper[ClosedEvent]):
                             self.detect_intersection(below_event, above_event)
                     yield event
 
-    def detect_intersection(self, below_event: ClosedEvent,
-                            event: ClosedEvent) -> bool:
+    def detect_intersection(self, below_event: CompoundEvent,
+                            event: CompoundEvent) -> bool:
         """
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
@@ -205,8 +205,8 @@ class ClosedSweeper(Sweeper[ClosedEvent]):
         return False
 
     @staticmethod
-    def compute_transition(below_event: Optional[ClosedEvent],
-                           event: ClosedEvent) -> None:
+    def compute_transition(below_event: Optional[CompoundEvent],
+                           event: CompoundEvent) -> None:
         if below_event is None:
             event.in_out, event.other_in_out = False, True
         elif event.from_test is below_event.from_test:
@@ -217,15 +217,15 @@ class ClosedSweeper(Sweeper[ClosedEvent]):
                                                 below_event.in_out)
 
 
-class OpenSweeper(Sweeper):
-    event_cls = OpenEvent
+class LinearSweeper(Sweeper[LinearEvent]):
+    event_cls = LinearEvent
 
-    def sweep(self, stop_x: Coordinate) -> Iterable[OpenEvent]:
+    def sweep(self, stop_x: Coordinate) -> Iterable[LinearEvent]:
         sweep_line = SweepLine()
         events_queue = self._events_queue
         prev_start = None
-        prev_from_same_events = []  # type: List[OpenEvent]
-        prev_from_other_events = []  # type: List[OpenEvent]
+        prev_from_same_events = []  # type: List[LinearEvent]
+        prev_from_other_events = []  # type: List[LinearEvent]
         while events_queue:
             event = events_queue.peek()
             start = event.start
@@ -296,8 +296,8 @@ class OpenSweeper(Sweeper):
             prev_from_same_events, prev_from_other_events = (from_same_events,
                                                              from_other_events)
 
-    def detect_intersection(self, below_event: OpenEvent,
-                            event: OpenEvent) -> None:
+    def detect_intersection(self, below_event: LinearEvent,
+                            event: LinearEvent) -> None:
         """
         Populates events queue with intersection events.
         """

@@ -2,11 +2,11 @@ from robust.linear import SegmentsRelationship
 
 from orient.hints import Coordinate
 from .relation import Relation
-from .sweep import (ClosedSweeper,
-                    OpenSweeper)
+from .sweep import (CompoundSweeper,
+                    LinearSweeper)
 
 
-def process_open_linear_queue(sweeper: OpenSweeper,
+def process_open_linear_queue(sweeper: LinearSweeper,
                               stop_x: Coordinate) -> Relation:
     test_is_subset = goal_is_subset = True
     has_no_cross = has_no_touch = has_no_overlap = True
@@ -48,7 +48,7 @@ def process_open_linear_queue(sweeper: OpenSweeper,
                 else Relation.OVERLAP)
 
 
-def process_closed_linear_queue(sweeper: ClosedSweeper,
+def process_closed_linear_queue(sweeper: CompoundSweeper,
                                 stop_x: Coordinate) -> Relation:
     test_is_subset_of_goal = goal_is_subset_of_test = True
     test_boundary_not_in_goal_interior = True
@@ -109,7 +109,7 @@ def process_closed_linear_queue(sweeper: ClosedSweeper,
                 else Relation.OVERLAP)
 
 
-def process_linear_compound_queue(sweeper: ClosedSweeper,
+def process_linear_compound_queue(sweeper: CompoundSweeper,
                                   stop_x: Coordinate) -> Relation:
     # ``goal`` is a compound object
     # ``test`` is a linear object
@@ -154,7 +154,7 @@ def process_linear_compound_queue(sweeper: ClosedSweeper,
                 else Relation.CROSS)
 
 
-def process_compound_queue(sweeper: ClosedSweeper,
+def process_compound_queue(sweeper: CompoundSweeper,
                            stop_x: Coordinate) -> Relation:
     test_boundary_not_in_goal_interior = True
     goal_boundary_not_in_test_interior = True

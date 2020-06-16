@@ -14,8 +14,8 @@ from .processing import (process_closed_linear_queue,
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
-from .sweep import (ClosedSweeper,
-                    OpenSweeper)
+from .sweep import (CompoundSweeper,
+                    LinearSweeper)
 
 
 def relate_point(contour: Contour, point: Point) -> Relation:
@@ -91,7 +91,7 @@ def relate_multisegment(contour: Contour,
     if bounding.box_disjoint_with(contour_bounding_box,
                                   multisegment_bounding_box):
         return Relation.DISJOINT
-    sweeper = OpenSweeper()
+    sweeper = LinearSweeper()
     sweeper.register_segments(to_segments(contour),
                               from_test=False)
     sweeper.register_segments(multisegment,
@@ -109,7 +109,7 @@ def relate_contour(goal: Contour, test: Contour) -> Relation:
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL
-    sweeper = ClosedSweeper()
+    sweeper = CompoundSweeper()
     sweeper.register_segments(to_segments(goal),
                               from_test=False)
     sweeper.register_segments(to_segments(test),

@@ -14,7 +14,7 @@ from .region import (relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
                      to_segments as region_to_segments)
 from .relation import Relation
-from .sweep import ClosedSweeper
+from .sweep import CompoundSweeper
 
 
 def relate_point(multiregion: Multiregion, point: Point) -> Relation:
@@ -60,7 +60,7 @@ def _relate_multisegment(multiregion: Multiregion,
             if disjoint:
                 disjoint = False
                 _, multiregion_max_x, _, _ = region_bounding_box
-                sweeper = ClosedSweeper()
+                sweeper = CompoundSweeper()
                 sweeper.register_segments(multisegment,
                                           from_test=True)
             else:
@@ -93,7 +93,7 @@ def _relate_contour(multiregion: Multiregion,
             if disjoint:
                 disjoint = False
                 _, multiregion_max_x, _, _ = region_bounding_box
-                sweeper = ClosedSweeper()
+                sweeper = CompoundSweeper()
                 sweeper.register_segments(contour_to_segments(contour),
                                           from_test=True)
             else:
@@ -130,7 +130,7 @@ def _relate_region(goal_regions: Iterable[Region],
             if all_disjoint:
                 all_disjoint = False
                 _, goal_regions_max_x, _, _ = goal_region_bounding_box
-                sweeper = ClosedSweeper()
+                sweeper = CompoundSweeper()
                 sweeper.register_segments(region_to_segments(region),
                                           from_test=True)
             else:
@@ -168,7 +168,7 @@ def _relate_multiregion(goal: Iterable[Region],
                         test_bounding_box: bounding.Box) -> Relation:
     if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    sweeper = ClosedSweeper()
+    sweeper = CompoundSweeper()
     sweeper.register_segments(to_segments(goal),
                               from_test=False)
     sweeper.register_segments(to_segments(test),

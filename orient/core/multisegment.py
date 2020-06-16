@@ -12,7 +12,7 @@ from .processing import process_open_linear_queue
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
-from .sweep import OpenSweeper
+from .sweep import LinearSweeper
 
 
 def relate_point(multisegment: Multisegment, point: Point) -> Relation:
@@ -141,7 +141,7 @@ def relate_multisegment(goal: Multisegment, test: Multisegment) -> Relation:
                                             bounding.box_from_iterables(test))
     if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    sweeper = OpenSweeper()
+    sweeper = LinearSweeper()
     sweeper.register_segments(goal,
                               from_test=False)
     sweeper.register_segments(test,

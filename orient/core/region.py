@@ -19,7 +19,7 @@ from .processing import (process_compound_queue,
 from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
-from .sweep import ClosedSweeper
+from .sweep import CompoundSweeper
 
 
 def relate_point(region: Region, point: Point) -> Relation:
@@ -277,7 +277,7 @@ def _relate_multisegment(region: Region,
     if bounding.box_disjoint_with(multisegment_bounding_box,
                                   region_bounding_box):
         return Relation.DISJOINT
-    sweeper = ClosedSweeper()
+    sweeper = CompoundSweeper()
     sweeper.register_segments(to_segments(region),
                               from_test=False)
     sweeper.register_segments(multisegment,
@@ -302,7 +302,7 @@ def _relate_contour(region: Region,
         return Relation.DISJOINT
     if equal(region, contour):
         return Relation.COMPONENT
-    sweeper = ClosedSweeper()
+    sweeper = CompoundSweeper()
     sweeper.register_segments(to_segments(region),
                               from_test=False)
     sweeper.register_segments(contour_to_segments(contour),
@@ -326,7 +326,7 @@ def _relate_region(goal: Region,
         return Relation.DISJOINT
     if equal(goal, test):
         return Relation.EQUAL
-    sweeper = ClosedSweeper()
+    sweeper = CompoundSweeper()
     sweeper.register_segments(to_segments(goal),
                               from_test=False)
     sweeper.register_segments(to_segments(test),

@@ -19,7 +19,7 @@ from .polygon import (_relate_polygon as relate_polygon_to_polygon,
 from .processing import process_linear_compound_queue
 from .region import to_segments as region_to_segments
 from .relation import Relation
-from .sweep import ClosedSweeper
+from .sweep import CompoundSweeper
 from .utils import flatten
 
 
@@ -60,7 +60,7 @@ def relate_multisegment(multipolygon: Multipolygon,
             if disjoint:
                 disjoint = False
                 _, multipolygon_max_x, _, _ = polygon_bounding_box
-                sweeper = ClosedSweeper()
+                sweeper = CompoundSweeper()
                 sweeper.register_segments(multisegment,
                                           from_test=True)
             else:
@@ -89,7 +89,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
             if disjoint:
                 disjoint = False
                 _, multipolygon_max_x, _, _ = polygon_bounding_box
-                sweeper = ClosedSweeper()
+                sweeper = CompoundSweeper()
                 sweeper.register_segments(contour_to_segments(contour),
                                           from_test=True)
             else:
