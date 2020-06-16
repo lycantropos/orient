@@ -8,7 +8,7 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding
 from .contour import to_segments as contour_to_segments
-from .processing import (process_complex_compound_queue,
+from .processing import (process_compound_queue,
                          process_compound_queue,
                          process_linear_compound_queue)
 from .region import (relate_point as relate_point_to_region,
@@ -176,7 +176,7 @@ def _relate_multiregion(goal: Iterable[Region],
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_complex_compound_queue(sweeper, min(goal_max_x, test_max_x))
+    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
 def to_segments(regions: Iterable[Region]) -> Iterable[Segment]:

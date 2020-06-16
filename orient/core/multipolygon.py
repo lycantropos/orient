@@ -17,7 +17,7 @@ from .polygon import (_relate_polygon as relate_polygon_to_polygon,
                       relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon,
                       to_segments as polygon_to_segments)
-from .processing import (process_complex_compound_queue,
+from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import to_segments as region_to_segments
 from .relation import Relation
@@ -257,7 +257,7 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
-    return process_complex_compound_queue(sweeper, min(goal_max_x, test_max_x))
+    return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
 def to_segments(polygons: Iterable[Polygon]) -> Iterable[Segment]:
