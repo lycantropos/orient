@@ -858,15 +858,27 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
     :param polygon: polygon to check in.
     :returns: relation between region and polygon.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> region_in_polygon(triangle, (triangle, [])) is Relation.EQUAL
+    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
+    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
+    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
+    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
+    >>> (region_in_polygon(innermore_square, (outer_square, [inner_square]))
+    ...  is Relation.DISJOINT)
     True
-    >>> region_in_polygon(square, (triangle, [])) is Relation.ENCLOSES
+    >>> (region_in_polygon(inner_square, (outer_square, [inner_square]))
+    ...  is Relation.TOUCH)
     True
-    >>> region_in_polygon(triangle, (square, [])) is Relation.ENCLOSED
+    >>> (region_in_polygon(inner_square, (outer_square, [innermore_square]))
+    ...  is Relation.OVERLAP)
     True
-    >>> region_in_polygon(square, (square, [])) is Relation.EQUAL
+    >>> region_in_polygon(outer_square, (inner_square, [])) is Relation.COVER
+    True
+    >>> (region_in_polygon(outer_square, (outer_square, [inner_square]))
+    ...  is Relation.ENCLOSES)
+    True
+    >>> region_in_polygon(outer_square, (outer_square, [])) is Relation.EQUAL
+    True
+    >>> region_in_polygon(inner_square, (outer_square, [])) is Relation.WITHIN
     True
     """
     return _polygon.relate_region(polygon, region)
