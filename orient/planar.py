@@ -1119,16 +1119,39 @@ def contour_in_multipolygon(contour: Contour,
     :param multipolygon: multipolygon to check in.
     :returns: relation between contour and multipolygon.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> (contour_in_multipolygon(triangle, [(triangle, [])])
+    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
+    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
+    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
+    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
+    >>> (contour_in_multipolygon(outer_square, [])
+    ...  is contour_in_multipolygon(outer_square, [(inner_square, [])])
+    ...  is contour_in_multipolygon(innermore_square,
+    ...                             [(outer_square, [inner_square])])
+    ...  is contour_in_multipolygon(innermore_square,
+    ...                             [(outer_square, [inner_square]),
+    ...                              (inner_square, [innermost_square])])
+    ...  is Relation.DISJOINT)
+    True
+    >>> (contour_in_multipolygon(outer_square, [(outer_square, [])])
+    ...  is contour_in_multipolygon(outer_square,
+    ...                             [(outer_square, [inner_square])])
+    ...  is contour_in_multipolygon(inner_square,
+    ...                             [(outer_square, [inner_square])])
+    ...  is contour_in_multipolygon(outer_square,
+    ...                            [(outer_square, [inner_square]),
+    ...                             (inner_square, [innermost_square])])
+    ...  is contour_in_multipolygon(innermost_square,
+    ...                             [(outer_square, [inner_square]),
+    ...                              (innermore_square, [innermost_square])])
     ...  is Relation.COMPONENT)
     True
-    >>> contour_in_multipolygon(triangle, [(square, [])]) is Relation.ENCLOSED
-    True
-    >>> contour_in_multipolygon(square, [(triangle, [])]) is Relation.TOUCH
-    True
-    >>> contour_in_multipolygon(square, [(square, [])]) is Relation.COMPONENT
+    >>> (contour_in_multipolygon(inner_square, [(outer_square, [])])
+    ...  is contour_in_multipolygon(inner_square,
+    ...                             [(outer_square, [innermore_square])])
+    ...  is contour_in_multipolygon(innermost_square,
+    ...                             [(outer_square, [inner_square]),
+    ...                              (innermore_square, [])])
+    ...  is Relation.WITHIN)
     True
     """
     return _multipolygon.relate_contour(multipolygon, contour)
