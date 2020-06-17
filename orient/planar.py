@@ -818,15 +818,24 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
     :param polygon: polygon to check in.
     :returns: relation between contour and polygon.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> contour_in_polygon(triangle, (triangle, [])) is Relation.COMPONENT
+    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
+    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
+    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
+    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
+    >>> (contour_in_polygon(outer_square, (inner_square, []))
+    ...  is contour_in_polygon(innermore_square,
+    ...                        (outer_square, [inner_square]))
+    ...  is Relation.DISJOINT)
     True
-    >>> contour_in_polygon(triangle, (square, [])) is Relation.ENCLOSED
+    >>> (contour_in_polygon(outer_square, (outer_square, []))
+    ...  is contour_in_polygon(outer_square, (outer_square, [inner_square]))
+    ...  is contour_in_polygon(inner_square, (outer_square, [inner_square]))
+    ...  is Relation.COMPONENT)
     True
-    >>> contour_in_polygon(square, (triangle, [])) is Relation.TOUCH
-    True
-    >>> contour_in_polygon(square, (square, [])) is Relation.COMPONENT
+    >>> (contour_in_polygon(inner_square, (outer_square, []))
+    ...  is contour_in_polygon(inner_square,
+    ...                        (outer_square, [innermore_square]))
+    ...  is Relation.WITHIN)
     True
     """
     return _polygon.relate_contour(polygon, contour)
