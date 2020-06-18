@@ -51,7 +51,8 @@ def relate_multisegment(multipolygon: Multipolygon,
         return Relation.DISJOINT
     multisegment_bounding_box = bounding.box_from_iterables(multisegment)
     disjoint, multipolygon_max_x, sweeper = True, None, None
-    for border, holes in multipolygon:
+    for polygon in multipolygon:
+        border, _ = polygon
         polygon_bounding_box = bounding.box_from_iterable(border)
         if not bounding.box_disjoint_with(polygon_bounding_box,
                                           multisegment_bounding_box):
@@ -64,9 +65,7 @@ def relate_multisegment(multipolygon: Multipolygon,
             else:
                 _, polygon_max_x, _, _ = polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(region_to_segments(border),
-                                      from_test=False)
-            sweeper.register_segments(multiregion_to_segments(holes),
+            sweeper.register_segments(polygon_to_segments(polygon),
                                       from_test=False)
     if disjoint:
         return Relation.DISJOINT
