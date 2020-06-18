@@ -8,7 +8,6 @@ from orient.hints import (Contour,
                           Region,
                           Segment)
 from . import bounding
-from .contour import orientation as contour_orientation
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
@@ -348,9 +347,7 @@ def _relate_polygon(goal_border: Region,
 
 def to_segments(polygon: Polygon) -> Iterable[Segment]:
     border, holes = polygon
-    border_orientation = contour_orientation(border)
     yield from region_to_segments(border)
     for hole in holes:
-        yield from ([(end, start) for start, end in region_to_segments(hole)]
-                    if contour_orientation(hole) is border_orientation
-                    else region_to_segments(hole))
+        yield from region_to_segments(hole,
+                                      reverse=True)

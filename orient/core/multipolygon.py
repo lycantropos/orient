@@ -81,7 +81,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
     contour_bounding_box = bounding.box_from_iterable(contour)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for polygon in multipolygon:
-        border, holes = polygon
+        border, _ = polygon
         polygon_bounding_box = bounding.box_from_iterable(border)
         if not bounding.box_disjoint_with(polygon_bounding_box,
                                           contour_bounding_box):
