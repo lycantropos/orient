@@ -55,9 +55,9 @@ def test_relations(multisegments_pair: Tuple[Multisegment, Multisegment]
                                               left_multisegment)
     assert equivalence(result is complement,
                        result in SYMMETRIC_SAME_LINEAR_RELATIONS)
-    assert equivalence(result is not complement
-                       and result.complement is complement,
-                       result in ASYMMETRIC_LINEAR_RELATIONS
+    assert equivalence(result is not complement,
+                       result.complement is complement
+                       and result in ASYMMETRIC_LINEAR_RELATIONS
                        and complement in ASYMMETRIC_LINEAR_RELATIONS)
 
 

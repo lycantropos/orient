@@ -43,9 +43,9 @@ def test_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     complement = polygon_in_polygon(right_polygon, left_polygon)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-    assert equivalence(result is not complement
-                       and result.complement is complement,
-                       result in ASYMMETRIC_COMPOUND_RELATIONS
+    assert equivalence(result is not complement,
+                       result.complement is complement
+                       and result in ASYMMETRIC_COMPOUND_RELATIONS
                        and complement in ASYMMETRIC_COMPOUND_RELATIONS)
 
 

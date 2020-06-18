@@ -51,9 +51,9 @@ def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                                             left_multiregion)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-    assert equivalence(result is not complement
-                       and result.complement is complement,
-                       result in ASYMMETRIC_COMPOUND_RELATIONS
+    assert equivalence(result is not complement,
+                       result.complement is complement
+                       and result in ASYMMETRIC_COMPOUND_RELATIONS
                        and complement in ASYMMETRIC_COMPOUND_RELATIONS)
 
 
