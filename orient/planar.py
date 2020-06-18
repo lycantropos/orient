@@ -1168,7 +1168,7 @@ def contour_in_multipolygon(contour: Contour,
     ...                             [(outer_square, [inner_square])])
     ...  is contour_in_multipolygon(innermore_square,
     ...                             [(outer_square, [inner_square]),
-    ...                              (inner_square, [innermost_square])])
+    ...                              (innermost_square, [])])
     ...  is Relation.DISJOINT)
     True
     >>> (contour_in_multipolygon(outer_square, [(outer_square, [])])
