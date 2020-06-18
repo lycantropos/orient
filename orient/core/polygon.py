@@ -9,19 +9,18 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
-                          _relate_multisegment
-                          as relate_multisegment_to_multiregion,
                           _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
                           relate_segment as relate_segment_to_multiregion,
                           to_segments as multiregion_to_segments)
+from .processing import process_linear_compound_queue
 from .region import (_relate_contour as relate_contour_to_region,
-                     _relate_multisegment as relate_multisegment_to_region,
                      _relate_region as relate_regions,
                      relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
                      to_segments as region_to_segments)
 from .relation import Relation
+from .sweep import CompoundSweeper
 
 
 def relate_point(polygon: Polygon, point: Point) -> Relation:
@@ -61,37 +60,23 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
 
 def relate_multisegment(polygon: Polygon,
                         multisegment: Multisegment) -> Relation:
-    return (_relate_multisegment(polygon, multisegment,
-                                 bounding.box_from_iterables(multisegment))
-            if multisegment
-            else Relation.DISJOINT)
-
-
-def _relate_multisegment(polygon: Polygon,
-                         multisegment: Multisegment,
-                         multisegment_bounding_box: bounding.Box
-                         ) -> Relation:
-    border, holes = polygon
-    relation_without_holes = relate_multisegment_to_region(
-            border, multisegment, multisegment_bounding_box)
-    if (holes and (relation_without_holes is Relation.WITHIN
-                   or relation_without_holes is Relation.ENCLOSED)):
-        relation_with_holes = relate_multisegment_to_multiregion(
-                holes, multisegment, multisegment_bounding_box)
-        if relation_with_holes is Relation.DISJOINT:
-            return relation_without_holes
-        elif relation_with_holes is Relation.TOUCH:
-            return Relation.ENCLOSED
-        elif (relation_with_holes is Relation.CROSS
-              or relation_with_holes is Relation.COMPONENT):
-            return relation_with_holes
-        elif relation_with_holes is Relation.ENCLOSED:
-            return Relation.TOUCH
-        else:
-            # multisegment is within holes
-            return Relation.DISJOINT
-    else:
-        return relation_without_holes
+    if not multisegment:
+        return Relation.DISJOINT
+    border, _ = polygon
+    polygon_bounding_box = bounding.box_from_iterable(border)
+    multisegment_bounding_box = bounding.box_from_iterables(multisegment)
+    if bounding.box_disjoint_with(polygon_bounding_box,
+                                  multisegment_bounding_box):
+        return Relation.DISJOINT
+    sweeper = CompoundSweeper()
+    sweeper.register_segments(to_segments(polygon),
+                              from_test=False)
+    sweeper.register_segments(multisegment,
+                              from_test=True)
+    _, multisegment_max_x, _, _ = multisegment_bounding_box
+    _, polygon_max_x, _, _ = polygon_bounding_box
+    return process_linear_compound_queue(sweeper, min(multisegment_max_x,
+                                                      polygon_max_x))
 
 
 def relate_contour(polygon: Polygon, contour: Contour) -> Relation:
