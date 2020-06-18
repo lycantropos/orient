@@ -43,29 +43,19 @@ class Sweeper(Generic[Event]):
     def peek(self) -> Event:
         return self._events_queue.peek()
 
+    @abstractmethod
     def register_segments(self, segments: Iterable[Segment],
                           *,
                           from_test: bool) -> None:
-        for start, end in segments:
-            if start > end:
-                start, end = end, start
-            start_event = self.event_cls(True, start, None, from_test,
-                                         SegmentsRelationship.NONE)
-            end_event = self.event_cls(False, end, start_event, from_test,
-                                       SegmentsRelationship.NONE)
-            start_event.complement = end_event
-            self._events_queue.push(start_event)
-            self._events_queue.push(end_event)
+        """
+        Registers segments in the events queue.
+        """
 
+    @abstractmethod
     def divide_segment(self, event: Event, point: Point) -> None:
-        left_event = self.event_cls(True, point, event.complement,
-                                    event.from_test,
-                                    event.complement.relationship)
-        right_event = self.event_cls(False, point, event, event.from_test,
-                                     event.relationship)
-        event.complement.complement, event.complement = left_event, right_event
-        self._events_queue.push(left_event)
-        self._events_queue.push(right_event)
+        """
+        Divides segment into parts at given point.
+        """
 
     @abstractmethod
     def sweep(self, stop_x: Coordinate) -> Iterable[Event]:
@@ -76,6 +66,35 @@ class Sweeper(Generic[Event]):
 
 class CompoundSweeper(Sweeper[CompoundEvent]):
     event_cls = CompoundEvent
+
+    def register_segments(self, segments: Iterable[Segment],
+                          *,
+                          from_test: bool) -> None:
+        for start, end in segments:
+            inside_on_left = True
+            if start > end:
+                inside_on_left = False
+                start, end = end, start
+            start_event = self.event_cls(True, start, None, from_test,
+                                         SegmentsRelationship.NONE,
+                                         inside_on_left)
+            end_event = self.event_cls(False, end, start_event, from_test,
+                                       SegmentsRelationship.NONE,
+                                       inside_on_left)
+            start_event.complement = end_event
+            self._events_queue.push(start_event)
+            self._events_queue.push(end_event)
+
+    def divide_segment(self, event: CompoundEvent, point: Point) -> None:
+        left_event = self.event_cls(True, point, event.complement,
+                                    event.from_test,
+                                    event.complement.relationship,
+                                    event.inside_on_left)
+        right_event = self.event_cls(False, point, event, event.from_test,
+                                     event.relationship, event.inside_on_left)
+        event.complement.complement, event.complement = left_event, right_event
+        self._events_queue.push(left_event)
+        self._events_queue.push(right_event)
 
     def sweep(self, stop_x: Coordinate) -> Iterable[CompoundEvent]:
         sweep_line = SweepLine()
@@ -103,16 +122,16 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
                     sweep_line.add(event)
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
-                    self.compute_transition(below_event, event)
+                    self.compute_position(below_event, event)
                     if (above_event is not None
                             and self.detect_intersection(event, above_event)):
-                        self.compute_transition(below_event, event)
-                        self.compute_transition(event, above_event)
+                        self.compute_position(below_event, event)
+                        self.compute_position(event, above_event)
                     if (below_event is not None
                             and self.detect_intersection(below_event, event)):
                         below_below_event = sweep_line.below(below_event)
-                        self.compute_transition(below_below_event, below_event)
-                        self.compute_transition(below_event, event)
+                        self.compute_position(below_below_event, below_event)
+                        self.compute_position(below_event, event)
                 else:
                     event = event.complement
                     if event in sweep_line:
@@ -158,7 +177,7 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
                 # both line segments are equal or share the left endpoint
                 below_event.overlap_transition = event.overlap_transition = (
                     OverlapTransition.SAME
-                    if event.in_out is below_event.in_out
+                    if event.inside_on_left is below_event.inside_on_left
                     else OverlapTransition.DIFFERENT)
                 if ends_equal:
                     event.set_both_relationships(relationship)
@@ -205,22 +224,41 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         return False
 
     @staticmethod
-    def compute_transition(below_event: Optional[CompoundEvent],
-                           event: CompoundEvent) -> None:
-        if below_event is None:
-            event.in_out, event.other_in_out = False, True
-        elif event.from_test is below_event.from_test:
-            event.in_out, event.other_in_out = (not below_event.in_out,
-                                                below_event.other_in_out)
-        else:
-            event.in_out, event.other_in_out = (not below_event.other_in_out,
-                                                not below_event.in_out
-                                                if below_event.is_vertical
-                                                else below_event.in_out)
+    def compute_position(below_event: Optional[CompoundEvent],
+                         event: CompoundEvent) -> None:
+        if below_event is not None:
+            event.other_inside_on_left = (below_event.other_inside_on_left
+                                          if (event.from_test
+                                              is below_event.from_test)
+                                          else below_event.inside_on_left)
 
 
 class LinearSweeper(Sweeper[LinearEvent]):
     event_cls = LinearEvent
+
+    def register_segments(self, segments: Iterable[Segment],
+                          *,
+                          from_test: bool) -> None:
+        for start, end in segments:
+            if start > end:
+                start, end = end, start
+            start_event = self.event_cls(True, start, None, from_test,
+                                         SegmentsRelationship.NONE)
+            end_event = self.event_cls(False, end, start_event, from_test,
+                                       SegmentsRelationship.NONE)
+            start_event.complement = end_event
+            self._events_queue.push(start_event)
+            self._events_queue.push(end_event)
+
+    def divide_segment(self, event: Event, point: Point) -> None:
+        left_event = self.event_cls(True, point, event.complement,
+                                    event.from_test,
+                                    event.complement.relationship)
+        right_event = self.event_cls(False, point, event, event.from_test,
+                                     event.relationship)
+        event.complement.complement, event.complement = left_event, right_event
+        self._events_queue.push(left_event)
+        self._events_queue.push(right_event)
 
     def sweep(self, stop_x: Coordinate) -> Iterable[LinearEvent]:
         sweep_line = SweepLine()

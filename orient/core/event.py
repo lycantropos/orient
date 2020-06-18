@@ -83,19 +83,20 @@ class OverlapTransition(IntEnum):
 
 
 class CompoundEvent(LinearEvent):
-    __slots__ = 'overlap_transition', 'in_out', 'other_in_out'
+    __slots__ = 'overlap_transition', 'inside_on_left', 'other_inside_on_left'
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['CompoundEvent'],
                  from_test: bool,
-                 relationship: SegmentsRelationship) -> None:
+                 relationship: SegmentsRelationship,
+                 inside_on_left: bool) -> None:
         super().__init__(is_left_endpoint, start, complement, from_test,
                          relationship)
         self.overlap_transition = OverlapTransition.NONE
-        self.in_out = None
-        self.other_in_out = None
+        self.inside_on_left = inside_on_left
+        self.other_inside_on_left = False
 
     @property
     def common_boundary(self) -> bool:
@@ -118,7 +119,7 @@ class CompoundEvent(LinearEvent):
         Checks if the segment enclosed by
         or lies within the region of the intersection.
         """
-        return (not self.other_in_out
+        return (self.other_inside_on_left
                 and self.overlap_transition is OverlapTransition.NONE)
 
     @property
@@ -127,7 +128,7 @@ class CompoundEvent(LinearEvent):
         Checks if the segment touches
         or disjoint with the region of the intersection.
         """
-        return (self.other_in_out
+        return (not self.other_inside_on_left
                 and self.overlap_transition is OverlapTransition.NONE)
 
 

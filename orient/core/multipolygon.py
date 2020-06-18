@@ -80,7 +80,8 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
         return Relation.DISJOINT
     contour_bounding_box = bounding.box_from_iterable(contour)
     disjoint, multipolygon_max_x, sweeper = True, None, None
-    for border, holes in multipolygon:
+    for polygon in multipolygon:
+        border, holes = polygon
         polygon_bounding_box = bounding.box_from_iterable(border)
         if not bounding.box_disjoint_with(polygon_bounding_box,
                                           contour_bounding_box):
@@ -93,9 +94,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
             else:
                 _, polygon_max_x, _, _ = polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(region_to_segments(border),
-                                      from_test=False)
-            sweeper.register_segments(multiregion_to_segments(holes),
+            sweeper.register_segments(polygon_to_segments(polygon),
                                       from_test=False)
     if disjoint:
         return Relation.DISJOINT
@@ -110,7 +109,8 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
     region_bounding_box = bounding.box_from_iterable(region)
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
-    for border, holes in multipolygon:
+    for polygon in multipolygon:
+        border, _ = polygon
         polygon_bounding_box = bounding.box_from_iterable(border)
         if bounding.box_disjoint_with(region_bounding_box,
                                       polygon_bounding_box):
@@ -126,9 +126,7 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
             else:
                 _, polygon_max_x, _, _ = polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(region_to_segments(border),
-                                      from_test=False)
-            sweeper.register_segments(multiregion_to_segments(holes),
+            sweeper.register_segments(polygon_to_segments(polygon),
                                       from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
@@ -179,8 +177,9 @@ def _relate_polygon(goal_polygons: Iterable[Polygon],
                     polygon_bounding_box: bounding.Box) -> Relation:
     all_disjoint, none_disjoint, goal_polygons_max_x, sweeper = (True, True,
                                                                  None, None)
-    for border, holes in goal_polygons:
-        goal_polygon_bounding_box = bounding.box_from_iterable(border)
+    for goal_polygon in goal_polygons:
+        goal_border, _ = goal_polygon
+        goal_polygon_bounding_box = bounding.box_from_iterable(goal_border)
         if bounding.box_disjoint_with(goal_polygon_bounding_box,
                                       polygon_bounding_box):
             if none_disjoint:
@@ -196,9 +195,7 @@ def _relate_polygon(goal_polygons: Iterable[Polygon],
                 _, goal_polygon_max_x, _, _ = goal_polygon_bounding_box
                 goal_polygons_max_x = max(goal_polygons_max_x,
                                           goal_polygon_max_x)
-            sweeper.register_segments(region_to_segments(border),
-                                      from_test=False)
-            sweeper.register_segments(multiregion_to_segments(holes),
+            sweeper.register_segments(polygon_to_segments(goal_polygon),
                                       from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
