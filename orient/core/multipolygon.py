@@ -164,42 +164,35 @@ def relate_multiregion(multipolygon: Multipolygon,
 
 
 def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
+    if not multipolygon:
+        return Relation.DISJOINT
     border, _ = polygon
-    return (_relate_polygon(multipolygon, polygon,
-                            bounding.box_from_iterable(border))
-            if multipolygon
-            else Relation.DISJOINT)
-
-
-def _relate_polygon(goal_polygons: Iterable[Polygon],
-                    polygon: Polygon,
-                    polygon_bounding_box: bounding.Box) -> Relation:
-    all_disjoint, none_disjoint, goal_polygons_max_x, sweeper = (True, True,
-                                                                 None, None)
-    for goal_polygon in goal_polygons:
-        goal_border, _ = goal_polygon
-        goal_polygon_bounding_box = bounding.box_from_iterable(goal_border)
-        if bounding.box_disjoint_with(goal_polygon_bounding_box,
+    polygon_bounding_box = bounding.box_from_iterable(border)
+    all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
+                                                                None, None)
+    for sub_polygon in multipolygon:
+        border, _ = sub_polygon
+        sub_polygon_bounding_box = bounding.box_from_iterable(border)
+        if bounding.box_disjoint_with(sub_polygon_bounding_box,
                                       polygon_bounding_box):
             if none_disjoint:
                 none_disjoint = False
         else:
             if all_disjoint:
                 all_disjoint = False
-                _, goal_polygons_max_x, _, _ = goal_polygon_bounding_box
+                _, multipolygon_max_x, _, _ = sub_polygon_bounding_box
                 sweeper = CompoundSweeper()
                 sweeper.register_segments(polygon_to_segments(polygon),
                                           from_test=True)
             else:
-                _, goal_polygon_max_x, _, _ = goal_polygon_bounding_box
-                goal_polygons_max_x = max(goal_polygons_max_x,
-                                          goal_polygon_max_x)
-            sweeper.register_segments(polygon_to_segments(goal_polygon),
+                _, sub_polygon_max_x, _, _ = sub_polygon_bounding_box
+                multipolygon_max_x = max(multipolygon_max_x, sub_polygon_max_x)
+            sweeper.register_segments(polygon_to_segments(sub_polygon),
                                       from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
     _, polygon_max_x, _, _ = polygon_bounding_box
-    relation = process_compound_queue(sweeper, min(goal_polygons_max_x,
+    relation = process_compound_queue(sweeper, min(multipolygon_max_x,
                                                    polygon_max_x))
     return (relation
             if none_disjoint
