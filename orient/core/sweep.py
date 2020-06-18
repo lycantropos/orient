@@ -214,7 +214,9 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
                                                 below_event.other_in_out)
         else:
             event.in_out, event.other_in_out = (not below_event.other_in_out,
-                                                below_event.in_out)
+                                                not below_event.in_out
+                                                if below_event.is_vertical
+                                                else below_event.in_out)
 
 
 class LinearSweeper(Sweeper[LinearEvent]):
