@@ -1,4 +1,5 @@
-from typing import (Optional,
+from typing import (Iterable,
+                    Optional,
                     Tuple)
 
 from robust.angular import (Orientation,
@@ -31,8 +32,7 @@ def _relate_point(region: Region, point: Point) -> Tuple[Optional[int],
                                                          Relation]:
     result = False
     _, point_y = point
-    for index, edge in enumerate(to_segments(region,
-                                             normalize=False)):
+    for index, edge in enumerate(contour_to_segments(region)):
         if relate_point_to_segment(edge, point) is Relation.COMPONENT:
             return index, Relation.COMPONENT
         start, end = edge
@@ -55,7 +55,7 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment) -> Relation:
     has_no_touch = has_no_overlap = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment
-    for index, edge in enumerate(to_segments(contour)):
+    for index, edge in enumerate(contour_to_segments(contour)):
         relation_with_edge = relate_segments(edge, segment)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
@@ -275,4 +275,16 @@ def _relate_region(goal: Region,
 
 
 equal = contours_equal
-to_segments = contour_to_segments
+
+
+def to_segments(contour: Contour,
+                *,
+                reverse: bool = False) -> Iterable[Segment]:
+    return (((contour[index - 1], contour[index])
+             for index in range(len(contour)))
+            if (contour_orientation(contour)
+                is (Orientation.CLOCKWISE
+                    if reverse
+                    else Orientation.COUNTERCLOCKWISE))
+            else ((contour[index], contour[index - 1])
+                  for index in range(len(contour) - 1, -1, -1)))

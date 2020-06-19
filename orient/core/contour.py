@@ -152,15 +152,6 @@ def orientation(contour: Contour) -> Orientation:
                              contour[(index + 1) % len(contour)])
 
 
-def to_segments(contour: Contour,
-                *,
-                normalize: bool = True,
-                reverse: bool = False) -> Iterable[Segment]:
-    return (((contour[index - 1], contour[index])
-             for index in range(len(contour)))
-            if (not normalize
-                or orientation(contour) is (Orientation.CLOCKWISE
-                                            if reverse
-                                            else Orientation.COUNTERCLOCKWISE))
-            else ((contour[index], contour[index - 1])
-                  for index in range(len(contour) - 1, -1, -1)))
+def to_segments(contour: Contour) -> Iterable[Segment]:
+    return ((contour[index - 1], contour[index])
+            for index in range(len(contour)))

@@ -9,7 +9,6 @@ from orient.hints import (Contour,
 from . import bounding
 from .contour import to_segments as contour_to_segments
 from .processing import (process_compound_queue,
-                         process_compound_queue,
                          process_linear_compound_queue)
 from .region import (relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
