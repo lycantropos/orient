@@ -1,9 +1,8 @@
-from itertools import chain
+from typing import (Optional,
+                    Tuple)
 
 from robust.angular import (Orientation,
                             orientation as angle_orientation)
-from robust.linear import (SegmentsRelationship,
-                           segments_relationship)
 
 from orient.hints import (Contour,
                           Multisegment,
@@ -23,20 +22,26 @@ from .sweep import CompoundSweeper
 
 
 def relate_point(region: Region, point: Point) -> Relation:
+    _, relation = _relate_point(region, point)
+    return relation
+
+
+def _relate_point(region: Region, point: Point) -> Tuple[Optional[int],
+                                                         Relation]:
     result = False
     _, point_y = point
-    for edge in to_segments(region):
+    for index, edge in enumerate(to_segments(region)):
         if relate_point_to_segment(edge, point) is Relation.COMPONENT:
-            return Relation.COMPONENT
+            return index, Relation.COMPONENT
         start, end = edge
         (_, start_y), (_, end_y) = start, end
         if ((start_y > point_y) is not (end_y > point_y)
                 and ((end_y > start_y) is (angle_orientation(end, start, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return (Relation.WITHIN
-            if result
-            else Relation.DISJOINT)
+    return None, (Relation.WITHIN
+                  if result
+                  else Relation.DISJOINT)
 
 
 def _relate_segment_to_contour(contour: Contour, segment: Segment) -> Relation:
@@ -96,7 +101,7 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
             or relation_with_contour is Relation.COMPONENT):
         return relation_with_contour
     start, end = segment
-    start_relation = relate_point(region, start)
+    start_index, start_relation = _relate_point(region, start)
     if relation_with_contour is Relation.DISJOINT:
         return (Relation.DISJOINT
                 if start_relation is Relation.DISJOINT
@@ -106,159 +111,80 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
     elif start_relation is Relation.WITHIN:
         return Relation.ENCLOSED
     else:
-        end_relation = relate_point(region, end)
+        end_index, end_relation = _relate_point(region, end)
         if end_relation is Relation.DISJOINT:
             return Relation.TOUCH
         elif end_relation is Relation.WITHIN:
             return Relation.ENCLOSED
         else:
-            start_index = end_index = None
-            start_is_not_vertex = end_is_not_vertex = True
-            overlaps_with_edges = relation_with_contour is Relation.OVERLAP
-            for index, edge in enumerate(to_segments(region)):
-                if (start_index is None
-                        and (relate_point_to_segment(edge, start)
-                             is Relation.COMPONENT)):
-                    start_index = index
-                    edge_start, edge_end = edge
-                    if overlaps_with_edges:
-                        if (segments_relationship(segment, edge)
-                                is SegmentsRelationship.OVERLAP):
-                            start = (max if start < end else min)(edge_start,
-                                                                  edge_end)
-                        elif (start == edge_start
-                              and (segments_relationship(
-                                        segment,
-                                        (region[index - 2], edge_start))
-                                   is SegmentsRelationship.OVERLAP)):
-                            edge_start, edge_end = (region[index - 2],
-                                                    edge_start)
-                            start_index = (start_index - 1) % len(region)
-                            start = (max if start < end else min)(edge_start,
-                                                                  edge_end)
-                        elif (start == edge_end
-                              and (segments_relationship(
-                                        segment,
-                                        (edge_end,
-                                         region[(index + 1) % len(region)]))
-                                   is SegmentsRelationship.OVERLAP)):
-                            edge_start, edge_end = (
-                                edge_end, region[(index + 1) % len(region)])
-                            start_index = (start_index + 1) % len(region)
-                            start = (max if start < end else min)(edge_start,
-                                                                  edge_end)
-                    if start == edge_start:
-                        start_is_not_vertex = False
-                    elif start == edge_end:
-                        start_index += 1
-                        start_is_not_vertex = False
-                if (end_index is None
-                        and (relate_point_to_segment(edge, end)
-                             is Relation.COMPONENT)):
-                    end_index = index
-                    edge_start, edge_end = edge
-                    if overlaps_with_edges:
-                        if (segments_relationship(segment, edge)
-                                is SegmentsRelationship.OVERLAP):
-                            end = (max if end < start else min)(edge_start,
-                                                                edge_end)
-                        elif (end == edge_start
-                              and (segments_relationship(
-                                        segment,
-                                        (region[index - 2], edge_start))
-                                   is SegmentsRelationship.OVERLAP)):
-                            edge_start, edge_end = (region[index - 2],
-                                                    edge_start)
-                            end_index = (end_index - 1) % len(region)
-                            end = (max if end < start else min)(edge_start,
-                                                                edge_end)
-                        elif (end == edge_end
-                              and (segments_relationship(
-                                        segment,
-                                        (edge_end,
-                                         region[(index + 1) % len(region)]))
-                                   is SegmentsRelationship.OVERLAP)):
-                            edge_start, edge_end = (
-                                edge_end, region[(index + 1) % len(region)])
-                            end_index = (end_index + 1) % len(region)
-                            end = (max if end < start else min)(edge_start,
-                                                                edge_end)
-                    if end == edge_start:
-                        end_is_not_vertex = False
-                    elif end == edge_end:
-                        end_index += 1
-                        end_is_not_vertex = False
-                if start_index is not None and end_index is not None:
-                    break
-            start_index = (start_index - 1) % len(region)
-            end_index = (end_index - 1) % len(region)
-            if start_index > end_index:
-                start, end = end, start
-                start_index, end_index = end_index, start_index
-                start_is_not_vertex, end_is_not_vertex = (end_is_not_vertex,
-                                                          start_is_not_vertex)
-            first_part_min_index, second_part_min_index = (
-                min(chain(range(start_index + start_is_not_vertex),
-                          range(end_index + 1, len(region))),
-                    key=region.__getitem__),
-                min(range(start_index + 1,
-                          end_index + end_is_not_vertex),
-                    key=region.__getitem__))
-            first_part_min_vertex, second_part_min_vertex = (
-                region[first_part_min_index], region[second_part_min_index])
-            if first_part_min_vertex > start:
-                if start > end:
-                    first_part_orientation = angle_orientation(
-                            end, start, region[(end_index + 1) % len(region)])
-                else:
-                    first_part_orientation = angle_orientation(
-                            start,
-                            region[start_index + start_is_not_vertex - 1], end)
-            elif first_part_min_vertex > end:
-                first_part_orientation = angle_orientation(
-                        end, start, region[(end_index + 1) % len(region)])
-            elif first_part_min_index + 1 == start_index + start_is_not_vertex:
-                first_part_orientation = angle_orientation(
-                        first_part_min_vertex,
-                        region[first_part_min_index - 1], start)
-            elif first_part_min_index == (end_index + 1) % len(region):
-                first_part_orientation = angle_orientation(
-                        first_part_min_vertex,
-                        end, region[(first_part_min_index + 1) % len(region)])
-            else:
-                first_part_orientation = angle_orientation(
-                        first_part_min_vertex,
-                        region[first_part_min_index - 1],
-                        region[(first_part_min_index + 1) % len(region)])
-            if second_part_min_vertex > start:
-                if start > end:
-                    second_part_orientation = angle_orientation(
-                            end, region[end_index + end_is_not_vertex - 1],
-                            start)
-                else:
-                    second_part_orientation = angle_orientation(
-                            start, end, region[start_index + 1])
-            elif second_part_min_vertex > end:
-                second_part_orientation = angle_orientation(
-                        end, region[end_index + end_is_not_vertex - 1], start)
-            elif second_part_min_index == start_index + 1:
-                second_part_orientation = angle_orientation(
-                        second_part_min_vertex, start,
-                        region[second_part_min_index + 1]
-                        if second_part_min_index + 1 < len(region)
-                        else end)
-            elif second_part_min_index + 1 == end_index + end_is_not_vertex:
-                second_part_orientation = angle_orientation(
-                        second_part_min_vertex,
-                        region[second_part_min_index - 1], end)
-            else:
-                second_part_orientation = angle_orientation(
-                        second_part_min_vertex,
-                        region[second_part_min_index - 1],
-                        region[second_part_min_index + 1])
-            return (Relation.ENCLOSED
-                    if first_part_orientation is second_part_orientation
-                    else Relation.TOUCH)
+            edge_start, edge_end = (region[start_index - 1],
+                                    region[start_index])
+            if start == edge_start:
+                prev_start = region[start_index - 2]
+                if (angle_orientation(edge_start, prev_start, edge_end)
+                        is Orientation.COUNTERCLOCKWISE):
+                    if (angle_orientation(edge_start, prev_start, end)
+                            is Orientation.CLOCKWISE
+                            or angle_orientation(edge_end, edge_start,
+                                                 end)
+                            is Orientation.CLOCKWISE):
+                        return Relation.TOUCH
+                elif (angle_orientation(edge_start, prev_start, end)
+                      is angle_orientation(edge_end, edge_start, end)
+                      is Orientation.CLOCKWISE):
+                    return Relation.TOUCH
+            elif start == edge_end:
+                next_end = region[(start_index + 1) % len(region)]
+                if (angle_orientation(edge_end, edge_start, next_end)
+                        is Orientation.COUNTERCLOCKWISE):
+                    if (angle_orientation(edge_end, edge_start, end)
+                            is Orientation.CLOCKWISE
+                            or angle_orientation(next_end, edge_end, end)
+                            is Orientation.CLOCKWISE):
+                        return Relation.TOUCH
+                    elif (angle_orientation(edge_end, edge_start,
+                                            end)
+                          is angle_orientation(next_end, edge_end,
+                                               end)
+                          is Orientation.CLOCKWISE):
+                        return Relation.TOUCH
+            elif angle_orientation(edge_end, edge_start,
+                                   end) is Orientation.CLOCKWISE:
+                return Relation.TOUCH
+            edge_start, edge_end = region[end_index - 1], region[end_index]
+            if end == edge_start:
+                prev_start = region[end_index - 2]
+                if (angle_orientation(edge_start, prev_start, edge_end)
+                        is Orientation.COUNTERCLOCKWISE):
+                    if (angle_orientation(edge_start, prev_start,
+                                          start)
+                            is Orientation.CLOCKWISE
+                            or angle_orientation(edge_end, edge_start,
+                                                 start)
+                            is Orientation.CLOCKWISE):
+                        return Relation.TOUCH
+                elif (angle_orientation(edge_start, prev_start, start)
+                      is angle_orientation(edge_end, edge_start, start)
+                      is Orientation.CLOCKWISE):
+                    return Relation.TOUCH
+            elif end == edge_end:
+                next_end = region[(end_index + 1) % len(region)]
+                if (angle_orientation(edge_end, edge_start, next_end)
+                        is Orientation.COUNTERCLOCKWISE):
+                    if (angle_orientation(edge_end, edge_start, start)
+                            is Orientation.CLOCKWISE
+                            or angle_orientation(next_end, edge_end,
+                                                 start)
+                            is Orientation.CLOCKWISE):
+                        return Relation.TOUCH
+                elif (angle_orientation(edge_end, edge_start, start)
+                      is angle_orientation(next_end, edge_end, start)
+                      is Orientation.CLOCKWISE):
+                    return Relation.TOUCH
+            elif angle_orientation(edge_end, edge_start,
+                                   start) is Orientation.CLOCKWISE:
+                return Relation.TOUCH
+        return Relation.ENCLOSED
 
 
 def relate_multisegment(region: Region,
