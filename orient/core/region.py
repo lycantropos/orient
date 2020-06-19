@@ -11,6 +11,7 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding
 from .contour import (equal as contours_equal,
+                      orientation as contour_orientation,
                       point_vertex_line_divides_angle,
                       to_segments as contour_to_segments)
 from .processing import (process_compound_queue,
@@ -30,7 +31,8 @@ def _relate_point(region: Region, point: Point) -> Tuple[Optional[int],
                                                          Relation]:
     result = False
     _, point_y = point
-    for index, edge in enumerate(to_segments(region)):
+    for index, edge in enumerate(to_segments(region,
+                                             normalize=False)):
         if relate_point_to_segment(edge, point) is Relation.COMPONENT:
             return index, Relation.COMPONENT
         start, end = edge
@@ -117,74 +119,84 @@ def relate_segment(region: Region, segment: Segment) -> Relation:
         elif end_relation is Relation.WITHIN:
             return Relation.ENCLOSED
         else:
+            border_orientation = contour_orientation(region)
+            positively_oriented = (border_orientation
+                                   is Orientation.COUNTERCLOCKWISE)
             edge_start, edge_end = (region[start_index - 1],
                                     region[start_index])
             if start == edge_start:
-                prev_start = region[start_index - 2]
+                prev_start = (region[start_index - 2]
+                              if positively_oriented
+                              else region[start_index])
                 if (angle_orientation(edge_start, prev_start, edge_end)
-                        is Orientation.COUNTERCLOCKWISE):
-                    if (angle_orientation(edge_start, prev_start, end)
-                            is Orientation.CLOCKWISE
-                            or angle_orientation(edge_end, edge_start,
+                        is border_orientation):
+                    if (angle_orientation(prev_start, edge_start, end)
+                            is border_orientation
+                            or angle_orientation(edge_start, edge_end,
                                                  end)
-                            is Orientation.CLOCKWISE):
+                            is border_orientation):
                         return Relation.TOUCH
-                elif (angle_orientation(edge_start, prev_start, end)
-                      is angle_orientation(edge_end, edge_start, end)
-                      is Orientation.CLOCKWISE):
+                elif (angle_orientation(prev_start, edge_start, end)
+                      is angle_orientation(edge_start, edge_end, end)
+                      is border_orientation):
                     return Relation.TOUCH
             elif start == edge_end:
-                next_end = region[(start_index + 1) % len(region)]
+                next_end = (region[(start_index + 1) % len(region)]
+                            if positively_oriented
+                            else region[len(region) - start_index - 3])
                 if (angle_orientation(edge_end, edge_start, next_end)
-                        is Orientation.COUNTERCLOCKWISE):
-                    if (angle_orientation(edge_end, edge_start, end)
-                            is Orientation.CLOCKWISE
-                            or angle_orientation(next_end, edge_end, end)
-                            is Orientation.CLOCKWISE):
+                        is border_orientation):
+                    if (angle_orientation(edge_start, edge_end, end)
+                            is border_orientation
+                            or angle_orientation(edge_end, next_end,
+                                                 end)
+                            is border_orientation):
                         return Relation.TOUCH
-                    elif (angle_orientation(edge_end, edge_start,
-                                            end)
-                          is angle_orientation(next_end, edge_end,
-                                               end)
-                          is Orientation.CLOCKWISE):
+                    elif (angle_orientation(edge_start, edge_end, end)
+                          is angle_orientation(edge_end, next_end, end)
+                          is border_orientation):
                         return Relation.TOUCH
-            elif angle_orientation(edge_end, edge_start,
-                                   end) is Orientation.CLOCKWISE:
+            elif (angle_orientation(edge_start, edge_end, end)
+                  is border_orientation):
                 return Relation.TOUCH
             edge_start, edge_end = region[end_index - 1], region[end_index]
             if end == edge_start:
-                prev_start = region[end_index - 2]
+                prev_start = (region[end_index - 2]
+                              if positively_oriented
+                              else region[end_index])
                 if (angle_orientation(edge_start, prev_start, edge_end)
-                        is Orientation.COUNTERCLOCKWISE):
-                    if (angle_orientation(edge_start, prev_start,
+                        is border_orientation):
+                    if (angle_orientation(prev_start, edge_start,
                                           start)
-                            is Orientation.CLOCKWISE
-                            or angle_orientation(edge_end, edge_start,
+                            is border_orientation
+                            or angle_orientation(edge_start, edge_end,
                                                  start)
-                            is Orientation.CLOCKWISE):
+                            is border_orientation):
                         return Relation.TOUCH
-                elif (angle_orientation(edge_start, prev_start, start)
-                      is angle_orientation(edge_end, edge_start, start)
-                      is Orientation.CLOCKWISE):
+                elif (angle_orientation(prev_start, edge_start, start)
+                      is angle_orientation(edge_start, edge_end, start)
+                      is border_orientation):
                     return Relation.TOUCH
             elif end == edge_end:
-                next_end = region[(end_index + 1) % len(region)]
+                next_end = (region[(end_index + 1) % len(region)]
+                            if positively_oriented
+                            else region[len(region) - end_index - 3])
                 if (angle_orientation(edge_end, edge_start, next_end)
-                        is Orientation.COUNTERCLOCKWISE):
-                    if (angle_orientation(edge_end, edge_start, start)
-                            is Orientation.CLOCKWISE
-                            or angle_orientation(next_end, edge_end,
+                        is border_orientation):
+                    if (angle_orientation(edge_start, edge_end, start)
+                            is border_orientation
+                            or angle_orientation(edge_end, next_end,
                                                  start)
-                            is Orientation.CLOCKWISE):
+                            is border_orientation):
                         return Relation.TOUCH
-                elif (angle_orientation(edge_end, edge_start, start)
-                      is angle_orientation(next_end, edge_end, start)
-                      is Orientation.CLOCKWISE):
+                elif (angle_orientation(edge_start, edge_end, start)
+                      is angle_orientation(edge_end, next_end, start)
+                      is border_orientation):
                     return Relation.TOUCH
-            elif angle_orientation(edge_end, edge_start,
-                                   start) is Orientation.CLOCKWISE:
+            elif (angle_orientation(edge_start, edge_end, start)
+                  is border_orientation):
                 return Relation.TOUCH
-        return Relation.ENCLOSED
+            return Relation.ENCLOSED
 
 
 def relate_multisegment(region: Region,
