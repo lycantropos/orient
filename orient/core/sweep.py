@@ -23,7 +23,7 @@ from orient.hints import (Coordinate,
 from .event import (CompoundEvent,
                     Event,
                     LinearEvent,
-                    OverlapTransition)
+                    OverlapOrientation)
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
@@ -175,10 +175,10 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
 
             if starts_equal:
                 # both line segments are equal or share the left endpoint
-                below_event.overlap_transition = event.overlap_transition = (
-                    OverlapTransition.SAME
+                below_event.overlap_orientation = event.overlap_orientation = (
+                    OverlapOrientation.SAME
                     if event.inside_on_left is below_event.inside_on_left
-                    else OverlapTransition.DIFFERENT)
+                    else OverlapOrientation.DIFFERENT)
                 if ends_equal:
                     event.set_both_relationships(relationship)
                     below_event.set_both_relationships(relationship)

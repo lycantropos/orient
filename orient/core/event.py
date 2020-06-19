@@ -76,14 +76,14 @@ class LinearEvent:
 
 
 @unique
-class OverlapTransition(IntEnum):
+class OverlapOrientation(IntEnum):
     NONE = 0
     SAME = 1
     DIFFERENT = 2
 
 
 class CompoundEvent(LinearEvent):
-    __slots__ = 'overlap_transition', 'inside_on_left', 'other_inside_on_left'
+    __slots__ = 'overlap_orientation', 'inside_on_left', 'other_inside_on_left'
 
     def __init__(self,
                  is_left_endpoint: bool,
@@ -94,7 +94,7 @@ class CompoundEvent(LinearEvent):
                  inside_on_left: bool) -> None:
         super().__init__(is_left_endpoint, start, complement, from_test,
                          relationship)
-        self.overlap_transition = OverlapTransition.NONE
+        self.overlap_orientation = OverlapOrientation.NONE
         self.inside_on_left = inside_on_left
         self.other_inside_on_left = False
 
@@ -104,14 +104,14 @@ class CompoundEvent(LinearEvent):
         Checks if the segment lies on the boundary of the components
         which intersect in region.
         """
-        return self.overlap_transition is OverlapTransition.SAME
+        return self.overlap_orientation is OverlapOrientation.SAME
 
     @property
     def contours_overlap(self) -> bool:
         """
         Checks if the segment is a separate component of the intersection.
         """
-        return self.overlap_transition is OverlapTransition.DIFFERENT
+        return self.overlap_orientation is OverlapOrientation.DIFFERENT
 
     @property
     def inside(self) -> bool:
@@ -120,7 +120,7 @@ class CompoundEvent(LinearEvent):
         or lies within the region of the intersection.
         """
         return (self.other_inside_on_left
-                and self.overlap_transition is OverlapTransition.NONE)
+                and self.overlap_orientation is OverlapOrientation.NONE)
 
     @property
     def outside(self) -> bool:
@@ -129,7 +129,7 @@ class CompoundEvent(LinearEvent):
         or disjoint with the region of the intersection.
         """
         return (not self.other_inside_on_left
-                and self.overlap_transition is OverlapTransition.NONE)
+                and self.overlap_orientation is OverlapOrientation.NONE)
 
 
 Event = TypeVar('Event', LinearEvent, CompoundEvent)
