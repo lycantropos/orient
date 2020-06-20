@@ -3,7 +3,7 @@ from typing import Tuple
 from hypothesis import given
 
 from orient.core.region import (equal,
-                                to_segments)
+                                to_oriented_segments)
 from orient.hints import (Region,
                           Segment)
 from orient.planar import (Relation,
@@ -34,7 +34,7 @@ def test_basic(region_with_segment: Tuple[Region, Segment]) -> None:
 @given(strategies.contours)
 def test_self(region: Region) -> None:
     assert all(segment_in_region(edge, region) is Relation.COMPONENT
-               for edge in to_segments(region))
+               for edge in to_oriented_segments(region))
 
 
 @given(strategies.contours)

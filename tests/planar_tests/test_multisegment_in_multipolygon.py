@@ -3,8 +3,9 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.multiregion import to_segments as multiregion_to_segments
-from orient.core.region import to_segments as region_to_segments
+from orient.core.multiregion import (to_oriented_segments
+                                     as multiregion_to_segments)
+from orient.core.region import to_oriented_segments as region_to_segments
 from orient.core.utils import flatten
 from orient.hints import (Multipolygon,
                           Multisegment)

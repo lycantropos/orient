@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.multiregion import to_segments
+from orient.core.multiregion import to_oriented_segments
 from orient.hints import (Multiregion,
                           Multisegment)
 from orient.planar import (Relation,
@@ -31,7 +31,7 @@ def test_basic(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
 
 @given(strategies.multiregions)
 def test_self(multiregion: Multiregion) -> None:
-    assert multisegment_in_multiregion(list(to_segments(multiregion)),
+    assert multisegment_in_multiregion(list(to_oriented_segments(multiregion)),
                                        multiregion) is (Relation.COMPONENT
                                                         if multiregion
                                                         else Relation.DISJOINT)

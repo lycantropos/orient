@@ -3,7 +3,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.region import to_segments
+from orient.core.region import to_oriented_segments
 from orient.hints import (Polygon,
                           Segment)
 from orient.planar import (Relation,
@@ -35,9 +35,9 @@ def test_basic(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
 def test_self(polygon: Polygon) -> None:
     border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
-               for edge in to_segments(border))
+               for edge in to_oriented_segments(border))
     assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
-               for edge in chain.from_iterable(map(to_segments, holes)))
+               for edge in chain.from_iterable(map(to_oriented_segments, holes)))
 
 
 @given(strategies.polygons)

@@ -2,7 +2,7 @@ from typing import Tuple
 
 from hypothesis import given
 
-from orient.core.region import to_segments
+from orient.core.region import to_oriented_segments
 from orient.hints import (Multisegment,
                           Region)
 from orient.planar import (Relation,
@@ -30,7 +30,7 @@ def test_basic(region_with_multisegment: Tuple[Region, Multisegment]) -> None:
 
 @given(strategies.contours)
 def test_self(region: Region) -> None:
-    assert multisegment_in_region(list(to_segments(region)),
+    assert multisegment_in_region(list(to_oriented_segments(region)),
                                   region) is Relation.COMPONENT
 
 
