@@ -11,13 +11,15 @@ from . import bounding
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
-                          relate_segment as relate_segment_to_multiregion)
+                          relate_segment as relate_segment_to_multiregion,
+                          to_oriented_segments
+                          as multiregion_to_oriented_segments)
 from .processing import process_linear_compound_queue
 from .region import (_relate_contour as relate_contour_to_region,
                      _relate_region as relate_regions,
                      relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
-                     to_segments as region_to_segments)
+                     to_oriented_segments as region_to_oriented_segments)
 from .relation import Relation
 from .sweep import CompoundSweeper
 
@@ -68,7 +70,7 @@ def relate_multisegment(polygon: Polygon,
                                   multisegment_bounding_box):
         return Relation.DISJOINT
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(polygon),
+    sweeper.register_segments(to_oriented_segments(polygon),
                               from_test=False)
     sweeper.register_segments(multisegment,
                               from_test=True)
@@ -345,9 +347,11 @@ def _relate_polygon(goal_border: Region,
                 else borders_relation)
 
 
-def to_segments(polygon: Polygon) -> Iterable[Segment]:
+def to_oriented_segments(polygon: Polygon,
+                         *,
+                         clockwise: bool = False) -> Iterable[Segment]:
     border, holes = polygon
-    yield from region_to_segments(border)
-    for hole in holes:
-        yield from region_to_segments(hole,
-                                      reverse=True)
+    yield from region_to_oriented_segments(border,
+                                           clockwise=clockwise)
+    yield from multiregion_to_oriented_segments(holes,
+                                                clockwise=not clockwise)

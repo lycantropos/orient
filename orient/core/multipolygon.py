@@ -10,13 +10,14 @@ from orient.hints import (Contour,
                           Segment)
 from . import bounding
 from .contour import to_segments as contour_to_segments
-from .multiregion import to_segments as multiregion_to_segments
+from .multiregion import (to_oriented_segments
+                          as multiregion_to_oriented_segments)
 from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon,
-                      to_segments as polygon_to_segments)
+                      to_oriented_segments as polygon_to_oriented_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .region import to_segments as region_to_segments
+from .region import to_oriented_segments as region_to_oriented_segments
 from .relation import Relation
 from .sweep import CompoundSweeper
 
@@ -65,7 +66,7 @@ def relate_multisegment(multipolygon: Multipolygon,
             else:
                 _, polygon_max_x, _, _ = polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(polygon_to_segments(polygon),
+            sweeper.register_segments(polygon_to_oriented_segments(polygon),
                                       from_test=False)
     if disjoint:
         return Relation.DISJOINT
@@ -93,7 +94,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour) -> Relation:
             else:
                 _, polygon_max_x, _, _ = polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(polygon_to_segments(polygon),
+            sweeper.register_segments(polygon_to_oriented_segments(polygon),
                                       from_test=False)
     if disjoint:
         return Relation.DISJOINT
@@ -120,12 +121,12 @@ def relate_region(multipolygon: Multipolygon, region: Region) -> Relation:
                 all_disjoint = False
                 _, multipolygon_max_x, _, _ = polygon_bounding_box
                 sweeper = CompoundSweeper()
-                sweeper.register_segments(region_to_segments(region),
+                sweeper.register_segments(region_to_oriented_segments(region),
                                           from_test=True)
             else:
                 _, polygon_max_x, _, _ = polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, polygon_max_x)
-            sweeper.register_segments(polygon_to_segments(polygon),
+            sweeper.register_segments(polygon_to_oriented_segments(polygon),
                                       from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
@@ -154,9 +155,9 @@ def relate_multiregion(multipolygon: Multipolygon,
                                   multiregion_bounding_box):
         return Relation.DISJOINT
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(multipolygon),
+    sweeper.register_segments(to_oriented_segments(multipolygon),
                               from_test=False)
-    sweeper.register_segments(multiregion_to_segments(multiregion),
+    sweeper.register_segments(multiregion_to_oriented_segments(multiregion),
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (multipolygon_bounding_box,
                                                     multiregion_bounding_box)
@@ -182,13 +183,15 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon) -> Relation:
                 all_disjoint = False
                 _, multipolygon_max_x, _, _ = sub_polygon_bounding_box
                 sweeper = CompoundSweeper()
-                sweeper.register_segments(polygon_to_segments(polygon),
-                                          from_test=True)
+                sweeper.register_segments(
+                        polygon_to_oriented_segments(polygon),
+                        from_test=True)
             else:
                 _, sub_polygon_max_x, _, _ = sub_polygon_bounding_box
                 multipolygon_max_x = max(multipolygon_max_x, sub_polygon_max_x)
-            sweeper.register_segments(polygon_to_segments(sub_polygon),
-                                      from_test=False)
+            sweeper.register_segments(
+                polygon_to_oriented_segments(sub_polygon),
+                from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
     _, polygon_max_x, _, _ = polygon_bounding_box
@@ -211,18 +214,21 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon) -> Relation:
     goal_bounding_box = bounding.box_from_iterables(_to_borders(goal))
     test_bounding_box = bounding.box_from_iterables(_to_borders(test))
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(goal),
+    sweeper.register_segments(to_oriented_segments(goal),
                               from_test=False)
-    sweeper.register_segments(to_segments(test),
+    sweeper.register_segments(to_oriented_segments(test),
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
     return process_compound_queue(sweeper, min(goal_max_x, test_max_x))
 
 
-def to_segments(polygons: Iterable[Polygon]) -> Iterable[Segment]:
+def to_oriented_segments(polygons: Iterable[Polygon],
+                         *,
+                         clockwise: bool = False) -> Iterable[Segment]:
     for polygon in polygons:
-        yield from polygon_to_segments(polygon)
+        yield from polygon_to_oriented_segments(polygon,
+                                                clockwise=clockwise)
 
 
 def _to_borders(multipolygon: Multipolygon) -> Iterable[Region]:

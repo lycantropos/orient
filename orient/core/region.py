@@ -1,5 +1,4 @@
-from typing import (Iterable,
-                    Optional,
+from typing import (Optional,
                     Tuple)
 
 from robust.angular import (Orientation,
@@ -14,6 +13,7 @@ from . import bounding
 from .contour import (equal as contours_equal,
                       orientation as contour_orientation,
                       point_vertex_line_divides_angle,
+                      to_oriented_segments as contour_to_oriented_segments,
                       to_segments as contour_to_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
@@ -216,7 +216,7 @@ def _relate_multisegment(region: Region,
                                   region_bounding_box):
         return Relation.DISJOINT
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(region),
+    sweeper.register_segments(to_oriented_segments(region),
                               from_test=False)
     sweeper.register_segments(multisegment,
                               from_test=True)
@@ -241,7 +241,7 @@ def _relate_contour(region: Region,
     if equal(region, contour):
         return Relation.COMPONENT
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(region),
+    sweeper.register_segments(to_oriented_segments(region),
                               from_test=False)
     sweeper.register_segments(contour_to_segments(contour),
                               from_test=True)
@@ -265,9 +265,9 @@ def _relate_region(goal: Region,
     if equal(goal, test):
         return Relation.EQUAL
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(goal),
+    sweeper.register_segments(to_oriented_segments(goal),
                               from_test=False)
-    sweeper.register_segments(to_segments(test),
+    sweeper.register_segments(to_oriented_segments(test),
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
@@ -275,16 +275,4 @@ def _relate_region(goal: Region,
 
 
 equal = contours_equal
-
-
-def to_segments(contour: Contour,
-                *,
-                reverse: bool = False) -> Iterable[Segment]:
-    return (((contour[index - 1], contour[index])
-             for index in range(len(contour)))
-            if (contour_orientation(contour)
-                is (Orientation.CLOCKWISE
-                    if reverse
-                    else Orientation.COUNTERCLOCKWISE))
-            else ((contour[index], contour[index - 1])
-                  for index in range(len(contour) - 1, -1, -1)))
+to_oriented_segments = contour_to_oriented_segments

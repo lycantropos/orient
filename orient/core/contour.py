@@ -110,9 +110,9 @@ def relate_contour(goal: Contour, test: Contour) -> Relation:
     if equal(goal, test):
         return Relation.EQUAL
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_segments(goal),
+    sweeper.register_segments(to_oriented_segments(goal),
                               from_test=False)
-    sweeper.register_segments(to_segments(test),
+    sweeper.register_segments(to_oriented_segments(test),
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
@@ -155,3 +155,15 @@ def orientation(contour: Contour) -> Orientation:
 def to_segments(contour: Contour) -> Iterable[Segment]:
     return ((contour[index - 1], contour[index])
             for index in range(len(contour)))
+
+
+def to_oriented_segments(contour: Contour,
+                         *,
+                         clockwise: bool = False) -> Iterable[Segment]:
+    return (((contour[index - 1], contour[index])
+             for index in range(len(contour)))
+            if orientation(contour) is (Orientation.CLOCKWISE
+                                        if clockwise
+                                        else Orientation.COUNTERCLOCKWISE)
+            else ((contour[index], contour[index - 1])
+                  for index in range(len(contour) - 1, -1, -1)))
