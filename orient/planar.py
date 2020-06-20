@@ -721,9 +721,9 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     Finds relation between segment and polygon.
 
     Time complexity:
-        ``O(vertices_count)``
+        ``O(vertices_count * log vertices_count)``
     Memory complexity:
-        ``O(1)``
+        ``O(vertices_count)``
 
     where ``vertices_count = len(border) + sum(map(len, holes))``,
     ``border, holes = polygon``.

@@ -47,14 +47,12 @@ def relate_segment(polygon: Polygon, segment: Segment) -> Relation:
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
             return Relation.ENCLOSED
-        elif (relation_with_holes is Relation.CROSS
-              or relation_with_holes is Relation.COMPONENT):
-            return relation_with_holes
         elif relation_with_holes is Relation.ENCLOSED:
             return Relation.TOUCH
-        else:
-            # segment is within holes
+        elif relation_with_holes is Relation.WITHIN:
             return Relation.DISJOINT
+        else:
+            return relation_with_holes
     else:
         return relation_without_holes
 
