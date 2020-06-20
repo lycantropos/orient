@@ -125,13 +125,11 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
                     self.compute_position(below_event, event)
                     if (above_event is not None
                             and self.detect_intersection(event, above_event)):
-                        self.compute_position(below_event, event)
                         self.compute_position(event, above_event)
                     if (below_event is not None
                             and self.detect_intersection(below_event, event)):
-                        below_below_event = sweep_line.below(below_event)
-                        self.compute_position(below_below_event, below_event)
-                        self.compute_position(below_event, event)
+                        self.compute_position(sweep_line.below(below_event),
+                                              below_event)
                 else:
                     event = event.complement
                     if event in sweep_line:
