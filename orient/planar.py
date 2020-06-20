@@ -1057,10 +1057,12 @@ def segment_in_multipolygon(segment: Segment,
     Finds relation between segment and multipolygon.
 
     Time complexity:
-        ``O(sum(len(border) = sum(map(len, holes))\
- for border, holes in multipolygon))``
+        ``O(segments_count * log segments_count)``
     Memory complexity:
-        ``O(1)``
+        ``O(segments_count)``
+
+    where ``segments_count = sum(len(border) + sum(map(len, holes))\
+ for border, holes in multipolygon)``.
 
     :param segment: segment to check for.
     :param multipolygon: multipolygon to check in.
