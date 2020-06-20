@@ -776,7 +776,6 @@ def multisegment_in_polygon(multisegment: Multisegment,
  + len(border) + sum(map(len, holes))``,
     ``border, holes = polygon``.
 
-
     :param multisegment: multisegment to check for.
     :param polygon: polygon to check in.
     :returns: relation between multisegment and polygon.
