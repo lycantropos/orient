@@ -26,19 +26,10 @@ def relate_point(multiregion: Multiregion, point: Point) -> Relation:
 
 
 def relate_segment(multiregion: Multiregion, segment: Segment) -> Relation:
-    do_not_touch = True
-    for region in multiregion:
-        relation_with_region = relate_segment_to_region(region, segment)
-        if relation_with_region in (Relation.CROSS,
-                                    Relation.COMPONENT,
-                                    Relation.ENCLOSED,
-                                    Relation.WITHIN):
-            return relation_with_region
-        elif do_not_touch and relation_with_region is Relation.TOUCH:
-            do_not_touch = False
-    return (Relation.DISJOINT
-            if do_not_touch
-            else Relation.TOUCH)
+    return (relate_segment_to_region(multiregion[0], segment)
+            if len(multiregion) == 1
+            else _relate_multisegment(multiregion, [segment],
+                                      bounding.box_from_iterable(segment)))
 
 
 def relate_multisegment(multiregion: Multiregion,

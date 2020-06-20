@@ -506,9 +506,11 @@ def segment_in_multiregion(segment: Segment,
     Finds relation between segment and multiregion.
 
     Time complexity:
-        ``O(sum(map(len, multiregion)))``
+        ``O(segments_count * log segments_count)``
     Memory complexity:
-        ``O(1)``
+        ``O(segments_count)``
+
+    where ``segments_count = sum(map(len, multiregion))``.
 
     :param segment: segment to check for.
     :param multiregion: multiregion to check in.
