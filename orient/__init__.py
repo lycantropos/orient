@@ -1,3 +1,3 @@
 """Geometric queries."""
 
-__version__ = '0.9.4-alpha'
+__version__ = '0.9.4'
