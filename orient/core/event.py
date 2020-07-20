@@ -5,11 +5,9 @@ from typing import (Optional,
                     TypeVar)
 
 from reprit.base import generate_repr
-from robust.linear import (SegmentsRelationship,
-                           segments_intersection)
+from robust.linear import SegmentsRelationship
 
-from orient.hints import (Coordinate,
-                          Point,
+from orient.hints import (Point,
                           Segment)
 
 
@@ -39,40 +37,13 @@ class LinearEvent:
     def end(self) -> Point:
         return self.complement.start
 
-    def set_both_relationships(self, relationship: SegmentsRelationship
-                               ) -> None:
-        self.relationship = self.complement.relationship = relationship
-
-    @property
-    def is_vertical(self) -> bool:
-        start_x, _ = self.start
-        end_x, _ = self.end
-        return start_x == end_x
-
-    @property
-    def is_horizontal(self) -> bool:
-        _, start_y = self.start
-        _, end_y = self.end
-        return start_y == end_y
-
     @property
     def segment(self) -> Segment:
         return self.start, self.end
 
-    def y_at(self, x: Coordinate) -> Coordinate:
-        if self.is_vertical or self.is_horizontal:
-            _, start_y = self.start
-            return start_y
-        else:
-            start_x, start_y = self.start
-            if x == start_x:
-                return start_y
-            end_x, end_y = self.end
-            if x == end_x:
-                return end_y
-            _, result = segments_intersection(self.segment,
-                                              ((x, start_y), (x, end_y)))
-            return result
+    def set_both_relationships(self, relationship: SegmentsRelationship
+                               ) -> None:
+        self.relationship = self.complement.relationship = relationship
 
 
 @unique
