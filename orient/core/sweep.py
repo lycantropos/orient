@@ -101,8 +101,7 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         events_queue = self._events_queue
         while events_queue:
             event = events_queue.peek()
-            start = event.start
-            start_x, _ = start
+            start_x, _ = start = event.start
             if start_x > stop_x:
                 # no intersection segments left
                 return
@@ -263,8 +262,7 @@ class LinearSweeper(Sweeper[LinearEvent]):
         prev_from_other_events = []  # type: List[LinearEvent]
         while events_queue:
             event = events_queue.peek()
-            start = event.start
-            start_x, _ = start
+            start_x, _ = start = event.start
             if start_x > stop_x:
                 # no intersection segments left
                 return
