@@ -73,8 +73,8 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         for start, end in segments:
             inside_on_left = True
             if start > end:
-                inside_on_left = False
                 start, end = end, start
+                inside_on_left = False
             start_event = self.event_cls(True, start, None, from_test,
                                          SegmentsRelationship.NONE,
                                          inside_on_left)
