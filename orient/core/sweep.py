@@ -342,24 +342,22 @@ class LinearSweeper(Sweeper[LinearEvent]):
             if event.from_test is below_event.from_test:
                 raise ValueError('Segments of the same object '
                                  'should not overlap.')
-
-            starts_equal = event.start == below_event.start
-            if starts_equal:
-                start_min = start_max = None
-            elif EventsQueueKey(event) < EventsQueueKey(below_event):
-                start_min, start_max = event, below_event
-            else:
-                start_min, start_max = below_event, event
-
-            ends_equal = event.end == below_event.end
-            if ends_equal:
-                end_min = end_max = None
-            elif (EventsQueueKey(event.complement)
-                  < EventsQueueKey(below_event.complement)):
-                end_min, end_max = event.complement, below_event.complement
-            else:
-                end_min, end_max = below_event.complement, event.complement
-
+            starts_equal = below_event.start == event.start
+            ends_equal = below_event.end == event.end
+            start_min, start_max = ((None, None)
+                                    if starts_equal
+                                    else ((event, below_event)
+                                          if (EventsQueueKey(event)
+                                              < EventsQueueKey(below_event))
+                                          else (below_event, event)))
+            end_min, end_max = ((None, None)
+                                if ends_equal
+                                else
+                                (event.complement, below_event.complement
+                                if (EventsQueueKey(event.complement)
+                                    < EventsQueueKey(below_event.complement))
+                                else (below_event.complement,
+                                      event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 if ends_equal:
@@ -398,7 +396,6 @@ class LinearSweeper(Sweeper[LinearEvent]):
                     self.divide_segment(below_event, point)
                 if point != event.start and point != event.end:
                     self.divide_segment(event, point)
-
             if event.from_test is not below_event.from_test:
                 event.set_both_relationships(max(event.relationship,
                                                  relationship))
