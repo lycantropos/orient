@@ -163,11 +163,11 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
             end_min, end_max = ((None, None)
                                 if ends_equal
                                 else
-                                (event.complement, below_event.complement
-                                if (EventsQueueKey(event.complement)
-                                    < EventsQueueKey(below_event.complement))
-                                else (below_event.complement,
-                                      event.complement)))
+                                ((event.complement, below_event.complement)
+                                 if (EventsQueueKey(event.complement)
+                                     < EventsQueueKey(below_event.complement))
+                                 else (below_event.complement,
+                                       event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 below_event.overlap_orientation = event.overlap_orientation = (
@@ -353,11 +353,11 @@ class LinearSweeper(Sweeper[LinearEvent]):
             end_min, end_max = ((None, None)
                                 if ends_equal
                                 else
-                                (event.complement, below_event.complement
-                                if (EventsQueueKey(event.complement)
-                                    < EventsQueueKey(below_event.complement))
-                                else (below_event.complement,
-                                      event.complement)))
+                                ((event.complement, below_event.complement)
+                                 if (EventsQueueKey(event.complement)
+                                     < EventsQueueKey(below_event.complement))
+                                 else (below_event.complement,
+                                       event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 if ends_equal:
