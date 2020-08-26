@@ -166,7 +166,7 @@ def process_compound_queue(sweeper: CompoundSweeper,
         elif (boundaries_do_not_intersect
               and event.relationship is not SegmentsRelationship.NONE):
             boundaries_do_not_intersect = False
-        if event.common_boundary:
+        if event.is_common_region_boundary:
             if none_overlapping_components:
                 none_overlapping_components = False
         elif event.inside:
@@ -182,7 +182,7 @@ def process_compound_queue(sweeper: CompoundSweeper,
                     goal_boundary_not_in_test_interior = False
                 if test_is_subset_of_goal:
                     test_is_subset_of_goal = False
-        elif event.outside or event.contours_overlap:
+        elif event.outside or event.is_common_polyline_component:
             if test_is_subset_of_goal and event.from_test:
                 test_is_subset_of_goal = False
             if goal_is_subset_of_test and event.from_goal:

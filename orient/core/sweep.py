@@ -23,7 +23,7 @@ from orient.hints import (Coordinate,
 from .event import (CompoundEvent,
                     Event,
                     LinearEvent,
-                    OverlapOrientation)
+                    OverlapKind)
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
@@ -89,9 +89,10 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         left_event = self.event_cls(True, point, event.complement,
                                     event.from_test,
                                     event.complement.relationship,
-                                    event.inside_on_left)
+                                    event.interior_to_left)
         right_event = self.event_cls(False, point, event, event.from_test,
-                                     event.relationship, event.inside_on_left)
+                                     event.relationship,
+                                     event.interior_to_left)
         event.complement.complement, event.complement = left_event, right_event
         self._events_queue.push(left_event)
         self._events_queue.push(right_event)
@@ -169,10 +170,10 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
                                        event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
-                below_event.overlap_orientation = event.overlap_orientation = (
-                    OverlapOrientation.SAME
-                    if event.inside_on_left is below_event.inside_on_left
-                    else OverlapOrientation.DIFFERENT)
+                below_event.overlap_kind = event.overlap_kind = (
+                    OverlapKind.SAME_ORIENTATION
+                    if event.interior_to_left is below_event.interior_to_left
+                    else OverlapKind.DIFFERENT_ORIENTATION)
                 if ends_equal:
                     event.set_both_relationships(relationship)
                     below_event.set_both_relationships(relationship)
@@ -221,10 +222,10 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
     def compute_position(below_event: Optional[CompoundEvent],
                          event: CompoundEvent) -> None:
         if below_event is not None:
-            event.other_inside_on_left = (below_event.other_inside_on_left
-                                          if (event.from_test
-                                              is below_event.from_test)
-                                          else below_event.inside_on_left)
+            event.other_interior_to_left = (below_event.other_interior_to_left
+                                            if (event.from_test
+                                                is below_event.from_test)
+                                            else below_event.interior_to_left)
 
 
 class LinearSweeper(Sweeper[LinearEvent]):
