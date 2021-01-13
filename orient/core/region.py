@@ -1,9 +1,6 @@
 from typing import (Optional,
                     Tuple)
 
-from robust.angular import (Orientation,
-                            orientation as angle_orientation)
-
 from orient.hints import (Contour,
                           Multisegment,
                           Point,
@@ -21,6 +18,8 @@ from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import CompoundSweeper
+from .utils import (Orientation,
+                    orientation as angle_orientation)
 
 
 def relate_point(region: Region, point: Point) -> Relation:

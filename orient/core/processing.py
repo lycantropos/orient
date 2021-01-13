@@ -1,9 +1,8 @@
-from robust.linear import SegmentsRelationship
-
 from orient.hints import Coordinate
 from .relation import Relation
 from .sweep import (CompoundSweeper,
                     LinearSweeper)
+from .utils import SegmentsRelationship
 
 
 def process_open_linear_queue(sweeper: LinearSweeper,

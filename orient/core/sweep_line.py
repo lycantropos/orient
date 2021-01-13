@@ -2,10 +2,10 @@ from typing import Optional
 
 from dendroid import red_black
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
 
 from .event import Event
+from .utils import (Orientation,
+                    orientation)
 
 
 class SweepLine:

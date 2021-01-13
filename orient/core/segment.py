@@ -1,10 +1,9 @@
-from robust.angular import (Orientation,
-                            orientation)
-
 from orient.hints import (Point,
                           Segment)
 from . import bounding
 from .relation import Relation
+from .utils import (Orientation,
+                    orientation)
 
 
 def relate_point(segment: Segment, point: Point) -> Relation:

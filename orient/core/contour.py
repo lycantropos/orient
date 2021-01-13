@@ -1,9 +1,6 @@
 from itertools import chain
 from typing import Iterable
 
-from robust.angular import (Orientation,
-                            orientation as angle_orientation)
-
 from orient.hints import (Contour,
                           Multisegment,
                           Point,
@@ -16,6 +13,8 @@ from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import (CompoundSweeper,
                     LinearSweeper)
+from .utils import (Orientation,
+                    orientation as angle_orientation)
 
 
 def relate_point(contour: Contour, point: Point) -> Relation:

@@ -10,12 +10,6 @@ from typing import (Any,
                     Type)
 
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
-from robust.linear import (SegmentsRelationship,
-                           segments_intersection,
-                           segments_relationship)
-from robust.projection import signed_length
 
 from orient.hints import (Coordinate,
                           Point,
@@ -27,6 +21,12 @@ from .event import (CompoundEvent,
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
+from .utils import (Orientation,
+                    SegmentsRelationship,
+                    orientation,
+                    segments_intersection,
+                    segments_relationship,
+                    signed_length)
 
 
 class Sweeper(Generic[Event]):

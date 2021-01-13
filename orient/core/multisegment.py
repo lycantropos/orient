@@ -1,9 +1,5 @@
 from typing import Dict
 
-from robust.angular import (Orientation,
-                            orientation)
-from robust.linear import segments_intersection
-
 from orient.hints import (Multisegment,
                           Point,
                           Segment)
@@ -13,6 +9,9 @@ from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import LinearSweeper
+from .utils import (Orientation,
+                    orientation,
+                    segments_intersection)
 
 
 def relate_point(multisegment: Multisegment, point: Point) -> Relation:

@@ -5,10 +5,10 @@ from typing import (Optional,
                     TypeVar)
 
 from reprit.base import generate_repr
-from robust.linear import SegmentsRelationship
 
 from orient.hints import (Point,
                           Segment)
+from .utils import SegmentsRelationship
 
 
 class LinearEvent:

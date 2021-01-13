@@ -4,10 +4,10 @@ from typing import (Callable,
 
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
 
 from .event import Event
+from .utils import (Orientation,
+                    orientation)
 
 
 class EventsQueueKey:
