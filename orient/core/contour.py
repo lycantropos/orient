@@ -43,7 +43,7 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
             elif (has_no_cross
                   and index - last_touched_edge_index == 1
                   and start not in edge and end not in edge
-                  and (angle_orientation(end, start, edge_start)
+                  and (angle_orientation(start, end, edge_start)
                        is Orientation.COLLINEAR)
                   and point_vertex_line_divides_angle(
                             start, last_touched_edge_start,
@@ -59,7 +59,7 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
         first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
         if (relate_segments(first_edge, segment) is Relation.TOUCH
                 and start not in first_edge and end not in first_edge
-                and (angle_orientation(end, start, first_edge_start)
+                and (angle_orientation(start, end, first_edge_start)
                      is Orientation.COLLINEAR)
                 and point_vertex_line_divides_angle(start, contour[-2],
                                                     first_edge_start,
@@ -76,8 +76,8 @@ def point_vertex_line_divides_angle(point: Point,
                                     first_ray_point: Point,
                                     vertex: Point,
                                     second_ray_point: Point) -> bool:
-    return (angle_orientation(first_ray_point, vertex, point)
-            is angle_orientation(point, vertex, second_ray_point))
+    return (angle_orientation(vertex, first_ray_point, point)
+            is angle_orientation(vertex, point, second_ray_point))
 
 
 def relate_multisegment(contour: Contour,
@@ -147,7 +147,7 @@ def equal(left: Contour, right: Contour) -> bool:
 def orientation(contour: Contour) -> Orientation:
     index = min(range(len(contour)),
                 key=contour.__getitem__)
-    return angle_orientation(contour[index], contour[index - 1],
+    return angle_orientation(contour[index - 1], contour[index],
                              contour[(index + 1) % len(contour)])
 
 
