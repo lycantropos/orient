@@ -1,5 +1,7 @@
 from typing import Iterable
 
+from ground.base import Relation
+
 from orient.hints import (Contour,
                           Multipolygon,
                           Multiregion,
@@ -18,7 +20,6 @@ from .polygon import (relate_point as relate_point_to_polygon,
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import to_oriented_segments as region_to_oriented_segments
-from .relation import Relation
 from .sweep import CompoundSweeper
 
 

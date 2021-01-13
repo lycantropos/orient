@@ -1,6 +1,8 @@
 from typing import (Optional,
                     Tuple)
 
+from ground.base import Relation
+
 from orient.hints import (Contour,
                           Multisegment,
                           Point,
@@ -14,7 +16,6 @@ from .contour import (equal as contours_equal,
                       to_segments as contour_to_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import CompoundSweeper

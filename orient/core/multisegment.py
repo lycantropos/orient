@@ -1,11 +1,12 @@
 from typing import Dict
 
+from ground.base import Relation
+
 from orient.hints import (Multisegment,
                           Point,
                           Segment)
 from . import bounding
 from .processing import process_open_linear_queue
-from .relation import Relation
 from .segment import (relate_point as relate_point_to_segment,
                       relate_segment as relate_segments)
 from .sweep import LinearSweeper

@@ -1,3 +1,5 @@
+from ground.base import Relation
+
 from .core import (contour as _contour,
                    multipolygon as _multipolygon,
                    multiregion as _multiregion,
@@ -5,7 +7,6 @@ from .core import (contour as _contour,
                    polygon as _polygon,
                    region as _region,
                    segment as _segment)
-from .core.relation import Relation
 from .hints import (Contour,
                     Multipolygon,
                     Multiregion,
