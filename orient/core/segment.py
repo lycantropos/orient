@@ -13,7 +13,7 @@ def relate_point(segment: Segment, point: Point) -> Relation:
         if (point == start or point == end
             or (bounding
                 .box_contains_point(bounding.box_from_iterable(segment), point)
-                and orientation(end, start, point) is Orientation.COLLINEAR))
+                and orientation(start, end, point) is Orientation.COLLINEAR))
         else Relation.DISJOINT)
 
 
@@ -26,8 +26,8 @@ def relate_segment(goal: Segment, test: Segment) -> Relation:
         goal_start, goal_end = goal_end, goal_start
     if test_start > test_end:
         test_start, test_end = test_end, test_start
-    goal_start_orientation = orientation(test_start, test_end, goal_start)
-    goal_end_orientation = orientation(test_start, test_end, goal_end)
+    goal_start_orientation = orientation(test_end, test_start, goal_start)
+    goal_end_orientation = orientation(test_end, test_start, goal_end)
     if goal_start_orientation is goal_end_orientation:
         if goal_start_orientation is Orientation.COLLINEAR:
             if goal_start == test_start:
@@ -61,8 +61,8 @@ def relate_segment(goal: Segment, test: Segment) -> Relation:
                 if test_start <= goal_end <= test_end
                 else Relation.DISJOINT)
     else:
-        test_start_orientation = orientation(goal_end, goal_start, test_start)
-        test_end_orientation = orientation(goal_end, goal_start, test_end)
+        test_start_orientation = orientation(goal_start, goal_end, test_start)
+        test_end_orientation = orientation(goal_start, goal_end, test_end)
         if test_start_orientation is test_end_orientation:
             return Relation.DISJOINT
         elif test_start_orientation is Orientation.COLLINEAR:

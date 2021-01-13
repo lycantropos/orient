@@ -8,7 +8,7 @@ from ground.base import (Orientation,
 Orientation = Orientation
 
 
-def orientation(first, vertex, second):
+def orientation(vertex, first, second):
     context = get_context()
     point_cls = context.point_cls
     return context.angle_orientation(point_cls(*vertex), point_cls(*first),

@@ -292,7 +292,7 @@ class LinearSweeper(Sweeper[LinearEvent]):
                             from_same_events,
                             key=partial(_to_point_event_cosine, base_end))
                     largest_angle_end = largest_angle_event.end
-                    base_orientation = orientation(base_end, start,
+                    base_orientation = orientation(start, base_end,
                                                    largest_angle_end)
                     if all_equal(_point_in_angle(other_event.end,
                                                  base_end, start,
@@ -417,8 +417,8 @@ def _point_in_angle(point: Point,
                     vertex: Point,
                     second_ray_point: Point,
                     angle_orientation: Orientation) -> bool:
-    first_half_orientation = orientation(first_ray_point, vertex, point)
-    second_half_orientation = orientation(vertex, second_ray_point, point)
+    first_half_orientation = orientation(vertex, first_ray_point, point)
+    second_half_orientation = orientation(second_ray_point, vertex, point)
     return (second_half_orientation is angle_orientation
             if first_half_orientation is Orientation.COLLINEAR
             else (first_half_orientation is angle_orientation

@@ -76,10 +76,10 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
                                     middle_touching_orientations[intersection])
                             except KeyError:
                                 middle_touching_orientations[intersection] = (
-                                    orientation(end, start,
+                                    orientation(start, end,
                                                 non_touched_endpoint))
                             else:
-                                if (orientation(end, start,
+                                if (orientation(start, end,
                                                 non_touched_endpoint)
                                         is not previous_orientation):
                                     has_no_cross = False

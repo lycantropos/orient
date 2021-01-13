@@ -38,7 +38,7 @@ class EventsQueueKey:
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
-            other_end_orientation = orientation(event.end, event.start,
+            other_end_orientation = orientation(event.start, event.end,
                                                 other_event.end)
             return (other_event.from_test
                     if other_end_orientation is Orientation.COLLINEAR
