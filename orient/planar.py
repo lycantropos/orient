@@ -48,8 +48,7 @@ def point_in_segment(point: Point, segment: Segment) -> Relation:
     >>> point_in_segment(Point(0, 1), segment) is Relation.DISJOINT
     True
     """
-    return _segment.relate_point(_raw.from_segment(segment),
-                                 _raw.from_point(point))
+    return _segment.relate_point(_raw.from_segment(segment), point)
 
 
 def segment_in_segment(left: Segment, right: Segment) -> Relation:
@@ -129,7 +128,7 @@ def point_in_multisegment(point: Point,
     True
     """
     return _multisegment.relate_point(_raw.from_multisegment(multisegment),
-                                      _raw.from_point(point))
+                                      point)
 
 
 def segment_in_multisegment(segment: Segment,
@@ -254,7 +253,7 @@ def point_in_contour(point: Point, contour: Contour) -> Relation:
     True
     """
     return _contour.relate_point(_raw.from_contour(contour),
-                                 _raw.from_point(point))
+                                 point)
 
 
 def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
@@ -414,8 +413,7 @@ def point_in_region(point: Point, region: Region) -> Relation:
     >>> point_in_region(Point(3, 3), square) is Relation.DISJOINT
     True
     """
-    return _region.relate_point(_raw.from_region(region),
-                                _raw.from_point(point))
+    return _region.relate_point(_raw.from_region(region), point)
 
 
 def segment_in_region(segment: Segment, region: Region) -> Relation:
@@ -608,8 +606,7 @@ def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
     >>> point_in_multiregion(Point(2, 2), [square]) is Relation.COMPONENT
     True
     """
-    return _multiregion.relate_point(_raw.from_multiregion(multiregion),
-                                     _raw.from_point(point))
+    return _multiregion.relate_point(_raw.from_multiregion(multiregion), point)
 
 
 def segment_in_multiregion(segment: Segment,
@@ -867,8 +864,7 @@ def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
     ...  is Relation.DISJOINT)
     True
     """
-    return _polygon.relate_point(_raw.from_polygon(polygon),
-                                 _raw.from_point(point))
+    return _polygon.relate_point(_raw.from_polygon(polygon), point)
 
 
 def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
@@ -1297,7 +1293,7 @@ def point_in_multipolygon(point: Point,
     True
     """
     return _multipolygon.relate_point(_raw.from_multipolygon(multipolygon),
-                                      _raw.from_point(point))
+                                      point)
 
 
 def segment_in_multipolygon(segment: Segment,

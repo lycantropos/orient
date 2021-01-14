@@ -1,13 +1,8 @@
-from ground.hints import Contour, Multipolygon, Multisegment, Point, Polygon, \
-    Segment
-
-
-def from_point(point: Point):
-    return point
+from ground.hints import Contour, Multipolygon, Multisegment, Polygon, Segment
 
 
 def from_segment(segment: Segment):
-    return from_point(segment.start), from_point(segment.end)
+    return segment.start, segment.end
 
 
 def from_multisegment(multisegment: Multisegment):
@@ -15,7 +10,7 @@ def from_multisegment(multisegment: Multisegment):
 
 
 def from_contour(contour: Contour):
-    return [from_point(vertex) for vertex in contour.vertices]
+    return contour.vertices
 
 
 from_region = from_contour
