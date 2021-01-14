@@ -31,19 +31,16 @@ def relate_point(region: Region, point: Point) -> Relation:
 def _relate_point(region: Region, point: Point) -> Tuple[Optional[int],
                                                          Relation]:
     result = False
-    _, point_y = point
+    point_y = point.y
     for index, edge in enumerate(contour_to_segments(region)):
         if relate_point_to_segment(edge, point) is Relation.COMPONENT:
             return index, Relation.COMPONENT
         start, end = edge
-        (_, start_y), (_, end_y) = start, end
-        if ((start_y > point_y) is not (end_y > point_y)
-                and ((end_y > start_y) is (orientation(start, end, point)
+        if ((start.y > point_y) is not (end.y > point_y)
+                and ((end.y > start.y) is (orientation(start, end, point)
                                            is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return None, (Relation.WITHIN
-                  if result
-                  else Relation.DISJOINT)
+    return None, (Relation.WITHIN if result else Relation.DISJOINT)
 
 
 def _relate_segment_to_contour(contour: Contour, segment: Segment) -> Relation:

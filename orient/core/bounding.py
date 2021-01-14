@@ -10,8 +10,7 @@ Box = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 
 def box_contains_point(box: Box, point: Point) -> bool:
     x_min, x_max, y_min, y_max = box
-    point_x, point_y = point
-    return x_min <= point_x <= x_max and y_min <= point_y <= y_max
+    return x_min <= point.x <= x_max and y_min <= point.y <= y_max
 
 
 def box_disjoint_with(goal: Box, test: Box) -> bool:
@@ -23,10 +22,11 @@ def box_disjoint_with(goal: Box, test: Box) -> bool:
 
 def box_from_iterable(points: Iterable[Point]) -> Box:
     iterator = iter(points)
-    x_min, y_min = x_max, y_max = next(iterator)
-    for x, y in iterator:
-        x_min, x_max, y_min, y_max = (min(x_min, x), max(x_max, x),
-                                      min(y_min, y), max(y_max, y))
+    point = next(iterator)
+    x_min, y_min = x_max, y_max = point.x, point.y
+    for point in iterator:
+        x_min, x_max, y_min, y_max = (min(x_min, point.x), max(x_max, point.x),
+                                      min(y_min, point.y), max(y_max, point.y))
     return x_min, x_max, y_min, y_max
 
 

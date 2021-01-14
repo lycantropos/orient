@@ -10,21 +10,15 @@ Orientation = Orientation
 
 def orientation(vertex, first, second):
     context = get_context()
-    point_cls = context.point_cls
-    return context.angle_orientation(point_cls(*vertex), point_cls(*first),
-                                     point_cls(*second))
+    return context.angle_orientation(vertex, first, second)
 
 
 def segments_intersection(first, second):
     first_start, first_end = first
     second_start, second_end = second
     context = get_context()
-    point_cls = context.point_cls
-    result = context.segments_intersection(point_cls(*first_start),
-                                           point_cls(*first_end),
-                                           point_cls(*second_start),
-                                           point_cls(*second_end))
-    return result.x, result.y
+    return context.segments_intersection(first_start, first_end, second_start,
+                                         second_end)
 
 
 class SegmentsRelationship(IntEnum):
@@ -38,11 +32,8 @@ def segments_relationship(first, second):
     first_start, first_end = first
     second_start, second_end = second
     context = get_context()
-    point_cls = context.point_cls
-    result = context.segments_relation(point_cls(*first_start),
-                                       point_cls(*first_end),
-                                       point_cls(*second_start),
-                                       point_cls(*second_end))
+    result = context.segments_relation(first_start, first_end, second_start,
+                                       second_end)
     return (SegmentsRelationship.NONE if result is Relation.DISJOINT
             else (SegmentsRelationship.TOUCH if result is Relation.TOUCH
                   else (SegmentsRelationship.CROSS if result is Relation.CROSS
@@ -51,10 +42,8 @@ def segments_relationship(first, second):
 
 def signed_length(first_start, first_end, second_start, second_end):
     context = get_context()
-    point_cls = context.point_cls
-    return context.dot_product(point_cls(*first_start), point_cls(*first_end),
-                               point_cls(*second_start),
-                               point_cls(*second_end))
+    return context.dot_product(first_start, first_end, second_start,
+                               second_end)
 
 
 flatten = chain.from_iterable

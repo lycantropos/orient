@@ -102,8 +102,8 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         events_queue = self._events_queue
         while events_queue:
             event = events_queue.peek()
-            start_x, _ = start = event.start
-            if start_x > stop_x:
+            start = event.start
+            if start.x > stop_x:
                 # no intersection segments left
                 return
             events_queue.pop()
@@ -263,8 +263,8 @@ class LinearSweeper(Sweeper[LinearEvent]):
         prev_from_other_events = []  # type: List[LinearEvent]
         while events_queue:
             event = events_queue.peek()
-            start_x, _ = start = event.start
-            if start_x > stop_x:
+            start = event.start
+            if start.x > stop_x:
                 # no intersection segments left
                 return
             events_queue.pop()
@@ -430,6 +430,6 @@ def _point_in_angle(point: Point,
 
 
 def _points_distance(start: Point, end: Point) -> Coordinate:
-    (start_x, start_y), (end_x, end_y) = start, end
-    delta_x, delta_y = end_x - start_x, end_y - start_y
+    start, end = start, end
+    delta_x, delta_y = end.x - start.x, end.y - start.y
     return math.sqrt(delta_x * delta_x + delta_y * delta_y)
