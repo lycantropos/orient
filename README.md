@@ -7,36 +7,23 @@ orient
 [![](https://img.shields.io/github/license/lycantropos/orient.svg)](https://github.com/lycantropos/orient/blob/master/LICENSE "License")
 [![](https://badge.fury.io/py/orient.svg)](https://badge.fury.io/py/orient "PyPI")
 
-In what follows
-- `python` is an alias for `python3.5` or any later
-version (`python3.6` and so on),
-- `pypy` is an alias for `pypy3.5` or any later
-version (`pypy3.6` and so on).
+In what follows `python` is an alias for `python3.5` or `pypy3.5`
+or any later version (`python3.6`, `pypy3.6` and so on).
 
 Installation
 ------------
 
-Install the latest `pip` & `setuptools` packages versions:
-- with `CPython`
-  ```bash
-  python -m pip install --upgrade pip setuptools
-  ```
-- with `PyPy`
-  ```bash
-  pypy -m pip install --upgrade pip setuptools
-  ```
+Install the latest `pip` & `setuptools` packages versions
+```bash
+python -m pip install --upgrade pip setuptools
+```
 
 ### User
 
 Download and install the latest stable version from `PyPI` repository:
-- with `CPython`
-  ```bash
-  python -m pip install --upgrade orient
-  ```
-- with `PyPy`
-  ```bash
-  pypy -m pip install --upgrade orient
-  ```
+```bash
+python -m pip install --upgrade orient
+```
 
 ### Developer
 
@@ -46,37 +33,32 @@ git clone https://github.com/lycantropos/orient.git
 cd orient
 ```
 
-Install dependencies:
-- with `CPython`
-  ```bash
-  python -m pip install --force-reinstall -r requirements.txt
-  ```
-- with `PyPy`
-  ```bash
-  pypy -m pip install --force-reinstall -r requirements.txt
-  ```
+Install dependencies
+```bash
+python -m pip install -r requirements.txt
+```
 
-Install:
-- with `CPython`
-  ```bash
-  python setup.py install
-  ```
-- with `PyPy`
-  ```bash
-  pypy setup.py install
-  ```
+Install
+```bash
+python setup.py install
+```
 
 Usage
 -----
 
 ```python
->>> left_bottom = (0, 0)
->>> right_bottom = (4, 0)
->>> left_top = (0, 4)
->>> right_top = (4, 4)
->>> bottom_segment_midpoint = (2, 0)
->>> bottom_segment = (left_bottom, right_bottom)
->>> from orient.planar import Relation, point_in_segment
+>>> from ground.base import get_context
+>>> context = get_context()
+>>> Point = context.point_cls
+>>> left_bottom = Point(0, 0)
+>>> right_bottom = Point(4, 0)
+>>> left_top = Point(0, 4)
+>>> right_top = Point(4, 4)
+>>> bottom_segment_midpoint = Point(2, 0)
+>>> Segment = context.segment_cls
+>>> bottom_segment = Segment(left_bottom, right_bottom)
+>>> from ground.base import Relation
+>>> from orient.planar import point_in_segment
 >>> point_in_segment(left_bottom, bottom_segment) is Relation.COMPONENT
 True
 >>> (point_in_segment(bottom_segment_midpoint, bottom_segment) 
@@ -86,29 +68,34 @@ True
 True
 >>> point_in_segment(left_top, bottom_segment) is Relation.DISJOINT
 True
->>> square = [left_bottom, right_bottom, right_top, left_top]
+>>> Contour = context.contour_cls
+>>> square = Contour([left_bottom, right_bottom, right_top, left_top])
 >>> from orient.planar import point_in_region
 >>> point_in_region(left_bottom, square) is Relation.COMPONENT
 True
->>> point_in_region((1, 1), square) is Relation.WITHIN
+>>> point_in_region(Point(1, 1), square) is Relation.WITHIN
 True
 >>> point_in_region(right_top, square) is Relation.COMPONENT
 True
->>> point_in_region((5, 5), square) is Relation.DISJOINT
+>>> point_in_region(Point(5, 5), square) is Relation.DISJOINT
 True
->>> main_diagonal = (left_bottom, right_top)
+>>> main_diagonal = Segment(left_bottom, right_top)
 >>> from orient.planar import segment_in_region
 >>> segment_in_region(bottom_segment, square) is Relation.COMPONENT
 True
->>> segment_in_region(((1, 0), (5, 0)), square) is Relation.TOUCH
+>>> (segment_in_region(Segment(Point(1, 0), Point(5, 0)), square)
+...  is Relation.TOUCH)
 True
 >>> segment_in_region(main_diagonal, square) is Relation.ENCLOSED
 True
->>> segment_in_region(((1, 1), (2, 2)), square) is Relation.WITHIN
+>>> (segment_in_region(Segment(Point(1, 1), Point(2, 2)), square)
+...  is Relation.WITHIN)
 True
->>> segment_in_region(((1, 1), (5, 5)), square) is Relation.CROSS
+>>> (segment_in_region(Segment(Point(1, 1), Point(5, 5)), square)
+...  is Relation.CROSS)
 True
->>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
+>>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+...                         Point(1, 3)])
 >>> from orient.planar import region_in_region
 >>> region_in_region(square, square) is Relation.EQUAL
 True
@@ -125,49 +112,59 @@ True
 True
 >>> region_in_multiregion(inner_square, [square]) is Relation.WITHIN
 True
+>>> Polygon = context.polygon_cls
 >>> from orient.planar import point_in_polygon
->>> point_in_polygon(left_bottom, (square, [])) is Relation.COMPONENT
+>>> point_in_polygon(left_bottom, Polygon(square, [])) is Relation.COMPONENT
 True
->>> point_in_polygon((1, 1), (square, [])) is Relation.WITHIN
+>>> point_in_polygon(Point(1, 1), Polygon(square, [])) is Relation.WITHIN
 True
->>> point_in_polygon((2, 2), (square, [])) is Relation.WITHIN
+>>> point_in_polygon(Point(2, 2), Polygon(square, [])) is Relation.WITHIN
 True
->>> point_in_polygon((1, 1), (square, [inner_square])) is Relation.COMPONENT
+>>> (point_in_polygon(Point(1, 1), Polygon(square, [inner_square]))
+...  is Relation.COMPONENT)
 True
->>> point_in_polygon((2, 2), (square, [inner_square])) is Relation.DISJOINT
+>>> (point_in_polygon(Point(2, 2), Polygon(square, [inner_square]))
+...  is Relation.DISJOINT)
 True
 >>> from orient.planar import segment_in_polygon
->>> segment_in_polygon(bottom_segment, (square, [])) is Relation.COMPONENT
+>>> (segment_in_polygon(bottom_segment, Polygon(square, []))
+...  is Relation.COMPONENT)
 True
->>> segment_in_polygon(((1, 0), (5, 0)), (square, [])) is Relation.TOUCH
-True
->>> segment_in_polygon(main_diagonal, (square, [])) is Relation.ENCLOSED
-True
->>> (segment_in_polygon(main_diagonal, (square, [inner_square]))
-...  is Relation.CROSS)
-True
->>> segment_in_polygon(((1, 1), (2, 2)), (square, [])) is Relation.WITHIN
-True
->>> (segment_in_polygon(((1, 1), (2, 2)), (square, [inner_square]))
+>>> (segment_in_polygon(Segment(Point(1, 0), Point(5, 0)), Polygon(square, []))
 ...  is Relation.TOUCH)
 True
->>> segment_in_polygon(((1, 1), (5, 5)), (square, [])) is Relation.CROSS
+>>> segment_in_polygon(main_diagonal, Polygon(square, [])) is Relation.ENCLOSED
 True
->>> (segment_in_polygon(((1, 1), (5, 5)), (square, [inner_square]))
+>>> (segment_in_polygon(main_diagonal, Polygon(square, [inner_square]))
 ...  is Relation.CROSS)
+True
+>>> (segment_in_polygon(Segment(Point(1, 1), Point(2, 2)), Polygon(square, []))
+...  is Relation.WITHIN)
+True
+>>> segment_in_polygon(Segment(Point(1, 1), Point(2, 2)),
+...                    Polygon(square, [inner_square])) is Relation.TOUCH
+True
+>>> (segment_in_polygon(Segment(Point(1, 1), Point(5, 5)), Polygon(square, []))
+...  is Relation.CROSS)
+True
+>>> segment_in_polygon(Segment(Point(1, 1), Point(5, 5)),
+...                    Polygon(square, [inner_square])) is Relation.CROSS
 True
 >>> from orient.planar import polygon_in_polygon
->>> polygon_in_polygon((square, []), (square, [])) is Relation.EQUAL
+>>> (polygon_in_polygon(Polygon(square, []), Polygon(square, []))
+...  is Relation.EQUAL)
 True
->>> polygon_in_polygon((inner_square, []), (square, [])) is Relation.WITHIN
+>>> (polygon_in_polygon(Polygon(inner_square, []), Polygon(square, []))
+...  is Relation.WITHIN)
 True
->>> polygon_in_polygon((square, []), (inner_square, [])) is Relation.COVER
+>>> (polygon_in_polygon(Polygon(square, []), Polygon(inner_square, []))
+...  is Relation.COVER)
 True
->>> (polygon_in_polygon((inner_square, []), (square, [inner_square]))
-...  is Relation.TOUCH)
+>>> polygon_in_polygon(Polygon(inner_square, []),
+...                    Polygon(square, [inner_square])) is Relation.TOUCH
 True
->>> (polygon_in_polygon((square, [inner_square]), (inner_square, []))
-...  is Relation.TOUCH)
+>>> polygon_in_polygon(Polygon(square, [inner_square]),
+...                    Polygon(inner_square, [])) is Relation.TOUCH
 True
 
 ```
@@ -218,15 +215,10 @@ This will set version to `major.minor.patch`.
 
 ### Running tests
 
-Install dependencies:
-- with `CPython`
-  ```bash
-  python -m pip install --force-reinstall -r requirements-tests.txt
-  ```
-- with `PyPy`
-  ```bash
-  pypy -m pip install --force-reinstall -r requirements-tests.txt
-  ```
+Install dependencies
+```bash
+python -m pip install -r requirements-tests.txt
+```
 
 Plain
 ```bash
