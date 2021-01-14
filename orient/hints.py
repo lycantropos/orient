@@ -1,12 +1,12 @@
 from numbers import Real
-from typing import (List,
+from typing import (Sequence,
                     Tuple)
 
 Coordinate = Real
 Point = Tuple[Coordinate, Coordinate]
 Segment = Tuple[Point, Point]
-Multisegment = List[Segment]
-Contour = Region = List[Point]
-Multiregion = List[Region]
+Multisegment = Sequence[Segment]
+Contour = Region = Sequence[Point]
+Multiregion = Sequence[Region]
 Polygon = Tuple[Region, Multiregion]
-Multipolygon = List[Polygon]
+Multipolygon = Sequence[Polygon]

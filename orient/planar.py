@@ -1,20 +1,21 @@
 from ground.base import Relation
+from ground.hints import (Contour,
+                          Multipolygon,
+                          Multisegment,
+                          Point,
+                          Polygon,
+                          Segment)
 
 from .core import (contour as _contour,
                    multipolygon as _multipolygon,
                    multiregion as _multiregion,
                    multisegment as _multisegment,
                    polygon as _polygon,
+                   raw as _raw,
                    region as _region,
                    segment as _segment)
-from .hints import (Contour,
-                    Multipolygon,
-                    Multiregion,
-                    Multisegment,
-                    Point,
-                    Polygon,
-                    Region,
-                    Segment)
+from .hints import (Multiregion,
+                    Region)
 
 Relation = Relation
 
@@ -32,19 +33,23 @@ def point_in_segment(point: Point, segment: Segment) -> Relation:
     :param segment: segment to check.
     :returns: relation between point and segment.
 
-    >>> segment = ((0, 0), (2, 0))
-    >>> point_in_segment((0, 0), segment) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point, Segment = context.point_cls, context.segment_cls
+    >>> segment = Segment(Point(0, 0), Point(2, 0))
+    >>> point_in_segment(Point(0, 0), segment) is Relation.COMPONENT
     True
-    >>> point_in_segment((1, 0), segment) is Relation.COMPONENT
+    >>> point_in_segment(Point(1, 0), segment) is Relation.COMPONENT
     True
-    >>> point_in_segment((2, 0), segment) is Relation.COMPONENT
+    >>> point_in_segment(Point(2, 0), segment) is Relation.COMPONENT
     True
-    >>> point_in_segment((3, 0), segment) is Relation.DISJOINT
+    >>> point_in_segment(Point(3, 0), segment) is Relation.DISJOINT
     True
-    >>> point_in_segment((0, 1), segment) is Relation.DISJOINT
+    >>> point_in_segment(Point(0, 1), segment) is Relation.DISJOINT
     True
     """
-    return _segment.relate_point(segment, point)
+    return _segment.relate_point(_raw.from_segment(segment),
+                                 _raw.from_point(point))
 
 
 def segment_in_segment(left: Segment, right: Segment) -> Relation:
@@ -60,23 +65,34 @@ def segment_in_segment(left: Segment, right: Segment) -> Relation:
     :param right: segment to check im.
     :returns: relation between segments.
 
-    >>> segment = ((0, 0), (2, 0))
-    >>> segment_in_segment(((0, 0), (0, 2)), segment) is Relation.TOUCH
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point, Segment = context.point_cls, context.segment_cls
+    >>> segment = Segment(Point(0, 0), Point(2, 0))
+    >>> (segment_in_segment(Segment(Point(0, 0), Point(0, 2)), segment)
+    ...  is Relation.TOUCH)
     True
-    >>> segment_in_segment(((0, 0), (1, 0)), segment) is Relation.COMPONENT
+    >>> (segment_in_segment(Segment(Point(0, 0), Point(1, 0)), segment)
+    ...  is Relation.COMPONENT)
     True
-    >>> segment_in_segment(((0, 0), (2, 0)), segment) is Relation.EQUAL
+    >>> (segment_in_segment(Segment(Point(0, 0), Point(2, 0)), segment)
+    ...  is Relation.EQUAL)
     True
-    >>> segment_in_segment(((0, 0), (3, 0)), segment) is Relation.COMPOSITE
+    >>> (segment_in_segment(Segment(Point(0, 0), Point(3, 0)), segment)
+    ...  is Relation.COMPOSITE)
     True
-    >>> segment_in_segment(((1, 0), (3, 0)), segment) is Relation.OVERLAP
+    >>> (segment_in_segment(Segment(Point(1, 0), Point(3, 0)), segment)
+    ...  is Relation.OVERLAP)
     True
-    >>> segment_in_segment(((2, 0), (3, 0)), segment) is Relation.TOUCH
+    >>> (segment_in_segment(Segment(Point(2, 0), Point(3, 0)), segment)
+    ...  is Relation.TOUCH)
     True
-    >>> segment_in_segment(((3, 0), (4, 0)), segment) is Relation.DISJOINT
+    >>> (segment_in_segment(Segment(Point(3, 0), Point(4, 0)), segment)
+    ...  is Relation.DISJOINT)
     True
     """
-    return _segment.relate_segment(right, left)
+    return _segment.relate_segment(_raw.from_segment(right),
+                                   _raw.from_segment(left))
 
 
 def point_in_multisegment(point: Point,
@@ -93,21 +109,27 @@ def point_in_multisegment(point: Point,
     :param multisegment: multisegment to check in.
     :returns: relation between point and multisegment.
 
-    >>> multisegment = [((0, 0), (1, 0)), ((3, 0), (5, 0))]
-    >>> point_in_multisegment((0, 0), multisegment) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point, Segment, Multisegment = (context.point_cls, context.segment_cls,
+    ...                                 context.multisegment_cls)
+    >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(3, 0), Point(5, 0))])
+    >>> point_in_multisegment(Point(0, 0), multisegment) is Relation.COMPONENT
     True
-    >>> point_in_multisegment((0, 1), multisegment) is Relation.DISJOINT
+    >>> point_in_multisegment(Point(0, 1), multisegment) is Relation.DISJOINT
     True
-    >>> point_in_multisegment((1, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(1, 0), multisegment) is Relation.COMPONENT
     True
-    >>> point_in_multisegment((2, 0), multisegment) is Relation.DISJOINT
+    >>> point_in_multisegment(Point(2, 0), multisegment) is Relation.DISJOINT
     True
-    >>> point_in_multisegment((3, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(3, 0), multisegment) is Relation.COMPONENT
     True
-    >>> point_in_multisegment((4, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(4, 0), multisegment) is Relation.COMPONENT
     True
     """
-    return _multisegment.relate_point(multisegment, point)
+    return _multisegment.relate_point(_raw.from_multisegment(multisegment),
+                                      _raw.from_point(point))
 
 
 def segment_in_multisegment(segment: Segment,
@@ -126,30 +148,36 @@ def segment_in_multisegment(segment: Segment,
     :param multisegment: multisegment to check in.
     :returns: relation between segment and multisegment.
 
-    >>> multisegment = [((0, 0), (1, 1)), ((1, 1), (3, 3))]
-    >>> segment_in_multisegment(((0, 0), (1, 0)),
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point, Segment, Multisegment = (context.point_cls, context.segment_cls,
+    ...                                 context.multisegment_cls)
+    >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(3, 3))])
+    >>> segment_in_multisegment(Segment(Point(0, 0), Point(1, 0)),
     ...                         multisegment) is Relation.TOUCH
     True
-    >>> segment_in_multisegment(((0, 0), (0, 1)),
+    >>> segment_in_multisegment(Segment(Point(0, 0), Point(0, 1)),
     ...                         multisegment) is Relation.TOUCH
     True
-    >>> segment_in_multisegment(((0, 1), (1, 0)),
+    >>> segment_in_multisegment(Segment(Point(0, 1), Point(1, 0)),
     ...                         multisegment) is Relation.CROSS
     True
-    >>> segment_in_multisegment(((0, 0), (1, 1)),
+    >>> segment_in_multisegment(Segment(Point(0, 0), Point(1, 1)),
     ...                         multisegment) is Relation.COMPONENT
     True
-    >>> segment_in_multisegment(((0, 0), (3, 3)),
+    >>> segment_in_multisegment(Segment(Point(0, 0), Point(3, 3)),
     ...                         multisegment) is Relation.EQUAL
     True
-    >>> segment_in_multisegment(((2, 2), (4, 4)),
+    >>> segment_in_multisegment(Segment(Point(2, 2), Point(4, 4)),
     ...                         multisegment) is Relation.OVERLAP
     True
-    >>> segment_in_multisegment(((4, 4), (5, 5)),
+    >>> segment_in_multisegment(Segment(Point(4, 4), Point(5, 5)),
     ...                         multisegment) is Relation.DISJOINT
     True
     """
-    return _multisegment.relate_segment(multisegment, segment)
+    return _multisegment.relate_segment(_raw.from_multisegment(multisegment),
+                                        _raw.from_segment(segment))
 
 
 def multisegment_in_multisegment(left: Multisegment,
@@ -168,10 +196,19 @@ def multisegment_in_multisegment(left: Multisegment,
     :param right: multisegment to check in.
     :returns: relation between multisegments.
 
-    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
-    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
-    ...                 ((0, 1), (0, 0))]
-    >>> multisegment_in_multisegment([], triangle_edges) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point, Segment, Multisegment = (context.point_cls, context.segment_cls,
+    ...                                 context.multisegment_cls)
+    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                                Segment(Point(1, 0), Point(0, 1)),
+    ...                                Segment(Point(0, 1), Point(0, 0))])
+    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(1, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(0, 1)),
+    ...                              Segment(Point(0, 1), Point(0, 0))])
+    >>> (multisegment_in_multisegment(Multisegment([]), triangle_edges)
+    ...  is Relation.DISJOINT)
     True
     >>> multisegment_in_multisegment(triangle_edges,
     ...                              triangle_edges) is Relation.EQUAL
@@ -186,7 +223,8 @@ def multisegment_in_multisegment(left: Multisegment,
     ...                              square_edges) is Relation.EQUAL
     True
     """
-    return _multisegment.relate_multisegment(right, left)
+    return _multisegment.relate_multisegment(_raw.from_multisegment(right),
+                                             _raw.from_multisegment(left))
 
 
 def point_in_contour(point: Point, contour: Contour) -> Relation:
@@ -202,17 +240,22 @@ def point_in_contour(point: Point, contour: Contour) -> Relation:
     :param contour: contour to check in.
     :returns: relation between point and contour.
 
-    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_contour((0, 0), square) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
+    >>> point_in_contour(Point(0, 0), square) is Relation.COMPONENT
     True
-    >>> point_in_contour((1, 1), square) is Relation.DISJOINT
+    >>> point_in_contour(Point(1, 1), square) is Relation.DISJOINT
     True
-    >>> point_in_contour((2, 2), square) is Relation.COMPONENT
+    >>> point_in_contour(Point(2, 2), square) is Relation.COMPONENT
     True
-    >>> point_in_contour((3, 3), square) is Relation.DISJOINT
+    >>> point_in_contour(Point(3, 3), square) is Relation.DISJOINT
     True
     """
-    return _contour.relate_point(contour, point)
+    return _contour.relate_point(_raw.from_contour(contour),
+                                 _raw.from_point(point))
 
 
 def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
@@ -228,25 +271,39 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     :param contour: contour to check in.
     :returns: relation between segment and contour.
 
-    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
-    >>> segment_in_contour(((0, 0), (1, 0)), square) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Contour = context.contour_cls
+    >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
+    >>> (segment_in_contour(Segment(Point(0, 0), Point(1, 0)), square)
+    ...  is Relation.COMPONENT)
     True
-    >>> segment_in_contour(((0, 0), (3, 0)), square) is Relation.COMPONENT
+    >>> (segment_in_contour(Segment(Point(0, 0), Point(3, 0)), square)
+    ...  is Relation.COMPONENT)
     True
-    >>> segment_in_contour(((2, 0), (4, 0)), square) is Relation.OVERLAP
+    >>> (segment_in_contour(Segment(Point(2, 0), Point(4, 0)), square)
+    ...  is Relation.OVERLAP)
     True
-    >>> segment_in_contour(((4, 0), (5, 0)), square) is Relation.DISJOINT
+    >>> (segment_in_contour(Segment(Point(4, 0), Point(5, 0)), square)
+    ...  is Relation.DISJOINT)
     True
-    >>> segment_in_contour(((1, 0), (1, 2)), square) is Relation.TOUCH
+    >>> (segment_in_contour(Segment(Point(1, 0), Point(1, 2)), square)
+    ...  is Relation.TOUCH)
     True
-    >>> segment_in_contour(((0, 0), (1, 1)), square) is Relation.TOUCH
+    >>> (segment_in_contour(Segment(Point(0, 0), Point(1, 1)), square)
+    ...  is Relation.TOUCH)
     True
-    >>> segment_in_contour(((1, 1), (2, 2)), square) is Relation.DISJOINT
+    >>> (segment_in_contour(Segment(Point(1, 1), Point(2, 2)), square)
+    ...  is Relation.DISJOINT)
     True
-    >>> segment_in_contour(((2, 2), (4, 4)), square) is Relation.CROSS
+    >>> (segment_in_contour(Segment(Point(2, 2), Point(4, 4)), square)
+    ...  is Relation.CROSS)
     True
     """
-    return _contour.relate_segment(contour, segment)
+    return _contour.relate_segment(_raw.from_contour(contour),
+                                   _raw.from_segment(segment))
 
 
 def multisegment_in_contour(multisegment: Multisegment,
@@ -265,12 +322,23 @@ def multisegment_in_contour(multisegment: Multisegment,
     :param contour: contour to check in.
     :returns: relation between multisegment and contour.
 
-    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
-    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
-    ...                 ((0, 1), (0, 0))]
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> multisegment_in_contour([], triangle) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Segment = context.segment_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                                Segment(Point(1, 0), Point(0, 1)),
+    ...                                Segment(Point(0, 1), Point(0, 0))])
+    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(1, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(0, 1)),
+    ...                              Segment(Point(0, 1), Point(0, 0))])
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
+    >>> (multisegment_in_contour(Multisegment([]), triangle)
+    ...  is Relation.DISJOINT)
     True
     >>> multisegment_in_contour(triangle_edges, triangle) is Relation.EQUAL
     True
@@ -281,7 +349,8 @@ def multisegment_in_contour(multisegment: Multisegment,
     >>> multisegment_in_contour(square_edges, square) is Relation.EQUAL
     True
     """
-    return _contour.relate_multisegment(contour, multisegment)
+    return _contour.relate_multisegment(_raw.from_contour(contour),
+                                        _raw.from_multisegment(multisegment))
 
 
 def contour_in_contour(left: Contour, right: Contour) -> Relation:
@@ -299,8 +368,12 @@ def contour_in_contour(left: Contour, right: Contour) -> Relation:
     :param right: contour to check in.
     :returns: relation between contours.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_contour(triangle, triangle) is Relation.EQUAL
     True
     >>> contour_in_contour(triangle, square) is Relation.OVERLAP
@@ -310,7 +383,8 @@ def contour_in_contour(left: Contour, right: Contour) -> Relation:
     >>> contour_in_contour(square, square) is Relation.EQUAL
     True
     """
-    return _contour.relate_contour(right, left)
+    return _contour.relate_contour(_raw.from_contour(right),
+                                   _raw.from_contour(left))
 
 
 def point_in_region(point: Point, region: Region) -> Relation:
@@ -330,17 +404,22 @@ def point_in_region(point: Point, region: Region) -> Relation:
     :param region: region to check in.
     :returns: relation between point and region.
 
-    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_region((0, 0), square) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
+    >>> point_in_region(Point(0, 0), square) is Relation.COMPONENT
     True
-    >>> point_in_region((1, 1), square) is Relation.WITHIN
+    >>> point_in_region(Point(1, 1), square) is Relation.WITHIN
     True
-    >>> point_in_region((2, 2), square) is Relation.COMPONENT
+    >>> point_in_region(Point(2, 2), square) is Relation.COMPONENT
     True
-    >>> point_in_region((3, 3), square) is Relation.DISJOINT
+    >>> point_in_region(Point(3, 3), square) is Relation.DISJOINT
     True
     """
-    return _region.relate_point(region, point)
+    return _region.relate_point(_raw.from_region(region),
+                                _raw.from_point(point))
 
 
 def segment_in_region(segment: Segment, region: Region) -> Relation:
@@ -356,25 +435,39 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
     :param region: region to check in.
     :returns: relation between segment and region.
 
-    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
-    >>> segment_in_region(((0, 0), (1, 0)), square) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Contour = context.contour_cls
+    >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
+    >>> (segment_in_region(Segment(Point(0, 0), Point(1, 0)), square)
+    ...  is Relation.COMPONENT)
     True
-    >>> segment_in_region(((0, 0), (3, 0)), square) is Relation.COMPONENT
+    >>> (segment_in_region(Segment(Point(0, 0), Point(3, 0)), square)
+    ...  is Relation.COMPONENT)
     True
-    >>> segment_in_region(((2, 0), (4, 0)), square) is Relation.TOUCH
+    >>> (segment_in_region(Segment(Point(2, 0), Point(4, 0)), square)
+    ...  is Relation.TOUCH)
     True
-    >>> segment_in_region(((4, 0), (5, 0)), square) is Relation.DISJOINT
+    >>> (segment_in_region(Segment(Point(4, 0), Point(5, 0)), square)
+    ...  is Relation.DISJOINT)
     True
-    >>> segment_in_region(((1, 0), (1, 2)), square) is Relation.ENCLOSED
+    >>> (segment_in_region(Segment(Point(1, 0), Point(1, 2)), square)
+    ...  is Relation.ENCLOSED)
     True
-    >>> segment_in_region(((0, 0), (1, 1)), square) is Relation.ENCLOSED
+    >>> (segment_in_region(Segment(Point(0, 0), Point(1, 1)), square)
+    ...  is Relation.ENCLOSED)
     True
-    >>> segment_in_region(((1, 1), (2, 2)), square) is Relation.WITHIN
+    >>> (segment_in_region(Segment(Point(1, 1), Point(2, 2)), square)
+    ...  is Relation.WITHIN)
     True
-    >>> segment_in_region(((2, 2), (4, 4)), square) is Relation.CROSS
+    >>> (segment_in_region(Segment(Point(2, 2), Point(4, 4)), square)
+    ...  is Relation.CROSS)
     True
     """
-    return _region.relate_segment(region, segment)
+    return _region.relate_segment(_raw.from_region(region),
+                                  _raw.from_segment(segment))
 
 
 def multisegment_in_region(multisegment: Multisegment,
@@ -393,12 +486,22 @@ def multisegment_in_region(multisegment: Multisegment,
     :param region: region to check in.
     :returns: relation between multisegment and region.
 
-    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
-    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
-    ...                 ((0, 1), (0, 0))]
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> multisegment_in_region([], triangle) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Contour = context.contour_cls
+    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                                Segment(Point(1, 0), Point(0, 1)),
+    ...                                Segment(Point(0, 1), Point(0, 0))])
+    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(1, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(0, 1)),
+    ...                              Segment(Point(0, 1), Point(0, 0))])
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
+    >>> multisegment_in_region(Multisegment([]), triangle) is Relation.DISJOINT
     True
     >>> multisegment_in_region(triangle_edges, triangle) is Relation.COMPONENT
     True
@@ -409,7 +512,8 @@ def multisegment_in_region(multisegment: Multisegment,
     >>> multisegment_in_region(square_edges, square) is Relation.COMPONENT
     True
     """
-    return _region.relate_multisegment(region, multisegment)
+    return _region.relate_multisegment(_raw.from_region(region),
+                                       _raw.from_multisegment(multisegment))
 
 
 def contour_in_region(contour: Contour, region: Region) -> Relation:
@@ -427,8 +531,12 @@ def contour_in_region(contour: Contour, region: Region) -> Relation:
     :param region: region to check in.
     :returns: relation between contour and region.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_region(triangle, triangle) is Relation.COMPONENT
     True
     >>> contour_in_region(triangle, square) is Relation.ENCLOSED
@@ -438,7 +546,8 @@ def contour_in_region(contour: Contour, region: Region) -> Relation:
     >>> contour_in_region(square, square) is Relation.COMPONENT
     True
     """
-    return _region.relate_contour(region, contour)
+    return _region.relate_contour(_raw.from_region(region),
+                                  _raw.from_contour(contour))
 
 
 def region_in_region(left: Region, right: Region) -> Relation:
@@ -456,8 +565,12 @@ def region_in_region(left: Region, right: Region) -> Relation:
     :param right: region to check in.
     :returns: relation between regions.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> region_in_region(triangle, triangle) is Relation.EQUAL
     True
     >>> region_in_region(triangle, square) is Relation.ENCLOSED
@@ -467,7 +580,8 @@ def region_in_region(left: Region, right: Region) -> Relation:
     >>> region_in_region(square, square) is Relation.EQUAL
     True
     """
-    return _region.relate_region(right, left)
+    return _region.relate_region(_raw.from_region(right),
+                                 _raw.from_region(left))
 
 
 def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
@@ -483,22 +597,27 @@ def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
     :param multiregion: multiregion to check in.
     :returns: relation between point and multiregion.
 
-    >>> triangle = [(0, 0), (2, 0), (0, 2)]
-    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_multiregion((0, 0), [triangle]) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
+    >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
+    >>> point_in_multiregion(Point(0, 0), [triangle]) is Relation.COMPONENT
     True
-    >>> point_in_multiregion((0, 0), [square]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(0, 0), [square]) is Relation.COMPONENT
     True
-    >>> point_in_multiregion((1, 1), [triangle]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(1, 1), [triangle]) is Relation.COMPONENT
     True
-    >>> point_in_multiregion((1, 1), [square]) is Relation.WITHIN
+    >>> point_in_multiregion(Point(1, 1), [square]) is Relation.WITHIN
     True
-    >>> point_in_multiregion((2, 2), [triangle]) is Relation.DISJOINT
+    >>> point_in_multiregion(Point(2, 2), [triangle]) is Relation.DISJOINT
     True
-    >>> point_in_multiregion((2, 2), [square]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(2, 2), [square]) is Relation.COMPONENT
     True
     """
-    return _multiregion.relate_point(multiregion, point)
+    return _multiregion.relate_point(_raw.from_multiregion(multiregion),
+                                     _raw.from_point(point))
 
 
 def segment_in_multiregion(segment: Segment,
@@ -517,35 +636,42 @@ def segment_in_multiregion(segment: Segment,
     :param multiregion: multiregion to check in.
     :returns: relation between segment and multiregion.
 
-    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
-    >>> (segment_in_multiregion(((0, 0), (1, 0)), [])
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Contour = context.contour_cls
+    >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
+    >>> (segment_in_multiregion(Segment(Point(0, 0), Point(1, 0)), [])
     ...  is Relation.DISJOINT)
     True
-    >>> (segment_in_multiregion(((0, 0), (1, 0)), [square])
+    >>> (segment_in_multiregion(Segment(Point(0, 0), Point(1, 0)), [square])
     ...  is Relation.COMPONENT)
     True
-    >>> (segment_in_multiregion(((0, 0), (3, 0)), [square])
+    >>> (segment_in_multiregion(Segment(Point(0, 0), Point(3, 0)), [square])
     ...  is Relation.COMPONENT)
     True
-    >>> (segment_in_multiregion(((2, 0), (4, 0)), [square])
+    >>> (segment_in_multiregion(Segment(Point(2, 0), Point(4, 0)), [square])
     ...  is Relation.TOUCH)
     True
-    >>> (segment_in_multiregion(((4, 0), (5, 0)), [square])
+    >>> (segment_in_multiregion(Segment(Point(4, 0), Point(5, 0)), [square])
     ...  is Relation.DISJOINT)
     True
-    >>> (segment_in_multiregion(((1, 0), (1, 2)), [square])
+    >>> (segment_in_multiregion(Segment(Point(1, 0), Point(1, 2)), [square])
     ...  is Relation.ENCLOSED)
     True
-    >>> (segment_in_multiregion(((0, 0), (1, 1)), [square])
+    >>> (segment_in_multiregion(Segment(Point(0, 0), Point(1, 1)), [square])
     ...  is Relation.ENCLOSED)
     True
-    >>> (segment_in_multiregion(((1, 1), (2, 2)), [square])
+    >>> (segment_in_multiregion(Segment(Point(1, 1), Point(2, 2)), [square])
     ...  is Relation.WITHIN)
     True
-    >>> segment_in_multiregion(((2, 2), (4, 4)), [square]) is Relation.CROSS
+    >>> (segment_in_multiregion(Segment(Point(2, 2), Point(4, 4)), [square])
+    ...  is Relation.CROSS)
     True
     """
-    return _multiregion.relate_segment(multiregion, segment)
+    return _multiregion.relate_segment(_raw.from_multiregion(multiregion),
+                                       _raw.from_segment(segment))
 
 
 def multisegment_in_multiregion(multisegment: Multisegment,
@@ -564,14 +690,25 @@ def multisegment_in_multiregion(multisegment: Multisegment,
     :param multiregion: multiregion to check in.
     :returns: relation between multisegment and multiregion.
 
-    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
-    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
-    ...                 ((0, 1), (0, 0))]
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> multisegment_in_multiregion([], []) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Contour = context.contour_cls
+    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                                Segment(Point(1, 0), Point(0, 1)),
+    ...                                Segment(Point(0, 1), Point(0, 0))])
+    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(1, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(0, 1)),
+    ...                              Segment(Point(0, 1), Point(0, 0))])
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
+    >>> multisegment_in_multiregion(Multisegment([]), []) is Relation.DISJOINT
     True
-    >>> multisegment_in_multiregion([], [triangle]) is Relation.DISJOINT
+    >>> (multisegment_in_multiregion(Multisegment([]), [triangle])
+    ...  is Relation.DISJOINT)
     True
     >>> (multisegment_in_multiregion(triangle_edges, [triangle])
     ...  is Relation.COMPONENT)
@@ -585,7 +722,9 @@ def multisegment_in_multiregion(multisegment: Multisegment,
     ...  is Relation.COMPONENT)
     True
     """
-    return _multiregion.relate_multisegment(multiregion, multisegment)
+    return _multiregion.relate_multisegment(
+            _raw.from_multiregion(multiregion),
+            _raw.from_multisegment(multisegment))
 
 
 def contour_in_multiregion(contour: Contour,
@@ -604,8 +743,12 @@ def contour_in_multiregion(contour: Contour,
     :param multiregion: multiregion to check in.
     :returns: relation between contour and multiregion.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_multiregion(triangle, [triangle]) is Relation.COMPONENT
     True
     >>> contour_in_multiregion(triangle, [square]) is Relation.ENCLOSED
@@ -615,7 +758,8 @@ def contour_in_multiregion(contour: Contour,
     >>> contour_in_multiregion(square, [square]) is Relation.COMPONENT
     True
     """
-    return _multiregion.relate_contour(multiregion, contour)
+    return _multiregion.relate_contour(_raw.from_multiregion(multiregion),
+                                       _raw.from_contour(contour))
 
 
 def region_in_multiregion(region: Region,
@@ -634,8 +778,12 @@ def region_in_multiregion(region: Region,
     :param multiregion: multiregion to check in.
     :returns: relation between region and multiregion.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> region_in_multiregion(triangle, []) is Relation.DISJOINT
     True
     >>> region_in_multiregion(square, []) is Relation.DISJOINT
@@ -649,7 +797,8 @@ def region_in_multiregion(region: Region,
     >>> region_in_multiregion(square, [square]) is Relation.EQUAL
     True
     """
-    return _multiregion.relate_region(multiregion, region)
+    return _multiregion.relate_region(_raw.from_multiregion(multiregion),
+                                      _raw.from_region(region))
 
 
 def multiregion_in_multiregion(left: Multiregion,
@@ -668,8 +817,11 @@ def multiregion_in_multiregion(left: Multiregion,
     :param right: multiregion to check in.
     :returns: relation between multiregions.
 
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point, Contour = context.point_cls, context.contour_cls
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> multiregion_in_multiregion([triangle], [triangle]) is Relation.EQUAL
     True
     >>> multiregion_in_multiregion([triangle], [square]) is Relation.ENCLOSED
@@ -679,7 +831,8 @@ def multiregion_in_multiregion(left: Multiregion,
     >>> multiregion_in_multiregion([square], [square]) is Relation.EQUAL
     True
     """
-    return _multiregion.relate_multiregion(right, left)
+    return _multiregion.relate_multiregion(_raw.from_multiregion(right),
+                                           _raw.from_multiregion(left))
 
 
 def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
@@ -698,23 +851,36 @@ def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
     :param polygon: polygon to check in.
     :returns: relation between point and polygon.
 
-    >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
-    >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
-    >>> point_in_polygon((0, 0), (inner_square, [])) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                         Point(1, 3)])
+    >>> (point_in_polygon(Point(0, 0), Polygon(inner_square, []))
+    ...  is Relation.DISJOINT)
     True
-    >>> point_in_polygon((0, 0), (outer_square, [])) is Relation.COMPONENT
+    >>> (point_in_polygon(Point(0, 0), Polygon(outer_square, []))
+    ...  is Relation.COMPONENT)
     True
-    >>> point_in_polygon((1, 1), (inner_square, [])) is Relation.COMPONENT
+    >>> (point_in_polygon(Point(1, 1), Polygon(inner_square, []))
+    ...  is Relation.COMPONENT)
     True
-    >>> point_in_polygon((1, 1), (outer_square, [])) is Relation.WITHIN
+    >>> (point_in_polygon(Point(1, 1), Polygon(outer_square, []))
+    ...  is Relation.WITHIN)
     True
-    >>> point_in_polygon((2, 2), (outer_square, [])) is Relation.WITHIN
+    >>> (point_in_polygon(Point(2, 2), Polygon(outer_square, []))
+    ...  is Relation.WITHIN)
     True
-    >>> (point_in_polygon((2, 2), (outer_square, [inner_square]))
+    >>> (point_in_polygon(Point(2, 2), Polygon(outer_square, [inner_square]))
     ...  is Relation.DISJOINT)
     True
     """
-    return _polygon.relate_point(polygon, point)
+    return _polygon.relate_point(_raw.from_polygon(polygon),
+                                 _raw.from_point(point))
 
 
 def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
@@ -733,34 +899,47 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     :param polygon: polygon to check in.
     :returns: relation between segment and polygon.
 
-    >>> outer_square = [(0, 0), (4, 0), (4, 4), (0, 4)]
-    >>> inner_square = [(1, 1), (3, 1), (3, 3), (1, 3)]
-    >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, []))
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                         Point(1, 3)])
+    >>> segment_in_polygon(Segment(Point(0, 0), Point(1, 0)),
+    ...                    Polygon(outer_square, [])) is Relation.COMPONENT
+    True
+    >>> (segment_in_polygon(Segment(Point(0, 0), Point(1, 0)),
+    ...                     Polygon(outer_square, [inner_square]))
     ...  is Relation.COMPONENT)
     True
-    >>> (segment_in_polygon(((0, 0), (1, 0)), (outer_square, [inner_square]))
-    ...  is Relation.COMPONENT)
+    >>> segment_in_polygon(Segment(Point(0, 0), Point(2, 2)),
+    ...                    Polygon(outer_square, [])) is Relation.ENCLOSED
     True
-    >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, []))
-    ...  is Relation.ENCLOSED)
-    True
-    >>> (segment_in_polygon(((0, 0), (2, 2)), (outer_square, [inner_square]))
+    >>> (segment_in_polygon(Segment(Point(0, 0), Point(2, 2)),
+    ...                     Polygon(outer_square, [inner_square]))
     ...  is Relation.CROSS)
     True
-    >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, []))
-    ...  is Relation.WITHIN)
+    >>> segment_in_polygon(Segment(Point(1, 1), Point(3, 3)),
+    ...                    Polygon(outer_square, [])) is Relation.WITHIN
     True
-    >>> (segment_in_polygon(((1, 1), (3, 3)), (outer_square, [inner_square]))
+    >>> (segment_in_polygon(Segment(Point(1, 1), Point(3, 3)),
+    ...                     Polygon(outer_square, [inner_square]))
     ...  is Relation.TOUCH)
     True
-    >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, []))
-    ...  is Relation.ENCLOSED)
+    >>> segment_in_polygon(Segment(Point(0, 0), Point(4, 4)),
+    ...                    Polygon(outer_square, [])) is Relation.ENCLOSED
     True
-    >>> (segment_in_polygon(((0, 0), (4, 4)), (outer_square, [inner_square]))
+    >>> (segment_in_polygon(Segment(Point(0, 0), Point(4, 4)),
+    ...                     Polygon(outer_square, [inner_square]))
     ...  is Relation.CROSS)
     True
     """
-    return _polygon.relate_segment(polygon, segment)
+    return _polygon.relate_segment(_raw.from_polygon(polygon),
+                                   _raw.from_segment(segment))
 
 
 def multisegment_in_polygon(multisegment: Multisegment,
@@ -781,26 +960,40 @@ def multisegment_in_polygon(multisegment: Multisegment,
     :param polygon: polygon to check in.
     :returns: relation between multisegment and polygon.
 
-    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
-    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
-    ...                 ((0, 1), (0, 0))]
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> multisegment_in_polygon([], (triangle, [])) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                                Segment(Point(1, 0), Point(0, 1)),
+    ...                                Segment(Point(0, 1), Point(0, 0))])
+    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(1, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(0, 1)),
+    ...                              Segment(Point(0, 1), Point(0, 0))])
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
+    >>> (multisegment_in_polygon(Multisegment([]), Polygon(triangle, []))
+    ...  is Relation.DISJOINT)
     True
-    >>> (multisegment_in_polygon(triangle_edges, (triangle, []))
+    >>> (multisegment_in_polygon(triangle_edges, Polygon(triangle, []))
     ...  is Relation.COMPONENT)
     True
-    >>> (multisegment_in_polygon(triangle_edges, (square, []))
+    >>> (multisegment_in_polygon(triangle_edges, Polygon(square, []))
     ...  is Relation.ENCLOSED)
     True
-    >>> multisegment_in_polygon(square_edges, (triangle, [])) is Relation.TOUCH
+    >>> (multisegment_in_polygon(square_edges, Polygon(triangle, []))
+    ...  is Relation.TOUCH)
     True
-    >>> (multisegment_in_polygon(square_edges, (square, []))
+    >>> (multisegment_in_polygon(square_edges, Polygon(square, []))
     ...  is Relation.COMPONENT)
     True
     """
-    return _polygon.relate_multisegment(polygon, multisegment)
+    return _polygon.relate_multisegment(_raw.from_polygon(polygon),
+                                        _raw.from_multisegment(multisegment))
 
 
 def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
@@ -820,27 +1013,39 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
     :param polygon: polygon to check in.
     :returns: relation between contour and polygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (contour_in_polygon(outer_square, (inner_square, []))
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
+    ...                         Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
+    ...                         Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
+    ...                             Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
+    ...                             Point(3, 4)])
+    >>> (contour_in_polygon(outer_square, Polygon(inner_square, []))
     ...  is contour_in_polygon(innermore_square,
-    ...                        (outer_square, [inner_square]))
+    ...                        Polygon(outer_square, [inner_square]))
     ...  is Relation.DISJOINT)
     True
-    >>> (contour_in_polygon(outer_square, (outer_square, []))
-    ...  is contour_in_polygon(outer_square, (outer_square, [inner_square]))
-    ...  is contour_in_polygon(inner_square, (outer_square, [inner_square]))
+    >>> (contour_in_polygon(outer_square, Polygon(outer_square, []))
+    ...  is contour_in_polygon(outer_square,
+    ...                        Polygon(outer_square, [inner_square]))
+    ...  is contour_in_polygon(inner_square,
+    ...                        Polygon(outer_square, [inner_square]))
     ...  is Relation.COMPONENT)
     True
-    >>> (contour_in_polygon(inner_square, (outer_square, []))
+    >>> (contour_in_polygon(inner_square, Polygon(outer_square, []))
     ...  is contour_in_polygon(inner_square,
-    ...                        (outer_square, [innermore_square]))
+    ...                        Polygon(outer_square, [innermore_square]))
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_contour(polygon, contour)
+    return _polygon.relate_contour(_raw.from_polygon(polygon),
+                                   _raw.from_contour(contour))
 
 
 def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
@@ -860,30 +1065,45 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
     :param polygon: polygon to check in.
     :returns: relation between region and polygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (region_in_polygon(innermore_square, (outer_square, [inner_square]))
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
+    ...                         Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
+    ...                         Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
+    ...                             Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
+    ...                             Point(3, 4)])
+    >>> (region_in_polygon(innermore_square,
+    ...                    Polygon(outer_square, [inner_square]))
     ...  is Relation.DISJOINT)
     True
-    >>> (region_in_polygon(inner_square, (outer_square, [inner_square]))
+    >>> (region_in_polygon(inner_square, Polygon(outer_square, [inner_square]))
     ...  is Relation.TOUCH)
     True
-    >>> (region_in_polygon(inner_square, (outer_square, [innermore_square]))
+    >>> (region_in_polygon(inner_square,
+    ...                    Polygon(outer_square, [innermore_square]))
     ...  is Relation.OVERLAP)
     True
-    >>> region_in_polygon(outer_square, (inner_square, [])) is Relation.COVER
+    >>> (region_in_polygon(outer_square, Polygon(inner_square, []))
+    ...  is Relation.COVER)
     True
-    >>> (region_in_polygon(outer_square, (outer_square, [inner_square]))
+    >>> (region_in_polygon(outer_square, Polygon(outer_square, [inner_square]))
     ...  is Relation.ENCLOSES)
     True
-    >>> region_in_polygon(outer_square, (outer_square, [])) is Relation.EQUAL
+    >>> (region_in_polygon(outer_square, Polygon(outer_square, []))
+    ...  is Relation.EQUAL)
     True
-    >>> region_in_polygon(inner_square, (outer_square, [])) is Relation.WITHIN
+    >>> (region_in_polygon(inner_square, Polygon(outer_square, []))
+    ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_region(polygon, region)
+    return _polygon.relate_region(_raw.from_polygon(polygon),
+                                  _raw.from_region(region))
 
 
 def multiregion_in_polygon(multiregion: Multiregion,
@@ -904,36 +1124,48 @@ def multiregion_in_polygon(multiregion: Multiregion,
     :param polygon: polygon to check in.
     :returns: relation between multiregion and polygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (multiregion_in_polygon([], (outer_square, []))
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
+    ...                         Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
+    ...                         Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
+    ...                             Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
+    ...                             Point(3, 4)])
+    >>> (multiregion_in_polygon([], Polygon(outer_square, []))
     ...  is multiregion_in_polygon([innermore_square],
-    ...                            (outer_square, [inner_square]))
+    ...                            Polygon(outer_square, [inner_square]))
     ...  is Relation.DISJOINT)
     True
-    >>> (multiregion_in_polygon([inner_square], (outer_square, [inner_square]))
+    >>> (multiregion_in_polygon([inner_square],
+    ...                         Polygon(outer_square, [inner_square]))
     ...  is Relation.TOUCH)
     True
     >>> (multiregion_in_polygon([inner_square],
-    ...                         (outer_square, [innermore_square]))
+    ...                         Polygon(outer_square, [innermore_square]))
     ...  is Relation.OVERLAP)
     True
-    >>> (multiregion_in_polygon([outer_square], (inner_square, []))
+    >>> (multiregion_in_polygon([outer_square], Polygon(inner_square, []))
     ...  is Relation.COVER)
     True
-    >>> (multiregion_in_polygon([outer_square], (outer_square, [inner_square]))
+    >>> (multiregion_in_polygon([outer_square],
+    ...                         Polygon(outer_square, [inner_square]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (multiregion_in_polygon([outer_square], (outer_square, []))
+    >>> (multiregion_in_polygon([outer_square], Polygon(outer_square, []))
     ...  is Relation.EQUAL)
     True
-    >>> (multiregion_in_polygon([inner_square], (outer_square, []))
+    >>> (multiregion_in_polygon([inner_square], Polygon(outer_square, []))
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_multiregion(polygon, multiregion)
+    return _polygon.relate_multiregion(_raw.from_polygon(polygon),
+                                       _raw.from_multiregion(multiregion))
 
 
 def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
@@ -953,70 +1185,85 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     :param right: polygon to check in.
     :returns: relation between polygons.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (polygon_in_polygon((outer_square, [inner_square]),
-    ...                     (innermore_square, []))
-    ...  is polygon_in_polygon((innermore_square, []),
-    ...                        (outer_square, [inner_square]))
-    ...  is polygon_in_polygon((outer_square, [inner_square]),
-    ...                        (innermore_square, [innermost_square]))
-    ...  is polygon_in_polygon((innermore_square, [innermost_square]),
-    ...                        (outer_square, [inner_square]))
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
+    ...                         Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
+    ...                         Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
+    ...                             Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
+    ...                             Point(3, 4)])
+    >>> (polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                     Polygon(innermore_square, []))
+    ...  is polygon_in_polygon(Polygon(innermore_square, []),
+    ...                        Polygon(outer_square, [inner_square]))
+    ...  is polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                        Polygon(innermore_square, [innermost_square]))
+    ...  is polygon_in_polygon(Polygon(innermore_square, [innermost_square]),
+    ...                        Polygon(outer_square, [inner_square]))
     ...  is Relation.DISJOINT)
     True
-    >>> (polygon_in_polygon((inner_square, []), (outer_square, [inner_square]))
-    ...  is polygon_in_polygon((outer_square, [inner_square]),
-    ...                        (inner_square, []))
-    ...  is polygon_in_polygon((outer_square, [inner_square]),
-    ...                        (inner_square, [innermore_square]))
-    ...  is polygon_in_polygon((inner_square, [innermore_square]),
-    ...                        (outer_square, [inner_square]))
+    >>> (polygon_in_polygon(Polygon(inner_square, []),
+    ...                     Polygon(outer_square, [inner_square]))
+    ...  is polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                        Polygon(inner_square, []))
+    ...  is polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                        Polygon(inner_square, [innermore_square]))
+    ...  is polygon_in_polygon(Polygon(inner_square, [innermore_square]),
+    ...                        Polygon(outer_square, [inner_square]))
     ...  is Relation.TOUCH)
     True
-    >>> (polygon_in_polygon((inner_square, []),
-    ...                     (outer_square, [innermore_square]))
-    ...  is polygon_in_polygon((outer_square, [innermore_square]),
-    ...                        (inner_square, []))
-    ...  is polygon_in_polygon((outer_square, [innermore_square]),
-    ...                        (inner_square, [innermost_square]))
-    ...  is polygon_in_polygon((inner_square, [innermost_square]),
-    ...                        (outer_square, [innermore_square]))
+    >>> (polygon_in_polygon(Polygon(inner_square, []),
+    ...                     Polygon(outer_square, [innermore_square]))
+    ...  is polygon_in_polygon(Polygon(outer_square, [innermore_square]),
+    ...                        Polygon(inner_square, []))
+    ...  is polygon_in_polygon(Polygon(outer_square, [innermore_square]),
+    ...                        Polygon(inner_square, [innermost_square]))
+    ...  is polygon_in_polygon(Polygon(inner_square, [innermost_square]),
+    ...                        Polygon(outer_square, [innermore_square]))
     ...  is Relation.OVERLAP)
     True
-    >>> (polygon_in_polygon((outer_square, []), (inner_square, []))
-    ...  is polygon_in_polygon((outer_square, [innermost_square]),
-    ...                        (inner_square, [innermore_square]))
+    >>> (polygon_in_polygon(Polygon(outer_square, []), Polygon(inner_square, []))
+    ...  is polygon_in_polygon(Polygon(outer_square, [innermost_square]),
+    ...                        Polygon(inner_square, [innermore_square]))
     ...  is Relation.COVER)
     True
-    >>> (polygon_in_polygon((outer_square, []), (outer_square, [inner_square]))
-    ...  is polygon_in_polygon((outer_square, [innermore_square]),
-    ...                        (outer_square, [inner_square]))
-    ...  is polygon_in_polygon((outer_square, [innermore_square]),
-    ...                        (inner_square, [innermore_square]))
+    >>> (polygon_in_polygon(Polygon(outer_square, []),
+    ...                     Polygon(outer_square, [inner_square]))
+    ...  is polygon_in_polygon(Polygon(outer_square, [innermore_square]),
+    ...                        Polygon(outer_square, [inner_square]))
+    ...  is polygon_in_polygon(Polygon(outer_square, [innermore_square]),
+    ...                        Polygon(inner_square, [innermore_square]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (polygon_in_polygon((outer_square, []), (outer_square, []))
-    ...  is polygon_in_polygon((outer_square, [inner_square]),
-    ...                        (outer_square, [inner_square]))
+    >>> (polygon_in_polygon(Polygon(outer_square, []),
+    ...                     Polygon(outer_square, []))
+    ...  is polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                        Polygon(outer_square, [inner_square]))
     ...  is Relation.EQUAL)
     True
-    >>> (polygon_in_polygon((outer_square, [inner_square]), (outer_square, []))
-    ...  is polygon_in_polygon((outer_square, [inner_square]),
-    ...                        (outer_square, [innermore_square]))
-    ...  is polygon_in_polygon((inner_square, [innermore_square]),
-    ...                        (outer_square, [innermore_square]))
+    >>> (polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                     Polygon(outer_square, []))
+    ...  is polygon_in_polygon(Polygon(outer_square, [inner_square]),
+    ...                        Polygon(outer_square, [innermore_square]))
+    ...  is polygon_in_polygon(Polygon(inner_square, [innermore_square]),
+    ...                        Polygon(outer_square, [innermore_square]))
     ...  is Relation.ENCLOSED)
     True
-    >>> (polygon_in_polygon((inner_square, []), (outer_square, []))
-    ...  is polygon_in_polygon((inner_square, [innermore_square]),
-    ...                        (outer_square, [innermost_square]))
+    >>> (polygon_in_polygon(Polygon(inner_square, []),
+    ...                     Polygon(outer_square, []))
+    ...  is polygon_in_polygon(Polygon(inner_square, [innermore_square]),
+    ...                        Polygon(outer_square, [innermost_square]))
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_polygon(right, left)
+    return _polygon.relate_polygon(_raw.from_polygon(right),
+                                   _raw.from_polygon(left))
 
 
 def point_in_multipolygon(point: Point,
@@ -1034,22 +1281,41 @@ def point_in_multipolygon(point: Point,
     :param multipolygon: multipolygon to check in.
     :returns: relation between point and multipolygon.
 
-    >>> triangle = [(0, 0), (2, 0), (0, 2)]
-    >>> square = [(0, 0), (2, 0), (2, 2), (0, 2)]
-    >>> point_in_multipolygon((0, 0), [(triangle, [])]) is Relation.COMPONENT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
+    >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
+    >>> (point_in_multipolygon(Point(0, 0),
+    ...                        Multipolygon([Polygon(triangle, [])]))
+    ...  is Relation.COMPONENT)
     True
-    >>> point_in_multipolygon((0, 0), [(square, [])]) is Relation.COMPONENT
+    >>> (point_in_multipolygon(Point(0, 0),
+    ...                        Multipolygon([Polygon(square, [])]))
+    ...  is Relation.COMPONENT)
     True
-    >>> point_in_multipolygon((1, 1), [(triangle, [])]) is Relation.COMPONENT
+    >>> (point_in_multipolygon(Point(1, 1),
+    ...                        Multipolygon([Polygon(triangle, [])]))
+    ...  is Relation.COMPONENT)
     True
-    >>> point_in_multipolygon((1, 1), [(square, [])]) is Relation.WITHIN
+    >>> (point_in_multipolygon(Point(1, 1),
+    ...                        Multipolygon([Polygon(square, [])]))
+    ...  is Relation.WITHIN)
     True
-    >>> point_in_multipolygon((2, 2), [(triangle, [])]) is Relation.DISJOINT
+    >>> (point_in_multipolygon(Point(2, 2),
+    ...                        Multipolygon([Polygon(triangle, [])]))
+    ...  is Relation.DISJOINT)
     True
-    >>> point_in_multipolygon((2, 2), [(square, [])]) is Relation.COMPONENT
+    >>> (point_in_multipolygon(Point(2, 2),
+    ...                        Multipolygon([Polygon(square, [])]))
+    ...  is Relation.COMPONENT)
     True
     """
-    return _multipolygon.relate_point(multipolygon, point)
+    return _multipolygon.relate_point(_raw.from_multipolygon(multipolygon),
+                                      _raw.from_point(point))
 
 
 def segment_in_multipolygon(segment: Segment,
@@ -1069,36 +1335,52 @@ def segment_in_multipolygon(segment: Segment,
     :param multipolygon: multipolygon to check in.
     :returns: relation between segment and multipolygon.
 
-    >>> square = [(0, 0), (3, 0), (3, 3), (0, 3)]
-    >>> (segment_in_multipolygon(((0, 0), (1, 0)), [])
-    ...  is Relation.DISJOINT)
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
+    >>> segment_in_multipolygon(Segment(Point(0, 0), Point(1, 0)),
+    ...                         Multipolygon([])) is Relation.DISJOINT
     True
-    >>> (segment_in_multipolygon(((0, 0), (1, 0)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(0, 0), Point(1, 0)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (segment_in_multipolygon(((0, 0), (3, 0)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(0, 0), Point(3, 0)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (segment_in_multipolygon(((2, 0), (4, 0)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(2, 0), Point(4, 0)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.TOUCH)
     True
-    >>> (segment_in_multipolygon(((4, 0), (5, 0)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(4, 0), Point(5, 0)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (segment_in_multipolygon(((1, 0), (1, 2)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(1, 0), Point(1, 2)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.ENCLOSED)
     True
-    >>> (segment_in_multipolygon(((0, 0), (1, 1)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(0, 0), Point(1, 1)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.ENCLOSED)
     True
-    >>> (segment_in_multipolygon(((1, 1), (2, 2)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(1, 1), Point(2, 2)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.WITHIN)
     True
-    >>> (segment_in_multipolygon(((2, 2), (4, 4)), [(square, [])])
+    >>> (segment_in_multipolygon(Segment(Point(2, 2), Point(4, 4)),
+    ...                          Multipolygon([Polygon(square, [])]))
     ...  is Relation.CROSS)
     True
     """
-    return _multipolygon.relate_segment(multipolygon, segment)
+    return _multipolygon.relate_segment(_raw.from_multipolygon(multipolygon),
+                                        _raw.from_segment(segment))
 
 
 def multisegment_in_multipolygon(multisegment: Multisegment,
@@ -1119,29 +1401,43 @@ def multisegment_in_multipolygon(multisegment: Multisegment,
     :param multipolygon: multipolygon to check in.
     :returns: relation between multisegment and multipolygon.
 
-    >>> triangle_edges = [((0, 0), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (0, 0))]
-    >>> square_edges = [((0, 0), (1, 0)), ((1, 0), (1, 1)), ((1, 1), (0, 1)),
-    ...                 ((0, 1), (0, 0))]
-    >>> triangle = [(0, 0), (1, 0), (0, 1)]
-    >>> square = [(0, 0), (1, 0), (1, 1), (0, 1)]
-    >>> multisegment_in_multipolygon([], []) is Relation.DISJOINT
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                                Segment(Point(1, 0), Point(0, 1)),
+    ...                                Segment(Point(0, 1), Point(0, 0))])
+    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                              Segment(Point(1, 0), Point(1, 1)),
+    ...                              Segment(Point(1, 1), Point(0, 1)),
+    ...                              Segment(Point(0, 1), Point(0, 0))])
+    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
+    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
+    >>> multisegment_in_multipolygon(Multisegment([]), Multipolygon([])) is Relation.DISJOINT
     True
-    >>> multisegment_in_multipolygon([], [(triangle, [])]) is Relation.DISJOINT
+    >>> multisegment_in_multipolygon(Multisegment([]), Multipolygon([Polygon(triangle, [])])) is Relation.DISJOINT
     True
-    >>> (multisegment_in_multipolygon(triangle_edges, [(triangle, [])])
+    >>> (multisegment_in_multipolygon(triangle_edges, Multipolygon([Polygon(triangle, [])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (multisegment_in_multipolygon(triangle_edges, [(square, [])])
+    >>> (multisegment_in_multipolygon(triangle_edges, Multipolygon([Polygon(square, [])]))
     ...  is Relation.ENCLOSED)
     True
-    >>> (multisegment_in_multipolygon(square_edges, [(triangle, [])])
+    >>> (multisegment_in_multipolygon(square_edges, Multipolygon([Polygon(triangle, [])]))
     ...  is Relation.TOUCH)
     True
-    >>> (multisegment_in_multipolygon(square_edges, [(square, [])])
+    >>> (multisegment_in_multipolygon(square_edges, Multipolygon([Polygon(square, [])]))
     ...  is Relation.COMPONENT)
     True
     """
-    return _multipolygon.relate_multisegment(multipolygon, multisegment)
+    return _multipolygon.relate_multisegment(
+            _raw.from_multipolygon(multipolygon),
+            _raw.from_multisegment(multisegment))
 
 
 def contour_in_multipolygon(contour: Contour,
@@ -1162,42 +1458,49 @@ def contour_in_multipolygon(contour: Contour,
     :param multipolygon: multipolygon to check in.
     :returns: relation between contour and multipolygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (contour_in_multipolygon(outer_square, [])
-    ...  is contour_in_multipolygon(outer_square, [(inner_square, [])])
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Polygon = context.polygon_cls
+    >>> Contour = context.contour_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7), Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6), Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5), Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4), Point(3, 4)])
+    >>> (contour_in_multipolygon(outer_square, Multipolygon([]))
+    ...  is contour_in_multipolygon(outer_square, Multipolygon([Polygon(inner_square, [])]))
     ...  is contour_in_multipolygon(innermore_square,
-    ...                             [(outer_square, [inner_square])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is contour_in_multipolygon(innermore_square,
-    ...                             [(outer_square, [inner_square]),
-    ...                              (innermost_square, [])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                           Polygon(innermost_square, [])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (contour_in_multipolygon(outer_square, [(outer_square, [])])
+    >>> (contour_in_multipolygon(outer_square, Multipolygon([Polygon(outer_square, [])]))
     ...  is contour_in_multipolygon(outer_square,
-    ...                             [(outer_square, [inner_square])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is contour_in_multipolygon(inner_square,
-    ...                             [(outer_square, [inner_square])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is contour_in_multipolygon(outer_square,
-    ...                            [(outer_square, [inner_square]),
-    ...                             (inner_square, [innermost_square])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                           Polygon(inner_square, [innermost_square])]))
     ...  is contour_in_multipolygon(innermost_square,
-    ...                             [(outer_square, [inner_square]),
-    ...                              (innermore_square, [innermost_square])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                           Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (contour_in_multipolygon(inner_square, [(outer_square, [])])
+    >>> (contour_in_multipolygon(inner_square, Multipolygon([Polygon(outer_square, [])]))
     ...  is contour_in_multipolygon(inner_square,
-    ...                             [(outer_square, [innermore_square])])
+    ...                             Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is contour_in_multipolygon(innermost_square,
-    ...                             [(outer_square, [inner_square]),
-    ...                              (innermore_square, [])])
+    ...                             Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                           Polygon(innermore_square, [])]))
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_contour(multipolygon, contour)
+    return _multipolygon.relate_contour(_raw.from_multipolygon(multipolygon),
+                                        _raw.from_contour(contour))
 
 
 def region_in_multipolygon(region: Region,
@@ -1218,53 +1521,62 @@ def region_in_multipolygon(region: Region,
     :param multipolygon: multipolygon to check in.
     :returns: relation between region and multipolygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (region_in_multipolygon(outer_square, [])
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7), Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6), Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5), Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4), Point(3, 4)])
+    >>> (region_in_multipolygon(outer_square, Multipolygon([]))
     ...  is region_in_multipolygon(innermore_square,
-    ...                            [(outer_square, [inner_square])])
+    ...                            Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (region_in_multipolygon(inner_square, [(outer_square, [inner_square])])
+    >>> (region_in_multipolygon(inner_square, Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is region_in_multipolygon(innermost_square,
-    ...                            [(outer_square, [inner_square]),
-    ...                             (innermore_square, [innermost_square])])
+    ...                            Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                          Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.TOUCH)
     True
     >>> (region_in_multipolygon(inner_square,
-    ...                         [(outer_square, [innermore_square])])
+    ...                         Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is region_in_multipolygon(innermore_square,
-    ...                            [(outer_square, [inner_square]),
-    ...                             (inner_square, [innermost_square])])
+    ...                            Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                          Polygon(inner_square, [innermost_square])]))
     ...  is Relation.OVERLAP)
     True
-    >>> (region_in_multipolygon(outer_square, [(inner_square, [])])
+    >>> (region_in_multipolygon(outer_square, Multipolygon([Polygon(inner_square, [])]))
     ...  is Relation.COVER)
     True
-    >>> (region_in_multipolygon(outer_square, [(outer_square, [inner_square])])
+    >>> (region_in_multipolygon(outer_square, Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is region_in_multipolygon(outer_square,
-    ...                            [(outer_square, [inner_square]),
-    ...                             (inner_square, [innermost_square])])
+    ...                            Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                          Polygon(inner_square, [innermost_square])]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (region_in_multipolygon(outer_square, [(outer_square, [])])
+    >>> (region_in_multipolygon(outer_square, Multipolygon([Polygon(outer_square, [])]))
     ...  is Relation.EQUAL)
     True
     >>> (region_in_multipolygon(innermore_square,
-    ...                         [(outer_square, [inner_square]),
-    ...                          (innermore_square, [])])
+    ...                         Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                       Polygon(innermore_square, [])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (region_in_multipolygon(inner_square, [(outer_square, [])])
+    >>> (region_in_multipolygon(inner_square, Multipolygon([Polygon(outer_square, [])]))
     ...  is region_in_multipolygon(innermost_square,
-    ...                            [(outer_square, [inner_square]),
-    ...                             (innermore_square, [])])
+    ...                            Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                          Polygon(innermore_square, [])]))
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_region(multipolygon, region)
+    return _multipolygon.relate_region(_raw.from_multipolygon(multipolygon),
+                                       _raw.from_region(region))
 
 
 def multiregion_in_multipolygon(multiregion: Multiregion,
@@ -1286,58 +1598,65 @@ def multiregion_in_multipolygon(multiregion: Multiregion,
     :param multipolygon: multipolygon to check in.
     :returns: relation between multiregion and multipolygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (multiregion_in_multipolygon([], [])
-    ...  is multiregion_in_multipolygon([], [(outer_square, [])])
-    ...  is multiregion_in_multipolygon([outer_square], [])
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7), Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6), Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5), Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4), Point(3, 4)])
+    >>> (multiregion_in_multipolygon([], Multipolygon([]))
+    ...  is multiregion_in_multipolygon([], Multipolygon([Polygon(outer_square, [])]))
+    ...  is multiregion_in_multipolygon([outer_square], Multipolygon([]))
     ...  is multiregion_in_multipolygon([innermore_square],
-    ...                                 [(outer_square, [inner_square])])
+    ...                                 Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.DISJOINT)
     True
     >>> (multiregion_in_multipolygon([inner_square],
-    ...                              [(outer_square, [inner_square])])
+    ...                              Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is multiregion_in_multipolygon([innermost_square],
-    ...                                 [(outer_square, [inner_square]),
-    ...                                  (innermore_square,
-    ...                                   [innermost_square])])
+    ...                                 Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                               Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.TOUCH)
     True
     >>> (multiregion_in_multipolygon([inner_square],
-    ...                              [(outer_square, [innermore_square])])
+    ...                              Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is multiregion_in_multipolygon([innermore_square],
-    ...                                 [(outer_square, [inner_square]),
-    ...                                  (inner_square, [innermost_square])])
+    ...                                 Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                               Polygon(inner_square, [innermost_square])]))
     ...  is Relation.OVERLAP)
     True
-    >>> (multiregion_in_multipolygon([outer_square], [(inner_square, [])])
+    >>> (multiregion_in_multipolygon([outer_square], Multipolygon([Polygon(inner_square, [])]))
     ...  is Relation.COVER)
     True
     >>> (multiregion_in_multipolygon([outer_square],
-    ...                              [(outer_square, [inner_square])])
+    ...                              Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is multiregion_in_multipolygon([outer_square],
-    ...                                 [(outer_square, [inner_square]),
-    ...                                  (inner_square, [innermost_square])])
+    ...                                 Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                               Polygon(inner_square, [innermost_square])]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (multiregion_in_multipolygon([outer_square], [(outer_square, [])])
+    >>> (multiregion_in_multipolygon([outer_square], Multipolygon([Polygon(outer_square, [])]))
     ...  is Relation.EQUAL)
     True
     >>> (multiregion_in_multipolygon([innermore_square],
-    ...                              [(outer_square, [inner_square]),
-    ...                               (innermore_square, [])])
+    ...                              Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                            Polygon(innermore_square, [])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (multiregion_in_multipolygon([inner_square], [(outer_square, [])])
+    >>> (multiregion_in_multipolygon([inner_square], Multipolygon([Polygon(outer_square, [])]))
     ...  is multiregion_in_multipolygon([innermost_square],
-    ...                                 [(outer_square, [inner_square]),
-    ...                                  (innermore_square, [])])
+    ...                                 Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                               Polygon(innermore_square, [])]))
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_multiregion(multipolygon, multiregion)
+    return _multipolygon.relate_multiregion(
+            _raw.from_multipolygon(multipolygon),
+            _raw.from_multiregion(multiregion))
 
 
 def polygon_in_multipolygon(polygon: Polygon,
@@ -1361,81 +1680,88 @@ def polygon_in_multipolygon(polygon: Polygon,
     :param multipolygon: multipolygon to check in.
     :returns: relation between polygon and multipolygon.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                          [(innermore_square, [])])
-    ...  is polygon_in_multipolygon((innermore_square, []),
-    ...                             [(outer_square, [inner_square])])
-    ...  is polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                             [(innermore_square, [innermost_square])])
-    ...  is polygon_in_multipolygon((innermore_square, [innermost_square]),
-    ...                             [(outer_square, [inner_square])])
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7), Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6), Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5), Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4), Point(3, 4)])
+    >>> (polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                          Multipolygon([Polygon(innermore_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(innermore_square, []),
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                             Multipolygon([Polygon(innermore_square, [innermost_square])]))
+    ...  is polygon_in_multipolygon(Polygon(innermore_square, [innermost_square]),
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (polygon_in_multipolygon((inner_square, []),
-    ...                          [(outer_square, [inner_square])])
-    ...  is polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                             [(inner_square, [])])
-    ...  is polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                             [(inner_square, [innermore_square])])
-    ...  is polygon_in_multipolygon((inner_square, [innermore_square]),
-    ...                             [(outer_square, [inner_square])])
+    >>> (polygon_in_multipolygon(Polygon(inner_square, []),
+    ...                          Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                             Multipolygon([Polygon(inner_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                             Multipolygon([Polygon(inner_square, [innermore_square])]))
+    ...  is polygon_in_multipolygon(Polygon(inner_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.TOUCH)
     True
-    >>> (polygon_in_multipolygon((inner_square, []),
-    ...                          [(outer_square, [innermore_square])])
-    ...  is polygon_in_multipolygon((outer_square, [innermore_square]),
-    ...                             [(inner_square, [])])
-    ...  is polygon_in_multipolygon((outer_square, [innermore_square]),
-    ...                             [(inner_square, [innermost_square])])
-    ...  is polygon_in_multipolygon((inner_square, [innermost_square]),
-    ...                             [(outer_square, [innermore_square])])
+    >>> (polygon_in_multipolygon(Polygon(inner_square, []),
+    ...                          Multipolygon([Polygon(outer_square, [innermore_square])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(inner_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(inner_square, [innermost_square])]))
+    ...  is polygon_in_multipolygon(Polygon(inner_square, [innermost_square]),
+    ...                             Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is Relation.OVERLAP)
     True
-    >>> (polygon_in_multipolygon((outer_square, []), [(inner_square, [])])
-    ...  is polygon_in_multipolygon((outer_square, [innermost_square]),
-    ...                             [(inner_square, [innermore_square])])
+    >>> (polygon_in_multipolygon(Polygon(outer_square, []), Multipolygon([Polygon(inner_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [innermost_square]),
+    ...                             Multipolygon([Polygon(inner_square, [innermore_square])]))
     ...  is Relation.COVER)
     True
-    >>> (polygon_in_multipolygon((outer_square, []),
-    ...                          [(outer_square, [inner_square])])
-    ...  is polygon_in_multipolygon((outer_square, [innermore_square]),
-    ...                             [(outer_square, [inner_square])])
-    ...  is polygon_in_multipolygon((outer_square, [innermore_square]),
-    ...                             [(inner_square, [innermore_square])])
+    >>> (polygon_in_multipolygon(Polygon(outer_square, []),
+    ...                          Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(inner_square, [innermore_square])]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (polygon_in_multipolygon((outer_square, []), [(outer_square, [])])
-    ...  is polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                             [(outer_square, [inner_square])])
+    >>> (polygon_in_multipolygon(Polygon(outer_square, []), Multipolygon([Polygon(outer_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                             Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.EQUAL)
     True
-    >>> (polygon_in_multipolygon((innermore_square, []),
-    ...                          [(outer_square, [inner_square]),
-    ...                           (innermore_square, [])])
-    ...  is polygon_in_multipolygon((innermore_square, [innermost_square]),
-    ...                             [(outer_square, [inner_square]),
-    ...                              (innermore_square, [innermost_square])])
+    >>> (polygon_in_multipolygon(Polygon(innermore_square, []),
+    ...                          Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                        Polygon(innermore_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(innermore_square, [innermost_square]),
+    ...                             Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                           Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                          [(outer_square, [])])
-    ...  is polygon_in_multipolygon((outer_square, [inner_square]),
-    ...                             [(outer_square, [innermore_square])])
-    ...  is polygon_in_multipolygon((inner_square, [innermore_square]),
-    ...                             [(outer_square, [innermore_square])])
+    >>> (polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                          Multipolygon([Polygon(outer_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(outer_square, [inner_square]),
+    ...                             Multipolygon([Polygon(outer_square, [innermore_square])]))
+    ...  is polygon_in_multipolygon(Polygon(inner_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is Relation.ENCLOSED)
     True
-    >>> (polygon_in_multipolygon((inner_square, []), [(outer_square, [])])
-    ...  is polygon_in_multipolygon((inner_square, [innermore_square]),
-    ...                             [(outer_square, [innermost_square])])
+    >>> (polygon_in_multipolygon(Polygon(inner_square, []), Multipolygon([Polygon(outer_square, [])]))
+    ...  is polygon_in_multipolygon(Polygon(inner_square, [innermore_square]),
+    ...                             Multipolygon([Polygon(outer_square, [innermost_square])]))
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_polygon(multipolygon, polygon)
+    return _multipolygon.relate_polygon(_raw.from_multipolygon(multipolygon),
+                                        _raw.from_polygon(polygon))
 
 
 def multipolygon_in_multipolygon(left: Multipolygon,
@@ -1459,105 +1785,106 @@ def multipolygon_in_multipolygon(left: Multipolygon,
     :param right: multipolygon to check in.
     :returns: relation between multipolygons.
 
-    >>> outer_square = [(0, 0), (7, 0), (7, 7), (0, 7)]
-    >>> inner_square = [(1, 1), (6, 1), (6, 6), (1, 6)]
-    >>> innermore_square = [(2, 2), (5, 2), (5, 5), (2, 5)]
-    >>> innermost_square = [(3, 3), (4, 3), (4, 4), (3, 4)]
-    >>> (multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                               [(innermore_square, [])])
-    ...  is multipolygon_in_multipolygon([(innermore_square, [])],
-    ...                                  [(outer_square, [inner_square])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                                  [(innermore_square,
-    ...                                   [innermost_square])])
-    ...  is multipolygon_in_multipolygon([(innermore_square,
-    ...                                   [innermost_square])],
-    ...                                  [(outer_square, [inner_square])])
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Point = context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Polygon = context.polygon_cls
+    >>> Multipolygon = context.multipolygon_cls
+    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7), Point(0, 7)])
+    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6), Point(1, 6)])
+    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5), Point(2, 5)])
+    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4), Point(3, 4)])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                               Multipolygon([Polygon(innermore_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(innermore_square, [])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                                  Multipolygon([Polygon(innermore_square, [innermost_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(innermore_square, [innermost_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (multipolygon_in_multipolygon([(inner_square, [])],
-    ...                               [(outer_square, [inner_square])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                                  [(inner_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                                  [(inner_square, [innermore_square])])
-    ...  is multipolygon_in_multipolygon([(inner_square, [innermore_square])],
-    ...                                  [(outer_square, [inner_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(inner_square, [])]),
+    ...                               Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                                  Multipolygon([Polygon(inner_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                                  Multipolygon([Polygon(inner_square, [innermore_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(inner_square, [innermore_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square])]))
     ...  is Relation.TOUCH)
     True
-    >>> (multipolygon_in_multipolygon([(inner_square, [])],
-    ...                               [(outer_square, [innermore_square])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [innermore_square])],
-    ...                                  [(inner_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [innermore_square])],
-    ...                                  [(inner_square, [innermost_square])])
-    ...  is multipolygon_in_multipolygon([(inner_square, [innermost_square])],
-    ...                                  [(outer_square, [innermore_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(inner_square, [])]),
+    ...                               Multipolygon([Polygon(outer_square, [innermore_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [innermore_square])]),
+    ...                                  Multipolygon([Polygon(inner_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [innermore_square])]),
+    ...                                  Multipolygon([Polygon(inner_square, [innermost_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(inner_square, [innermost_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is Relation.OVERLAP)
     True
-    >>> (multipolygon_in_multipolygon([(outer_square, [])],
-    ...                               [(inner_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [innermost_square])],
-    ...                                  [(inner_square, [innermore_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [])]),
+    ...                               Multipolygon([Polygon(inner_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [innermost_square])]),
+    ...                                  Multipolygon([Polygon(inner_square, [innermore_square])]))
     ...  is Relation.COVER)
     True
-    >>> (multipolygon_in_multipolygon([(outer_square, [])],
-    ...                               [(outer_square, [inner_square])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [innermore_square])],
-    ...                                  [(outer_square, [inner_square])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [innermore_square])],
-    ...                                  [(inner_square, [innermore_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [])]),
+    ...                               Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [innermore_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [innermore_square])]),
+    ...                                  Multipolygon([Polygon(inner_square, [innermore_square])]))
     ...  is Relation.ENCLOSES)
     True
-    >>> (multipolygon_in_multipolygon([(outer_square, [inner_square]),
-    ...                                (innermore_square, [])],
-    ...                               [(innermore_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square]),
-    ...                                   (innermore_square,
-    ...                                    [innermost_square])],
-    ...                                  [(innermore_square,
-    ...                                    [innermost_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                             Polygon(innermore_square, [])]),
+    ...                               Multipolygon([Polygon(innermore_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                                Polygon(innermore_square, [innermost_square])]),
+    ...                                  Multipolygon([Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.COMPOSITE)
     True
-    >>> (multipolygon_in_multipolygon([(outer_square, [])],
-    ...                               [(outer_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                                  [(outer_square, [inner_square])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square]),
-    ...                                   (innermore_square, [])],
-    ...                                  [(outer_square, [inner_square]),
-    ...                                   (innermore_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square]),
-    ...                                   (innermore_square,
-    ...                                    [innermost_square])],
-    ...                                  [(outer_square, [inner_square]),
-    ...                                   (innermore_square,
-    ...                                    [innermost_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [])]),
+    ...                               Multipolygon([Polygon(outer_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                                Polygon(innermore_square, [])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                                Polygon(innermore_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                                Polygon(innermore_square, [innermost_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                                Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.EQUAL)
     True
-    >>> (multipolygon_in_multipolygon([(innermore_square, [])],
-    ...                               [(outer_square, [inner_square]),
-    ...                                (innermore_square, [])])
-    ...  is multipolygon_in_multipolygon([(innermore_square,
-    ...                                    [innermost_square])],
-    ...                                  [(outer_square, [inner_square]),
-    ...                                   (innermore_square,
-    ...                                    [innermost_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(innermore_square, [])]),
+    ...                               Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                             Polygon(innermore_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(innermore_square, [innermost_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [inner_square]),
+    ...                                                Polygon(innermore_square, [innermost_square])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                               [(outer_square, [])])
-    ...  is multipolygon_in_multipolygon([(outer_square, [inner_square])],
-    ...                                  [(outer_square, [innermore_square])])
-    ...  is multipolygon_in_multipolygon([(inner_square, [innermore_square])],
-    ...                                  [(outer_square, [innermore_square])])
+    >>> (multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                               Multipolygon([Polygon(outer_square, [])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(outer_square, [inner_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [innermore_square])]))
+    ...  is multipolygon_in_multipolygon(Multipolygon([Polygon(inner_square, [innermore_square])]),
+    ...                                  Multipolygon([Polygon(outer_square, [innermore_square])]))
     ...  is Relation.ENCLOSED)
     True
-    >>> (multipolygon_in_multipolygon([(inner_square, [])],
-    ...                               [(outer_square, [])])
-    ...  is multipolygon_in_multipolygon([(inner_square, [innermore_square])],
-    ...                                  [(outer_square, [innermost_square])])
+    >>> (multipolygon_in_multipolygon(
+    ...         Multipolygon([Polygon(inner_square, [])]),
+    ...         Multipolygon([Polygon(outer_square, [])]))
+    ...  is multipolygon_in_multipolygon(
+    ...             Multipolygon([Polygon(inner_square, [innermore_square])]),
+    ...             Multipolygon([Polygon(outer_square, [innermost_square])]))
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_multipolygon(right, left)
+    return _multipolygon.relate_multipolygon(_raw.from_multipolygon(right),
+                                             _raw.from_multipolygon(left))
