@@ -49,13 +49,14 @@ Usage
 ```python
 >>> from ground.base import get_context
 >>> context = get_context()
->>> Point = context.point_cls
+>>> Contour, Point, Polygon, Segment = (context.contour_cls, context.point_cls,
+...                                     context.polygon_cls,
+...                                     context.segment_cls)
 >>> left_bottom = Point(0, 0)
 >>> right_bottom = Point(4, 0)
 >>> left_top = Point(0, 4)
 >>> right_top = Point(4, 4)
 >>> bottom_segment_midpoint = Point(2, 0)
->>> Segment = context.segment_cls
 >>> bottom_segment = Segment(left_bottom, right_bottom)
 >>> from ground.base import Relation
 >>> from orient.planar import point_in_segment
@@ -68,7 +69,6 @@ True
 True
 >>> point_in_segment(left_top, bottom_segment) is Relation.DISJOINT
 True
->>> Contour = context.contour_cls
 >>> square = Contour([left_bottom, right_bottom, right_top, left_top])
 >>> from orient.planar import point_in_region
 >>> point_in_region(left_bottom, square) is Relation.COMPONENT
@@ -112,7 +112,6 @@ True
 True
 >>> region_in_multiregion(inner_square, [square]) is Relation.WITHIN
 True
->>> Polygon = context.polygon_cls
 >>> from orient.planar import point_in_polygon
 >>> point_in_polygon(left_bottom, Polygon(square, [])) is Relation.COMPONENT
 True
