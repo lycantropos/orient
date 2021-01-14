@@ -1,8 +1,8 @@
 from typing import Tuple
 
+from ground.hints import Segment
 from hypothesis import given
 
-from orient.hints import Segment
 from orient.planar import (Relation,
                            segment_in_segment)
 from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,

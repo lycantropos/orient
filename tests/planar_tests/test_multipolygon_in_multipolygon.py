@@ -1,8 +1,8 @@
 from typing import Tuple
 
+from ground.hints import Multipolygon
 from hypothesis import given
 
-from orient.hints import Multipolygon
 from orient.planar import (Relation,
                            multipolygon_in_multipolygon,
                            polygon_in_multipolygon)
@@ -11,11 +11,13 @@ from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         multipolygon_pop_left,
+                         multipolygon_rotations,
+                         polygon_to_multipolygon,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
-                         reverse_multipolygon_holes_contours,
-                         rotations)
+                         reverse_multipolygon_holes_contours)
 from . import strategies
 
 
@@ -33,28 +35,28 @@ def test_basic(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
 def test_self(multipolygon: Multipolygon) -> None:
     assert (multipolygon_in_multipolygon(multipolygon, multipolygon)
             is Relation.EQUAL)
-    assert equivalence(all(multipolygon_in_multipolygon([polygon],
-                                                        multipolygon)
-                           is Relation.EQUAL
-                           for polygon in multipolygon),
-                       len(multipolygon) == 1)
-    assert equivalence(all(multipolygon_in_multipolygon([polygon],
-                                                        multipolygon)
-                           is Relation.COMPONENT
-                           for polygon in multipolygon),
-                       len(multipolygon) > 1)
+    assert equivalence(
+            all(multipolygon_in_multipolygon(polygon_to_multipolygon(polygon),
+                                             multipolygon)
+                is Relation.EQUAL
+                for polygon in multipolygon.polygons),
+            len(multipolygon.polygons) == 1)
+    assert equivalence(
+            all(multipolygon_in_multipolygon(polygon_to_multipolygon(polygon),
+                                             multipolygon)
+                is Relation.COMPONENT
+                for polygon in multipolygon.polygons),
+            len(multipolygon.polygons) > 1)
 
 
 @given(strategies.multipolygons_pairs)
 def test_relations(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
                    ) -> None:
-    left_multipolygon, right_multipolygon = multipolygons_pair
+    left, right = multipolygons_pair
 
-    result = multipolygon_in_multipolygon(left_multipolygon,
-                                          right_multipolygon)
+    result = multipolygon_in_multipolygon(left, right)
 
-    complement = multipolygon_in_multipolygon(right_multipolygon,
-                                              left_multipolygon)
+    complement = multipolygon_in_multipolygon(right, left)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
     assert equivalence(result is not complement,
@@ -65,24 +67,21 @@ def test_relations(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
 
 @given(strategies.empty_multipolygons_with_multipolygons)
 def test_base(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
-    left_multipolygon, right_multipolygon = multipolygons_pair
+    left, right = multipolygons_pair
 
-    assert (multipolygon_in_multipolygon(left_multipolygon, right_multipolygon)
+    assert (multipolygon_in_multipolygon(left, right)
             is Relation.DISJOINT)
 
 
 @given(strategies.non_empty_multipolygons_with_multipolygons)
 def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
-    left_multipolygon, right_multipolygon = multipolygons_pair
-    first_polygon, *rest_left_multipolygon = left_multipolygon
+    left, right = multipolygons_pair
+    first_polygon, rest_left = multipolygon_pop_left(left)
 
-    result = multipolygon_in_multipolygon(rest_left_multipolygon,
-                                          right_multipolygon)
-    next_result = multipolygon_in_multipolygon(left_multipolygon,
-                                               right_multipolygon)
+    result = multipolygon_in_multipolygon(rest_left, right)
+    next_result = multipolygon_in_multipolygon(left, right)
 
-    relation_with_first_polygon = polygon_in_multipolygon(first_polygon,
-                                                          right_multipolygon)
+    relation_with_first_polygon = polygon_in_multipolygon(first_polygon, right)
     assert equivalence(next_result is Relation.DISJOINT,
                        result is relation_with_first_polygon
                        is Relation.DISJOINT)
@@ -95,7 +94,7 @@ def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
     assert implication(next_result is Relation.OVERLAP,
                        result is Relation.OVERLAP
                        or relation_with_first_polygon is Relation.OVERLAP
-                       or (bool(rest_left_multipolygon)
+                       or (bool(rest_left.polygons)
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
                        and (relation_with_first_polygon is Relation.COMPONENT
@@ -116,7 +115,7 @@ def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
                            or result is Relation.ENCLOSED
                            or result is Relation.WITHIN)
                        and relation_with_first_polygon is Relation.OVERLAP
-                       or (bool(rest_left_multipolygon)
+                       or (bool(rest_left.polygons)
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
                        and (relation_with_first_polygon is Relation.COMPONENT
@@ -149,20 +148,20 @@ def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
     assert equivalence(next_result is Relation.COMPOSITE,
                        result is Relation.COMPOSITE or result is Relation.EQUAL
                        or (relation_with_first_polygon is Relation.COMPOSITE
-                           or bool(rest_left_multipolygon)
+                           or bool(rest_left.polygons)
                            and relation_with_first_polygon is Relation.EQUAL))
     assert implication(result is relation_with_first_polygon
                        is Relation.COMPONENT,
                        next_result is Relation.EQUAL
                        or next_result is Relation.COMPONENT)
-    assert implication(not rest_left_multipolygon
+    assert implication(not rest_left.polygons
                        and relation_with_first_polygon is Relation.EQUAL,
                        next_result is Relation.EQUAL)
-    assert implication(not rest_left_multipolygon
+    assert implication(not rest_left.polygons
                        and relation_with_first_polygon is Relation.COMPONENT,
                        next_result is Relation.COMPONENT)
     assert equivalence(next_result is Relation.ENCLOSED,
-                       (not rest_left_multipolygon
+                       (not rest_left.polygons
                         or result is Relation.COMPONENT
                         or result is Relation.ENCLOSED
                         or result is Relation.WITHIN)
@@ -171,8 +170,7 @@ def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
                        and (relation_with_first_polygon is Relation.COMPONENT
                             or relation_with_first_polygon is Relation.WITHIN))
     assert equivalence(next_result is Relation.WITHIN,
-                       (not rest_left_multipolygon
-                        or result is Relation.WITHIN)
+                       (not rest_left.polygons or result is Relation.WITHIN)
                        and relation_with_first_polygon is Relation.WITHIN)
 
 
@@ -209,6 +207,6 @@ def test_rotations(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
     result = multipolygon_in_multipolygon(left, right)
 
     assert all(result is multipolygon_in_multipolygon(rotated, right)
-               for rotated in rotations(left))
+               for rotated in multipolygon_rotations(left))
     assert all(result is multipolygon_in_multipolygon(left, rotated)
-               for rotated in rotations(right))
+               for rotated in multipolygon_rotations(right))

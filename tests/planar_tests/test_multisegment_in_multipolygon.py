@@ -1,26 +1,24 @@
-from itertools import chain
 from typing import Tuple
 
+from ground.hints import (Multipolygon,
+                          Multisegment)
 from hypothesis import given
 
-from orient.core.multiregion import (to_oriented_segments
-                                     as multiregion_to_segments)
-from orient.core.region import to_oriented_segments as region_to_segments
-from orient.core.utils import flatten
-from orient.hints import (Multipolygon,
-                          Multisegment)
 from orient.planar import (Relation,
                            multisegment_in_multipolygon,
                            segment_in_multipolygon)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         multipolygon_rotations,
+                         multipolygon_to_multisegment,
+                         multisegment_pop_left,
+                         multisegment_rotations,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
-                         reverse_multisegment,
-                         rotations)
+                         reverse_multisegment)
 from . import strategies
 
 
@@ -37,13 +35,11 @@ def test_basic(multipolygon_with_multisegment
 
 @given(strategies.multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
-    assert multisegment_in_multipolygon(
-            list(flatten(chain(region_to_segments(border),
-                               multiregion_to_segments(holes))
-                         for border, holes in multipolygon)),
-            multipolygon) is (Relation.COMPONENT
-                              if multipolygon
-                              else Relation.DISJOINT)
+    assert (multisegment_in_multipolygon(
+            multipolygon_to_multisegment(multipolygon), multipolygon)
+            is (Relation.COMPONENT
+                if multipolygon.polygons
+                else Relation.DISJOINT))
 
 
 @given(strategies.multipolygons_with_empty_multisegments)
@@ -60,7 +56,7 @@ def test_base(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
 def test_step(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
               ) -> None:
     multipolygon, multisegment = multipolygon_with_multisegment
-    first_segment, *rest_multisegment = multisegment
+    first_segment, rest_multisegment = multisegment_pop_left(multisegment)
 
     result = multisegment_in_multipolygon(rest_multisegment, multipolygon)
     next_result = multisegment_in_multipolygon(multisegment, multipolygon)
@@ -83,7 +79,7 @@ def test_step(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
     assert equivalence(next_result is Relation.CROSS,
                        result is Relation.CROSS
                        or relation_with_first_segment is Relation.CROSS
-                       or (bool(rest_multisegment)
+                       or (bool(rest_multisegment.segments)
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
                        and (relation_with_first_segment is Relation.ENCLOSED
@@ -93,10 +89,11 @@ def test_step(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
                        and (relation_with_first_segment is Relation.DISJOINT
                             or relation_with_first_segment is Relation.TOUCH))
     assert equivalence(next_result is Relation.COMPONENT,
-                       (not rest_multisegment or result is Relation.COMPONENT)
+                       (not rest_multisegment.segments
+                        or result is Relation.COMPONENT)
                        and relation_with_first_segment is Relation.COMPONENT)
     assert equivalence(next_result is Relation.ENCLOSED,
-                       not rest_multisegment
+                       not rest_multisegment.segments
                        and relation_with_first_segment is Relation.ENCLOSED
                        or (result is Relation.COMPONENT
                            or result is Relation.ENCLOSED)
@@ -108,7 +105,8 @@ def test_step(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
                        or result is Relation.WITHIN
                        and relation_with_first_segment is Relation.ENCLOSED)
     assert equivalence(next_result is Relation.WITHIN,
-                       (not rest_multisegment or result is Relation.WITHIN)
+                       (not rest_multisegment.segments
+                        or result is Relation.WITHIN)
                        and relation_with_first_segment is Relation.WITHIN)
 
 
@@ -139,6 +137,6 @@ def test_rotations(multipolygon_with_multisegment
     result = multisegment_in_multipolygon(multisegment, multipolygon)
 
     assert all(result is multisegment_in_multipolygon(multisegment, rotated)
-               for rotated in rotations(multipolygon))
+               for rotated in multipolygon_rotations(multipolygon))
     assert all(result is multisegment_in_multipolygon(rotated, multipolygon)
-               for rotated in rotations(multisegment))
+               for rotated in multisegment_rotations(multisegment))

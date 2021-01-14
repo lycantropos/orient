@@ -1,8 +1,8 @@
 from typing import Tuple
 
+from ground.hints import Multisegment
 from hypothesis import given
 
-from orient.hints import Multisegment
 from orient.planar import (Relation,
                            multisegment_in_multisegment,
                            segment_in_multisegment)
@@ -11,17 +11,18 @@ from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SYMMETRIC_SAME_LINEAR_RELATIONS,
                          equivalence,
                          implication,
+                         multisegment_pop_left,
+                         multisegment_rotations,
                          reverse_multisegment,
-                         rotations)
+                         segment_to_multisegment)
 from . import strategies
 
 
 @given(strategies.multisegments_pairs)
 def test_basic(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+    left, right = multisegments_pair
 
-    result = multisegment_in_multisegment(left_multisegment,
-                                          right_multisegment)
+    result = multisegment_in_multisegment(left, right)
 
     assert isinstance(result, Relation)
     assert result in SAME_LINEAR_RELATIONS
@@ -31,28 +32,27 @@ def test_basic(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
 def test_self(multisegment: Multisegment) -> None:
     assert (multisegment_in_multisegment(multisegment, multisegment)
             is Relation.EQUAL)
-    assert equivalence(all(multisegment_in_multisegment([segment],
-                                                        multisegment)
-                           is Relation.EQUAL
-                           for segment in multisegment),
-                       len(multisegment) == 1)
-    assert equivalence(all(multisegment_in_multisegment([segment],
-                                                        multisegment)
-                           is Relation.COMPONENT
-                           for segment in multisegment),
-                       len(multisegment) > 1)
+    assert equivalence(
+            all(multisegment_in_multisegment(segment_to_multisegment(segment),
+                                             multisegment) is Relation.EQUAL
+                for segment in multisegment.segments),
+            len(multisegment.segments) == 1)
+    assert equivalence(
+            all(multisegment_in_multisegment(segment_to_multisegment(segment),
+                                             multisegment)
+                is Relation.COMPONENT
+                for segment in multisegment.segments),
+            len(multisegment.segments) > 1)
 
 
 @given(strategies.multisegments_pairs)
 def test_relations(multisegments_pair: Tuple[Multisegment, Multisegment]
                    ) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+    left, right = multisegments_pair
 
-    result = multisegment_in_multisegment(left_multisegment,
-                                          right_multisegment)
+    result = multisegment_in_multisegment(left, right)
 
-    complement = multisegment_in_multisegment(right_multisegment,
-                                              left_multisegment)
+    complement = multisegment_in_multisegment(right, left)
     assert equivalence(result is complement,
                        result in SYMMETRIC_SAME_LINEAR_RELATIONS)
     assert equivalence(result is not complement,
@@ -63,24 +63,20 @@ def test_relations(multisegments_pair: Tuple[Multisegment, Multisegment]
 
 @given(strategies.empty_multisegments_with_multisegments)
 def test_base(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
+    left, right = multisegments_pair
 
-    assert (multisegment_in_multisegment(left_multisegment, right_multisegment)
-            is Relation.DISJOINT)
+    assert multisegment_in_multisegment(left, right) is Relation.DISJOINT
 
 
 @given(strategies.non_empty_multisegments_with_multisegments)
 def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
-    left_multisegment, right_multisegment = multisegments_pair
-    first_segment, *rest_left_multisegment = left_multisegment
+    left, right = multisegments_pair
+    first_segment, rest_left = multisegment_pop_left(left)
 
-    result = multisegment_in_multisegment(rest_left_multisegment,
-                                          right_multisegment)
-    next_result = multisegment_in_multisegment(left_multisegment,
-                                               right_multisegment)
+    result = multisegment_in_multisegment(rest_left, right)
+    next_result = multisegment_in_multisegment(left, right)
 
-    relation_with_first_segment = segment_in_multisegment(first_segment,
-                                                          right_multisegment)
+    relation_with_first_segment = segment_in_multisegment(first_segment, right)
     assert equivalence(next_result is Relation.DISJOINT,
                        result is relation_with_first_segment
                        is Relation.DISJOINT)
@@ -117,7 +113,7 @@ def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
                        result is Relation.OVERLAP
                        or relation_with_first_segment is Relation.OVERLAP
                        or (result is Relation.DISJOINT
-                           and bool(rest_left_multisegment)
+                           and bool(rest_left.segments)
                            or result is Relation.TOUCH
                            or result is Relation.CROSS)
                        and relation_with_first_segment is Relation.COMPONENT
@@ -131,30 +127,30 @@ def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
                        or result is Relation.OVERLAP
                        and (relation_with_first_segment is Relation.COMPONENT
                             or relation_with_first_segment is Relation.OVERLAP)
-                       or bool(rest_left_multisegment)
+                       or bool(rest_left.segments)
                        and relation_with_first_segment is Relation.EQUAL
                        or result is Relation.EQUAL
                        or result is Relation.COMPONENT
                        and relation_with_first_segment is Relation.OVERLAP)
     assert implication(result is Relation.COMPOSITE
                        or relation_with_first_segment is Relation.COMPOSITE
-                       or bool(rest_left_multisegment)
+                       or bool(rest_left.segments)
                        and relation_with_first_segment is Relation.EQUAL
                        or result is Relation.EQUAL,
                        next_result is Relation.COMPOSITE)
     assert implication(next_result is Relation.EQUAL,
-                       not rest_left_multisegment
+                       not rest_left.segments
                        and relation_with_first_segment is Relation.EQUAL
                        or result is relation_with_first_segment
                        is Relation.COMPONENT)
-    assert implication(not rest_left_multisegment
+    assert implication(not rest_left.segments
                        and relation_with_first_segment is Relation.EQUAL,
                        next_result is Relation.EQUAL)
     assert implication(next_result is Relation.COMPONENT,
-                       (not rest_left_multisegment
+                       (not rest_left.segments
                         or result is Relation.COMPONENT)
                        and relation_with_first_segment is Relation.COMPONENT)
-    assert implication(not rest_left_multisegment
+    assert implication(not rest_left.segments
                        and relation_with_first_segment is Relation.COMPONENT,
                        next_result is Relation.COMPONENT)
 
@@ -180,6 +176,6 @@ def test_rotations(multisegments_pair: Tuple[Multisegment, Multisegment]
     result = multisegment_in_multisegment(left, right)
 
     assert all(result is multisegment_in_multisegment(rotated, right)
-               for rotated in rotations(left))
+               for rotated in multisegment_rotations(left))
     assert all(result is multisegment_in_multisegment(left, rotated)
-               for rotated in rotations(right))
+               for rotated in multisegment_rotations(right))

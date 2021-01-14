@@ -1,14 +1,14 @@
 from typing import Tuple
 
+from ground.hints import (Contour,
+                          Point)
 from hypothesis import given
 
-from orient.hints import (Contour,
-                          Point)
 from orient.planar import (Relation,
                            point_in_contour)
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
-                         reverse_contour,
-                         rotations)
+                         contour_rotations,
+                         reverse_contour)
 from . import strategies
 
 
@@ -25,7 +25,7 @@ def test_basic(contour_with_point: Tuple[Contour, Point]) -> None:
 @given(strategies.contours)
 def test_self(contour: Contour) -> None:
     assert all(point_in_contour(vertex, contour) is Relation.COMPONENT
-               for vertex in contour)
+               for vertex in contour.vertices)
 
 
 @given(strategies.contours_with_points)
@@ -44,4 +44,4 @@ def test_rotations(contour_with_point: Tuple[Contour, Point]) -> None:
     result = point_in_contour(point, contour)
 
     assert all(result is point_in_contour(point, rotated)
-               for rotated in rotations(contour))
+               for rotated in contour_rotations(contour))

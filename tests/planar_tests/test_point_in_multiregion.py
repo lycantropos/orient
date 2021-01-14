@@ -1,9 +1,9 @@
 from typing import Tuple
 
+from ground.hints import Point
 from hypothesis import given
 
-from orient.hints import (Multiregion,
-                          Point)
+from orient.hints import Multiregion
 from orient.planar import (Relation,
                            point_in_multiregion,
                            point_in_region)
@@ -11,7 +11,7 @@ from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          equivalence,
                          reverse_multicontour,
                          reverse_multicontour_contours,
-                         rotations)
+                         sequence_rotations)
 from . import strategies
 
 
@@ -28,8 +28,8 @@ def test_basic(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
 @given(strategies.multiregions)
 def test_vertices(multiregion: Multiregion) -> None:
     assert all(point_in_multiregion(vertex, multiregion) is Relation.COMPONENT
-               for contour in multiregion
-               for vertex in contour)
+               for region in multiregion
+               for vertex in region.vertices)
 
 
 @given(strategies.empty_multiregions_with_points)
@@ -78,4 +78,4 @@ def test_rotations(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
     result = point_in_multiregion(point, multiregion)
 
     assert all(result is point_in_multiregion(point, rotated)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))

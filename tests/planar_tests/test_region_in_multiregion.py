@@ -14,7 +14,7 @@ from tests.utils import (COMPOUND_RELATIONS,
                          reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
-                         rotations)
+                         sequence_rotations)
 from . import strategies
 
 
@@ -123,7 +123,7 @@ def test_rotations(multiregion_with_region: Tuple[Multiregion, Region]
     result = region_in_multiregion(region, multiregion)
 
     assert all(result is region_in_multiregion(region, rotated)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))
 
 
 @given(strategies.multiregions_with_contours)

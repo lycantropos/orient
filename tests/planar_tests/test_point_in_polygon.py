@@ -1,17 +1,18 @@
-from itertools import chain
 from typing import Tuple
 
+from ground.hints import (Point,
+                          Polygon)
 from hypothesis import given
 
-from orient.hints import (Point,
-                          Polygon)
 from orient.planar import (Relation,
                            point_in_polygon)
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          implication,
                          reverse_polygon_border,
                          reverse_polygon_holes,
-                         reverse_polygon_holes_contours)
+                         reverse_polygon_holes_contours,
+                         to_polygon_vertices,
+                         to_solid_polygon)
 from . import strategies
 
 
@@ -27,9 +28,8 @@ def test_basic(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
 @given(strategies.polygons)
 def test_self(polygon: Polygon) -> None:
-    border, holes = polygon
     assert all(point_in_polygon(vertex, polygon) is Relation.COMPONENT
-               for vertex in chain(border, *holes))
+               for vertex in to_polygon_vertices(polygon))
 
 
 @given(strategies.polygons_with_points)
@@ -38,8 +38,7 @@ def test_without_holes(polygon_with_point: Tuple[Polygon, Point]) -> None:
 
     result = point_in_polygon(point, polygon)
 
-    border, holes = polygon
-    polygon_without_holes = (border, [])
+    polygon_without_holes = to_solid_polygon(polygon)
     assert implication(result is Relation.WITHIN,
                        point_in_polygon(point, polygon_without_holes)
                        is Relation.WITHIN)

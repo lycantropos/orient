@@ -1,9 +1,9 @@
 from typing import Tuple
 
+from ground.hints import Segment
 from hypothesis import given
 
-from orient.hints import (Multiregion,
-                          Segment)
+from orient.hints import Multiregion
 from orient.planar import (Relation,
                            point_in_multiregion,
                            segment_in_multiregion,
@@ -14,7 +14,7 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          reverse_multicontour,
                          reverse_multicontour_contours,
                          reverse_segment,
-                         rotations)
+                         sequence_rotations)
 from . import strategies
 
 
@@ -87,7 +87,7 @@ def test_rotations(multiregion_with_segment: Tuple[Multiregion, Segment]
     result = segment_in_multiregion(segment, multiregion)
 
     assert all(result is segment_in_multiregion(segment, rotated)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))
 
 
 @given(strategies.multiregions_with_segments)
@@ -98,8 +98,7 @@ def test_connection_with_point_in_multiregion(multiregion_with_segment
 
     result = segment_in_multiregion(segment, multiregion)
 
-    start, end = segment
     assert implication(result is Relation.DISJOINT,
-                       point_in_multiregion(start, multiregion)
-                       is point_in_multiregion(end, multiregion)
+                       point_in_multiregion(segment.start, multiregion)
+                       is point_in_multiregion(segment.end, multiregion)
                        is Relation.DISJOINT)

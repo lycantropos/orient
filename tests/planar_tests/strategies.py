@@ -1,26 +1,27 @@
 from fractions import Fraction
 from functools import partial
 from typing import (Optional,
+                    Sequence,
                     Tuple)
 
+from ground.hints import Coordinate
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from orient.core.utils import flatten
-from orient.hints import (Contour,
-                          Coordinate,
-                          Multipolygon,
-                          Multiregion,
-                          Multisegment,
-                          Point,
-                          Polygon,
-                          Segment)
+from orient.hints import Multiregion
 from tests.strategies import (coordinates_strategies,
                               rational_coordinates_strategies)
-from tests.utils import (Strategy,
-                         polygon_to_edges,
+from tests.utils import (Contour,
+                         Multipolygon,
+                         Multisegment,
+                         Point,
+                         Polygon,
+                         Segment,
+                         Strategy,
                          sub_lists,
+                         to_multipolygon_edges,
                          to_pairs,
+                         to_polygon_edges,
                          to_triplets)
 
 points = coordinates_strategies.flatmap(planar.points)
@@ -36,7 +37,7 @@ def to_segments_with_points(coordinates: Strategy[Coordinate]
 segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
 segments_strategies = coordinates_strategies.map(planar.segments)
 segments_pairs = segments_strategies.flatmap(to_pairs)
-empty_multisegments = strategies.builds(list)
+empty_multisegments = strategies.builds(Multisegment, strategies.builds(list))
 multisegments = coordinates_strategies.flatmap(planar.multisegments)
 non_empty_multisegments = (coordinates_strategies
                            .flatmap(partial(planar.multisegments,
@@ -73,17 +74,18 @@ non_empty_multisegments_with_segments = (
                                            min_size=1)))
 
 
-def chop_segment(segment: Segment, parts_count: int) -> Multisegment:
+def chop_segment(segment: Segment, parts_count: int) -> Sequence[Segment]:
     if parts_count == 1:
         return [segment]
-    (start_x, start_y), (end_x, end_y) = segment
-    delta_x, delta_y = end_x - start_x, end_y - start_y
+    delta_x, delta_y = (segment.end.x - segment.start.x,
+                        segment.end.y - segment.start.y)
     step_x, step_y = (Fraction(delta_x, parts_count),
                       Fraction(delta_y, parts_count))
+    start_x, start_y = segment.start.x, segment.start.y
     end_x, end_y = start_x + step_x, start_y + step_y
     result = []
     for part_index in range(parts_count):
-        result.append(((start_x, start_y), (end_x, end_y)))
+        result.append(Segment(Point(start_x, start_y), Point(end_x, end_y)))
         start_x, start_y = end_x, end_y
         end_x, end_y = start_x + step_x, start_y + step_y
     return result
@@ -99,7 +101,8 @@ def segment_to_multisegments_with_segments(segment: Segment,
     return strategies.tuples((strategies.builds(chop_segment,
                                                 always_segment,
                                                 partition_sizes)
-                              .flatmap(strategies.permutations)),
+                              .flatmap(strategies.permutations))
+                             .map(Multisegment),
                              always_segment)
 
 
@@ -310,7 +313,8 @@ def polygon_to_polygons_with_multisegments(polygon: Polygon
                                            ) -> Strategy[Tuple[Polygon,
                                                                Multisegment]]:
     return strategies.tuples(strategies.just(polygon),
-                             sub_lists(list(polygon_to_edges(polygon))))
+                             sub_lists(list(to_polygon_edges(polygon)))
+                             .map(Multisegment))
 
 
 polygons_with_multisegments = (
@@ -349,8 +353,8 @@ def to_polygons_with_multiregions(coordinates: Strategy[Coordinate],
 def polygon_to_polygons_with_multiregions(polygon: Polygon
                                           ) -> Strategy[Tuple[Polygon,
                                                               Multiregion]]:
-    _, holes = polygon
-    return strategies.tuples(strategies.just(polygon), sub_lists(holes))
+    return strategies.tuples(strategies.just(polygon),
+                             sub_lists(polygon.holes))
 
 
 polygons_with_multiregions = (
@@ -362,7 +366,7 @@ polygons_with_non_empty_multiregions = (
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
-empty_multipolygons = strategies.builds(list)
+empty_multipolygons = strategies.builds(Multipolygon, strategies.builds(list))
 multipolygons = coordinates_strategies.flatmap(planar.multipolygons)
 non_empty_multipolygons = (coordinates_strategies
                            .flatmap(partial(planar.multipolygons,
@@ -426,9 +430,9 @@ def to_multipolygons_with_multisegments(coordinates: Strategy[Coordinate],
 def multipolygon_to_multipolygons_with_multisegments(
         multipolygon: Multipolygon) -> Strategy[Tuple[Multipolygon,
                                                       Multisegment]]:
-    edges = list(flatten(polygon_to_edges(polygon)
-                         for polygon in multipolygon))
-    return strategies.tuples(strategies.just(multipolygon), sub_lists(edges))
+    edges = list(to_multipolygon_edges(multipolygon))
+    return strategies.tuples(strategies.just(multipolygon),
+                             sub_lists(edges).map(Multisegment))
 
 
 multipolygons_with_multisegments = (

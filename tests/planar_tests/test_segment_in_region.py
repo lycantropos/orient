@@ -1,23 +1,23 @@
 from typing import Tuple
 
+from ground.hints import Segment
 from hypothesis import given
 
-from orient.core.region import (equal,
-                                to_oriented_segments)
-from orient.hints import (Region,
-                          Segment)
+from orient.hints import Region
 from orient.planar import (Relation,
                            point_in_region,
                            segment_in_contour,
                            segment_in_region)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
+                         are_regions_equal,
                          equivalence,
                          implication,
+                         region_rotations,
                          reverse_contour,
                          reverse_segment,
-                         rotations,
                          to_contour_separators,
-                         to_convex_hull)
+                         to_region_convex_hull,
+                         to_region_edges)
 from . import strategies
 
 
@@ -34,7 +34,7 @@ def test_basic(region_with_segment: Tuple[Region, Segment]) -> None:
 @given(strategies.contours)
 def test_self(region: Region) -> None:
     assert all(segment_in_region(edge, region) is Relation.COMPONENT
-               for edge in to_oriented_segments(region))
+               for edge in to_region_edges(region))
 
 
 @given(strategies.contours)
@@ -46,7 +46,8 @@ def test_separators(region: Region) -> None:
 
 @given(strategies.contours)
 def test_convex_region(region: Region) -> None:
-    assert implication(equal(region, to_convex_hull(region)),
+    assert implication(are_regions_equal(region,
+                                         to_region_convex_hull(region)),
                        all(segment_in_region(segment, region)
                            is Relation.ENCLOSED
                            for segment in to_contour_separators(region)))
@@ -69,7 +70,7 @@ def test_rotations(region_with_segment: Tuple[Region, Segment]) -> None:
     result = segment_in_region(segment, region)
 
     assert all(result is segment_in_region(segment, rotated)
-               for rotated in rotations(region))
+               for rotated in region_rotations(region))
 
 
 @given(strategies.contours_with_segments)
@@ -79,9 +80,8 @@ def test_connection_with_point_in_region(region_with_segment
 
     result = segment_in_region(segment, region)
 
-    start, end = segment
-    start_relation, end_relation = (point_in_region(start, region),
-                                    point_in_region(end, region))
+    start_relation, end_relation = (point_in_region(segment.start, region),
+                                    point_in_region(segment.end, region))
     assert implication(result is Relation.DISJOINT,
                        start_relation is end_relation is Relation.DISJOINT)
     assert implication(result is Relation.COMPONENT,

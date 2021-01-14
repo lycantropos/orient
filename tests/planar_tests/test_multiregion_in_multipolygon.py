@@ -1,9 +1,9 @@
 from typing import Tuple
 
+from ground.hints import Multipolygon
 from hypothesis import given
 
-from orient.hints import (Multipolygon,
-                          Multiregion)
+from orient.hints import Multiregion
 from orient.planar import (Relation,
                            multiregion_in_multipolygon,
                            region_in_multipolygon)
@@ -13,7 +13,7 @@ from tests.utils import (COMPOUND_RELATIONS,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
-                         rotations)
+                         sequence_rotations)
 from . import strategies
 
 
@@ -30,15 +30,17 @@ def test_basic(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
 
 @given(strategies.non_empty_multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
-    multipolygon_has_holes = any(holes for _, holes in multipolygon)
-    assert (multiregion_in_multipolygon([border for border, _ in multipolygon],
+    multipolygon_has_holes = any(polygon.holes
+                                 for polygon in multipolygon.polygons)
+    assert (multiregion_in_multipolygon([polygon.border
+                                         for polygon in multipolygon.polygons],
                                         multipolygon)
             is (Relation.ENCLOSES
                 if multipolygon_has_holes
                 else Relation.EQUAL))
     assert (multiregion_in_multipolygon([hole
-                                         for _, holes in multipolygon
-                                         for hole in holes],
+                                         for polygon in multipolygon.polygons
+                                         for hole in polygon.holes],
                                         multipolygon)
             is (Relation.TOUCH
                 if multipolygon_has_holes
@@ -143,4 +145,4 @@ def test_rotations(multipolygon_with_multiregion
     result = multiregion_in_multipolygon(multiregion, multipolygon)
 
     assert all(result is multiregion_in_multipolygon(rotated, multipolygon)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))

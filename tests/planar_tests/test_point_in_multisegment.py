@@ -1,14 +1,14 @@
 from typing import Tuple
 
+from ground.hints import (Multisegment,
+                          Point)
 from hypothesis import given
 
-from orient.hints import (Multisegment,
-                          Point)
 from orient.planar import (Relation,
                            point_in_multisegment)
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
-                         reverse_multisegment,
-                         rotations)
+                         multisegment_rotations,
+                         reverse_multisegment)
 from . import strategies
 
 
@@ -41,4 +41,4 @@ def test_rotations(multisegment_with_point: Tuple[Multisegment, Point]
     result = point_in_multisegment(point, multisegment)
 
     assert all(result is point_in_multisegment(point, rotated)
-               for rotated in rotations(multisegment))
+               for rotated in multisegment_rotations(multisegment))

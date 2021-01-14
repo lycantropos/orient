@@ -1,19 +1,21 @@
 from typing import Tuple
 
+from ground.hints import (Contour,
+                          Multisegment)
 from hypothesis import given
 
-from orient.core.contour import to_segments
-from orient.hints import (Contour,
-                          Multisegment)
 from orient.planar import (Relation,
                            multisegment_in_contour,
                            segment_in_contour)
 from tests.utils import (SAME_LINEAR_RELATIONS,
+                         contour_rotations,
+                         contour_to_multisegment,
                          equivalence,
                          implication,
+                         multisegment_pop_left,
+                         multisegment_rotations,
                          reverse_contour,
-                         reverse_multisegment,
-                         rotations)
+                         reverse_multisegment)
 from . import strategies
 
 
@@ -30,7 +32,7 @@ def test_basic(contour_with_multisegment: Tuple[Contour, Multisegment]
 
 @given(strategies.contours)
 def test_self(contour: Contour) -> None:
-    assert multisegment_in_contour(list(to_segments(contour)),
+    assert multisegment_in_contour(contour_to_multisegment(contour),
                                    contour) is Relation.EQUAL
 
 
@@ -44,7 +46,7 @@ def test_base(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
 @given(strategies.contours_with_non_empty_multisegments)
 def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
     contour, multisegment = contour_with_multisegment
-    first_segment, *rest_multisegment = multisegment
+    first_segment, rest_multisegment = multisegment_pop_left(multisegment)
 
     result = multisegment_in_contour(rest_multisegment, contour)
     next_result = multisegment_in_contour(multisegment, contour)
@@ -86,7 +88,7 @@ def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
                        result is Relation.OVERLAP
                        or relation_with_first_segment is Relation.OVERLAP
                        or (result is Relation.DISJOINT
-                           and bool(rest_multisegment)
+                           and bool(rest_multisegment.segments)
                            or result is Relation.TOUCH
                            or result is Relation.CROSS)
                        and relation_with_first_segment is Relation.COMPONENT
@@ -97,7 +99,7 @@ def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
     assert implication(next_result is Relation.COMPOSITE,
                        result is Relation.COMPOSITE
                        or relation_with_first_segment is Relation.COMPOSITE
-                       or bool(rest_multisegment)
+                       or bool(rest_multisegment.segments)
                        and relation_with_first_segment is Relation.EQUAL
                        or result is Relation.EQUAL
                        or result is Relation.COMPONENT
@@ -106,22 +108,23 @@ def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
                        and relation_with_first_segment is Relation.COMPONENT)
     assert implication(result is Relation.COMPOSITE
                        or relation_with_first_segment is Relation.COMPOSITE
-                       or bool(rest_multisegment)
+                       or bool(rest_multisegment.segments)
                        and relation_with_first_segment is Relation.EQUAL
                        or result is Relation.EQUAL,
                        next_result is Relation.COMPOSITE)
     assert implication(next_result is Relation.EQUAL,
-                       not rest_multisegment
+                       not rest_multisegment.segments
                        and relation_with_first_segment is Relation.EQUAL
                        or result is relation_with_first_segment
                        is Relation.COMPONENT)
-    assert implication(not rest_multisegment
+    assert implication(not rest_multisegment.segments
                        and relation_with_first_segment is Relation.EQUAL,
                        next_result is Relation.EQUAL)
     assert implication(next_result is Relation.COMPONENT,
-                       (not rest_multisegment or result is Relation.COMPONENT)
+                       (not rest_multisegment.segments
+                        or result is Relation.COMPONENT)
                        and relation_with_first_segment is Relation.COMPONENT)
-    assert implication(not rest_multisegment
+    assert implication(not rest_multisegment.segments
                        and relation_with_first_segment is Relation.COMPONENT,
                        next_result is Relation.COMPONENT)
 
@@ -147,6 +150,6 @@ def test_rotations(contour_with_multisegment: Tuple[Contour, Multisegment]
     result = multisegment_in_contour(multisegment, contour)
 
     assert all(result is multisegment_in_contour(multisegment, rotated)
-               for rotated in rotations(contour))
+               for rotated in contour_rotations(contour))
     assert all(result is multisegment_in_contour(rotated, contour)
-               for rotated in rotations(multisegment))
+               for rotated in multisegment_rotations(multisegment))

@@ -1,22 +1,22 @@
 from typing import Tuple
 
+from ground.hints import (Contour,
+                          Polygon)
 from hypothesis import given
 
-from orient.core.contour import to_segments
-from orient.hints import (Contour,
-                          Polygon)
 from orient.planar import (Relation,
                            contour_in_polygon,
                            point_in_polygon,
                            segment_in_polygon)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
+                         contour_rotations,
                          equivalence,
                          implication,
                          reverse_contour,
                          reverse_polygon_border,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
-                         rotations)
+                         to_contour_edges)
 from . import strategies
 
 
@@ -32,10 +32,9 @@ def test_basic(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
 
 @given(strategies.polygons)
 def test_self(polygon: Polygon) -> None:
-    border, holes = polygon
-    assert contour_in_polygon(border, polygon) is Relation.COMPONENT
+    assert contour_in_polygon(polygon.border, polygon) is Relation.COMPONENT
     assert all(contour_in_polygon(hole, polygon) is Relation.COMPONENT
-               for hole in holes)
+               for hole in polygon.holes)
 
 
 @given(strategies.polygons_with_contours)
@@ -61,7 +60,7 @@ def test_rotations(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
     result = contour_in_polygon(contour, polygon)
 
     assert all(result is contour_in_polygon(rotated, polygon)
-               for rotated in rotations(contour))
+               for rotated in contour_rotations(contour))
 
 
 @given(strategies.polygons_with_contours)
@@ -72,7 +71,7 @@ def test_connection_with_point_in_polygon(polygon_with_contour
     result = contour_in_polygon(contour, polygon)
 
     vertices_relations = [point_in_polygon(vertex, polygon)
-                          for vertex in contour]
+                          for vertex in contour.vertices]
     assert implication(result is Relation.DISJOINT,
                        all(vertex_relation is Relation.DISJOINT
                            for vertex_relation in vertices_relations))
@@ -113,7 +112,7 @@ def test_connection_with_segment_in_polygon(polygon_with_contour
     result = contour_in_polygon(contour, polygon)
 
     edges_relations = [segment_in_polygon(edge, polygon)
-                       for edge in to_segments(contour)]
+                       for edge in to_contour_edges(contour)]
     assert equivalence(result is Relation.DISJOINT,
                        all(edge_relation is Relation.DISJOINT
                            for edge_relation in edges_relations))

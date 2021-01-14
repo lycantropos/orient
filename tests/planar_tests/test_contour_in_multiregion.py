@@ -1,10 +1,9 @@
 from typing import Tuple
 
+from ground.hints import Contour
 from hypothesis import given
 
-from orient.core.contour import to_segments
-from orient.hints import (Contour,
-                          Multiregion)
+from orient.hints import Multiregion
 from orient.planar import (Relation,
                            contour_in_multiregion,
                            contour_in_region,
@@ -16,7 +15,8 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          reverse_contour,
                          reverse_multicontour,
                          reverse_multicontour_contours,
-                         rotations)
+                         sequence_rotations,
+                         to_contour_edges)
 from . import strategies
 
 
@@ -99,7 +99,7 @@ def test_rotations(multiregion_with_contour: Tuple[Multiregion, Contour]
     result = contour_in_multiregion(contour, multiregion)
 
     assert all(result is contour_in_multiregion(contour, rotated)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))
 
 
 @given(strategies.multiregions_with_contours)
@@ -110,7 +110,7 @@ def test_connection_with_point_in_multiregion(
     result = contour_in_multiregion(contour, multiregion)
 
     vertices_relations = [point_in_multiregion(vertex, multiregion)
-                          for vertex in contour]
+                          for vertex in contour.vertices]
     assert implication(result is Relation.DISJOINT,
                        all(vertex_relation is Relation.DISJOINT
                            for vertex_relation in vertices_relations))
@@ -151,7 +151,7 @@ def test_connection_with_segment_in_multiregion(
     result = contour_in_multiregion(contour, multiregion)
 
     edges_relations = [segment_in_multiregion(edge, multiregion)
-                       for edge in to_segments(contour)]
+                       for edge in to_contour_edges(contour)]
     assert equivalence(result is Relation.DISJOINT,
                        all(edge_relation is Relation.DISJOINT
                            for edge_relation in edges_relations))

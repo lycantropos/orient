@@ -1,19 +1,19 @@
 from typing import Tuple
 
+from ground.hints import Contour
 from hypothesis import given
 
-from orient.hints import Contour
 from orient.planar import (Relation,
                            contour_in_contour,
                            point_in_contour)
 from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SAME_LINEAR_RELATIONS,
                          SYMMETRIC_SAME_LINEAR_RELATIONS,
+                         contour_rotations,
                          equivalence,
                          implication,
                          reverse_contour,
-                         rotations,
-                         to_convex_hull)
+                         to_contour_convex_hull)
 from . import strategies
 
 
@@ -49,7 +49,7 @@ def test_relations(contours_pair: Tuple[Contour, Contour]) -> None:
 
 @given(strategies.contours)
 def test_convex_hull(contour: Contour) -> None:
-    assert (contour_in_contour(contour, to_convex_hull(contour))
+    assert (contour_in_contour(contour, to_contour_convex_hull(contour))
             in (Relation.TOUCH, Relation.OVERLAP, Relation.EQUAL))
 
 
@@ -70,9 +70,9 @@ def test_rotations(contours_pair: Tuple[Contour, Contour]) -> None:
     result = contour_in_contour(left, right)
 
     assert all(result is contour_in_contour(rotated, right)
-               for rotated in rotations(left))
+               for rotated in contour_rotations(left))
     assert all(result is contour_in_contour(left, rotated)
-               for rotated in rotations(right))
+               for rotated in contour_rotations(right))
 
 
 @given(strategies.contours_pairs)
@@ -84,4 +84,4 @@ def test_connection_with_point_in_contour(contours_pair
                        in (Relation.EQUAL, Relation.COMPONENT),
                        all(point_in_contour(vertex, right_contour)
                            is Relation.COMPONENT
-                           for vertex in left_contour))
+                           for vertex in left_contour.vertices))

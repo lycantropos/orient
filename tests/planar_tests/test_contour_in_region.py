@@ -1,19 +1,19 @@
 from typing import Tuple
 
+from ground.hints import Contour
 from hypothesis import given
 
-from orient.core.contour import to_segments
-from orient.hints import (Contour,
-                          Region)
+from orient.hints import Region
 from orient.planar import (Relation,
                            contour_in_region,
                            point_in_region,
                            segment_in_region)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
+                         contour_rotations,
                          equivalence,
                          implication,
                          reverse_contour,
-                         rotations)
+                         to_contour_edges)
 from . import strategies
 
 
@@ -49,9 +49,9 @@ def test_rotations(region_with_contour: Tuple[Region, Contour]) -> None:
     result = contour_in_region(contour, region)
 
     assert all(result is contour_in_region(rotated, region)
-               for rotated in rotations(contour))
+               for rotated in contour_rotations(contour))
     assert all(result is contour_in_region(contour, rotated)
-               for rotated in rotations(region))
+               for rotated in contour_rotations(region))
 
 
 @given(strategies.contours_pairs)
@@ -62,7 +62,7 @@ def test_connection_with_point_in_region(region_with_contour
     result = contour_in_region(contour, region)
 
     vertices_relations = [point_in_region(vertex, region)
-                          for vertex in contour]
+                          for vertex in contour.vertices]
     assert implication(result is Relation.DISJOINT,
                        all(vertex_relation is Relation.DISJOINT
                            for vertex_relation in vertices_relations))
@@ -103,7 +103,7 @@ def test_connection_with_segment_in_region(region_with_contour
     result = contour_in_region(contour, region)
 
     edges_relations = [segment_in_region(edge, region)
-                       for edge in to_segments(contour)]
+                       for edge in to_contour_edges(contour)]
     assert equivalence(result is Relation.DISJOINT,
                        all(edge_relation is Relation.DISJOINT
                            for edge_relation in edges_relations))

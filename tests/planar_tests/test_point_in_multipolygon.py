@@ -1,20 +1,21 @@
-from itertools import chain
 from typing import Tuple
 
+from ground.hints import (Multipolygon,
+                          Point)
 from hypothesis import given
 
-from orient.hints import (Multipolygon,
-                          Point)
 from orient.planar import (Relation,
                            point_in_multipolygon,
                            point_in_polygon)
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          equivalence,
+                         multipolygon_pop_left,
+                         multipolygon_rotations,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
-                         rotations)
+                         to_multipolygon_vertices)
 from . import strategies
 
 
@@ -30,10 +31,9 @@ def test_basic(multipolygon_with_point: Tuple[Multipolygon, Point]) -> None:
 
 @given(strategies.multipolygons)
 def test_vertices(multipolygon: Multipolygon) -> None:
-    assert all(point_in_multipolygon(vertex,
-                                     multipolygon) is Relation.COMPONENT
-               for border, holes in multipolygon
-               for vertex in chain(border, *holes))
+    assert all(point_in_multipolygon(vertex, multipolygon)
+               is Relation.COMPONENT
+               for vertex in to_multipolygon_vertices(multipolygon))
 
 
 @given(strategies.empty_multipolygons_with_points)
@@ -46,7 +46,7 @@ def test_base(multipolygon_with_polygon: Tuple[Multipolygon, Point]) -> None:
 @given(strategies.non_empty_multipolygons_with_points)
 def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Point]) -> None:
     multipolygon, point = multipolygon_with_polygon
-    first_polygon, *rest_multipolygon = multipolygon
+    first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)
 
     result = point_in_multipolygon(point, rest_multipolygon)
     next_result = point_in_multipolygon(point, multipolygon)
@@ -88,4 +88,4 @@ def test_rotations(multipolygon_with_point: Tuple[Multipolygon, Point]
     result = point_in_multipolygon(point, multipolygon)
 
     assert all(result is point_in_multipolygon(point, rotated)
-               for rotated in rotations(multipolygon))
+               for rotated in multipolygon_rotations(multipolygon))

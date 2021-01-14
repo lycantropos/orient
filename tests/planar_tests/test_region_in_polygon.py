@@ -1,19 +1,20 @@
 from typing import Tuple
 
+from ground.hints import Polygon
 from hypothesis import given
 
-from orient.hints import (Polygon,
-                          Region)
+from orient.hints import Region
 from orient.planar import (Relation,
                            contour_in_polygon,
                            region_in_polygon)
 from tests.utils import (COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         region_rotations,
                          reverse_contour,
                          reverse_polygon_border,
                          reverse_polygon_holes,
-                         reverse_polygon_holes_contours, rotations)
+                         reverse_polygon_holes_contours)
 from . import strategies
 
 
@@ -29,12 +30,11 @@ def test_basic(region_with_polygon: Tuple[Polygon, Region]) -> None:
 
 @given(strategies.polygons)
 def test_self(polygon: Polygon) -> None:
-    border, holes = polygon
-    assert region_in_polygon(border, polygon) is (Relation.ENCLOSES
-                                                  if holes
-                                                  else Relation.EQUAL)
+    assert region_in_polygon(polygon.border, polygon) is (Relation.ENCLOSES
+                                                          if polygon.holes
+                                                          else Relation.EQUAL)
     assert all(region_in_polygon(hole, polygon) is Relation.TOUCH
-               for hole in holes)
+               for hole in polygon.holes)
 
 
 @given(strategies.polygons_with_contours)
@@ -57,7 +57,7 @@ def test_rotations(polygon_with_region: Tuple[Polygon, Region]) -> None:
     result = region_in_polygon(region, polygon)
 
     assert all(result is region_in_polygon(rotated, polygon)
-               for rotated in rotations(region))
+               for rotated in region_rotations(region))
 
 
 @given(strategies.polygons_with_contours)

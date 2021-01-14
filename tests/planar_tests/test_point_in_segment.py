@@ -1,15 +1,15 @@
 from typing import Tuple
 
-from hypothesis import given
-from robust.angular import (Orientation,
-                            orientation)
-
-from orient.hints import (Point,
+from ground.base import Orientation
+from ground.hints import (Point,
                           Segment)
+from hypothesis import given
+
 from orient.planar import (Relation,
                            point_in_segment)
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
                          implication,
+                         orientation,
                          reverse_point_coordinates,
                          reverse_segment,
                          reverse_segment_coordinates)
@@ -28,19 +28,17 @@ def test_basic(segment_with_point: Tuple[Segment, Point]) -> None:
 
 @given(strategies.segments)
 def test_self(segment: Segment) -> None:
-    start, end = segment
-
-    assert point_in_segment(start, segment) is Relation.COMPONENT
-    assert point_in_segment(end, segment) is Relation.COMPONENT
+    assert point_in_segment(segment.start, segment) is Relation.COMPONENT
+    assert point_in_segment(segment.end, segment) is Relation.COMPONENT
 
 
 @given(strategies.segments_with_points)
 def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
     segment, point = segment_with_point
 
-    start, end = segment
     assert implication(point_in_segment(point, segment) is Relation.COMPONENT,
-                       orientation(end, start, point) is Orientation.COLLINEAR)
+                       orientation(segment.start, segment.end, point)
+                       is Orientation.COLLINEAR)
 
 
 @given(strategies.segments_with_points)

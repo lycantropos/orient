@@ -1,9 +1,9 @@
 from typing import Tuple
 
+from ground.hints import Polygon
 from hypothesis import given
 
-from orient.hints import (Multiregion,
-                          Polygon)
+from orient.hints import Multiregion
 from orient.planar import (Relation,
                            multiregion_in_polygon,
                            region_in_polygon)
@@ -13,7 +13,7 @@ from tests.utils import (COMPOUND_RELATIONS,
                          reverse_polygon_border,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
-                         rotations)
+                         sequence_rotations)
 from . import strategies
 
 
@@ -29,13 +29,10 @@ def test_basic(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
 
 @given(strategies.polygons)
 def test_self(polygon: Polygon) -> None:
-    border, holes = polygon
-    assert multiregion_in_polygon([border], polygon) is (Relation.ENCLOSES
-                                                         if holes
-                                                         else Relation.EQUAL)
-    assert multiregion_in_polygon(holes, polygon) is (Relation.TOUCH
-                                                      if holes
-                                                      else Relation.DISJOINT)
+    assert (multiregion_in_polygon([polygon.border], polygon)
+            is (Relation.ENCLOSES if polygon.holes else Relation.EQUAL))
+    assert (multiregion_in_polygon(polygon.holes, polygon)
+            is (Relation.TOUCH if polygon.holes else Relation.DISJOINT))
 
 
 @given(strategies.polygons_with_empty_multiregions)
@@ -132,4 +129,4 @@ def test_rotations(polygon_with_multiregion: Tuple[Polygon, Multiregion]
     result = multiregion_in_polygon(multiregion, polygon)
 
     assert all(result is multiregion_in_polygon(rotated, polygon)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))

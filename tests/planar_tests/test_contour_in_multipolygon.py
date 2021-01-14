@@ -1,10 +1,9 @@
 from typing import Tuple
 
+from ground.hints import (Contour,
+                          Multipolygon)
 from hypothesis import given
 
-from orient.core.contour import to_segments
-from orient.hints import (Contour,
-                          Multipolygon)
 from orient.planar import (Relation,
                            contour_in_multipolygon,
                            contour_in_polygon,
@@ -13,12 +12,14 @@ from orient.planar import (Relation,
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         multipolygon_pop_left,
+                         multipolygon_rotations,
                          reverse_contour,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
-                         rotations)
+                         to_contour_edges)
 from . import strategies
 
 
@@ -35,13 +36,13 @@ def test_basic(multipolygon_with_contour: Tuple[Multipolygon, Contour]
 
 @given(strategies.multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
-    assert all(contour_in_multipolygon(border, multipolygon)
+    assert all(contour_in_multipolygon(polygon.border, multipolygon)
                is Relation.COMPONENT
-               for border, _ in multipolygon)
+               for polygon in multipolygon.polygons)
     assert all(contour_in_multipolygon(hole, multipolygon)
                is Relation.COMPONENT
-               for _, holes in multipolygon
-               for hole in holes)
+               for polygon in multipolygon.polygons
+               for hole in polygon.holes)
 
 
 @given(strategies.empty_multipolygons_with_contours)
@@ -54,7 +55,7 @@ def test_base(multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
 @given(strategies.non_empty_multipolygons_with_contours)
 def test_step(multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
     multipolygon, contour = multipolygon_with_contour
-    first_polygon, *rest_multipolygon = multipolygon
+    first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)
 
     result = contour_in_multipolygon(contour, rest_multipolygon)
     next_result = contour_in_multipolygon(contour, multipolygon)
@@ -110,7 +111,7 @@ def test_rotations(multipolygon_with_contour: Tuple[Multipolygon, Contour]
     result = contour_in_multipolygon(contour, multipolygon)
 
     assert all(result is contour_in_multipolygon(contour, rotated)
-               for rotated in rotations(multipolygon))
+               for rotated in multipolygon_rotations(multipolygon))
 
 
 @given(strategies.multipolygons_with_contours)
@@ -122,7 +123,7 @@ def test_connection_with_point_in_multipolygon(multipolygon_with_contour
     result = contour_in_multipolygon(contour, multipolygon)
 
     vertices_relations = [point_in_multipolygon(vertex, multipolygon)
-                          for vertex in contour]
+                          for vertex in contour.vertices]
     assert implication(result is Relation.DISJOINT,
                        all(vertex_relation is Relation.DISJOINT
                            for vertex_relation in vertices_relations))
@@ -164,7 +165,7 @@ def test_connection_with_segment_in_multipolygon(multipolygon_with_contour
     result = contour_in_multipolygon(contour, multipolygon)
 
     edges_relations = [segment_in_multipolygon(edge, multipolygon)
-                       for edge in to_segments(contour)]
+                       for edge in to_contour_edges(contour)]
     assert equivalence(result is Relation.DISJOINT,
                        all(edge_relation is Relation.DISJOINT
                            for edge_relation in edges_relations))

@@ -12,9 +12,9 @@ from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         region_rotations,
                          reverse_contour,
-                         rotations,
-                         to_convex_hull)
+                         to_region_convex_hull)
 from . import strategies
 
 
@@ -50,7 +50,7 @@ def test_relations(regions_pair: Tuple[Region, Region]) -> None:
 
 @given(strategies.contours)
 def test_convex_hull(region: Region) -> None:
-    assert (region_in_region(region, to_convex_hull(region))
+    assert (region_in_region(region, to_region_convex_hull(region))
             in (Relation.EQUAL, Relation.ENCLOSED))
 
 
@@ -71,9 +71,9 @@ def test_rotations(regions_pair: Tuple[Region, Region]) -> None:
     result = region_in_region(left, right)
 
     assert all(result is region_in_region(rotated, right)
-               for rotated in rotations(left))
+               for rotated in region_rotations(left))
     assert all(result is region_in_region(left, rotated)
-               for rotated in rotations(right))
+               for rotated in region_rotations(right))
 
 
 @given(strategies.contours_pairs)
@@ -86,7 +86,7 @@ def test_connection_with_point_in_region(regions_pair: Tuple[Region, Region]
                            Relation.ENCLOSED, Relation.WITHIN),
                        all(point_in_region(vertex, right_region)
                            is not Relation.DISJOINT
-                           for vertex in left_region))
+                           for vertex in left_region.vertices))
 
 
 @given(strategies.contours_pairs)

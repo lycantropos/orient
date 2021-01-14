@@ -1,23 +1,22 @@
-from itertools import chain
 from typing import Tuple
 
+from ground.hints import (Polygon,
+                          Segment)
 from hypothesis import given
 
-from orient.core.region import to_oriented_segments
-from orient.hints import (Polygon,
-                          Segment)
 from orient.planar import (Relation,
                            point_in_polygon,
                            segment_in_polygon)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
-                         are_polygons_similar,
+                         are_polygons_equivalent,
                          implication,
                          reverse_polygon_border,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
                          reverse_segment,
                          to_contour_separators,
-                         to_convex_hull)
+                         to_polygon_edges,
+                         to_polygon_with_convex_border)
 from . import strategies
 
 
@@ -33,35 +32,31 @@ def test_basic(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
 
 @given(strategies.polygons)
 def test_self(polygon: Polygon) -> None:
-    border, holes = polygon
     assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
-               for edge in to_oriented_segments(border))
-    assert all(segment_in_polygon(edge, polygon) is Relation.COMPONENT
-               for edge in chain.from_iterable(map(to_oriented_segments, holes)))
+               for edge in to_polygon_edges(polygon))
 
 
 @given(strategies.polygons)
 def test_separators(polygon: Polygon) -> None:
-    border, holes = polygon
     assert all(segment_in_polygon(segment, polygon)
                in (Relation.TOUCH, Relation.CROSS, Relation.ENCLOSED)
-               for segment in to_contour_separators(border))
+               for segment in to_contour_separators(polygon.border))
     assert all(segment_in_polygon(segment, polygon)
                in (Relation.TOUCH, Relation.CROSS, Relation.ENCLOSED)
-               for hole in holes
+               for hole in polygon.holes
                for segment in to_contour_separators(hole))
 
 
 @given(strategies.polygons)
 def test_convex_polygon(polygon: Polygon) -> None:
-    border, holes = polygon
-    polygon_with_convex_border = (to_convex_hull(border), holes)
-    assert (bool(holes)
-            or implication(are_polygons_similar(polygon,
-                                                polygon_with_convex_border),
-                           all(segment_in_polygon(segment, polygon)
-                               is Relation.ENCLOSED
-                               for segment in to_contour_separators(border))))
+    polygon_with_convex_border = to_polygon_with_convex_border(polygon)
+    assert (bool(polygon.holes)
+            or implication(
+                    are_polygons_equivalent(polygon,
+                                            polygon_with_convex_border),
+                    all(segment_in_polygon(segment, polygon)
+                        is Relation.ENCLOSED
+                        for segment in to_contour_separators(polygon.border))))
 
 
 @given(strategies.polygons_with_segments)
@@ -86,7 +81,7 @@ def test_connection_with_point_in_polygon(polygon_with_segment
 
     result = segment_in_polygon(segment, polygon)
 
-    start, end = segment
     assert implication(result is Relation.DISJOINT,
-                       point_in_polygon(start, polygon) is Relation.DISJOINT
-                       and point_in_polygon(end, polygon) is Relation.DISJOINT)
+                       point_in_polygon(segment.start, polygon)
+                       is point_in_polygon(segment.end, polygon)
+                       is Relation.DISJOINT)

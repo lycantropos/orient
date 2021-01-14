@@ -1,9 +1,9 @@
 from typing import Tuple
 
+from ground.hints import (Multipolygon,
+                          Segment)
 from hypothesis import given
 
-from orient.hints import (Multipolygon,
-                          Segment)
 from orient.planar import (Relation,
                            point_in_multipolygon,
                            segment_in_multipolygon,
@@ -11,12 +11,13 @@ from orient.planar import (Relation,
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         multipolygon_pop_left,
+                         multipolygon_rotations,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
-                         reverse_segment,
-                         rotations)
+                         reverse_segment)
 from . import strategies
 
 
@@ -41,7 +42,7 @@ def test_base(multipolygon_with_polygon: Tuple[Multipolygon, Segment]) -> None:
 @given(strategies.non_empty_multipolygons_with_segments)
 def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Segment]) -> None:
     multipolygon, segment = multipolygon_with_polygon
-    first_polygon, *rest_multipolygon = multipolygon
+    first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)
 
     result = segment_in_multipolygon(segment, rest_multipolygon)
     next_result = segment_in_multipolygon(segment, multipolygon)
@@ -95,7 +96,7 @@ def test_rotations(multipolygon_with_segment: Tuple[Multipolygon, Segment]
     result = segment_in_multipolygon(segment, multipolygon)
 
     assert all(result is segment_in_multipolygon(segment, rotated)
-               for rotated in rotations(multipolygon))
+               for rotated in multipolygon_rotations(multipolygon))
 
 
 @given(strategies.multipolygons_with_segments)
@@ -106,8 +107,7 @@ def test_connection_with_point_in_multipolygon(multipolygon_with_segment
 
     result = segment_in_multipolygon(segment, multipolygon)
 
-    start, end = segment
     assert implication(result is Relation.DISJOINT,
-                       point_in_multipolygon(start, multipolygon)
-                       is point_in_multipolygon(end, multipolygon)
+                       point_in_multipolygon(segment.start, multipolygon)
+                       is point_in_multipolygon(segment.end, multipolygon)
                        is Relation.DISJOINT)

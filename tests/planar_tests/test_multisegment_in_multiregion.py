@@ -1,20 +1,22 @@
 from typing import Tuple
 
+from ground.hints import Multisegment
 from hypothesis import given
 
-from orient.core.multiregion import to_oriented_segments
-from orient.hints import (Multiregion,
-                          Multisegment)
+from orient.hints import Multiregion
 from orient.planar import (Relation,
                            multisegment_in_multiregion,
                            segment_in_multiregion)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
+                         multiregion_to_multisegment,
+                         multisegment_pop_left,
+                         multisegment_rotations,
                          reverse_multicontour,
                          reverse_multicontour_contours,
                          reverse_multisegment,
-                         rotations)
+                         sequence_rotations)
 from . import strategies
 
 
@@ -31,10 +33,9 @@ def test_basic(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
 
 @given(strategies.multiregions)
 def test_self(multiregion: Multiregion) -> None:
-    assert multisegment_in_multiregion(list(to_oriented_segments(multiregion)),
-                                       multiregion) is (Relation.COMPONENT
-                                                        if multiregion
-                                                        else Relation.DISJOINT)
+    assert (multisegment_in_multiregion(
+            multiregion_to_multisegment(multiregion), multiregion)
+            is (Relation.COMPONENT if multiregion else Relation.DISJOINT))
 
 
 @given(strategies.multiregions_with_empty_multisegments)
@@ -51,7 +52,7 @@ def test_base(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
 def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
               ) -> None:
     multiregion, multisegment = multiregion_with_multisegment
-    first_segment, *rest_multisegment = multisegment
+    first_segment, rest_multisegment = multisegment_pop_left(multisegment)
 
     result = multisegment_in_multiregion(rest_multisegment, multiregion)
     next_result = multisegment_in_multiregion(multisegment, multiregion)
@@ -74,7 +75,7 @@ def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
     assert equivalence(next_result is Relation.CROSS,
                        result is Relation.CROSS
                        or relation_with_first_segment is Relation.CROSS
-                       or (bool(rest_multisegment)
+                       or (bool(rest_multisegment.segments)
                            and result is Relation.DISJOINT
                            or result is Relation.TOUCH)
                        and (relation_with_first_segment is Relation.ENCLOSED
@@ -84,10 +85,11 @@ def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
                        and (relation_with_first_segment is Relation.DISJOINT
                             or relation_with_first_segment is Relation.TOUCH))
     assert equivalence(next_result is Relation.COMPONENT,
-                       (not rest_multisegment or result is Relation.COMPONENT)
+                       (not rest_multisegment.segments
+                        or result is Relation.COMPONENT)
                        and relation_with_first_segment is Relation.COMPONENT)
     assert equivalence(next_result is Relation.ENCLOSED,
-                       not rest_multisegment
+                       not rest_multisegment.segments
                        and relation_with_first_segment is Relation.ENCLOSED
                        or (result is Relation.COMPONENT
                            or result is Relation.ENCLOSED)
@@ -99,7 +101,8 @@ def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
                        or result is Relation.WITHIN
                        and relation_with_first_segment is Relation.ENCLOSED)
     assert equivalence(next_result is Relation.WITHIN,
-                       (not rest_multisegment or result is Relation.WITHIN)
+                       (not rest_multisegment.segments
+                        or result is Relation.WITHIN)
                        and relation_with_first_segment is Relation.WITHIN)
 
 
@@ -126,6 +129,6 @@ def test_rotations(multiregion_with_multisegment
     result = multisegment_in_multiregion(multisegment, multiregion)
 
     assert all(result is multisegment_in_multiregion(multisegment, rotated)
-               for rotated in rotations(multiregion))
+               for rotated in sequence_rotations(multiregion))
     assert all(result is multisegment_in_multiregion(rotated, multiregion)
-               for rotated in rotations(multisegment))
+               for rotated in multisegment_rotations(multisegment))

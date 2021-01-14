@@ -1,4 +1,4 @@
-bentley-ottmann<1.0
+bentley-ottmann~=1.0
 pytest>=6.0.2
 hypothesis>=5.32.0
-hypothesis-geometry<1.0
+hypothesis-geometry~=1.0
