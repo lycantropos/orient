@@ -3,11 +3,11 @@ from typing import Iterable
 
 from ground.base import Relation
 
-from orient.hints import (Contour,
-                          Multisegment,
-                          Point,
-                          Segment)
 from . import bounding
+from .hints import (Contour,
+                    Multisegment,
+                    Point,
+                    Segment)
 from .processing import (process_closed_linear_queue,
                          process_open_linear_queue)
 from .segment import (relate_point as relate_point_to_segment,

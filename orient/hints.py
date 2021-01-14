@@ -1,12 +1,6 @@
-from numbers import Real
-from typing import (Sequence,
-                    Tuple)
+from typing import Sequence
 
-Coordinate = Real
-Point = Tuple[Coordinate, Coordinate]
-Segment = Tuple[Point, Point]
-Multisegment = Sequence[Segment]
-Contour = Region = Sequence[Point]
+from ground.hints import Contour as _Contour
+
+Region = _Contour
 Multiregion = Sequence[Region]
-Polygon = Tuple[Region, Multiregion]
-Multipolygon = Sequence[Polygon]

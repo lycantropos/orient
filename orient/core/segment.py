@@ -1,8 +1,8 @@
 from ground.base import Relation
 
-from orient.hints import (Point,
-                          Segment)
 from . import bounding
+from .hints import (Point,
+                    Segment)
 from .utils import (Orientation,
                     orientation)
 

@@ -2,14 +2,14 @@ from typing import Iterable
 
 from ground.base import Relation
 
-from orient.hints import (Contour,
-                          Multiregion,
-                          Multisegment,
-                          Point,
-                          Region,
-                          Segment)
 from . import bounding
 from .contour import to_segments as contour_to_segments
+from .hints import (Contour,
+                    Multiregion,
+                    Multisegment,
+                    Point,
+                    Region,
+                    Segment)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import (relate_point as relate_point_to_region,

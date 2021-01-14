@@ -6,8 +6,8 @@ from typing import (Optional,
 
 from reprit.base import generate_repr
 
-from orient.hints import (Point,
-                          Segment)
+from .hints import (Point,
+                    Segment)
 from .utils import SegmentsRelationship
 
 

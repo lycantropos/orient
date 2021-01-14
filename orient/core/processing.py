@@ -1,6 +1,6 @@
 from ground.base import Relation
 
-from orient.hints import Coordinate
+from .hints import Coordinate
 from .sweep import (CompoundSweeper,
                     LinearSweeper)
 from .utils import SegmentsRelationship

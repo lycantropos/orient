@@ -11,15 +11,15 @@ from typing import (Any,
 
 from reprit.base import generate_repr
 
-from orient.hints import (Coordinate,
-                          Point,
-                          Segment)
 from .event import (CompoundEvent,
                     Event,
                     LinearEvent,
                     OverlapKind)
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
+from .hints import (Coordinate,
+                    Point,
+                    Segment)
 from .sweep_line import SweepLine
 from .utils import (Orientation,
                     SegmentsRelationship,

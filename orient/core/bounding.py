@@ -1,8 +1,8 @@
 from typing import (Iterable,
                     Tuple)
 
-from orient.hints import (Coordinate,
-                          Point)
+from .hints import (Coordinate,
+                    Point)
 from .utils import flatten
 
 Box = Tuple[Coordinate, Coordinate, Coordinate, Coordinate]

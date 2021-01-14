@@ -3,17 +3,17 @@ from typing import (Optional,
 
 from ground.base import Relation
 
-from orient.hints import (Contour,
-                          Multisegment,
-                          Point,
-                          Region,
-                          Segment)
 from . import bounding
 from .contour import (equal as contours_equal,
                       orientation as contour_orientation,
                       point_vertex_line_divides_angle,
                       to_oriented_segments as contour_to_oriented_segments,
                       to_segments as contour_to_segments)
+from .hints import (Contour,
+                    Multisegment,
+                    Point,
+                    Region,
+                    Segment)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .segment import (relate_point as relate_point_to_segment,
