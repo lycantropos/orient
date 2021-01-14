@@ -111,8 +111,8 @@ def point_in_multisegment(point: Point,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point, Segment, Multisegment = (context.point_cls, context.segment_cls,
-    ...                                 context.multisegment_cls)
+    >>> Multisegment, Point, Segment = (context.multisegment_cls,
+    ...                                 context.point_cls, context.segment_cls)
     >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                              Segment(Point(3, 0), Point(5, 0))])
     >>> point_in_multisegment(Point(0, 0), multisegment) is Relation.COMPONENT
@@ -150,8 +150,8 @@ def segment_in_multisegment(segment: Segment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point, Segment, Multisegment = (context.point_cls, context.segment_cls,
-    ...                                 context.multisegment_cls)
+    >>> Multisegment, Point, Segment = (context.multisegment_cls,
+    ...                                 context.point_cls, context.segment_cls)
     >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 1)),
     ...                              Segment(Point(1, 1), Point(3, 3))])
     >>> segment_in_multisegment(Segment(Point(0, 0), Point(1, 0)),
@@ -198,8 +198,8 @@ def multisegment_in_multisegment(left: Multisegment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point, Segment, Multisegment = (context.point_cls, context.segment_cls,
-    ...                                 context.multisegment_cls)
+    >>> Multisegment, Point, Segment = (context.multisegment_cls,
+    ...                                 context.point_cls, context.segment_cls)
     >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                                Segment(Point(1, 0), Point(0, 1)),
     ...                                Segment(Point(0, 1), Point(0, 0))])
@@ -242,8 +242,7 @@ def point_in_contour(point: Point, contour: Contour) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> point_in_contour(Point(0, 0), square) is Relation.COMPONENT
     True
@@ -273,9 +272,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point, Segment = (context.contour_cls, context.point_cls,
+    ...                            context.segment_cls)
     >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
     >>> (segment_in_contour(Segment(Point(0, 0), Point(1, 0)), square)
     ...  is Relation.COMPONENT)
@@ -324,10 +322,10 @@ def multisegment_in_contour(multisegment: Multisegment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Segment = context.segment_cls
-    >>> Multisegment = context.multisegment_cls
+    >>> Contour, Multisegment, Point, Segment = (context.contour_cls,
+    ...                                          context.multisegment_cls,
+    ...                                          context.point_cls,
+    ...                                          context.segment_cls)
     >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                                Segment(Point(1, 0), Point(0, 1)),
     ...                                Segment(Point(0, 1), Point(0, 0))])
@@ -370,8 +368,7 @@ def contour_in_contour(left: Contour, right: Contour) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_contour(triangle, triangle) is Relation.EQUAL
@@ -406,8 +403,7 @@ def point_in_region(point: Point, region: Region) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> point_in_region(Point(0, 0), square) is Relation.COMPONENT
     True
@@ -437,9 +433,8 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point, Segment = (context.contour_cls, context.point_cls,
+    ...                            context.segment_cls)
     >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
     >>> (segment_in_region(Segment(Point(0, 0), Point(1, 0)), square)
     ...  is Relation.COMPONENT)
@@ -488,10 +483,10 @@ def multisegment_in_region(multisegment: Multisegment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Multisegment = context.multisegment_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Multisegment, Point, Segment = (context.contour_cls,
+    ...                                          context.multisegment_cls,
+    ...                                          context.point_cls,
+    ...                                          context.segment_cls)
     >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                                Segment(Point(1, 0), Point(0, 1)),
     ...                                Segment(Point(0, 1), Point(0, 0))])
@@ -533,8 +528,7 @@ def contour_in_region(contour: Contour, region: Region) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_region(triangle, triangle) is Relation.COMPONENT
@@ -567,8 +561,7 @@ def region_in_region(left: Region, right: Region) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> region_in_region(triangle, triangle) is Relation.EQUAL
@@ -599,8 +592,7 @@ def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> point_in_multiregion(Point(0, 0), [triangle]) is Relation.COMPONENT
@@ -638,9 +630,8 @@ def segment_in_multiregion(segment: Segment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point, Segment = (context.contour_cls, context.point_cls,
+    ...                            context.segment_cls)
     >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
     >>> (segment_in_multiregion(Segment(Point(0, 0), Point(1, 0)), [])
     ...  is Relation.DISJOINT)
@@ -692,10 +683,10 @@ def multisegment_in_multiregion(multisegment: Multisegment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Multisegment = context.multisegment_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Multisegment, Point, Segment = (context.contour_cls,
+    ...                                          context.multisegment_cls,
+    ...                                          context.point_cls,
+    ...                                          context.segment_cls)
     >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                                Segment(Point(1, 0), Point(0, 1)),
     ...                                Segment(Point(0, 1), Point(0, 0))])
@@ -745,8 +736,7 @@ def contour_in_multiregion(contour: Contour,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_multiregion(triangle, [triangle]) is Relation.COMPONENT
@@ -780,8 +770,7 @@ def region_in_multiregion(region: Region,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> region_in_multiregion(triangle, []) is Relation.DISJOINT
@@ -819,7 +808,7 @@ def multiregion_in_multiregion(left: Multiregion,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point, Contour = context.point_cls, context.contour_cls
+    >>> Contour, Point = context.contour_cls, context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> multiregion_in_multiregion([triangle], [triangle]) is Relation.EQUAL
@@ -853,9 +842,8 @@ def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
     ...                         Point(0, 4)])
     >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
@@ -901,10 +889,10 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon, Segment = (context.contour_cls,
+    ...                                     context.point_cls,
+    ...                                     context.polygon_cls,
+    ...                                     context.segment_cls)
     >>> outer_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
     ...                         Point(0, 4)])
     >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
@@ -962,11 +950,9 @@ def multisegment_in_polygon(multisegment: Multisegment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Multisegment = context.multisegment_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon, Segment, Multisegment = (
+    ...         context.contour_cls, context.point_cls, context.polygon_cls,
+    ...         context.segment_cls, context.multisegment_cls)
     >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                                Segment(Point(1, 0), Point(0, 1)),
     ...                                Segment(Point(0, 1), Point(0, 0))])
@@ -1015,9 +1001,8 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1067,9 +1052,8 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1126,9 +1110,8 @@ def multiregion_in_polygon(multiregion: Multiregion,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1187,9 +1170,8 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1283,10 +1265,10 @@ def point_in_multipolygon(point: Point,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Point, Polygon = (context.contour_cls,
+    ...                                          context.multipolygon_cls,
+    ...                                          context.point_cls,
+    ...                                          context.polygon_cls)
     >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> (point_in_multipolygon(Point(0, 0),
@@ -1337,8 +1319,9 @@ def segment_in_multipolygon(segment: Segment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
+    >>> Contour, Multipolygon, Point, Polygon, Segment = (
+    ...         context.contour_cls, context.multipolygon_cls,
+    ...         context.point_cls, context.polygon_cls, context.segment_cls)
     >>> Contour = context.contour_cls
     >>> Polygon = context.polygon_cls
     >>> Multipolygon = context.multipolygon_cls
@@ -1403,12 +1386,10 @@ def multisegment_in_multipolygon(multisegment: Multisegment,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Multisegment = context.multisegment_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Multisegment, Point, Polygon, Segment = (
+    ...         context.contour_cls, context.multipolygon_cls,
+    ...         context.multisegment_cls, context.point_cls,
+    ...         context.polygon_cls, context.segment_cls)
     >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                                Segment(Point(1, 0), Point(0, 1)),
     ...                                Segment(Point(0, 1), Point(0, 0))])
@@ -1467,10 +1448,10 @@ def contour_in_multipolygon(contour: Contour,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Polygon = context.polygon_cls
-    >>> Contour = context.contour_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Point, Polygon = (context.contour_cls,
+    ...                                          context.multipolygon_cls,
+    ...                                          context.point_cls,
+    ...                                          context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1548,12 +1529,10 @@ def region_in_multipolygon(region: Region,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Segment = context.segment_cls
-    >>> Multisegment = context.multisegment_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Point, Polygon = (context.contour_cls,
+    ...                                          context.multipolygon_cls,
+    ...                                          context.point_cls,
+    ...                                          context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1646,10 +1625,10 @@ def multiregion_in_multipolygon(multiregion: Multiregion,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Point, Polygon = (context.contour_cls,
+    ...                                          context.multipolygon_cls,
+    ...                                          context.point_cls,
+    ...                                          context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1748,10 +1727,10 @@ def polygon_in_multipolygon(polygon: Polygon,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Point, Polygon = (context.contour_cls,
+    ...                                          context.multipolygon_cls,
+    ...                                          context.point_cls,
+    ...                                          context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
@@ -1890,10 +1869,10 @@ def multipolygon_in_multipolygon(left: Multipolygon,
 
     >>> from ground.base import get_context
     >>> context = get_context()
-    >>> Point = context.point_cls
-    >>> Contour = context.contour_cls
-    >>> Polygon = context.polygon_cls
-    >>> Multipolygon = context.multipolygon_cls
+    >>> Contour, Multipolygon, Point, Polygon = (context.contour_cls,
+    ...                                          context.multipolygon_cls,
+    ...                                          context.point_cls,
+    ...                                          context.polygon_cls)
     >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
     ...                         Point(0, 7)])
     >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
