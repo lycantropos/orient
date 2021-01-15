@@ -49,7 +49,7 @@ def point_in_segment(point: Point, segment: Segment) -> Relation:
     >>> point_in_segment(Point(0, 1), segment) is Relation.DISJOINT
     True
     """
-    return _segment.relate_point(_raw.from_segment(segment), point,
+    return _segment.relate_point(segment, point,
                                  context=_get_context())
 
 
@@ -92,8 +92,7 @@ def segment_in_segment(left: Segment, right: Segment) -> Relation:
     ...  is Relation.DISJOINT)
     True
     """
-    return _segment.relate_segment(_raw.from_segment(right),
-                                   _raw.from_segment(left),
+    return _segment.relate_segment(right, left,
                                    context=_get_context())
 
 
@@ -180,7 +179,7 @@ def segment_in_multisegment(segment: Segment,
     True
     """
     return _multisegment.relate_segment(_raw.from_multisegment(multisegment),
-                                        _raw.from_segment(segment),
+                                        segment,
                                         context=_get_context())
 
 
@@ -306,7 +305,7 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
     True
     """
     return _contour.relate_segment(_raw.from_contour(contour),
-                                   _raw.from_segment(segment),
+                                   segment,
                                    context=_get_context())
 
 
@@ -470,7 +469,7 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
     True
     """
     return _region.relate_segment(_raw.from_region(region),
-                                  _raw.from_segment(segment),
+                                  segment,
                                   context=_get_context())
 
 
@@ -674,7 +673,7 @@ def segment_in_multiregion(segment: Segment,
     True
     """
     return _multiregion.relate_segment(_raw.from_multiregion(multiregion),
-                                       _raw.from_segment(segment),
+                                       segment,
                                        context=_get_context())
 
 
@@ -944,7 +943,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     True
     """
     return _polygon.relate_segment(_raw.from_polygon(polygon),
-                                   _raw.from_segment(segment),
+                                   segment,
                                    context=_get_context())
 
 
@@ -1387,7 +1386,7 @@ def segment_in_multipolygon(segment: Segment,
     True
     """
     return _multipolygon.relate_segment(_raw.from_multipolygon(multipolygon),
-                                        _raw.from_segment(segment),
+                                        segment,
                                         context=_get_context())
 
 
