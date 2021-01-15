@@ -1,4 +1,4 @@
-from ground.base import Relation
+from ground.base import Context, Relation
 
 from . import bounding
 from .hints import (Point,
@@ -7,7 +7,9 @@ from .utils import (Orientation,
                     orientation)
 
 
-def relate_point(segment: Segment, point: Point) -> Relation:
+def relate_point(segment: Segment, point: Point,
+                 *,
+                 context: Context) -> Relation:
     start, end = segment
     return (
         Relation.COMPONENT
@@ -18,7 +20,9 @@ def relate_point(segment: Segment, point: Point) -> Relation:
         else Relation.DISJOINT)
 
 
-def relate_segment(goal: Segment, test: Segment) -> Relation:
+def relate_segment(goal: Segment, test: Segment,
+                   *,
+                   context: Context) -> Relation:
     if goal == test or goal == test[::-1]:
         return Relation.EQUAL
     goal_start, goal_end = goal

@@ -1,6 +1,7 @@
 from typing import Dict
 
-from ground.base import Relation
+from ground.base import (Context,
+                         Relation)
 
 from . import bounding
 from .hints import (Multisegment,
@@ -15,14 +16,20 @@ from .utils import (Orientation,
                     segments_intersection)
 
 
-def relate_point(multisegment: Multisegment, point: Point) -> Relation:
+def relate_point(multisegment: Multisegment, point: Point,
+                 *,
+                 context: Context) -> Relation:
     return (Relation.DISJOINT
-            if all(relate_point_to_segment(segment, point) is Relation.DISJOINT
+            if all(relate_point_to_segment(segment, point,
+                                           context=context)
+                   is Relation.DISJOINT
                    for segment in multisegment)
             else Relation.COMPONENT)
 
 
-def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
+def relate_segment(multisegment: Multisegment, segment: Segment,
+                   *,
+                   context: Context) -> Relation:
     all_components = has_no_touch = has_no_cross = has_no_overlap = True
     # orientations of multisegment's segments
     # which touch given segment in the middle
@@ -32,7 +39,8 @@ def relate_segment(multisegment: Multisegment, segment: Segment) -> Relation:
     if start > end:
         start, end = end, start
     for index, sub_segment in enumerate(multisegment):
-        relation = relate_segments(sub_segment, segment)
+        relation = relate_segments(sub_segment, segment,
+                                   context=context)
         if relation is Relation.COMPONENT:
             return Relation.COMPONENT
         elif relation is Relation.EQUAL:
@@ -134,7 +142,9 @@ def sort_endpoints(segment: Segment) -> Segment:
             else (end, start))
 
 
-def relate_multisegment(goal: Multisegment, test: Multisegment) -> Relation:
+def relate_multisegment(goal: Multisegment, test: Multisegment,
+                        *,
+                        context: Context) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
     goal_bounding_box, test_bounding_box = (bounding.box_from_iterables(goal),

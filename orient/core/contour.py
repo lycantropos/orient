@@ -1,7 +1,8 @@
 from itertools import chain
 from typing import Iterable
 
-from ground.base import Relation
+from ground.base import (Context,
+                         Relation)
 
 from . import bounding
 from .hints import (Contour,
@@ -18,19 +19,26 @@ from .utils import (Orientation,
                     orientation as angle_orientation)
 
 
-def relate_point(contour: Contour, point: Point) -> Relation:
+def relate_point(contour: Contour, point: Point,
+                 *,
+                 context: Context) -> Relation:
     return (Relation.DISJOINT
-            if all(relate_point_to_segment(edge, point) is Relation.DISJOINT
+            if all(relate_point_to_segment(edge, point,
+                                           context=context)
+                   is Relation.DISJOINT
                    for edge in to_segments(contour))
             else Relation.COMPONENT)
 
 
-def relate_segment(contour: Contour, segment: Segment) -> Relation:
+def relate_segment(contour: Contour, segment: Segment,
+                   *,
+                   context: Context) -> Relation:
     has_no_touch = has_no_cross = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment
     for index, edge in enumerate(to_segments(contour)):
-        relation_with_edge = relate_segments(edge, segment)
+        relation_with_edge = relate_segments(edge, segment,
+                                             context=context)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
             return Relation.COMPONENT
@@ -46,9 +54,10 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
                   and start not in edge and end not in edge
                   and (angle_orientation(start, end, edge_start)
                        is Orientation.COLLINEAR)
-                  and point_vertex_line_divides_angle(
-                            start, last_touched_edge_start,
-                            edge_start, edge_end)):
+                  and point_vertex_line_divides_angle(start,
+                                                      last_touched_edge_start,
+                                                      edge_start, edge_end,
+                                                      context=context)):
                 has_no_cross = False
             last_touched_edge_index = index
             last_touched_edge_start = edge_start
@@ -64,7 +73,8 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
                      is Orientation.COLLINEAR)
                 and point_vertex_line_divides_angle(start, contour[-2],
                                                     first_edge_start,
-                                                    first_edge_end)):
+                                                    first_edge_end,
+                                                    context=context)):
             has_no_cross = False
     return ((Relation.DISJOINT
              if has_no_touch
@@ -76,13 +86,17 @@ def relate_segment(contour: Contour, segment: Segment) -> Relation:
 def point_vertex_line_divides_angle(point: Point,
                                     first_ray_point: Point,
                                     vertex: Point,
-                                    second_ray_point: Point) -> bool:
+                                    second_ray_point: Point,
+                                    *,
+                                    context: Context) -> bool:
     return (angle_orientation(vertex, first_ray_point, point)
             is angle_orientation(vertex, point, second_ray_point))
 
 
 def relate_multisegment(contour: Contour,
-                        multisegment: Multisegment) -> Relation:
+                        multisegment: Multisegment,
+                        *,
+                        context: Context) -> Relation:
     if not multisegment:
         return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
@@ -102,17 +116,19 @@ def relate_multisegment(contour: Contour,
                                      min(contour_max_x, multisegment_max_x))
 
 
-def relate_contour(goal: Contour, test: Contour) -> Relation:
+def relate_contour(goal: Contour, test: Contour,
+                   *,
+                   context: Context) -> Relation:
     goal_bounding_box, test_bounding_box = (bounding.box_from_iterable(goal),
                                             bounding.box_from_iterable(test))
     if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    if equal(goal, test):
+    if equal(goal, test, context=context):
         return Relation.EQUAL
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(goal),
+    sweeper.register_segments(to_oriented_segments(goal, context=context),
                               from_test=False)
-    sweeper.register_segments(to_oriented_segments(test),
+    sweeper.register_segments(to_oriented_segments(test, context=context),
                               from_test=True)
     (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
                                                     test_bounding_box)
@@ -120,14 +136,19 @@ def relate_contour(goal: Contour, test: Contour) -> Relation:
                                        min(goal_max_x, test_max_x))
 
 
-def equal(left: Contour, right: Contour) -> bool:
+def equal(left: Contour, right: Contour,
+          *,
+          context: Context) -> bool:
     if len(left) != len(right):
         return False
     try:
         index = right.index(left[0])
     except ValueError:
         return False
-    same_oriented = orientation(left) is orientation(right)
+    same_oriented = (orientation(left,
+                                 context=context)
+                     is orientation(right,
+                                    context=context))
     right_step = 1 if same_oriented else -1
     size = len(left)
     indices = chain(zip(range(size),
@@ -145,7 +166,9 @@ def equal(left: Contour, right: Contour) -> bool:
                for left_index, right_index in indices)
 
 
-def orientation(contour: Contour) -> Orientation:
+def orientation(contour: Contour,
+                *,
+                context: Context) -> Orientation:
     index = min(range(len(contour)),
                 key=contour.__getitem__)
     return angle_orientation(contour[index - 1], contour[index],
@@ -159,11 +182,14 @@ def to_segments(contour: Contour) -> Iterable[Segment]:
 
 def to_oriented_segments(contour: Contour,
                          *,
-                         clockwise: bool = False) -> Iterable[Segment]:
+                         clockwise: bool = False,
+                         context: Context) -> Iterable[Segment]:
     return (((contour[index - 1], contour[index])
              for index in range(len(contour)))
-            if orientation(contour) is (Orientation.CLOCKWISE
-                                        if clockwise
-                                        else Orientation.COUNTERCLOCKWISE)
+            if (orientation(contour,
+                            context=context)
+                is (Orientation.CLOCKWISE
+                    if clockwise
+                    else Orientation.COUNTERCLOCKWISE))
             else ((contour[index], contour[index - 1])
                   for index in range(len(contour) - 1, -1, -1)))
