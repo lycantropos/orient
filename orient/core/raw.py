@@ -1,8 +1,4 @@
-from ground.hints import Contour, Multipolygon, Multisegment, Polygon
-
-
-def from_multisegment(multisegment: Multisegment):
-    return multisegment
+from ground.hints import Contour, Multipolygon, Polygon
 
 
 def from_contour(contour: Contour):

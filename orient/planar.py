@@ -129,8 +129,7 @@ def point_in_multisegment(point: Point,
     >>> point_in_multisegment(Point(4, 0), multisegment) is Relation.COMPONENT
     True
     """
-    return _multisegment.relate_point(_raw.from_multisegment(multisegment),
-                                      point,
+    return _multisegment.relate_point(multisegment, point,
                                       context=_get_context())
 
 
@@ -178,8 +177,7 @@ def segment_in_multisegment(segment: Segment,
     ...                         multisegment) is Relation.DISJOINT
     True
     """
-    return _multisegment.relate_segment(_raw.from_multisegment(multisegment),
-                                        segment,
+    return _multisegment.relate_segment(multisegment, segment,
                                         context=_get_context())
 
 
@@ -226,8 +224,7 @@ def multisegment_in_multisegment(left: Multisegment,
     ...                              square_edges) is Relation.EQUAL
     True
     """
-    return _multisegment.relate_multisegment(_raw.from_multisegment(right),
-                                             _raw.from_multisegment(left),
+    return _multisegment.relate_multisegment(right, left,
                                              context=_get_context())
 
 
@@ -353,7 +350,7 @@ def multisegment_in_contour(multisegment: Multisegment,
     True
     """
     return _contour.relate_multisegment(_raw.from_contour(contour),
-                                        _raw.from_multisegment(multisegment),
+                                        multisegment,
                                         context=_get_context())
 
 
@@ -515,8 +512,7 @@ def multisegment_in_region(multisegment: Multisegment,
     >>> multisegment_in_region(square_edges, square) is Relation.COMPONENT
     True
     """
-    return _region.relate_multisegment(_raw.from_region(region),
-                                       _raw.from_multisegment(multisegment),
+    return _region.relate_multisegment(_raw.from_region(region), multisegment,
                                        context=_get_context())
 
 
@@ -726,8 +722,7 @@ def multisegment_in_multiregion(multisegment: Multisegment,
     True
     """
     return _multiregion.relate_multisegment(_raw.from_multiregion(multiregion),
-                                            _raw.from_multisegment(
-                                                    multisegment),
+                                            multisegment,
                                             context=_get_context())
 
 
@@ -996,7 +991,7 @@ def multisegment_in_polygon(multisegment: Multisegment,
     True
     """
     return _polygon.relate_multisegment(_raw.from_polygon(polygon),
-                                        _raw.from_multisegment(multisegment),
+                                        multisegment,
                                         context=_get_context())
 
 
@@ -1448,8 +1443,7 @@ def multisegment_in_multipolygon(multisegment: Multisegment,
     True
     """
     return _multipolygon.relate_multisegment(
-            _raw.from_multipolygon(multipolygon),
-            _raw.from_multisegment(multisegment),
+            _raw.from_multipolygon(multipolygon), multisegment,
             context=_get_context())
 
 
