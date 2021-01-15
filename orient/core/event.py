@@ -4,10 +4,9 @@ from reprlib import recursive_repr
 from typing import (Optional,
                     TypeVar)
 
+from ground.hints import Point
 from reprit.base import generate_repr
 
-from .hints import (Point,
-                    Segment)
 from .utils import SegmentsRelationship
 
 
@@ -36,10 +35,6 @@ class LinearEvent:
     @property
     def end(self) -> Point:
         return self.complement.start
-
-    @property
-    def segment(self) -> Segment:
-        return self.start, self.end
 
     def set_both_relationships(self, relationship: SegmentsRelationship
                                ) -> None:

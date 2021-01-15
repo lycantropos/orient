@@ -2,22 +2,23 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import Box
+from ground.hints import (Box,
+                          Point,
+                          Segment)
 
 from . import box
 from .hints import (Contour,
                     Multiregion,
                     Multisegment,
-                    Point,
                     Polygon,
-                    Region,
-                    Segment)
+                    Region, SegmentEndpoints)
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
                           relate_segment as relate_segment_to_multiregion,
-                          to_oriented_segments
+                          to_oriented_edges_endpoints
                           as multiregion_to_oriented_segments)
+from .multisegment import to_segments_endpoints
 from .processing import process_linear_compound_queue
 from .region import (_relate_contour as relate_contour_to_region,
                      _relate_region as relate_regions,
@@ -77,16 +78,16 @@ def relate_multisegment(polygon: Polygon,
     border, _ = polygon
     polygon_bounding_box = box.from_iterable(border,
                                              context=context)
-    multisegment_bounding_box = box.from_iterables(multisegment,
-                                                   context=context)
+    multisegment_bounding_box = box.from_multisegment(multisegment,
+                                                      context=context)
     if box.disjoint_with(polygon_bounding_box,
                          multisegment_bounding_box):
         return Relation.DISJOINT
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(polygon,
-                                                   context=context),
+    sweeper.register_segments(to_oriented_edges_endpoints(polygon,
+                                                          context=context),
                               from_test=False)
-    sweeper.register_segments(multisegment,
+    sweeper.register_segments(to_segments_endpoints(multisegment),
                               from_test=True)
     return process_linear_compound_queue(sweeper,
                                          min(multisegment_bounding_box.max_x,
@@ -396,10 +397,11 @@ def _relate_polygon(goal_border: Region,
                 else borders_relation)
 
 
-def to_oriented_segments(polygon: Polygon,
-                         *,
-                         clockwise: bool = False,
-                         context: Context) -> Iterable[Segment]:
+def to_oriented_edges_endpoints(polygon: Polygon,
+                                *,
+                                clockwise: bool = False,
+                                context: Context
+                                ) -> Iterable[SegmentEndpoints]:
     border, holes = polygon
     yield from region_to_oriented_segments(border,
                                            clockwise=clockwise,

@@ -9,6 +9,8 @@ from typing import (Any,
                     Optional,
                     Type)
 
+from ground.hints import (Coordinate,
+                          Point)
 from reprit.base import generate_repr
 
 from .event import (CompoundEvent,
@@ -17,9 +19,7 @@ from .event import (CompoundEvent,
                     OverlapKind)
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
-from .hints import (Coordinate,
-                    Point,
-                    Segment)
+from .hints import SegmentEndpoints
 from .sweep_line import SweepLine
 from .utils import (Orientation,
                     SegmentsRelationship,
@@ -44,7 +44,7 @@ class Sweeper(Generic[Event]):
         return self._events_queue.peek()
 
     @abstractmethod
-    def register_segments(self, segments: Iterable[Segment],
+    def register_segments(self, endpoints: Iterable[SegmentEndpoints],
                           *,
                           from_test: bool) -> None:
         """
@@ -67,10 +67,10 @@ class Sweeper(Generic[Event]):
 class CompoundSweeper(Sweeper[CompoundEvent]):
     event_cls = CompoundEvent
 
-    def register_segments(self, segments: Iterable[Segment],
+    def register_segments(self, endpoints: Iterable[SegmentEndpoints],
                           *,
                           from_test: bool) -> None:
-        for start, end in segments:
+        for start, end in endpoints:
             inside_on_left = True
             if start > end:
                 start, end = end, start
@@ -145,8 +145,12 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
         """
-        below_segment, segment = below_event.segment, event.segment
-        relationship = segments_relationship(below_segment, segment)
+        below_segment_start, below_segment_end = (below_event.start,
+                                                  below_event.end)
+        segment_start, segment_end = event.start, event.end
+        relationship = segments_relationship(below_segment_start,
+                                             below_segment_end, segment_start,
+                                             segment_end)
         if relationship is SegmentsRelationship.OVERLAP:
             # segments overlap
             if event.from_test is below_event.from_test:
@@ -203,7 +207,9 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
                 start_min.complement.relationship = relationship
                 self.divide_segment(start_min, start_max.start)
         elif relationship is not SegmentsRelationship.NONE:
-            point = segments_intersection(below_segment, segment)
+            point = segments_intersection(below_segment_start,
+                                          below_segment_end, segment_start,
+                                          segment_end)
             if (event.start != below_event.start
                     and event.end != below_event.end):
                 # segments do not intersect at endpoints
@@ -231,10 +237,10 @@ class CompoundSweeper(Sweeper[CompoundEvent]):
 class LinearSweeper(Sweeper[LinearEvent]):
     event_cls = LinearEvent
 
-    def register_segments(self, segments: Iterable[Segment],
+    def register_segments(self, endpoints: Iterable[SegmentEndpoints],
                           *,
                           from_test: bool) -> None:
-        for start, end in segments:
+        for start, end in endpoints:
             if start > end:
                 start, end = end, start
             start_event = self.event_cls(True, start, None, from_test,
@@ -334,8 +340,12 @@ class LinearSweeper(Sweeper[LinearEvent]):
         """
         Populates events queue with intersection events.
         """
-        below_segment, segment = below_event.segment, event.segment
-        relationship = segments_relationship(below_segment, segment)
+        below_segment_start, below_segment_end = (below_event.start,
+                                                  below_event.end)
+        segment_start, segment_end = event.start, event.end
+        relationship = segments_relationship(below_segment_start,
+                                             below_segment_end, segment_start,
+                                             segment_end)
         if relationship is SegmentsRelationship.OVERLAP:
             # segments overlap
             if event.from_test is below_event.from_test:
@@ -387,7 +397,9 @@ class LinearSweeper(Sweeper[LinearEvent]):
                 start_min.complement.relationship = relationship
                 self.divide_segment(start_min, start_max.start)
         elif relationship is not SegmentsRelationship.NONE:
-            point = segments_intersection(below_segment, segment)
+            point = segments_intersection(below_segment_start,
+                                          below_segment_end, segment_start,
+                                          segment_end)
             if (event.start != below_event.start
                     and event.end != below_event.end):
                 # segments do not intersect at endpoints

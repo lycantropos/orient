@@ -2,16 +2,18 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import Box
+from ground.hints import (Box,
+                          Point,
+                          Segment)
 
 from . import box
-from .contour import to_segments as contour_to_segments
+from .contour import to_edges_endpoints as contour_to_edges_endpoints
 from .hints import (Contour,
                     Multiregion,
                     Multisegment,
-                    Point,
                     Region,
-                    Segment)
+                    SegmentEndpoints)
+from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import (relate_point as relate_point_to_region,
@@ -37,11 +39,10 @@ def relate_segment(multiregion: Multiregion, segment: Segment,
     return (relate_segment_to_region(multiregion[0], segment,
                                      context=context)
             if len(multiregion) == 1
-            else _relate_multisegment(
-            multiregion, [segment],
-            box.from_iterable(segment,
-                              context=context),
-            context=context))
+            else _relate_multisegment(multiregion, [segment],
+                                      box.from_segment(segment,
+                                                       context=context),
+                                      context=context))
 
 
 def relate_multisegment(multiregion: Multiregion,
@@ -49,8 +50,8 @@ def relate_multisegment(multiregion: Multiregion,
                         *,
                         context: Context) -> Relation:
     return (_relate_multisegment(multiregion, multisegment,
-                                 box.from_iterables(multisegment,
-                                                    context=context),
+                                 box.from_multisegment(multisegment,
+                                                       context=context),
                                  context=context)
             if multisegment and multiregion
             else Relation.DISJOINT)
@@ -71,7 +72,7 @@ def _relate_multisegment(multiregion: Multiregion,
                 disjoint = False
                 multiregion_max_x = region_bounding_box.max_x
                 sweeper = CompoundSweeper()
-                sweeper.register_segments(multisegment,
+                sweeper.register_segments(to_segments_endpoints(multisegment),
                                           from_test=True)
             else:
                 multiregion_max_x = max(multiregion_max_x,
@@ -113,7 +114,7 @@ def _relate_contour(multiregion: Multiregion,
                 disjoint = False
                 multiregion_max_x = region_bounding_box.max_x
                 sweeper = CompoundSweeper()
-                sweeper.register_segments(contour_to_segments(contour),
+                sweeper.register_segments(contour_to_edges_endpoints(contour),
                                           from_test=True)
             else:
                 multiregion_max_x = max(multiregion_max_x,
@@ -207,20 +208,21 @@ def _relate_multiregion(goal: Iterable[Region],
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(goal,
-                                                   context=context),
+    sweeper.register_segments(to_oriented_edges_endpoints(goal,
+                                                          context=context),
                               from_test=False)
-    sweeper.register_segments(to_oriented_segments(test,
-                                                   context=context),
+    sweeper.register_segments(to_oriented_edges_endpoints(test,
+                                                          context=context),
                               from_test=True)
     return process_compound_queue(sweeper, min(goal_bounding_box.max_x,
                                                test_bounding_box.max_x))
 
 
-def to_oriented_segments(regions: Iterable[Region],
-                         *,
-                         clockwise: bool = False,
-                         context: Context) -> Iterable[Segment]:
+def to_oriented_edges_endpoints(regions: Iterable[Region],
+                                *,
+                                clockwise: bool = False,
+                                context: Context
+                                ) -> Iterable[SegmentEndpoints]:
     for region in regions:
         yield from region_to_oriented_segments(region,
                                                clockwise=clockwise,

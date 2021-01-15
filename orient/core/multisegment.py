@@ -1,19 +1,21 @@
-from typing import Dict
+from typing import (Dict,
+                    Iterable)
 
 from ground.base import (Context,
                          Relation)
+from ground.hints import (Point,
+                          Segment)
 
 from . import box
-from .hints import (Multisegment,
-                    Point,
-                    Segment)
+from .hints import Multisegment, SegmentEndpoints
 from .processing import process_open_linear_queue
-from .segment import (relate_point as relate_point_to_segment,
-                      relate_segment as relate_segments)
+from .segment import (_relate_segment as relate_segments,
+                      relate_point as relate_point_to_segment)
 from .sweep import LinearSweeper
 from .utils import (Orientation,
                     orientation,
-                    segments_intersection)
+                    segments_intersection,
+                    to_sorted_pair)
 
 
 def relate_point(multisegment: Multisegment, point: Point,
@@ -35,11 +37,14 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
     # which touch given segment in the middle
     middle_touching_orientations = {}  # type: Dict[Point, Orientation]
     components = []
-    start, end = segment
+    start, end = segment_endpoints = segment.start, segment.end
     if start > end:
         start, end = end, start
     for index, sub_segment in enumerate(multisegment):
-        relation = relate_segments(sub_segment, segment,
+        sub_segment_start, sub_segment_end = sub_segment_endpoints = (
+            sub_segment.start, sub_segment.end)
+        relation = relate_segments(sub_segment_start, sub_segment_end, start,
+                                   end,
                                    context=context)
         if relation is Relation.COMPONENT:
             return Relation.COMPONENT
@@ -50,21 +55,21 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
         elif relation is Relation.COMPOSITE:
             if has_no_overlap:
                 has_no_overlap = False
-            if start in sub_segment:
-                start = max(sub_segment)
-                segment = start, end
-            elif end in sub_segment:
-                end = min(sub_segment)
-                segment = start, end
+            if start in sub_segment_endpoints:
+                start = max(sub_segment_endpoints)
+                segment_endpoints = start, end
+            elif end in sub_segment_endpoints:
+                end = min(sub_segment_endpoints)
+                segment_endpoints = start, end
             else:
-                components.append(sort_endpoints(sub_segment))
+                components.append(to_sorted_pair(sub_segment_endpoints))
         elif relation is Relation.OVERLAP:
             if all_components:
                 all_components = False
             if has_no_overlap:
                 has_no_overlap = False
-            start, end = segment = _subtract_segments_overlap(segment,
-                                                              sub_segment)
+            start, end = segment_endpoints = _subtract_segments_overlap(
+                    segment_endpoints, sub_segment_endpoints)
         else:
             if all_components:
                 all_components = False
@@ -73,10 +78,10 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                     if has_no_touch:
                         has_no_touch = False
                     if has_no_cross:
-                        intersection = segments_intersection(sub_segment,
-                                                             segment)
+                        intersection = segments_intersection(
+                                sub_segment_start, sub_segment_end, start, end)
                         if intersection != start and intersection != end:
-                            sub_start, sub_end = sub_segment
+                            sub_start, sub_end = sub_segment_endpoints
                             non_touched_endpoint = (sub_start
                                                     if intersection == sub_end
                                                     else sub_end)
@@ -127,19 +132,13 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                 else Relation.OVERLAP)
 
 
-def _subtract_segments_overlap(minuend: Segment,
-                               subtrahend: Segment) -> Segment:
+def _subtract_segments_overlap(minuend: SegmentEndpoints,
+                               subtrahend: SegmentEndpoints
+                               ) -> SegmentEndpoints:
     left_start, left_end, right_start, right_end = sorted(minuend + subtrahend)
     return ((left_start, left_end)
             if left_start in minuend
             else (right_start, right_end))
-
-
-def sort_endpoints(segment: Segment) -> Segment:
-    start, end = segment
-    return (segment
-            if start < end
-            else (end, start))
 
 
 def relate_multisegment(goal: Multisegment, test: Multisegment,
@@ -148,16 +147,21 @@ def relate_multisegment(goal: Multisegment, test: Multisegment,
     if not (goal and test):
         return Relation.DISJOINT
     goal_bounding_box, test_bounding_box = (
-        box.from_iterables(goal,
-                           context=context),
-        box.from_iterables(test,
-                           context=context))
+        box.from_multisegment(goal,
+                              context=context),
+        box.from_multisegment(test,
+                              context=context))
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     sweeper = LinearSweeper()
-    sweeper.register_segments(goal,
+    sweeper.register_segments(to_segments_endpoints(goal),
                               from_test=False)
-    sweeper.register_segments(test,
+    sweeper.register_segments(to_segments_endpoints(test),
                               from_test=True)
     return process_open_linear_queue(sweeper, min(goal_bounding_box.max_x,
                                                   test_bounding_box.max_x))
+
+
+def to_segments_endpoints(multisegment: Multisegment
+                          ) -> Iterable[SegmentEndpoints]:
+    return ((segment.start, segment.end) for segment in multisegment)

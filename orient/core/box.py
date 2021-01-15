@@ -2,8 +2,10 @@ from typing import Iterable
 
 from ground.base import Context
 from ground.hints import (Box,
-                          Point)
+                          Point,
+                          Segment)
 
+from .hints import Multisegment
 from .utils import flatten
 
 
@@ -34,3 +36,19 @@ def from_iterables(iterables: Iterable[Iterable[Point]],
                    context: Context) -> Box:
     return from_iterable(flatten(iterables),
                          context=context)
+
+
+def from_multisegment(multisegment: Multisegment,
+                      *,
+                      context: Context) -> Box:
+    return from_iterable(flatten((segment.start, segment.end)
+                                 for segment in multisegment),
+                         context=context)
+
+
+def from_segment(segment: Segment,
+                 *,
+                 context: Context) -> Box:
+    start, end = segment.start, segment.end
+    return context.box_cls(min(start.x, end.x), max(start.x, end.x),
+                           min(start.y, end.y), max(start.y, end.y))

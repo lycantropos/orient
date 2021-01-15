@@ -3,23 +3,25 @@ from typing import (Optional,
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import Box
+from ground.hints import (Box,
+                          Point,
+                          Segment)
 
 from . import box
 from .contour import (equal as contours_equal,
                       orientation as contour_orientation,
                       point_vertex_line_divides_angle,
-                      to_oriented_segments as contour_to_oriented_segments,
-                      to_segments as contour_to_segments)
+                      to_edges_endpoints as contour_to_edges_endpoints,
+                      to_oriented_edges_endpoints
+                      as contour_to_oriented_segments)
 from .hints import (Contour,
                     Multisegment,
-                    Point,
-                    Region,
-                    Segment)
+                    Region)
+from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .segment import (relate_point as relate_point_to_segment,
-                      relate_segment as relate_segments)
+from .segment import (_relate_point as relate_point_to_segment,
+                      _relate_segment as relate_segments)
 from .sweep import CompoundSweeper
 from .utils import (Orientation,
                     orientation)
@@ -39,11 +41,10 @@ def _relate_point(region: Region, point: Point,
                                              Relation]:
     result = False
     point_y = point.y
-    for index, edge in enumerate(contour_to_segments(region)):
-        if relate_point_to_segment(edge, point,
+    for index, (start, end) in enumerate(contour_to_edges_endpoints(region)):
+        if relate_point_to_segment(start, end, point,
                                    context=context) is Relation.COMPONENT:
             return index, Relation.COMPONENT
-        start, end = edge
         if ((start.y > point_y) is not (end.y > point_y)
                 and ((end.y > start.y) is (orientation(start, end, point)
                                            is Orientation.COUNTERCLOCKWISE))):
@@ -61,9 +62,11 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
     # and should be classified by further analysis
     has_no_touch = has_no_overlap = True
     last_touched_edge_index = last_touched_edge_start = None
-    start, end = segment
-    for index, edge in enumerate(contour_to_segments(contour)):
-        relation_with_edge = relate_segments(edge, segment,
+    start, end = segment.start, segment.end
+    for index, edge_endpoints in enumerate(contour_to_edges_endpoints(
+            contour)):
+        edge_start, edge_end = edge_endpoints
+        relation_with_edge = relate_segments(edge_start, edge_end, start, end,
                                              context=context)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
@@ -73,11 +76,10 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
             if has_no_overlap:
                 has_no_overlap = False
         elif relation_with_edge is Relation.TOUCH:
-            edge_start, edge_end = edge
             if has_no_touch:
                 has_no_touch = False
             elif (index - last_touched_edge_index == 1
-                  and start not in edge and end not in edge
+                  and start not in edge_endpoints and end not in edge_endpoints
                   and (orientation(start, end, edge_start)
                        is Orientation.COLLINEAR)
                   and point_vertex_line_divides_angle(start,
@@ -90,10 +92,12 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
         elif relation_with_edge is Relation.CROSS:
             return Relation.CROSS
     if not has_no_touch and last_touched_edge_index == len(contour) - 1:
-        first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
-        if (relate_segments(first_edge, segment,
+        first_edge_endpoints = first_edge_start, first_edge_end = (contour[-1],
+                                                                   contour[0])
+        if (relate_segments(first_edge_start, first_edge_end, start, end,
                             context=context) is Relation.TOUCH
-                and start not in first_edge and end not in first_edge
+                and start not in first_edge_endpoints
+                and end not in first_edge_endpoints
                 and (orientation(start, end, first_edge_start)
                      is Orientation.COLLINEAR)
                 and point_vertex_line_divides_angle(start, contour[-2],
@@ -116,7 +120,7 @@ def relate_segment(region: Region, segment: Segment,
     if (relation_with_contour is Relation.CROSS
             or relation_with_contour is Relation.COMPONENT):
         return relation_with_contour
-    start, end = segment
+    start, end = segment.start, segment.end
     start_index, start_relation = _relate_point(region, start,
                                                 context=context)
     if relation_with_contour is Relation.DISJOINT:
@@ -216,8 +220,8 @@ def relate_multisegment(region: Region,
                         *,
                         context: Context) -> Relation:
     return (_relate_multisegment(region, multisegment,
-                                 box.from_iterables(multisegment,
-                                                    context=context),
+                                 box.from_multisegment(multisegment,
+                                                       context=context),
                                  context=context)
             if multisegment
             else Relation.DISJOINT)
@@ -237,7 +241,7 @@ def _relate_multisegment(region: Region,
     sweeper.register_segments(to_oriented_segments(region,
                                                    context=context),
                               from_test=False)
-    sweeper.register_segments(multisegment,
+    sweeper.register_segments(to_segments_endpoints(multisegment),
                               from_test=True)
     return process_linear_compound_queue(sweeper,
                                          min(multisegment_bounding_box.max_x,
@@ -269,7 +273,7 @@ def _relate_contour(region: Region,
     sweeper.register_segments(to_oriented_segments(region,
                                                    context=context),
                               from_test=False)
-    sweeper.register_segments(contour_to_segments(contour),
+    sweeper.register_segments(contour_to_edges_endpoints(contour),
                               from_test=True)
     return process_linear_compound_queue(sweeper,
                                          min(contour_bounding_box.max_x,

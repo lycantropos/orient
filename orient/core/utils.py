@@ -1,10 +1,13 @@
 from enum import IntEnum
 from itertools import chain
+from typing import (Tuple,
+                    TypeVar)
 
 from ground.base import (Orientation,
                          Relation,
                          get_context)
 
+Domain = TypeVar('Domain')
 Orientation = Orientation
 
 
@@ -13,9 +16,7 @@ def orientation(vertex, first, second):
     return context.angle_orientation(vertex, first, second)
 
 
-def segments_intersection(first, second):
-    first_start, first_end = first
-    second_start, second_end = second
+def segments_intersection(first_start, first_end, second_start, second_end):
     context = get_context()
     return context.segments_intersection(first_start, first_end, second_start,
                                          second_end)
@@ -28,9 +29,7 @@ class SegmentsRelationship(IntEnum):
     OVERLAP = 3
 
 
-def segments_relationship(first, second):
-    first_start, first_end = first
-    second_start, second_end = second
+def segments_relationship(first_start, first_end, second_start, second_end):
     context = get_context()
     result = context.segments_relation(first_start, first_end, second_start,
                                        second_end)
@@ -47,3 +46,8 @@ def signed_length(first_start, first_end, second_start, second_end):
 
 
 flatten = chain.from_iterable
+
+
+def to_sorted_pair(pair: Tuple[Domain, Domain]) -> Tuple[Domain, Domain]:
+    first, second = pair
+    return pair if first < second else (second, first)

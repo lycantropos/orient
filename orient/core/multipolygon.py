@@ -2,22 +2,23 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
+from ground.hints import (Point,
+                          Segment)
 
 from . import box
-from .contour import to_segments as contour_to_segments
+from .contour import to_edges_endpoints as contour_to_edges_endpoints
 from .hints import (Contour,
                     Multipolygon,
                     Multiregion,
                     Multisegment,
-                    Point,
                     Polygon,
-                    Region,
-                    Segment)
-from .multiregion import (to_oriented_segments
+                    Region)
+from .multiregion import (to_oriented_edges_endpoints
                           as multiregion_to_oriented_segments)
+from .multisegment import to_segments_endpoints
 from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon,
-                      to_oriented_segments as polygon_to_oriented_segments)
+                      to_oriented_edges_endpoints as polygon_to_oriented_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import to_oriented_segments as region_to_oriented_segments
@@ -60,8 +61,8 @@ def relate_multisegment(multipolygon: Multipolygon,
                         context: Context) -> Relation:
     if not (multisegment and multipolygon):
         return Relation.DISJOINT
-    multisegment_bounding_box = box.from_iterables(multisegment,
-                                                   context=context)
+    multisegment_bounding_box = box.from_multisegment(multisegment,
+                                                      context=context)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for polygon in multipolygon:
         border, _ = polygon
@@ -73,7 +74,7 @@ def relate_multisegment(multipolygon: Multipolygon,
                 disjoint = False
                 multipolygon_max_x = polygon_bounding_box.max_x
                 sweeper = CompoundSweeper()
-                sweeper.register_segments(multisegment,
+                sweeper.register_segments(to_segments_endpoints(multisegment),
                                           from_test=True)
             else:
                 multipolygon_max_x = max(multipolygon_max_x,
@@ -107,7 +108,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour,
                 disjoint = False
                 multipolygon_max_x = polygon_bounding_box.max_x
                 sweeper = CompoundSweeper()
-                sweeper.register_segments(contour_to_segments(contour),
+                sweeper.register_segments(contour_to_edges_endpoints(contour),
                                           from_test=True)
             else:
                 multipolygon_max_x = max(multipolygon_max_x,
