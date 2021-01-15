@@ -3,7 +3,7 @@ from typing import Dict
 from ground.base import (Context,
                          Relation)
 
-from . import bounding
+from . import box
 from .hints import (Multisegment,
                     Point,
                     Segment)
@@ -147,15 +147,17 @@ def relate_multisegment(goal: Multisegment, test: Multisegment,
                         context: Context) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
-    goal_bounding_box, test_bounding_box = (bounding.box_from_iterables(goal),
-                                            bounding.box_from_iterables(test))
-    if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
+    goal_bounding_box, test_bounding_box = (
+        box.from_iterables(goal,
+                           context=context),
+        box.from_iterables(test,
+                           context=context))
+    if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     sweeper = LinearSweeper()
     sweeper.register_segments(goal,
                               from_test=False)
     sweeper.register_segments(test,
                               from_test=True)
-    (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
-                                                    test_bounding_box)
-    return process_open_linear_queue(sweeper, min(goal_max_x, test_max_x))
+    return process_open_linear_queue(sweeper, min(goal_bounding_box.max_x,
+                                                  test_bounding_box.max_x))

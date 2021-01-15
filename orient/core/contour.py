@@ -4,7 +4,7 @@ from typing import Iterable
 from ground.base import (Context,
                          Relation)
 
-from . import bounding
+from . import box
 from .hints import (Contour,
                     Multisegment,
                     Point,
@@ -67,7 +67,8 @@ def relate_segment(contour: Contour, segment: Segment,
             and not has_no_touch
             and last_touched_edge_index == len(contour) - 1):
         first_edge = first_edge_start, first_edge_end = contour[-1], contour[0]
-        if (relate_segments(first_edge, segment) is Relation.TOUCH
+        if (relate_segments(first_edge, segment,
+                            context=context) is Relation.TOUCH
                 and start not in first_edge and end not in first_edge
                 and (angle_orientation(start, end, first_edge_start)
                      is Orientation.COLLINEAR)
@@ -100,40 +101,45 @@ def relate_multisegment(contour: Contour,
     if not multisegment:
         return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
-        bounding.box_from_iterable(contour),
-        bounding.box_from_iterables(multisegment))
-    if bounding.box_disjoint_with(contour_bounding_box,
-                                  multisegment_bounding_box):
+        box.from_iterable(contour,
+                          context=context),
+        box.from_iterables(multisegment,
+                           context=context))
+    if box.disjoint_with(contour_bounding_box,
+                         multisegment_bounding_box):
         return Relation.DISJOINT
     sweeper = LinearSweeper()
     sweeper.register_segments(to_segments(contour),
                               from_test=False)
     sweeper.register_segments(multisegment,
                               from_test=True)
-    (_, contour_max_x, _, _), (_, multisegment_max_x, _, _) = (
-        contour_bounding_box, multisegment_bounding_box)
     return process_open_linear_queue(sweeper,
-                                     min(contour_max_x, multisegment_max_x))
+                                     min(contour_bounding_box.max_x,
+                                         multisegment_bounding_box.max_x))
 
 
 def relate_contour(goal: Contour, test: Contour,
                    *,
                    context: Context) -> Relation:
-    goal_bounding_box, test_bounding_box = (bounding.box_from_iterable(goal),
-                                            bounding.box_from_iterable(test))
-    if bounding.box_disjoint_with(goal_bounding_box, test_bounding_box):
+    goal_bounding_box, test_bounding_box = (box.from_iterable(goal,
+                                                              context=context),
+                                            box.from_iterable(test,
+                                                              context=context))
+    if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    if equal(goal, test, context=context):
+    if equal(goal, test,
+             context=context):
         return Relation.EQUAL
     sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(goal, context=context),
+    sweeper.register_segments(to_oriented_segments(goal,
+                                                   context=context),
                               from_test=False)
-    sweeper.register_segments(to_oriented_segments(test, context=context),
+    sweeper.register_segments(to_oriented_segments(test,
+                                                   context=context),
                               from_test=True)
-    (_, goal_max_x, _, _), (_, test_max_x, _, _) = (goal_bounding_box,
-                                                    test_bounding_box)
     return process_closed_linear_queue(sweeper,
-                                       min(goal_max_x, test_max_x))
+                                       min(goal_bounding_box.max_x,
+                                           test_bounding_box.max_x))
 
 
 def equal(left: Contour, right: Contour,

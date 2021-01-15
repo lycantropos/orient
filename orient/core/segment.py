@@ -1,6 +1,7 @@
-from ground.base import Context, Relation
+from ground.base import (Context,
+                         Relation)
 
-from . import bounding
+from . import box
 from .hints import (Point,
                     Segment)
 from .utils import (Orientation,
@@ -14,8 +15,10 @@ def relate_point(segment: Segment, point: Point,
     return (
         Relation.COMPONENT
         if (point == start or point == end
-            or (bounding
-                .box_contains_point(bounding.box_from_iterable(segment), point)
+            or (box.contains_point(
+                        box.from_iterable(segment,
+                                          context=context),
+                        point)
                 and orientation(start, end, point) is Orientation.COLLINEAR))
         else Relation.DISJOINT)
 
