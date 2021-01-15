@@ -3,11 +3,12 @@ from typing import (Dict,
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import (Point,
+from ground.hints import (Multisegment,
+                          Point,
                           Segment)
 
 from . import box
-from .hints import Multisegment, SegmentEndpoints
+from .hints import SegmentEndpoints
 from .processing import process_open_linear_queue
 from .segment import (_relate_segment as relate_segments,
                       relate_point as relate_point_to_segment)
@@ -25,7 +26,7 @@ def relate_point(multisegment: Multisegment, point: Point,
             if all(relate_point_to_segment(segment, point,
                                            context=context)
                    is Relation.DISJOINT
-                   for segment in multisegment)
+                   for segment in multisegment.segments)
             else Relation.COMPONENT)
 
 
@@ -40,7 +41,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
     start, end = segment_endpoints = segment.start, segment.end
     if start > end:
         start, end = end, start
-    for index, sub_segment in enumerate(multisegment):
+    for index, sub_segment in enumerate(multisegment.segments):
         sub_segment_start, sub_segment_end = sub_segment_endpoints = (
             sub_segment.start, sub_segment.end)
         relation = relate_segments(sub_segment_start, sub_segment_end, start,
@@ -50,7 +51,8 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
             return Relation.COMPONENT
         elif relation is Relation.EQUAL:
             return (Relation.EQUAL
-                    if all_components and index == len(multisegment) - 1
+                    if (all_components
+                        and index == len(multisegment.segments) - 1)
                     else Relation.COMPONENT)
         elif relation is Relation.COMPOSITE:
             if has_no_overlap:
@@ -144,7 +146,7 @@ def _subtract_segments_overlap(minuend: SegmentEndpoints,
 def relate_multisegment(goal: Multisegment, test: Multisegment,
                         *,
                         context: Context) -> Relation:
-    if not (goal and test):
+    if not (goal.segments and test.segments):
         return Relation.DISJOINT
     goal_bounding_box, test_bounding_box = (
         box.from_multisegment(goal,
@@ -164,4 +166,4 @@ def relate_multisegment(goal: Multisegment, test: Multisegment,
 
 def to_segments_endpoints(multisegment: Multisegment
                           ) -> Iterable[SegmentEndpoints]:
-    return ((segment.start, segment.end) for segment in multisegment)
+    return ((segment.start, segment.end) for segment in multisegment.segments)

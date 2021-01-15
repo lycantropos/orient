@@ -3,15 +3,16 @@ from typing import Iterable
 from ground.base import (Context,
                          Relation)
 from ground.hints import (Box,
+                          Multisegment,
                           Point,
                           Segment)
 
 from . import box
 from .hints import (Contour,
                     Multiregion,
-                    Multisegment,
                     Polygon,
-                    Region, SegmentEndpoints)
+                    Region,
+                    SegmentEndpoints)
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
                           _relate_region as relate_region_to_regions,
                           relate_multiregion as relate_multiregions,
@@ -73,7 +74,7 @@ def relate_multisegment(polygon: Polygon,
                         multisegment: Multisegment,
                         *,
                         context: Context) -> Relation:
-    if not multisegment:
+    if not multisegment.segments:
         return Relation.DISJOINT
     border, _ = polygon
     polygon_bounding_box = box.from_iterable(border,

@@ -4,6 +4,7 @@ from typing import (Optional,
 from ground.base import (Context,
                          Relation)
 from ground.hints import (Box,
+                          Multisegment,
                           Point,
                           Segment)
 
@@ -15,7 +16,6 @@ from .contour import (equal as contours_equal,
                       to_oriented_edges_endpoints
                       as contour_to_oriented_segments)
 from .hints import (Contour,
-                    Multisegment,
                     Region)
 from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
@@ -223,7 +223,7 @@ def relate_multisegment(region: Region,
                                  box.from_multisegment(multisegment,
                                                        context=context),
                                  context=context)
-            if multisegment
+            if multisegment.segments
             else Relation.DISJOINT)
 
 

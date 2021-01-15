@@ -3,6 +3,7 @@ from typing import Iterable
 from ground.base import (Context,
                          Relation)
 from ground.hints import (Box,
+                          Multisegment,
                           Point,
                           Segment)
 
@@ -10,7 +11,6 @@ from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
 from .hints import (Contour,
                     Multiregion,
-                    Multisegment,
                     Region,
                     SegmentEndpoints)
 from .multisegment import to_segments_endpoints
@@ -39,7 +39,8 @@ def relate_segment(multiregion: Multiregion, segment: Segment,
     return (relate_segment_to_region(multiregion[0], segment,
                                      context=context)
             if len(multiregion) == 1
-            else _relate_multisegment(multiregion, [segment],
+            else _relate_multisegment(multiregion,
+                                      context.multisegment_cls([segment]),
                                       box.from_segment(segment,
                                                        context=context),
                                       context=context))
@@ -53,7 +54,7 @@ def relate_multisegment(multiregion: Multiregion,
                                  box.from_multisegment(multisegment,
                                                        context=context),
                                  context=context)
-            if multisegment and multiregion
+            if multisegment.segments and multiregion
             else Relation.DISJOINT)
 
 

@@ -3,12 +3,12 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import (Point,
+from ground.hints import (Multisegment,
+                          Point,
                           Segment)
 
 from . import box
 from .hints import (Contour,
-                    Multisegment,
                     SegmentEndpoints)
 from .multisegment import to_segments_endpoints
 from .processing import (process_closed_linear_queue,
@@ -102,7 +102,7 @@ def relate_multisegment(contour: Contour,
                         multisegment: Multisegment,
                         *,
                         context: Context) -> Relation:
-    if not multisegment:
+    if not multisegment.segments:
         return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
         box.from_iterable(contour,

@@ -2,10 +2,10 @@ from typing import Iterable
 
 from ground.base import Context
 from ground.hints import (Box,
+                          Multisegment,
                           Point,
                           Segment)
 
-from .hints import Multisegment
 from .utils import flatten
 
 
@@ -42,7 +42,7 @@ def from_multisegment(multisegment: Multisegment,
                       *,
                       context: Context) -> Box:
     return from_iterable(flatten((segment.start, segment.end)
-                                 for segment in multisegment),
+                                 for segment in multisegment.segments),
                          context=context)
 
 

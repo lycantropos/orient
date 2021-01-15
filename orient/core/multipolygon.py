@@ -2,7 +2,8 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import (Point,
+from ground.hints import (Multisegment,
+                          Point,
                           Segment)
 
 from . import box
@@ -10,15 +11,16 @@ from .contour import to_edges_endpoints as contour_to_edges_endpoints
 from .hints import (Contour,
                     Multipolygon,
                     Multiregion,
-                    Multisegment,
                     Polygon,
-                    Region)
+                    Region,
+                    SegmentEndpoints)
 from .multiregion import (to_oriented_edges_endpoints
                           as multiregion_to_oriented_segments)
 from .multisegment import to_segments_endpoints
 from .polygon import (relate_point as relate_point_to_polygon,
                       relate_segment as relate_segment_to_polygon,
-                      to_oriented_edges_endpoints as polygon_to_oriented_segments)
+                      to_oriented_edges_endpoints
+                      as polygon_to_oriented_segments)
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import to_oriented_segments as region_to_oriented_segments
@@ -59,7 +61,7 @@ def relate_multisegment(multipolygon: Multipolygon,
                         multisegment: Multisegment,
                         *,
                         context: Context) -> Relation:
-    if not (multisegment and multipolygon):
+    if not (multisegment.segments and multipolygon):
         return Relation.DISJOINT
     multisegment_bounding_box = box.from_multisegment(multisegment,
                                                       context=context)
@@ -272,7 +274,7 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon,
 def to_oriented_segments(polygons: Iterable[Polygon],
                          *,
                          clockwise: bool = False,
-                         context: Context) -> Iterable[Segment]:
+                         context: Context) -> Iterable[SegmentEndpoints]:
     for polygon in polygons:
         yield from polygon_to_oriented_segments(polygon,
                                                 clockwise=clockwise,
