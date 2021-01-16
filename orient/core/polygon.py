@@ -243,16 +243,14 @@ def _relate_multiregion(polygon: Polygon,
 def relate_polygon(goal: Polygon, test: Polygon,
                    *,
                    context: Context) -> Relation:
-    goal_border_bounding_box, test_border_bounding_box = (
-        box.from_polygon(goal,
-                         context=context),
-        box.from_polygon(test,
-                         context=context))
+    goal_bounding_box, test_bounding_box = (box.from_polygon(goal,
+                                                             context=context),
+                                            box.from_polygon(test,
+                                                             context=context))
     goal_border, goal_holes = goal.border, goal.holes
     test_border, test_holes = test.border, test.holes
     borders_relation = relate_regions(goal_border, test_border,
-                                      goal_border_bounding_box,
-                                      test_border_bounding_box,
+                                      goal_bounding_box, test_bounding_box,
                                       context=context)
     if borders_relation in (Relation.DISJOINT,
                             Relation.TOUCH,
@@ -288,7 +286,7 @@ def relate_polygon(goal: Polygon, test: Polygon,
             subsets_holes_indices = []
             for hole_index, hole in enumerate(goal_holes):
                 hole_relation = relate_regions(
-                        test_border, hole, test_border_bounding_box,
+                        test_border, hole, test_bounding_box,
                         box.from_contour(hole,
                                          context=context),
                         context=context)
@@ -337,7 +335,7 @@ def relate_polygon(goal: Polygon, test: Polygon,
         subsets_holes_indices = []
         for hole_index, hole in enumerate(test_holes):
             hole_relation = relate_regions(goal_border, hole,
-                                           goal_border_bounding_box,
+                                           goal_bounding_box,
                                            box.from_contour(hole,
                                                             context=context),
                                            context=context)
