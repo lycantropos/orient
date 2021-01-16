@@ -11,6 +11,7 @@ from ground.hints import (Contour,
 
 from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
+from .events_queue import CompoundEventsQueue
 from .hints import (Multiregion,
                     Region,
                     SegmentEndpoints)
@@ -24,7 +25,6 @@ from .polygon import (relate_point as relate_point_to_polygon,
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import to_oriented_segments as region_to_oriented_segments
-from .sweep import CompoundSweeper
 
 
 def relate_point(multipolygon: Multipolygon, point: Point,
@@ -65,7 +65,7 @@ def relate_multisegment(multipolygon: Multipolygon,
         return Relation.DISJOINT
     multisegment_bounding_box = box.from_multisegment(multisegment,
                                                       context=context)
-    disjoint, multipolygon_max_x, sweeper = True, None, None
+    disjoint, multipolygon_max_x, events_queue = True, None, None
     for polygon in multipolygon.polygons:
         polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
@@ -74,19 +74,19 @@ def relate_multisegment(multipolygon: Multipolygon,
             if disjoint:
                 disjoint = False
                 multipolygon_max_x = polygon_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(to_segments_endpoints(multisegment),
-                                          from_test=True)
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(to_segments_endpoints(multisegment),
+                                      from_test=True)
             else:
                 multipolygon_max_x = max(multipolygon_max_x,
                                          polygon_bounding_box.max_x)
-            sweeper.register_segments(
+            events_queue.register(
                     polygon_to_oriented_segments(polygon,
                                                  context=context),
                     from_test=False)
     if disjoint:
         return Relation.DISJOINT
-    return process_linear_compound_queue(sweeper,
+    return process_linear_compound_queue(events_queue,
                                          min(multisegment_bounding_box.max_x,
                                              multipolygon_max_x))
 
@@ -98,7 +98,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour,
         return Relation.DISJOINT
     contour_bounding_box = box.from_contour(contour,
                                             context=context)
-    disjoint, multipolygon_max_x, sweeper = True, None, None
+    disjoint, multipolygon_max_x, events_queue = True, None, None
     for polygon in multipolygon.polygons:
         polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
@@ -107,19 +107,19 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour,
             if disjoint:
                 disjoint = False
                 multipolygon_max_x = polygon_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(contour_to_edges_endpoints(contour),
-                                          from_test=True)
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(contour_to_edges_endpoints(contour),
+                                      from_test=True)
             else:
                 multipolygon_max_x = max(multipolygon_max_x,
                                          polygon_bounding_box.max_x)
-            sweeper.register_segments(
+            events_queue.register(
                     polygon_to_oriented_segments(polygon,
                                                  context=context),
                     from_test=False)
     if disjoint:
         return Relation.DISJOINT
-    return process_linear_compound_queue(sweeper,
+    return process_linear_compound_queue(events_queue,
                                          min(contour_bounding_box.max_x,
                                              multipolygon_max_x))
 
@@ -131,8 +131,8 @@ def relate_region(multipolygon: Multipolygon, region: Region,
         return Relation.DISJOINT
     region_bounding_box = box.from_contour(region,
                                            context=context)
-    all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
-                                                                None, None)
+    all_disjoint, none_disjoint, multipolygon_max_x, events_queue = (
+        True, True, None, None)
     for polygon in multipolygon.polygons:
         polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
@@ -144,22 +144,23 @@ def relate_region(multipolygon: Multipolygon, region: Region,
             if all_disjoint:
                 all_disjoint = False
                 multipolygon_max_x = polygon_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(
                         region_to_oriented_segments(region,
                                                     context=context),
                         from_test=True)
             else:
                 multipolygon_max_x = max(multipolygon_max_x,
                                          polygon_bounding_box.max_x)
-            sweeper.register_segments(
+            events_queue.register(
                     polygon_to_oriented_segments(polygon,
                                                  context=context),
                     from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
-    relation = process_compound_queue(sweeper, min(multipolygon_max_x,
-                                                   region_bounding_box.max_x))
+    relation = process_compound_queue(events_queue,
+                                      min(multipolygon_max_x,
+                                          region_bounding_box.max_x))
     return (relation
             if none_disjoint
             else (Relation.COMPONENT
@@ -184,15 +185,14 @@ def relate_multiregion(multipolygon: Multipolygon,
     if box.disjoint_with(multipolygon_bounding_box,
                          multiregion_bounding_box):
         return Relation.DISJOINT
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(multipolygon,
-                                                   context=context),
-                              from_test=False)
-    sweeper.register_segments(
-            multiregion_to_oriented_segments(multiregion,
-                                             context=context),
-            from_test=True)
-    return process_compound_queue(sweeper,
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_segments(multipolygon,
+                                               context=context),
+                          from_test=False)
+    events_queue.register(multiregion_to_oriented_segments(multiregion,
+                                                           context=context),
+                          from_test=True)
+    return process_compound_queue(events_queue,
                                   min(multipolygon_bounding_box.max_x,
                                       multiregion_bounding_box.max_x))
 
@@ -204,8 +204,8 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon,
         return Relation.DISJOINT
     polygon_bounding_box = box.from_polygon(polygon,
                                             context=context)
-    all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
-                                                                None, None)
+    all_disjoint, none_disjoint, multipolygon_max_x, events_queue = (
+        True, True, None, None)
     for sub_polygon in multipolygon.polygons:
         sub_polygon_bounding_box = box.from_contour(sub_polygon.border,
                                                     context=context)
@@ -217,22 +217,23 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon,
             if all_disjoint:
                 all_disjoint = False
                 multipolygon_max_x = sub_polygon_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(
                         polygon_to_oriented_segments(polygon,
                                                      context=context),
                         from_test=True)
             else:
                 multipolygon_max_x = max(multipolygon_max_x,
                                          sub_polygon_bounding_box.max_x)
-            sweeper.register_segments(
+            events_queue.register(
                     polygon_to_oriented_segments(sub_polygon,
                                                  context=context),
                     from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
-    relation = process_compound_queue(sweeper, min(multipolygon_max_x,
-                                                   polygon_bounding_box.max_x))
+    relation = process_compound_queue(events_queue,
+                                      min(multipolygon_max_x,
+                                          polygon_bounding_box.max_x))
     return (relation
             if none_disjoint
             else (Relation.COMPONENT
@@ -253,14 +254,14 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon,
                                               context=context)
     test_bounding_box = box.from_multipolygon(test,
                                               context=context)
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(goal,
-                                                   context=context),
-                              from_test=False)
-    sweeper.register_segments(to_oriented_segments(test,
-                                                   context=context),
-                              from_test=True)
-    return process_compound_queue(sweeper,
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_segments(goal,
+                                               context=context),
+                          from_test=False)
+    events_queue.register(to_oriented_segments(test,
+                                               context=context),
+                          from_test=True)
+    return process_compound_queue(events_queue,
                                   min(goal_bounding_box.max_x,
                                       test_bounding_box.max_x))
 

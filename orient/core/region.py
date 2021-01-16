@@ -2,6 +2,7 @@ from typing import (Optional,
                     Tuple)
 
 from ground.base import (Context,
+                         Orientation,
                          Relation)
 from ground.hints import (Box,
                           Contour,
@@ -16,15 +17,13 @@ from .contour import (equal as contours_equal,
                       to_edges_endpoints as contour_to_edges_endpoints,
                       to_oriented_edges_endpoints
                       as contour_to_oriented_segments)
+from .events_queue import CompoundEventsQueue
 from .hints import Region
 from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .segment import (_relate_point as relate_point_to_segment,
                       _relate_segment as relate_segments)
-from .sweep import CompoundSweeper
-from .utils import (Orientation,
-                    orientation)
 
 
 def relate_point(region: Region, point: Point,
@@ -46,8 +45,9 @@ def _relate_point(region: Region, point: Point,
                                    context=context) is Relation.COMPONENT:
             return index, Relation.COMPONENT
         if ((start.y > point_y) is not (end.y > point_y)
-                and ((end.y > start.y) is (orientation(start, end, point)
-                                           is Orientation.COUNTERCLOCKWISE))):
+                and ((end.y > start.y)
+                     is (context.angle_orientation(start, end, point)
+                         is Orientation.COUNTERCLOCKWISE))):
             result = not result
     return None, (Relation.WITHIN if result else Relation.DISJOINT)
 
@@ -80,7 +80,7 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
                 has_no_touch = False
             elif (index - last_touched_edge_index == 1
                   and start not in edge_endpoints and end not in edge_endpoints
-                  and (orientation(start, end, edge_start)
+                  and (context.angle_orientation(start, end, edge_start)
                        is Orientation.COLLINEAR)
                   and point_vertex_line_divides_angle(start,
                                                       last_touched_edge_start,
@@ -99,7 +99,7 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
                             context=context) is Relation.TOUCH
                 and start not in first_edge_endpoints
                 and end not in first_edge_endpoints
-                and (orientation(start, end, first_edge_start)
+                and (context.angle_orientation(start, end, first_edge_start)
                      is Orientation.COLLINEAR)
                 and point_vertex_line_divides_angle(start, vertices[-2],
                                                     first_edge_start,
@@ -138,6 +138,7 @@ def relate_segment(region: Region, segment: Segment,
         elif end_relation is Relation.WITHIN:
             return Relation.ENCLOSED
         else:
+            angle_orientation = context.angle_orientation
             border_orientation = contour_orientation(region,
                                                      context=context)
             positively_oriented = (border_orientation
@@ -149,33 +150,33 @@ def relate_segment(region: Region, segment: Segment,
                 prev_start = (vertices[start_index - 2]
                               if positively_oriented
                               else vertices[start_index])
-                if (orientation(prev_start, edge_start, edge_end)
+                if (angle_orientation(prev_start, edge_start, edge_end)
                         is border_orientation):
-                    if (orientation(edge_start, prev_start, end)
+                    if (angle_orientation(edge_start, prev_start, end)
                             is border_orientation
-                            or orientation(edge_end, edge_start, end)
+                            or angle_orientation(edge_end, edge_start, end)
                             is border_orientation):
                         return Relation.TOUCH
-                elif (orientation(edge_start, prev_start, end)
-                      is orientation(edge_end, edge_start, end)
+                elif (angle_orientation(edge_start, prev_start, end)
+                      is angle_orientation(edge_end, edge_start, end)
                       is border_orientation):
                     return Relation.TOUCH
             elif start == edge_end:
                 next_end = (vertices[(start_index + 1) % len(vertices)]
                             if positively_oriented
                             else vertices[len(vertices) - start_index - 3])
-                if (orientation(edge_start, edge_end, next_end)
+                if (angle_orientation(edge_start, edge_end, next_end)
                         is border_orientation):
-                    if (orientation(edge_end, edge_start, end)
+                    if (angle_orientation(edge_end, edge_start, end)
                             is border_orientation
-                            or orientation(next_end, edge_end, end)
+                            or angle_orientation(next_end, edge_end, end)
                             is border_orientation):
                         return Relation.TOUCH
-                    elif (orientation(edge_end, edge_start, end)
-                          is orientation(next_end, edge_end, end)
+                    elif (angle_orientation(edge_end, edge_start, end)
+                          is angle_orientation(next_end, edge_end, end)
                           is border_orientation):
                         return Relation.TOUCH
-            elif (orientation(edge_end, edge_start, end)
+            elif (angle_orientation(edge_end, edge_start, end)
                   is border_orientation):
                 return Relation.TOUCH
             edge_start, edge_end = vertices[end_index - 1], vertices[end_index]
@@ -183,33 +184,33 @@ def relate_segment(region: Region, segment: Segment,
                 prev_start = (vertices[end_index - 2]
                               if positively_oriented
                               else vertices[end_index])
-                if (orientation(prev_start, edge_start, edge_end)
+                if (angle_orientation(prev_start, edge_start, edge_end)
                         is border_orientation):
-                    if (orientation(edge_start, prev_start, start)
+                    if (angle_orientation(edge_start, prev_start, start)
                             is border_orientation
-                            or orientation(edge_end, edge_start, start)
+                            or angle_orientation(edge_end, edge_start, start)
                             is border_orientation):
                         return Relation.TOUCH
-                elif (orientation(edge_start, prev_start, start)
-                      is orientation(edge_end, edge_start, start)
+                elif (angle_orientation(edge_start, prev_start, start)
+                      is angle_orientation(edge_end, edge_start, start)
                       is border_orientation):
                     return Relation.TOUCH
             elif end == edge_end:
                 next_end = (vertices[(end_index + 1) % len(vertices)]
                             if positively_oriented
                             else vertices[len(vertices) - end_index - 3])
-                if (orientation(edge_start, edge_end, next_end)
+                if (angle_orientation(edge_start, edge_end, next_end)
                         is border_orientation):
-                    if (orientation(edge_end, edge_start, start)
+                    if (angle_orientation(edge_end, edge_start, start)
                             is border_orientation
-                            or orientation(next_end, edge_end, start)
+                            or angle_orientation(next_end, edge_end, start)
                             is border_orientation):
                         return Relation.TOUCH
-                elif (orientation(edge_end, edge_start, start)
-                      is orientation(next_end, edge_end, start)
+                elif (angle_orientation(edge_end, edge_start, start)
+                      is angle_orientation(next_end, edge_end, start)
                       is border_orientation):
                     return Relation.TOUCH
-            elif (orientation(edge_end, edge_start, start)
+            elif (angle_orientation(edge_end, edge_start, start)
                   is border_orientation):
                 return Relation.TOUCH
             return Relation.ENCLOSED
@@ -237,13 +238,13 @@ def _relate_multisegment(region: Region,
     if box.disjoint_with(multisegment_bounding_box,
                          region_bounding_box):
         return Relation.DISJOINT
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(region,
-                                                   context=context),
-                              from_test=False)
-    sweeper.register_segments(to_segments_endpoints(multisegment),
-                              from_test=True)
-    return process_linear_compound_queue(sweeper,
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_segments(region,
+                                               context=context),
+                          from_test=False)
+    events_queue.register(to_segments_endpoints(multisegment),
+                          from_test=True)
+    return process_linear_compound_queue(events_queue,
                                          min(multisegment_bounding_box.max_x,
                                              region_bounding_box.max_x))
 
@@ -269,13 +270,13 @@ def _relate_contour(region: Region,
     if equal(region, contour,
              context=context):
         return Relation.COMPONENT
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(region,
-                                                   context=context),
-                              from_test=False)
-    sweeper.register_segments(contour_to_edges_endpoints(contour),
-                              from_test=True)
-    return process_linear_compound_queue(sweeper,
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_segments(region,
+                                               context=context),
+                          from_test=False)
+    events_queue.register(contour_to_edges_endpoints(contour),
+                          from_test=True)
+    return process_linear_compound_queue(events_queue,
                                          min(contour_bounding_box.max_x,
                                              region_bounding_box.max_x))
 
@@ -302,15 +303,15 @@ def _relate_region(goal: Region,
     if equal(goal, test,
              context=context):
         return Relation.EQUAL
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_segments(goal,
-                                                   context=context),
-                              from_test=False)
-    sweeper.register_segments(to_oriented_segments(test,
-                                                   context=context),
-                              from_test=True)
-    return process_compound_queue(sweeper, min(goal_bounding_box.max_x,
-                                               test_bounding_box.max_x))
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_segments(goal,
+                                               context=context),
+                          from_test=False)
+    events_queue.register(to_oriented_segments(test,
+                                               context=context),
+                          from_test=True)
+    return process_compound_queue(events_queue, min(goal_bounding_box.max_x,
+                                                    test_bounding_box.max_x))
 
 
 equal = contours_equal

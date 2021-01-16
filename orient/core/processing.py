@@ -1,17 +1,17 @@
 from ground.base import Relation
 from ground.hints import Coordinate
 
-from .sweep import (CompoundSweeper,
-                    LinearSweeper)
-from .utils import SegmentsRelationship
+from .enums import SegmentsRelation
+from .events_queue import (CompoundEventsQueue,
+                           LinearEventsQueue)
 
 
-def process_open_linear_queue(sweeper: LinearSweeper,
+def process_open_linear_queue(events_queue: LinearEventsQueue,
                               stop_x: Coordinate) -> Relation:
     test_is_subset = goal_is_subset = True
     has_no_cross = has_no_touch = has_no_overlap = True
-    for event in sweeper.sweep(stop_x):
-        if event.relationship is SegmentsRelationship.OVERLAP:
+    for event in events_queue.sweep(stop_x):
+        if event.relation is SegmentsRelation.OVERLAP:
             if has_no_overlap:
                 has_no_overlap = False
         else:
@@ -21,14 +21,14 @@ def process_open_linear_queue(sweeper: LinearSweeper,
             elif goal_is_subset:
                 goal_is_subset = False
             if has_no_overlap:
-                if event.relationship is SegmentsRelationship.CROSS:
+                if event.relation is SegmentsRelation.CROSS:
                     if has_no_cross:
                         has_no_cross = False
-                elif event.relationship is SegmentsRelationship.TOUCH:
+                elif event.relation is SegmentsRelation.TOUCH:
                     if has_no_touch:
                         has_no_touch = False
-    if sweeper:
-        if sweeper.peek().from_test:
+    if events_queue:
+        if events_queue.peek().from_test:
             test_is_subset = False
         else:
             goal_is_subset = False
@@ -48,13 +48,13 @@ def process_open_linear_queue(sweeper: LinearSweeper,
                 else Relation.OVERLAP)
 
 
-def process_closed_linear_queue(sweeper: CompoundSweeper,
+def process_closed_linear_queue(events_queue: CompoundEventsQueue,
                                 stop_x: Coordinate) -> Relation:
     test_is_subset_of_goal = goal_is_subset_of_test = True
     test_boundary_not_in_goal_interior = True
     goal_boundary_not_in_test_interior = True
     has_no_cross = has_no_touch = has_no_overlap = True
-    for event in sweeper.sweep(stop_x):
+    for event in events_queue.sweep(stop_x):
         if (test_is_subset_of_goal
                 and event.from_test and event.outside):
             test_is_subset_of_goal = False
@@ -67,15 +67,15 @@ def process_closed_linear_queue(sweeper: CompoundSweeper,
         if (goal_boundary_not_in_test_interior
                 and event.from_goal and event.inside):
             goal_boundary_not_in_test_interior = False
-        if has_no_cross and event.relationship is SegmentsRelationship.CROSS:
+        if has_no_cross and event.relation is SegmentsRelation.CROSS:
             has_no_cross = False
         if (has_no_overlap
-                and event.relationship is SegmentsRelationship.OVERLAP):
+                and event.relation is SegmentsRelation.OVERLAP):
             has_no_overlap = False
-        if has_no_touch and event.relationship is SegmentsRelationship.TOUCH:
+        if has_no_touch and event.relation is SegmentsRelation.TOUCH:
             has_no_touch = False
-    if sweeper:
-        if sweeper.peek().from_test:
+    if events_queue:
+        if events_queue.peek().from_test:
             test_is_subset_of_goal = False
         else:
             goal_is_subset_of_test = False
@@ -109,17 +109,17 @@ def process_closed_linear_queue(sweeper: CompoundSweeper,
                 else Relation.OVERLAP)
 
 
-def process_linear_compound_queue(sweeper: CompoundSweeper,
+def process_linear_compound_queue(events_queue: CompoundEventsQueue,
                                   stop_x: Coordinate) -> Relation:
     # ``goal`` is a compound object
     # ``test`` is a linear object
     test_not_in_goal_interior = has_no_touch = True
     test_is_subset_of_goal = goal_border_subset_of_test = True
-    for event in sweeper.sweep(stop_x):
-        if event.relationship is SegmentsRelationship.CROSS:
+    for event in events_queue.sweep(stop_x):
+        if event.relation is SegmentsRelation.CROSS:
             return Relation.CROSS
         elif (has_no_touch
-              and event.relationship is not SegmentsRelationship.NONE):
+              and event.relation is not SegmentsRelation.DISJOINT):
             has_no_touch = False
         if event.from_test:
             if test_is_subset_of_goal and event.outside:
@@ -127,10 +127,10 @@ def process_linear_compound_queue(sweeper: CompoundSweeper,
             if test_not_in_goal_interior and event.inside:
                 test_not_in_goal_interior = False
         elif (goal_border_subset_of_test
-              and event.relationship is not SegmentsRelationship.OVERLAP):
+              and event.relation is not SegmentsRelation.OVERLAP):
             goal_border_subset_of_test = False
-    if sweeper:
-        if sweeper.peek().from_test:
+    if events_queue:
+        if events_queue.peek().from_test:
             if test_is_subset_of_goal:
                 test_is_subset_of_goal = False
         elif goal_border_subset_of_test:
@@ -153,18 +153,18 @@ def process_linear_compound_queue(sweeper: CompoundSweeper,
                 else Relation.CROSS)
 
 
-def process_compound_queue(sweeper: CompoundSweeper,
+def process_compound_queue(events_queue: CompoundEventsQueue,
                            stop_x: Coordinate) -> Relation:
     test_boundary_not_in_goal_interior = True
     goal_boundary_not_in_test_interior = True
     boundaries_do_not_intersect = True
     none_overlapping_components = True
     test_is_subset_of_goal = goal_is_subset_of_test = True
-    for event in sweeper.sweep(stop_x):
-        if event.relationship is SegmentsRelationship.CROSS:
+    for event in events_queue.sweep(stop_x):
+        if event.relation is SegmentsRelation.CROSS:
             return Relation.OVERLAP
         elif (boundaries_do_not_intersect
-              and event.relationship is not SegmentsRelationship.NONE):
+              and event.relation is not SegmentsRelation.DISJOINT):
             boundaries_do_not_intersect = False
         if event.is_common_region_boundary:
             if none_overlapping_components:
@@ -187,8 +187,8 @@ def process_compound_queue(sweeper: CompoundSweeper,
                 test_is_subset_of_goal = False
             if goal_is_subset_of_test and event.from_goal:
                 goal_is_subset_of_test = False
-    if sweeper:
-        if sweeper.peek().from_test:
+    if events_queue:
+        if events_queue.peek().from_test:
             if test_is_subset_of_goal:
                 test_is_subset_of_goal = False
         elif goal_is_subset_of_test:

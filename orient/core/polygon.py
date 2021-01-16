@@ -9,6 +9,7 @@ from ground.hints import (Contour,
                           Segment)
 
 from . import box
+from .events_queue import CompoundEventsQueue
 from .hints import (Multiregion,
                     Region,
                     SegmentEndpoints)
@@ -25,7 +26,6 @@ from .region import (_relate_contour as relate_contour_to_region,
                      relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
                      to_oriented_segments as region_to_oriented_segments)
-from .sweep import CompoundSweeper
 
 
 def relate_point(polygon: Polygon, point: Point,
@@ -81,13 +81,13 @@ def relate_multisegment(polygon: Polygon,
     if box.disjoint_with(polygon_bounding_box,
                          multisegment_bounding_box):
         return Relation.DISJOINT
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_edges_endpoints(polygon,
-                                                          context=context),
-                              from_test=False)
-    sweeper.register_segments(to_segments_endpoints(multisegment),
-                              from_test=True)
-    return process_linear_compound_queue(sweeper,
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_edges_endpoints(polygon,
+                                                      context=context),
+                          from_test=False)
+    events_queue.register(to_segments_endpoints(multisegment),
+                          from_test=True)
+    return process_linear_compound_queue(events_queue,
                                          min(multisegment_bounding_box.max_x,
                                              polygon_bounding_box.max_x))
 

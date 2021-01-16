@@ -2,6 +2,7 @@ from itertools import chain
 from typing import Iterable
 
 from ground.base import (Context,
+                         Orientation,
                          Relation)
 from ground.hints import (Contour,
                           Multisegment,
@@ -9,16 +10,14 @@ from ground.hints import (Contour,
                           Segment)
 
 from . import box
+from .events_queue import (CompoundEventsQueue,
+                           LinearEventsQueue)
 from .hints import SegmentEndpoints
 from .multisegment import to_segments_endpoints
 from .processing import (process_closed_linear_queue,
                          process_open_linear_queue)
 from .segment import (_relate_point as relate_point_to_segment,
                       _relate_segment as relate_segments)
-from .sweep import (CompoundSweeper,
-                    LinearSweeper)
-from .utils import (Orientation,
-                    orientation as angle_orientation)
 
 
 def relate_point(contour: Contour, point: Point,
@@ -35,6 +34,7 @@ def relate_point(contour: Contour, point: Point,
 def relate_segment(contour: Contour, segment: Segment,
                    *,
                    context: Context) -> Relation:
+    angle_orientation = context.angle_orientation
     has_no_touch = has_no_cross = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment.start, segment.end
@@ -93,8 +93,8 @@ def point_vertex_line_divides_angle(point: Point,
                                     second_ray_point: Point,
                                     *,
                                     context: Context) -> bool:
-    return (angle_orientation(vertex, first_ray_point, point)
-            is angle_orientation(vertex, point, second_ray_point))
+    return (context.angle_orientation(vertex, first_ray_point, point)
+            is context.angle_orientation(vertex, point, second_ray_point))
 
 
 def relate_multisegment(contour: Contour,
@@ -110,12 +110,12 @@ def relate_multisegment(contour: Contour,
                               context=context))
     if box.disjoint_with(contour_bounding_box, multisegment_bounding_box):
         return Relation.DISJOINT
-    sweeper = LinearSweeper()
-    sweeper.register_segments(to_edges_endpoints(contour),
-                              from_test=False)
-    sweeper.register_segments(to_segments_endpoints(multisegment),
-                              from_test=True)
-    return process_open_linear_queue(sweeper,
+    events_queue = LinearEventsQueue(context)
+    events_queue.register(to_edges_endpoints(contour),
+                          from_test=False)
+    events_queue.register(to_segments_endpoints(multisegment),
+                          from_test=True)
+    return process_open_linear_queue(events_queue,
                                      min(contour_bounding_box.max_x,
                                          multisegment_bounding_box.max_x))
 
@@ -132,14 +132,14 @@ def relate_contour(goal: Contour, test: Contour,
     if equal(goal, test,
              context=context):
         return Relation.EQUAL
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_edges_endpoints(goal,
-                                                          context=context),
-                              from_test=False)
-    sweeper.register_segments(to_oriented_edges_endpoints(test,
-                                                          context=context),
-                              from_test=True)
-    return process_closed_linear_queue(sweeper,
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_edges_endpoints(goal,
+                                                      context=context),
+                          from_test=False)
+    events_queue.register(to_oriented_edges_endpoints(test,
+                                                      context=context),
+                          from_test=True)
+    return process_closed_linear_queue(events_queue,
                                        min(goal_bounding_box.max_x,
                                            test_bounding_box.max_x))
 
@@ -180,8 +180,8 @@ def orientation(contour: Contour,
     vertices = contour.vertices
     index = min(range(len(vertices)),
                 key=vertices.__getitem__)
-    return angle_orientation(vertices[index - 1], vertices[index],
-                             vertices[(index + 1) % len(vertices)])
+    return context.angle_orientation(vertices[index - 1], vertices[index],
+                                     vertices[(index + 1) % len(vertices)])
 
 
 def to_edges_endpoints(contour: Contour) -> Iterable[SegmentEndpoints]:

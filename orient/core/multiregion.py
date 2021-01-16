@@ -10,6 +10,7 @@ from ground.hints import (Box,
 
 from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
+from .events_queue import CompoundEventsQueue
 from .hints import (Multiregion,
                     Region,
                     SegmentEndpoints)
@@ -19,7 +20,6 @@ from .processing import (process_compound_queue,
 from .region import (relate_point as relate_point_to_region,
                      relate_segment as relate_segment_to_region,
                      to_oriented_segments as region_to_oriented_segments)
-from .sweep import CompoundSweeper
 
 
 def relate_point(multiregion: Multiregion, point: Point,
@@ -63,7 +63,7 @@ def _relate_multisegment(multiregion: Multiregion,
                          multisegment_bounding_box: Box,
                          *,
                          context: Context) -> Relation:
-    disjoint, multiregion_max_x, sweeper = True, None, None
+    disjoint, multiregion_max_x, events_queue = True, None, None
     for region in multiregion:
         region_bounding_box = box.from_contour(region,
                                                context=context)
@@ -72,19 +72,19 @@ def _relate_multisegment(multiregion: Multiregion,
             if disjoint:
                 disjoint = False
                 multiregion_max_x = region_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(to_segments_endpoints(multisegment),
-                                          from_test=True)
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(to_segments_endpoints(multisegment),
+                                      from_test=True)
             else:
                 multiregion_max_x = max(multiregion_max_x,
                                         region_bounding_box.max_x)
-            sweeper.register_segments(
+            events_queue.register(
                     region_to_oriented_segments(region,
                                                 context=context),
                     from_test=False)
     if disjoint:
         return Relation.DISJOINT
-    return process_linear_compound_queue(sweeper,
+    return process_linear_compound_queue(events_queue,
                                          min(multisegment_bounding_box.max_x,
                                              multiregion_max_x))
 
@@ -105,7 +105,7 @@ def _relate_contour(multiregion: Multiregion,
                     contour_bounding_box: Box,
                     *,
                     context: Context) -> Relation:
-    disjoint, multiregion_max_x, sweeper = True, None, None
+    disjoint, multiregion_max_x, events_queue = True, None, None
     for region in multiregion:
         region_bounding_box = box.from_contour(region,
                                                context=context)
@@ -114,19 +114,18 @@ def _relate_contour(multiregion: Multiregion,
             if disjoint:
                 disjoint = False
                 multiregion_max_x = region_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(contour_to_edges_endpoints(contour),
-                                          from_test=True)
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(contour_to_edges_endpoints(contour),
+                                      from_test=True)
             else:
                 multiregion_max_x = max(multiregion_max_x,
                                         region_bounding_box.max_x)
-            sweeper.register_segments(
-                    region_to_oriented_segments(region,
-                                                context=context),
-                    from_test=False)
+            events_queue.register(region_to_oriented_segments(region,
+                                                              context=context),
+                                  from_test=False)
     if disjoint:
         return Relation.DISJOINT
-    return process_linear_compound_queue(sweeper,
+    return process_linear_compound_queue(events_queue,
                                          min(contour_bounding_box.max_x,
                                              multiregion_max_x))
 
@@ -147,8 +146,9 @@ def _relate_region(goal_regions: Iterable[Region],
                    region_bounding_box: Box,
                    *,
                    context: Context) -> Relation:
-    all_disjoint, none_disjoint, goal_regions_max_x, sweeper = (True, True,
-                                                                None, None)
+    all_disjoint, none_disjoint, goal_regions_max_x, events_queue = (
+        True, True,
+        None, None)
     for goal_region in goal_regions:
         goal_region_bounding_box = box.from_contour(goal_region,
                                                     context=context)
@@ -159,22 +159,22 @@ def _relate_region(goal_regions: Iterable[Region],
             if all_disjoint:
                 all_disjoint = False
                 goal_regions_max_x = goal_region_bounding_box.max_x
-                sweeper = CompoundSweeper()
-                sweeper.register_segments(
+                events_queue = CompoundEventsQueue(context)
+                events_queue.register(
                         region_to_oriented_segments(region,
                                                     context=context),
                         from_test=True)
             else:
                 goal_regions_max_x = max(goal_regions_max_x,
                                          goal_region_bounding_box.max_x)
-            sweeper.register_segments(
-                    region_to_oriented_segments(goal_region,
-                                                context=context),
-                    from_test=False)
+            events_queue.register(region_to_oriented_segments(goal_region,
+                                                              context=context),
+                                  from_test=False)
     if all_disjoint:
         return Relation.DISJOINT
-    relation = process_compound_queue(sweeper, min(goal_regions_max_x,
-                                                   region_bounding_box.max_x))
+    relation = process_compound_queue(events_queue,
+                                      min(goal_regions_max_x,
+                                          region_bounding_box.max_x))
     return (relation
             if none_disjoint
             else (Relation.COMPONENT
@@ -207,15 +207,15 @@ def _relate_multiregion(goal: Iterable[Region],
                         context: Context) -> Relation:
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    sweeper = CompoundSweeper()
-    sweeper.register_segments(to_oriented_edges_endpoints(goal,
-                                                          context=context),
-                              from_test=False)
-    sweeper.register_segments(to_oriented_edges_endpoints(test,
-                                                          context=context),
-                              from_test=True)
-    return process_compound_queue(sweeper, min(goal_bounding_box.max_x,
-                                               test_bounding_box.max_x))
+    events_queue = CompoundEventsQueue(context)
+    events_queue.register(to_oriented_edges_endpoints(goal,
+                                                      context=context),
+                          from_test=False)
+    events_queue.register(to_oriented_edges_endpoints(test,
+                                                      context=context),
+                          from_test=True)
+    return process_compound_queue(events_queue, min(goal_bounding_box.max_x,
+                                                    test_bounding_box.max_x))
 
 
 def to_oriented_edges_endpoints(regions: Iterable[Region],

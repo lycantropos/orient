@@ -2,21 +2,19 @@ from typing import (Dict,
                     Iterable)
 
 from ground.base import (Context,
+                         Orientation,
                          Relation)
 from ground.hints import (Multisegment,
                           Point,
                           Segment)
 
 from . import box
+from .events_queue import LinearEventsQueue
 from .hints import SegmentEndpoints
 from .processing import process_open_linear_queue
 from .segment import (_relate_segment as relate_segments,
                       relate_point as relate_point_to_segment)
-from .sweep import LinearSweeper
-from .utils import (Orientation,
-                    orientation,
-                    segments_intersection,
-                    to_sorted_pair)
+from .utils import to_sorted_pair
 
 
 def relate_point(multisegment: Multisegment, point: Point,
@@ -80,7 +78,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                     if has_no_touch:
                         has_no_touch = False
                     if has_no_cross:
-                        intersection = segments_intersection(
+                        intersection = context.segments_intersection(
                                 sub_segment_start, sub_segment_end, start, end)
                         if intersection != start and intersection != end:
                             sub_start, sub_end = sub_segment_endpoints
@@ -92,11 +90,11 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                                     middle_touching_orientations[intersection])
                             except KeyError:
                                 middle_touching_orientations[intersection] = (
-                                    orientation(start, end,
-                                                non_touched_endpoint))
+                                    context.angle_orientation(
+                                            start, end, non_touched_endpoint))
                             else:
-                                if (orientation(start, end,
-                                                non_touched_endpoint)
+                                if (context.angle_orientation(
+                                        start, end, non_touched_endpoint)
                                         is not previous_orientation):
                                     has_no_cross = False
                 elif has_no_cross and relation is Relation.CROSS:
@@ -155,13 +153,14 @@ def relate_multisegment(goal: Multisegment, test: Multisegment,
                               context=context))
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    sweeper = LinearSweeper()
-    sweeper.register_segments(to_segments_endpoints(goal),
-                              from_test=False)
-    sweeper.register_segments(to_segments_endpoints(test),
-                              from_test=True)
-    return process_open_linear_queue(sweeper, min(goal_bounding_box.max_x,
-                                                  test_bounding_box.max_x))
+    events_queue = LinearEventsQueue(context)
+    events_queue.register(to_segments_endpoints(goal),
+                          from_test=False)
+    events_queue.register(to_segments_endpoints(test),
+                          from_test=True)
+    return process_open_linear_queue(events_queue,
+                                     min(goal_bounding_box.max_x,
+                                         test_bounding_box.max_x))
 
 
 def to_segments_endpoints(multisegment: Multisegment

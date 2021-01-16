@@ -1,5 +1,3 @@
-from enum import (IntEnum,
-                  unique)
 from reprlib import recursive_repr
 from typing import (Optional,
                     TypeVar)
@@ -7,24 +5,24 @@ from typing import (Optional,
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from .utils import SegmentsRelationship
+from .enums import (OverlapKind,
+                    SegmentsRelation)
 
 
 class LinearEvent:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
-                 'relationship')
+                 'relation')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
                  from_test: bool,
-                 relationship: SegmentsRelationship) -> None:
+                 relation: SegmentsRelation) -> None:
         self.is_left_endpoint = is_left_endpoint
-        self.start = start
-        self.complement = complement
+        self.start, self.complement = start, complement
         self.from_test = from_test
-        self.relationship = relationship
+        self.relation = relation
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
@@ -36,16 +34,8 @@ class LinearEvent:
     def end(self) -> Point:
         return self.complement.start
 
-    def set_both_relationships(self, relationship: SegmentsRelationship
-                               ) -> None:
-        self.relationship = self.complement.relationship = relationship
-
-
-@unique
-class OverlapKind(IntEnum):
-    NONE = 0
-    SAME_ORIENTATION = 1
-    DIFFERENT_ORIENTATION = 2
+    def set_both_relations(self, relation: SegmentsRelation) -> None:
+        self.relation = self.complement.relation = relation
 
 
 class CompoundEvent(LinearEvent):
@@ -56,10 +46,10 @@ class CompoundEvent(LinearEvent):
                  start: Point,
                  complement: Optional['CompoundEvent'],
                  from_test: bool,
-                 relationship: SegmentsRelationship,
+                 relation: SegmentsRelation,
                  interior_to_left: bool) -> None:
         super().__init__(is_left_endpoint, start, complement, from_test,
-                         relationship)
+                         relation)
         self.overlap_kind = OverlapKind.NONE
         self.interior_to_left = interior_to_left
         self.other_interior_to_left = False
