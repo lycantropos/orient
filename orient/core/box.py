@@ -3,12 +3,12 @@ from typing import Iterable
 from ground.base import Context
 from ground.hints import (Box,
                           Contour,
+                          Multipolygon,
                           Multisegment,
                           Point,
                           Polygon,
                           Segment)
 
-from .hints import Multipolygon
 from .utils import flatten
 
 
@@ -39,7 +39,7 @@ def from_contours(contours: Iterable[Contour],
 def from_multipolygon(multipolygon: Multipolygon,
                       *,
                       context: Context):
-    return from_contours((polygon.border for polygon in multipolygon),
+    return from_contours((polygon.border for polygon in multipolygon.polygons),
                          context=context)
 
 

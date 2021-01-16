@@ -3,6 +3,7 @@ from typing import Iterable
 from ground.base import (Context,
                          Relation)
 from ground.hints import (Contour,
+                          Multipolygon,
                           Multisegment,
                           Point,
                           Polygon,
@@ -10,8 +11,7 @@ from ground.hints import (Contour,
 
 from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
-from .hints import (Multipolygon,
-                    Multiregion,
+from .hints import (Multiregion,
                     Region,
                     SegmentEndpoints)
 from .multiregion import (to_oriented_edges_endpoints
@@ -30,7 +30,7 @@ from .sweep import CompoundSweeper
 def relate_point(multipolygon: Multipolygon, point: Point,
                  *,
                  context: Context) -> Relation:
-    for polygon in multipolygon:
+    for polygon in multipolygon.polygons:
         relation_with_polygon = relate_point_to_polygon(polygon, point,
                                                         context=context)
         if relation_with_polygon is not Relation.DISJOINT:
@@ -42,7 +42,7 @@ def relate_segment(multipolygon: Multipolygon, segment: Segment,
                    *,
                    context: Context) -> Relation:
     do_not_touch = True
-    for polygon in multipolygon:
+    for polygon in multipolygon.polygons:
         relation_with_polygon = relate_segment_to_polygon(polygon, segment,
                                                           context=context)
         if relation_with_polygon in (Relation.CROSS,
@@ -61,12 +61,12 @@ def relate_multisegment(multipolygon: Multipolygon,
                         multisegment: Multisegment,
                         *,
                         context: Context) -> Relation:
-    if not (multisegment.segments and multipolygon):
+    if not (multisegment.segments and multipolygon.polygons):
         return Relation.DISJOINT
     multisegment_bounding_box = box.from_multisegment(multisegment,
                                                       context=context)
     disjoint, multipolygon_max_x, sweeper = True, None, None
-    for polygon in multipolygon:
+    for polygon in multipolygon.polygons:
         polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
         if not box.disjoint_with(polygon_bounding_box,
@@ -94,12 +94,12 @@ def relate_multisegment(multipolygon: Multipolygon,
 def relate_contour(multipolygon: Multipolygon, contour: Contour,
                    *,
                    context: Context) -> Relation:
-    if not multipolygon:
+    if not multipolygon.polygons:
         return Relation.DISJOINT
     contour_bounding_box = box.from_contour(contour,
                                             context=context)
     disjoint, multipolygon_max_x, sweeper = True, None, None
-    for polygon in multipolygon:
+    for polygon in multipolygon.polygons:
         polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
         if not box.disjoint_with(polygon_bounding_box,
@@ -127,13 +127,13 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour,
 def relate_region(multipolygon: Multipolygon, region: Region,
                   *,
                   context: Context) -> Relation:
-    if not multipolygon:
+    if not multipolygon.polygons:
         return Relation.DISJOINT
     region_bounding_box = box.from_contour(region,
                                            context=context)
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
-    for polygon in multipolygon:
+    for polygon in multipolygon.polygons:
         polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
         if box.disjoint_with(region_bounding_box,
@@ -175,7 +175,7 @@ def relate_multiregion(multipolygon: Multipolygon,
                        multiregion: Multiregion,
                        *,
                        context: Context) -> Relation:
-    if not (multipolygon and multiregion):
+    if not (multipolygon.polygons and multiregion):
         return Relation.DISJOINT
     multiregion_bounding_box = box.from_contours(multiregion,
                                                  context=context)
@@ -200,13 +200,13 @@ def relate_multiregion(multipolygon: Multipolygon,
 def relate_polygon(multipolygon: Multipolygon, polygon: Polygon,
                    *,
                    context: Context) -> Relation:
-    if not multipolygon:
+    if not multipolygon.polygons:
         return Relation.DISJOINT
     polygon_bounding_box = box.from_polygon(polygon,
                                             context=context)
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
-    for sub_polygon in multipolygon:
+    for sub_polygon in multipolygon.polygons:
         sub_polygon_bounding_box = box.from_contour(sub_polygon.border,
                                                     context=context)
         if box.disjoint_with(sub_polygon_bounding_box,
@@ -247,7 +247,7 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon,
 def relate_multipolygon(goal: Multipolygon, test: Multipolygon,
                         *,
                         context: Context) -> Relation:
-    if not (goal and test):
+    if not (goal.polygons and test.polygons):
         return Relation.DISJOINT
     goal_bounding_box = box.from_multipolygon(goal,
                                               context=context)
@@ -265,11 +265,11 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon,
                                       test_bounding_box.max_x))
 
 
-def to_oriented_segments(polygons: Iterable[Polygon],
+def to_oriented_segments(multipolygon: Multipolygon,
                          *,
                          clockwise: bool = False,
                          context: Context) -> Iterable[SegmentEndpoints]:
-    for polygon in polygons:
+    for polygon in multipolygon.polygons:
         yield from polygon_to_oriented_segments(polygon,
                                                 clockwise=clockwise,
                                                 context=context)
