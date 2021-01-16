@@ -867,7 +867,7 @@ def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
     ...  is Relation.DISJOINT)
     True
     """
-    return _polygon.relate_point(_raw.from_polygon(polygon), point,
+    return _polygon.relate_point(polygon, point,
                                  context=_get_context())
 
 
@@ -926,7 +926,7 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
     ...  is Relation.CROSS)
     True
     """
-    return _polygon.relate_segment(_raw.from_polygon(polygon), segment,
+    return _polygon.relate_segment(polygon, segment,
                                    context=_get_context())
 
 
@@ -978,8 +978,7 @@ def multisegment_in_polygon(multisegment: Multisegment,
     ...  is Relation.COMPONENT)
     True
     """
-    return _polygon.relate_multisegment(_raw.from_polygon(polygon),
-                                        multisegment,
+    return _polygon.relate_multisegment(polygon, multisegment,
                                         context=_get_context())
 
 
@@ -1030,7 +1029,7 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_contour(_raw.from_polygon(polygon), contour,
+    return _polygon.relate_contour(polygon, contour,
                                    context=_get_context())
 
 
@@ -1087,7 +1086,7 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_region(_raw.from_polygon(polygon), region,
+    return _polygon.relate_region(polygon, region,
                                   context=_get_context())
 
 
@@ -1148,7 +1147,7 @@ def multiregion_in_polygon(multiregion: Multiregion,
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_multiregion(_raw.from_polygon(polygon), multiregion,
+    return _polygon.relate_multiregion(polygon, multiregion,
                                        context=_get_context())
 
 
@@ -1245,8 +1244,7 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_polygon(_raw.from_polygon(right),
-                                   _raw.from_polygon(left),
+    return _polygon.relate_polygon(right, left,
                                    context=_get_context())
 
 
@@ -1849,7 +1847,7 @@ def polygon_in_multipolygon(polygon: Polygon,
     True
     """
     return _multipolygon.relate_polygon(_raw.from_multipolygon(multipolygon),
-                                        _raw.from_polygon(polygon),
+                                        polygon,
                                         context=_get_context())
 
 
