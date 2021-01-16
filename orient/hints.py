@@ -1,6 +1,5 @@
-from typing import Sequence
+from .core.hints import (Multiregion,
+                         Region)
 
-from ground.hints import Contour as _Contour
-
-Region = _Contour
-Multiregion = Sequence[Region]
+Region = Region
+Multiregion = Multiregion
