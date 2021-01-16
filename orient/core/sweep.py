@@ -442,6 +442,4 @@ def _point_in_angle(point: Point,
 
 
 def _points_distance(start: Point, end: Point) -> Coordinate:
-    start, end = start, end
-    delta_x, delta_y = end.x - start.x, end.y - start.y
-    return math.sqrt(delta_x * delta_x + delta_y * delta_y)
+    return math.hypot(end.x - start.x, end.y - start.y)
