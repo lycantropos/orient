@@ -2,7 +2,7 @@ from ground.hints import Contour, Multipolygon, Polygon
 
 
 def from_contour(contour: Contour):
-    return contour.vertices
+    return contour
 
 
 from_region = from_contour

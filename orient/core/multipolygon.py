@@ -2,14 +2,14 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import (Multisegment,
+from ground.hints import (Contour,
+                          Multisegment,
                           Point,
                           Segment)
 
 from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
-from .hints import (Contour,
-                    Multipolygon,
+from .hints import (Multipolygon,
                     Multiregion,
                     Polygon,
                     Region,
@@ -68,8 +68,8 @@ def relate_multisegment(multipolygon: Multipolygon,
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for polygon in multipolygon:
         border, _ = polygon
-        polygon_bounding_box = box.from_iterable(border,
-                                                 context=context)
+        polygon_bounding_box = box.from_contour(border,
+                                                context=context)
         if not box.disjoint_with(polygon_bounding_box,
                                  multisegment_bounding_box):
             if disjoint:
@@ -97,13 +97,13 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour,
                    context: Context) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
-    contour_bounding_box = box.from_iterable(contour,
-                                             context=context)
+    contour_bounding_box = box.from_contour(contour,
+                                            context=context)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for polygon in multipolygon:
         border, _ = polygon
-        polygon_bounding_box = box.from_iterable(border,
-                                                 context=context)
+        polygon_bounding_box = box.from_contour(border,
+                                                context=context)
         if not box.disjoint_with(polygon_bounding_box,
                                  contour_bounding_box):
             if disjoint:
@@ -131,14 +131,14 @@ def relate_region(multipolygon: Multipolygon, region: Region,
                   context: Context) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
-    region_bounding_box = box.from_iterable(region,
-                                            context=context)
+    region_bounding_box = box.from_contour(region,
+                                           context=context)
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
     for polygon in multipolygon:
         border, _ = polygon
-        polygon_bounding_box = box.from_iterable(border,
-                                                 context=context)
+        polygon_bounding_box = box.from_contour(border,
+                                                context=context)
         if box.disjoint_with(region_bounding_box,
                              polygon_bounding_box):
             if none_disjoint:
@@ -180,11 +180,10 @@ def relate_multiregion(multipolygon: Multipolygon,
                        context: Context) -> Relation:
     if not (multipolygon and multiregion):
         return Relation.DISJOINT
-    multiregion_bounding_box = box.from_iterables(multiregion,
-                                                  context=context)
-    multipolygon_bounding_box = box.from_iterables(
-            _to_borders(multipolygon),
-            context=context)
+    multiregion_bounding_box = box.from_contours(multiregion,
+                                                 context=context)
+    multipolygon_bounding_box = box.from_multipolygon(multipolygon,
+                                                      context=context)
     if box.disjoint_with(multipolygon_bounding_box,
                          multiregion_bounding_box):
         return Relation.DISJOINT
@@ -207,14 +206,14 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon,
     if not multipolygon:
         return Relation.DISJOINT
     border, _ = polygon
-    polygon_bounding_box = box.from_iterable(border,
-                                             context=context)
+    polygon_bounding_box = box.from_contour(border,
+                                            context=context)
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
     for sub_polygon in multipolygon:
         border, _ = sub_polygon
-        sub_polygon_bounding_box = box.from_iterable(border,
-                                                     context=context)
+        sub_polygon_bounding_box = box.from_contour(border,
+                                                    context=context)
         if box.disjoint_with(sub_polygon_bounding_box,
                              polygon_bounding_box):
             if none_disjoint:
@@ -255,10 +254,10 @@ def relate_multipolygon(goal: Multipolygon, test: Multipolygon,
                         context: Context) -> Relation:
     if not (goal and test):
         return Relation.DISJOINT
-    goal_bounding_box = box.from_iterables(_to_borders(goal),
-                                           context=context)
-    test_bounding_box = box.from_iterables(_to_borders(test),
-                                           context=context)
+    goal_bounding_box = box.from_multipolygon(goal,
+                                              context=context)
+    test_bounding_box = box.from_multipolygon(test,
+                                              context=context)
     sweeper = CompoundSweeper()
     sweeper.register_segments(to_oriented_segments(goal,
                                                    context=context),
@@ -279,7 +278,3 @@ def to_oriented_segments(polygons: Iterable[Polygon],
         yield from polygon_to_oriented_segments(polygon,
                                                 clockwise=clockwise,
                                                 context=context)
-
-
-def _to_borders(multipolygon: Multipolygon) -> Iterable[Region]:
-    return (border for border, _ in multipolygon)

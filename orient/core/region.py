@@ -4,6 +4,7 @@ from typing import (Optional,
 from ground.base import (Context,
                          Relation)
 from ground.hints import (Box,
+                          Contour,
                           Multisegment,
                           Point,
                           Segment)
@@ -15,8 +16,7 @@ from .contour import (equal as contours_equal,
                       to_edges_endpoints as contour_to_edges_endpoints,
                       to_oriented_edges_endpoints
                       as contour_to_oriented_segments)
-from .hints import (Contour,
-                    Region)
+from .hints import Region
 from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
@@ -91,23 +91,22 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
             last_touched_edge_start = edge_start
         elif relation_with_edge is Relation.CROSS:
             return Relation.CROSS
-    if not has_no_touch and last_touched_edge_index == len(contour) - 1:
-        first_edge_endpoints = first_edge_start, first_edge_end = (contour[-1],
-                                                                   contour[0])
+    vertices = contour.vertices
+    if not has_no_touch and last_touched_edge_index == len(vertices) - 1:
+        first_edge_endpoints = first_edge_start, first_edge_end = (
+            vertices[-1], vertices[0])
         if (relate_segments(first_edge_start, first_edge_end, start, end,
                             context=context) is Relation.TOUCH
                 and start not in first_edge_endpoints
                 and end not in first_edge_endpoints
                 and (orientation(start, end, first_edge_start)
                      is Orientation.COLLINEAR)
-                and point_vertex_line_divides_angle(start, contour[-2],
+                and point_vertex_line_divides_angle(start, vertices[-2],
                                                     first_edge_start,
                                                     first_edge_end,
                                                     context=context)):
             return Relation.CROSS
-    return ((Relation.DISJOINT
-             if has_no_touch
-             else Relation.TOUCH)
+    return ((Relation.DISJOINT if has_no_touch else Relation.TOUCH)
             if has_no_overlap
             else Relation.OVERLAP)
 
@@ -143,12 +142,13 @@ def relate_segment(region: Region, segment: Segment,
                                                      context=context)
             positively_oriented = (border_orientation
                                    is Orientation.COUNTERCLOCKWISE)
-            edge_start, edge_end = (region[start_index - 1],
-                                    region[start_index])
+            vertices = region.vertices
+            edge_start, edge_end = (vertices[start_index - 1],
+                                    vertices[start_index])
             if start == edge_start:
-                prev_start = (region[start_index - 2]
+                prev_start = (vertices[start_index - 2]
                               if positively_oriented
-                              else region[start_index])
+                              else vertices[start_index])
                 if (orientation(prev_start, edge_start, edge_end)
                         is border_orientation):
                     if (orientation(edge_start, prev_start, end)
@@ -161,9 +161,9 @@ def relate_segment(region: Region, segment: Segment,
                       is border_orientation):
                     return Relation.TOUCH
             elif start == edge_end:
-                next_end = (region[(start_index + 1) % len(region)]
+                next_end = (vertices[(start_index + 1) % len(vertices)]
                             if positively_oriented
-                            else region[len(region) - start_index - 3])
+                            else vertices[len(vertices) - start_index - 3])
                 if (orientation(edge_start, edge_end, next_end)
                         is border_orientation):
                     if (orientation(edge_end, edge_start, end)
@@ -178,11 +178,11 @@ def relate_segment(region: Region, segment: Segment,
             elif (orientation(edge_end, edge_start, end)
                   is border_orientation):
                 return Relation.TOUCH
-            edge_start, edge_end = region[end_index - 1], region[end_index]
+            edge_start, edge_end = vertices[end_index - 1], vertices[end_index]
             if end == edge_start:
-                prev_start = (region[end_index - 2]
+                prev_start = (vertices[end_index - 2]
                               if positively_oriented
-                              else region[end_index])
+                              else vertices[end_index])
                 if (orientation(prev_start, edge_start, edge_end)
                         is border_orientation):
                     if (orientation(edge_start, prev_start, start)
@@ -195,9 +195,9 @@ def relate_segment(region: Region, segment: Segment,
                       is border_orientation):
                     return Relation.TOUCH
             elif end == edge_end:
-                next_end = (region[(end_index + 1) % len(region)]
+                next_end = (vertices[(end_index + 1) % len(vertices)]
                             if positively_oriented
-                            else region[len(region) - end_index - 3])
+                            else vertices[len(vertices) - end_index - 3])
                 if (orientation(edge_start, edge_end, next_end)
                         is border_orientation):
                     if (orientation(edge_end, edge_start, start)
@@ -232,8 +232,8 @@ def _relate_multisegment(region: Region,
                          multisegment_bounding_box: Box,
                          *,
                          context: Context) -> Relation:
-    region_bounding_box = box.from_iterable(region,
-                                            context=context)
+    region_bounding_box = box.from_contour(region,
+                                           context=context)
     if box.disjoint_with(multisegment_bounding_box,
                          region_bounding_box):
         return Relation.DISJOINT
@@ -252,8 +252,8 @@ def relate_contour(region: Region, contour: Contour,
                    *,
                    context: Context) -> Relation:
     return _relate_contour(region, contour,
-                           box.from_iterable(contour,
-                                             context=context),
+                           box.from_contour(contour,
+                                            context=context),
                            context=context)
 
 
@@ -262,8 +262,8 @@ def _relate_contour(region: Region,
                     contour_bounding_box: Box,
                     *,
                     context: Context) -> Relation:
-    region_bounding_box = box.from_iterable(region,
-                                            context=context)
+    region_bounding_box = box.from_contour(region,
+                                           context=context)
     if box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour,
@@ -284,10 +284,10 @@ def relate_region(goal: Region, test: Region,
                   *,
                   context: Context) -> Relation:
     return _relate_region(goal, test,
-                          box.from_iterable(goal,
-                                            context=context),
-                          box.from_iterable(test,
-                                            context=context),
+                          box.from_contour(goal,
+                                           context=context),
+                          box.from_contour(test,
+                                           context=context),
                           context=context)
 
 

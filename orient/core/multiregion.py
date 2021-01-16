@@ -3,14 +3,14 @@ from typing import Iterable
 from ground.base import (Context,
                          Relation)
 from ground.hints import (Box,
+                          Contour,
                           Multisegment,
                           Point,
                           Segment)
 
 from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
-from .hints import (Contour,
-                    Multiregion,
+from .hints import (Multiregion,
                     Region,
                     SegmentEndpoints)
 from .multisegment import to_segments_endpoints
@@ -65,8 +65,8 @@ def _relate_multisegment(multiregion: Multiregion,
                          context: Context) -> Relation:
     disjoint, multiregion_max_x, sweeper = True, None, None
     for region in multiregion:
-        region_bounding_box = box.from_iterable(region,
-                                                context=context)
+        region_bounding_box = box.from_contour(region,
+                                               context=context)
         if not box.disjoint_with(region_bounding_box,
                                  multisegment_bounding_box):
             if disjoint:
@@ -93,8 +93,8 @@ def relate_contour(multiregion: Multiregion, contour: Contour,
                    *,
                    context: Context) -> Relation:
     return (_relate_contour(multiregion, contour,
-                            box.from_iterable(contour,
-                                              context=context),
+                            box.from_contour(contour,
+                                             context=context),
                             context=context)
             if multiregion
             else Relation.DISJOINT)
@@ -107,8 +107,8 @@ def _relate_contour(multiregion: Multiregion,
                     context: Context) -> Relation:
     disjoint, multiregion_max_x, sweeper = True, None, None
     for region in multiregion:
-        region_bounding_box = box.from_iterable(region,
-                                                context=context)
+        region_bounding_box = box.from_contour(region,
+                                               context=context)
         if not box.disjoint_with(region_bounding_box,
                                  contour_bounding_box):
             if disjoint:
@@ -135,8 +135,8 @@ def relate_region(multiregion: Multiregion, region: Region,
                   *,
                   context: Context) -> Relation:
     return (_relate_region(multiregion, region,
-                           box.from_iterable(region,
-                                             context=context),
+                           box.from_contour(region,
+                                            context=context),
                            context=context)
             if multiregion
             else Relation.DISJOINT)
@@ -150,10 +150,9 @@ def _relate_region(goal_regions: Iterable[Region],
     all_disjoint, none_disjoint, goal_regions_max_x, sweeper = (True, True,
                                                                 None, None)
     for goal_region in goal_regions:
-        goal_region_bounding_box = box.from_iterable(goal_region,
-                                                     context=context)
-        if box.disjoint_with(region_bounding_box,
-                             goal_region_bounding_box):
+        goal_region_bounding_box = box.from_contour(goal_region,
+                                                    context=context)
+        if box.disjoint_with(region_bounding_box, goal_region_bounding_box):
             if none_disjoint:
                 none_disjoint = False
         else:
@@ -191,10 +190,10 @@ def relate_multiregion(goal: Multiregion, test: Multiregion,
                        *,
                        context: Context) -> Relation:
     return (_relate_multiregion(goal, test,
-                                box.from_iterables(goal,
-                                                   context=context),
-                                box.from_iterables(test,
-                                                   context=context),
+                                box.from_contours(goal,
+                                                  context=context),
+                                box.from_contours(test,
+                                                  context=context),
                                 context=context)
             if goal and test
             else Relation.DISJOINT)
