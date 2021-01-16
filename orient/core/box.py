@@ -5,6 +5,7 @@ from ground.hints import (Box,
                           Contour,
                           Multisegment,
                           Point,
+                          Polygon,
                           Segment)
 
 from .hints import Multipolygon
@@ -38,7 +39,7 @@ def from_contours(contours: Iterable[Contour],
 def from_multipolygon(multipolygon: Multipolygon,
                       *,
                       context: Context):
-    return from_contours((border for border, _ in multipolygon),
+    return from_contours((polygon.border for polygon in multipolygon),
                          context=context)
 
 
@@ -48,6 +49,13 @@ def from_multisegment(multisegment: Multisegment,
     return _from_iterable(flatten((segment.start, segment.end)
                                   for segment in multisegment.segments),
                           context=context)
+
+
+def from_polygon(polygon: Polygon,
+                 *,
+                 context: Context):
+    return from_contour(polygon.border,
+                        context=context)
 
 
 def from_segment(segment: Segment,

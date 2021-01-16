@@ -2,15 +2,14 @@ from typing import Iterable
 
 from ground.base import (Context,
                          Relation)
-from ground.hints import (Box,
-                          Contour,
+from ground.hints import (Contour,
                           Multisegment,
                           Point,
+                          Polygon,
                           Segment)
 
 from . import box
 from .hints import (Multiregion,
-                    Polygon,
                     Region,
                     SegmentEndpoints)
 from .multiregion import (_relate_contour as relate_contour_to_multiregion,
@@ -32,11 +31,10 @@ from .sweep import CompoundSweeper
 def relate_point(polygon: Polygon, point: Point,
                  *,
                  context: Context) -> Relation:
-    border, holes = polygon
-    relation_without_holes = relate_point_to_region(border, point,
+    relation_without_holes = relate_point_to_region(polygon.border, point,
                                                     context=context)
     if relation_without_holes is Relation.WITHIN:
-        for hole in holes:
+        for hole in polygon.holes:
             relation_with_hole = relate_point_to_region(hole, point,
                                                         context=context)
             if relation_with_hole is Relation.WITHIN:
@@ -49,7 +47,7 @@ def relate_point(polygon: Polygon, point: Point,
 def relate_segment(polygon: Polygon, segment: Segment,
                    *,
                    context: Context) -> Relation:
-    border, holes = polygon
+    border, holes = polygon.border, polygon.holes
     relation_without_holes = relate_segment_to_region(border, segment,
                                                       context=context)
     if (holes and (relation_without_holes is Relation.WITHIN
@@ -76,8 +74,7 @@ def relate_multisegment(polygon: Polygon,
                         context: Context) -> Relation:
     if not multisegment.segments:
         return Relation.DISJOINT
-    border, _ = polygon
-    polygon_bounding_box = box.from_contour(border,
+    polygon_bounding_box = box.from_polygon(polygon,
                                             context=context)
     multisegment_bounding_box = box.from_multisegment(multisegment,
                                                       context=context)
@@ -98,12 +95,12 @@ def relate_multisegment(polygon: Polygon,
 def relate_contour(polygon: Polygon, contour: Contour,
                    *,
                    context: Context) -> Relation:
-    border, holes = polygon
     contour_bounding_box = box.from_contour(contour,
                                             context=context)
-    relation_without_holes = relate_contour_to_region(border, contour,
+    relation_without_holes = relate_contour_to_region(polygon.border, contour,
                                                       contour_bounding_box,
                                                       context=context)
+    holes = polygon.holes
     if holes and (relation_without_holes is Relation.ENCLOSED
                   or relation_without_holes is Relation.WITHIN):
         relation_with_holes = relate_contour_to_multiregion(
@@ -128,9 +125,9 @@ def relate_contour(polygon: Polygon, contour: Contour,
 def relate_region(polygon: Polygon, region: Region,
                   *,
                   context: Context) -> Relation:
-    border, holes = polygon
     region_bounding_box = box.from_contour(region,
                                            context=context)
+    border, holes = polygon.border, polygon.holes
     relation_with_border = relate_regions(border, region,
                                           box.from_contour(border,
                                                            context=context),
@@ -178,7 +175,7 @@ def _relate_multiregion(polygon: Polygon,
                         multiregion: Multiregion,
                         *,
                         context: Context) -> Relation:
-    border, holes = polygon
+    border, holes = polygon.border, polygon.holes
     border_bounding_box = box.from_contour(border,
                                            context=context)
     if not holes:
@@ -246,24 +243,13 @@ def _relate_multiregion(polygon: Polygon,
 def relate_polygon(goal: Polygon, test: Polygon,
                    *,
                    context: Context) -> Relation:
-    goal_border, goal_holes = goal
-    test_border, test_holes = test
-    return _relate_polygon(goal_border, goal_holes, test_border, test_holes,
-                           box.from_contour(goal_border,
-                                            context=context),
-                           box.from_contour(test_border,
-                                            context=context),
-                           context=context)
-
-
-def _relate_polygon(goal_border: Region,
-                    goal_holes: Multiregion,
-                    test_border: Region,
-                    test_holes: Multiregion,
-                    goal_border_bounding_box: Box,
-                    test_border_bounding_box: Box,
-                    *,
-                    context: Context) -> Relation:
+    goal_border_bounding_box, test_border_bounding_box = (
+        box.from_polygon(goal,
+                         context=context),
+        box.from_polygon(test,
+                         context=context))
+    goal_border, goal_holes = goal.border, goal.holes
+    test_border, test_holes = test.border, test.holes
     borders_relation = relate_regions(goal_border, test_border,
                                       goal_border_bounding_box,
                                       test_border_bounding_box,
@@ -350,11 +336,11 @@ def _relate_polygon(goal_border: Region,
         none_touch = True
         subsets_holes_indices = []
         for hole_index, hole in enumerate(test_holes):
-            hole_relation = relate_regions(
-                    goal_border, hole, goal_border_bounding_box,
-                    box.from_contour(hole,
-                                     context=context),
-                    context=context)
+            hole_relation = relate_regions(goal_border, hole,
+                                           goal_border_bounding_box,
+                                           box.from_contour(hole,
+                                                            context=context),
+                                           context=context)
             if hole_relation is Relation.TOUCH:
                 if none_touch:
                     none_touch = False
@@ -402,10 +388,9 @@ def to_oriented_edges_endpoints(polygon: Polygon,
                                 clockwise: bool = False,
                                 context: Context
                                 ) -> Iterable[SegmentEndpoints]:
-    border, holes = polygon
-    yield from region_to_oriented_segments(border,
+    yield from region_to_oriented_segments(polygon.border,
                                            clockwise=clockwise,
                                            context=context)
-    yield from multiregion_to_oriented_segments(holes,
+    yield from multiregion_to_oriented_segments(polygon.holes,
                                                 clockwise=not clockwise,
                                                 context=context)

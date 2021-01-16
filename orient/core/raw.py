@@ -2,7 +2,7 @@ from ground.hints import Multipolygon, Polygon
 
 
 def from_polygon(polygon: Polygon):
-    return polygon.border, polygon.holes
+    return polygon
 
 
 def from_multipolygon(multipolygon: Multipolygon):

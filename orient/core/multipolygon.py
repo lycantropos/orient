@@ -5,13 +5,13 @@ from ground.base import (Context,
 from ground.hints import (Contour,
                           Multisegment,
                           Point,
+                          Polygon,
                           Segment)
 
 from . import box
 from .contour import to_edges_endpoints as contour_to_edges_endpoints
 from .hints import (Multipolygon,
                     Multiregion,
-                    Polygon,
                     Region,
                     SegmentEndpoints)
 from .multiregion import (to_oriented_edges_endpoints
@@ -67,8 +67,7 @@ def relate_multisegment(multipolygon: Multipolygon,
                                                       context=context)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for polygon in multipolygon:
-        border, _ = polygon
-        polygon_bounding_box = box.from_contour(border,
+        polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
         if not box.disjoint_with(polygon_bounding_box,
                                  multisegment_bounding_box):
@@ -101,8 +100,7 @@ def relate_contour(multipolygon: Multipolygon, contour: Contour,
                                             context=context)
     disjoint, multipolygon_max_x, sweeper = True, None, None
     for polygon in multipolygon:
-        border, _ = polygon
-        polygon_bounding_box = box.from_contour(border,
+        polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
         if not box.disjoint_with(polygon_bounding_box,
                                  contour_bounding_box):
@@ -136,8 +134,7 @@ def relate_region(multipolygon: Multipolygon, region: Region,
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
     for polygon in multipolygon:
-        border, _ = polygon
-        polygon_bounding_box = box.from_contour(border,
+        polygon_bounding_box = box.from_polygon(polygon,
                                                 context=context)
         if box.disjoint_with(region_bounding_box,
                              polygon_bounding_box):
@@ -205,14 +202,12 @@ def relate_polygon(multipolygon: Multipolygon, polygon: Polygon,
                    context: Context) -> Relation:
     if not multipolygon:
         return Relation.DISJOINT
-    border, _ = polygon
-    polygon_bounding_box = box.from_contour(border,
+    polygon_bounding_box = box.from_polygon(polygon,
                                             context=context)
     all_disjoint, none_disjoint, multipolygon_max_x, sweeper = (True, True,
                                                                 None, None)
     for sub_polygon in multipolygon:
-        border, _ = sub_polygon
-        sub_polygon_bounding_box = box.from_contour(border,
+        sub_polygon_bounding_box = box.from_contour(sub_polygon.border,
                                                     context=context)
         if box.disjoint_with(sub_polygon_bounding_box,
                              polygon_bounding_box):
