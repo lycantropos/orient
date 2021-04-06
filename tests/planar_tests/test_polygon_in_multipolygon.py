@@ -7,7 +7,7 @@ from hypothesis import given
 
 from orient.planar import (polygon_in_multipolygon,
                            polygon_in_polygon)
-from tests.utils import (COMPOUND_RELATIONS,
+from tests.utils import (MULTIPART_COMPOUND_RELATIONS,
                          equivalence,
                          multipolygon_pop_left,
                          multipolygon_rotations,
@@ -30,7 +30,7 @@ def test_basic(multipolygon_with_polygon: Tuple[Multipolygon, Polygon]
     result = polygon_in_multipolygon(polygon, multipolygon)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in MULTIPART_COMPOUND_RELATIONS
 
 
 @given(strategies.non_empty_multipolygons)

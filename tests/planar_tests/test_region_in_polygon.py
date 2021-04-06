@@ -7,7 +7,7 @@ from hypothesis import given
 from orient.hints import Region
 from orient.planar import (contour_in_polygon,
                            region_in_polygon)
-from tests.utils import (COMPOUND_RELATIONS,
+from tests.utils import (UNIFORM_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          region_rotations,
@@ -25,7 +25,7 @@ def test_basic(region_with_polygon: Tuple[Polygon, Region]) -> None:
     result = region_in_polygon(region, polygon)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in UNIFORM_COMPOUND_RELATIONS
 
 
 @given(strategies.polygons)
@@ -62,8 +62,7 @@ def test_rotations(polygon_with_region: Tuple[Polygon, Region]) -> None:
 
 @given(strategies.polygons_with_contours)
 def test_connection_with_contour_in_polygon(polygon_with_region
-                                            : Tuple[Polygon, Region]
-                                            ) -> None:
+                                            : Tuple[Polygon, Region]) -> None:
     polygon, region = polygon_with_region
 
     result = region_in_polygon(region, polygon)

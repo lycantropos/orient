@@ -43,11 +43,15 @@ LINEAR_COMPOUND_RELATIONS = (Relation.DISJOINT, Relation.TOUCH, Relation.CROSS,
                              Relation.WITHIN)
 SYMMETRIC_COMPOUND_RELATIONS = (Relation.DISJOINT, Relation.TOUCH,
                                 Relation.OVERLAP, Relation.EQUAL)
-ASYMMETRIC_COMPOUND_RELATIONS = (Relation.COVER, Relation.COMPOSITE,
-                                 Relation.ENCLOSES, Relation.COMPONENT,
-                                 Relation.ENCLOSED, Relation.WITHIN)
-COMPOUND_RELATIONS = (SYMMETRIC_COMPOUND_RELATIONS
-                      + ASYMMETRIC_COMPOUND_RELATIONS)
+ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS = (Relation.COVER, Relation.ENCLOSES,
+                                         Relation.ENCLOSED, Relation.WITHIN)
+UNIFORM_COMPOUND_RELATIONS = (SYMMETRIC_COMPOUND_RELATIONS
+                              + ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS)
+ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS = (
+        ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS + (Relation.COMPOSITE,
+                                                 Relation.COMPONENT))
+MULTIPART_COMPOUND_RELATIONS = (SYMMETRIC_COMPOUND_RELATIONS
+                                + ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
 def implication(antecedent: bool, consequent: bool) -> bool:

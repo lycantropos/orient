@@ -6,8 +6,8 @@ from hypothesis import given
 
 from orient.planar import (multipolygon_in_multipolygon,
                            polygon_in_multipolygon)
-from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
-                         COMPOUND_RELATIONS,
+from tests.utils import (ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS,
+                         MULTIPART_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
@@ -28,7 +28,7 @@ def test_basic(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
     result = multipolygon_in_multipolygon(multipolygon, multipolygon)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in MULTIPART_COMPOUND_RELATIONS
 
 
 @given(strategies.non_empty_multipolygons)
@@ -59,10 +59,11 @@ def test_relations(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
     complement = multipolygon_in_multipolygon(right, left)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-    assert equivalence(result is not complement,
-                       result.complement is complement
-                       and result in ASYMMETRIC_COMPOUND_RELATIONS
-                       and complement in ASYMMETRIC_COMPOUND_RELATIONS)
+    assert equivalence(
+            result is not complement,
+            result.complement is complement
+            and result in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS
+            and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
 @given(strategies.empty_multipolygons_with_multipolygons)

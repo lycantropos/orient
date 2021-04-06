@@ -6,15 +6,16 @@ from hypothesis import given
 
 from orient.planar import (point_in_polygon,
                            polygon_in_polygon)
-from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
-                         COMPOUND_RELATIONS,
+from tests.utils import (ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
+                         UNIFORM_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_polygon_border,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
-                         to_polygon_vertices, to_polygon_with_convex_border,
+                         to_polygon_vertices,
+                         to_polygon_with_convex_border,
                          to_solid_polygon)
 from . import strategies
 
@@ -26,7 +27,7 @@ def test_basic(polygons_pair: Tuple[Polygon, Polygon]) -> None:
     result = polygon_in_polygon(left, right)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in UNIFORM_COMPOUND_RELATIONS
 
 
 @given(strategies.polygons)
@@ -45,8 +46,8 @@ def test_relations(polygons_pair: Tuple[Polygon, Polygon]) -> None:
                        result in SYMMETRIC_COMPOUND_RELATIONS)
     assert equivalence(result is not complement,
                        result.complement is complement
-                       and result in ASYMMETRIC_COMPOUND_RELATIONS
-                       and complement in ASYMMETRIC_COMPOUND_RELATIONS)
+                       and result in ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS
+                       and complement in ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS)
 
 
 @given(strategies.polygons)

@@ -7,9 +7,9 @@ from orient.hints import Region
 from orient.planar import (contour_in_region,
                            point_in_region,
                            region_in_region)
-from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
-                         COMPOUND_RELATIONS,
+from tests.utils import (ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
+                         UNIFORM_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          region_rotations,
@@ -25,7 +25,7 @@ def test_basic(regions_pair: Tuple[Region, Region]) -> None:
     result = region_in_region(left_region, right_region)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in UNIFORM_COMPOUND_RELATIONS
 
 
 @given(strategies.contours)
@@ -44,8 +44,8 @@ def test_relations(regions_pair: Tuple[Region, Region]) -> None:
                        result in SYMMETRIC_COMPOUND_RELATIONS)
     assert equivalence(result is not complement,
                        result.complement is complement
-                       and result in ASYMMETRIC_COMPOUND_RELATIONS
-                       and complement in ASYMMETRIC_COMPOUND_RELATIONS)
+                       and result in ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS
+                       and complement in ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS)
 
 
 @given(strategies.contours)

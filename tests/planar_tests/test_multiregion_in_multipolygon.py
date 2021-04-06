@@ -7,7 +7,7 @@ from hypothesis import given
 from orient.hints import Multiregion
 from orient.planar import (multiregion_in_multipolygon,
                            region_in_multipolygon)
-from tests.utils import (COMPOUND_RELATIONS,
+from tests.utils import (MULTIPART_COMPOUND_RELATIONS,
                          equivalence,
                          reverse_multicontour,
                          reverse_multipolygon_borders,
@@ -25,7 +25,7 @@ def test_basic(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
     result = multiregion_in_multipolygon(multiregion, multipolygon)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in MULTIPART_COMPOUND_RELATIONS
 
 
 @given(strategies.non_empty_multipolygons)

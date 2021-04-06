@@ -6,8 +6,8 @@ from hypothesis import given
 from orient.hints import Multiregion
 from orient.planar import (multiregion_in_multiregion,
                            region_in_multiregion)
-from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
-                         COMPOUND_RELATIONS,
+from tests.utils import (ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS,
+                         MULTIPART_COMPOUND_RELATIONS,
                          SYMMETRIC_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
@@ -24,7 +24,7 @@ def test_basic(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     result = multiregion_in_multiregion(multiregion, multiregion)
 
     assert isinstance(result, Relation)
-    assert result in COMPOUND_RELATIONS
+    assert result in MULTIPART_COMPOUND_RELATIONS
 
 
 @given(strategies.non_empty_multiregions)
@@ -53,8 +53,8 @@ def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                        result in SYMMETRIC_COMPOUND_RELATIONS)
     assert equivalence(result is not complement,
                        result.complement is complement
-                       and result in ASYMMETRIC_COMPOUND_RELATIONS
-                       and complement in ASYMMETRIC_COMPOUND_RELATIONS)
+                       and result in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS
+                       and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
 @given(strategies.empty_multiregions_with_multiregions)
