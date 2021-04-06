@@ -8,5 +8,3 @@ Welcome to orient's documentation!
 
 .. automodule:: orient.planar
     :members:
-.. autoclass:: Relation
-    :members:
