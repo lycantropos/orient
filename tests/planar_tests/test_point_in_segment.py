@@ -1,12 +1,12 @@
 from typing import Tuple
 
-from ground.base import Orientation
+from ground.base import (Orientation,
+                         Relation)
 from ground.hints import (Point,
                           Segment)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           point_in_segment)
+from orient.planar import point_in_segment
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
                          implication,
                          orientation,

@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import (Contour,
                           Polygon)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           contour_in_polygon,
+from orient.planar import (contour_in_polygon,
                            point_in_polygon,
                            segment_in_polygon)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,

@@ -1,10 +1,10 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import Segment
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           segment_in_segment)
+from orient.planar import segment_in_segment
 from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SAME_LINEAR_RELATIONS,
                          SYMMETRIC_SAME_LINEAR_RELATIONS,

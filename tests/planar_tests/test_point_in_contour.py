@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import (Contour,
                           Point)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           point_in_contour)
+from orient.planar import point_in_contour
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
                          contour_rotations,
                          reverse_contour)

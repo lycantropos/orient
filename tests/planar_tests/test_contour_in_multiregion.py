@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import Contour
 from hypothesis import given
 
 from orient.hints import Multiregion
-from orient.planar import (Relation,
-                           contour_in_multiregion,
+from orient.planar import (contour_in_multiregion,
                            contour_in_region,
                            point_in_multiregion,
                            segment_in_multiregion)

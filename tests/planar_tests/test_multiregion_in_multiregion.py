@@ -1,10 +1,10 @@
 from typing import Tuple
 
+from ground.base import Relation
 from hypothesis import given
 
 from orient.hints import Multiregion
-from orient.planar import (Relation,
-                           multiregion_in_multiregion,
+from orient.planar import (multiregion_in_multiregion,
                            region_in_multiregion)
 from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          COMPOUND_RELATIONS,

@@ -1,10 +1,10 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import Contour
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           contour_in_contour,
+from orient.planar import (contour_in_contour,
                            point_in_contour)
 from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SAME_LINEAR_RELATIONS,

@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import (Multisegment,
                           Polygon)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           multisegment_in_polygon,
+from orient.planar import (multisegment_in_polygon,
                            segment_in_polygon)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,

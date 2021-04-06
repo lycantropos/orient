@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import (Contour,
                           Multisegment)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           multisegment_in_contour,
+from orient.planar import (multisegment_in_contour,
                            segment_in_contour)
 from tests.utils import (SAME_LINEAR_RELATIONS,
                          contour_rotations,

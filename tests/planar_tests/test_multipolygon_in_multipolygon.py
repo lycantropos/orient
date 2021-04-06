@@ -1,10 +1,10 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import Multipolygon
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           multipolygon_in_multipolygon,
+from orient.planar import (multipolygon_in_multipolygon,
                            polygon_in_multipolygon)
 from tests.utils import (ASYMMETRIC_COMPOUND_RELATIONS,
                          COMPOUND_RELATIONS,

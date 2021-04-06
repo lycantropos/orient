@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import Point
 from hypothesis import given
 
 from orient.hints import Multiregion
-from orient.planar import (Relation,
-                           point_in_multiregion,
+from orient.planar import (point_in_multiregion,
                            point_in_region)
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          equivalence,

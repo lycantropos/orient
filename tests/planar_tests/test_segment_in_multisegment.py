@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import (Multisegment,
                           Segment)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           point_in_multisegment,
+from orient.planar import (point_in_multisegment,
                            segment_in_multisegment,
                            segment_in_segment)
 from tests.utils import (SAME_LINEAR_RELATIONS,

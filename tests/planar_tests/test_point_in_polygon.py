@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import (Point,
                           Polygon)
 from hypothesis import given
 
-from orient.planar import (Relation,
-                           point_in_polygon)
+from orient.planar import point_in_polygon
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          implication,
                          reverse_polygon_border,

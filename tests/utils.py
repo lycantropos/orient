@@ -9,13 +9,13 @@ from typing import (Any,
                     TypeVar)
 
 from ground.base import (Orientation,
+                         Relation,
                          get_context)
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 
 from orient.core.utils import flatten
 from orient.hints import Multiregion
-from orient.planar import Relation
 
 Domain = TypeVar('Domain')
 Key = Callable[[Domain], Any]

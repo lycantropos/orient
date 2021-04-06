@@ -1,11 +1,11 @@
 from typing import Tuple
 
+from ground.base import Relation
 from ground.hints import Segment
 from hypothesis import given
 
 from orient.hints import Region
-from orient.planar import (Relation,
-                           point_in_region,
+from orient.planar import (point_in_region,
                            segment_in_contour,
                            segment_in_region)
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
