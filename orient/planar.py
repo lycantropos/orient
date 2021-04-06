@@ -1,11 +1,11 @@
-from ground.base import (Relation,
+from ground.base import (Relation as _Relation,
                          get_context as _get_context)
-from ground.hints import (Contour,
-                          Multipolygon,
-                          Multisegment,
-                          Point,
-                          Polygon,
-                          Segment)
+from ground.hints import (Contour as _Contour,
+                          Multipolygon as _Multipolygon,
+                          Multisegment as _Multisegment,
+                          Point as _Point,
+                          Polygon as _Polygon,
+                          Segment as _Segment)
 
 from .core import (contour as _contour,
                    multipolygon as _multipolygon,
@@ -14,13 +14,11 @@ from .core import (contour as _contour,
                    polygon as _polygon,
                    region as _region,
                    segment as _segment)
-from .hints import (Multiregion,
-                    Region)
-
-Relation = Relation
+from .hints import (Multiregion as _Multiregion,
+                    Region as _Region)
 
 
-def point_in_segment(point: Point, segment: Segment) -> Relation:
+def point_in_segment(point: _Point, segment: _Segment) -> _Relation:
     """
     Finds relation between point and segment.
 
@@ -52,7 +50,7 @@ def point_in_segment(point: Point, segment: Segment) -> Relation:
                                  context=_get_context())
 
 
-def segment_in_segment(left: Segment, right: Segment) -> Relation:
+def segment_in_segment(left: _Segment, right: _Segment) -> _Relation:
     """
     Finds relation between segments.
 
@@ -95,8 +93,8 @@ def segment_in_segment(left: Segment, right: Segment) -> Relation:
                                    context=_get_context())
 
 
-def point_in_multisegment(point: Point,
-                          multisegment: Multisegment) -> Relation:
+def point_in_multisegment(point: _Point,
+                          multisegment: _Multisegment) -> _Relation:
     """
     Finds relation between point and multisegment.
 
@@ -132,8 +130,8 @@ def point_in_multisegment(point: Point,
                                       context=_get_context())
 
 
-def segment_in_multisegment(segment: Segment,
-                            multisegment: Multisegment) -> Relation:
+def segment_in_multisegment(segment: _Segment,
+                            multisegment: _Multisegment) -> _Relation:
     """
     Finds relation between segment and multisegment.
 
@@ -180,8 +178,8 @@ def segment_in_multisegment(segment: Segment,
                                         context=_get_context())
 
 
-def multisegment_in_multisegment(left: Multisegment,
-                                 right: Multisegment) -> Relation:
+def multisegment_in_multisegment(left: _Multisegment,
+                                 right: _Multisegment) -> _Relation:
     """
     Finds relation between multisegments.
 
@@ -227,7 +225,7 @@ def multisegment_in_multisegment(left: Multisegment,
                                              context=_get_context())
 
 
-def point_in_contour(point: Point, contour: Contour) -> Relation:
+def point_in_contour(point: _Point, contour: _Contour) -> _Relation:
     """
     Finds relation between point and contour.
 
@@ -257,7 +255,7 @@ def point_in_contour(point: Point, contour: Contour) -> Relation:
                                  context=_get_context())
 
 
-def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
+def segment_in_contour(segment: _Segment, contour: _Contour) -> _Relation:
     """
     Finds relation between segment and contour.
 
@@ -304,8 +302,8 @@ def segment_in_contour(segment: Segment, contour: Contour) -> Relation:
                                    context=_get_context())
 
 
-def multisegment_in_contour(multisegment: Multisegment,
-                            contour: Contour) -> Relation:
+def multisegment_in_contour(multisegment: _Multisegment,
+                            contour: _Contour) -> _Relation:
     """
     Finds relation between multisegment and contour.
 
@@ -351,7 +349,7 @@ def multisegment_in_contour(multisegment: Multisegment,
                                         context=_get_context())
 
 
-def contour_in_contour(left: Contour, right: Contour) -> Relation:
+def contour_in_contour(left: _Contour, right: _Contour) -> _Relation:
     """
     Finds relation between contours.
 
@@ -384,7 +382,7 @@ def contour_in_contour(left: Contour, right: Contour) -> Relation:
                                    context=_get_context())
 
 
-def point_in_region(point: Point, region: Region) -> Relation:
+def point_in_region(point: _Point, region: _Region) -> _Relation:
     """
     Finds relation between point and region.
 
@@ -418,7 +416,7 @@ def point_in_region(point: Point, region: Region) -> Relation:
                                 context=_get_context())
 
 
-def segment_in_region(segment: Segment, region: Region) -> Relation:
+def segment_in_region(segment: _Segment, region: _Region) -> _Relation:
     """
     Finds relation between segment and region.
 
@@ -465,8 +463,8 @@ def segment_in_region(segment: Segment, region: Region) -> Relation:
                                   context=_get_context())
 
 
-def multisegment_in_region(multisegment: Multisegment,
-                           region: Region) -> Relation:
+def multisegment_in_region(multisegment: _Multisegment,
+                           region: _Region) -> _Relation:
     """
     Finds relation between multisegment and region.
 
@@ -511,7 +509,7 @@ def multisegment_in_region(multisegment: Multisegment,
                                        context=_get_context())
 
 
-def contour_in_region(contour: Contour, region: Region) -> Relation:
+def contour_in_region(contour: _Contour, region: _Region) -> _Relation:
     """
     Finds relation between contour and region.
 
@@ -544,7 +542,7 @@ def contour_in_region(contour: Contour, region: Region) -> Relation:
                                   context=_get_context())
 
 
-def region_in_region(left: Region, right: Region) -> Relation:
+def region_in_region(left: _Region, right: _Region) -> _Relation:
     """
     Finds relation between regions.
 
@@ -577,7 +575,8 @@ def region_in_region(left: Region, right: Region) -> Relation:
                                  context=_get_context())
 
 
-def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
+def point_in_multiregion(point: _Point,
+                         multiregion: _Multiregion) -> _Relation:
     """
     Finds relation between point and multiregion.
 
@@ -612,8 +611,8 @@ def point_in_multiregion(point: Point, multiregion: Multiregion) -> Relation:
                                      context=_get_context())
 
 
-def segment_in_multiregion(segment: Segment,
-                           multiregion: Multiregion) -> Relation:
+def segment_in_multiregion(segment: _Segment,
+                           multiregion: _Multiregion) -> _Relation:
     """
     Finds relation between segment and multiregion.
 
@@ -665,8 +664,8 @@ def segment_in_multiregion(segment: Segment,
                                        context=_get_context())
 
 
-def multisegment_in_multiregion(multisegment: Multisegment,
-                                multiregion: Multiregion) -> Relation:
+def multisegment_in_multiregion(multisegment: _Multisegment,
+                                multiregion: _Multiregion) -> _Relation:
     """
     Finds relation between multisegment and multiregion.
 
@@ -717,8 +716,8 @@ def multisegment_in_multiregion(multisegment: Multisegment,
                                             context=_get_context())
 
 
-def contour_in_multiregion(contour: Contour,
-                           multiregion: Multiregion) -> Relation:
+def contour_in_multiregion(contour: _Contour,
+                           multiregion: _Multiregion) -> _Relation:
     """
     Finds relation between contour and multiregion.
 
@@ -751,8 +750,8 @@ def contour_in_multiregion(contour: Contour,
                                        context=_get_context())
 
 
-def region_in_multiregion(region: Region,
-                          multiregion: Multiregion) -> Relation:
+def region_in_multiregion(region: _Region,
+                          multiregion: _Multiregion) -> _Relation:
     """
     Finds relation between region and multiregion.
 
@@ -789,8 +788,8 @@ def region_in_multiregion(region: Region,
                                       context=_get_context())
 
 
-def multiregion_in_multiregion(left: Multiregion,
-                               right: Multiregion) -> Relation:
+def multiregion_in_multiregion(left: _Multiregion,
+                               right: _Multiregion) -> _Relation:
     """
     Finds relation between multiregions.
 
@@ -823,7 +822,7 @@ def multiregion_in_multiregion(left: Multiregion,
                                            context=_get_context())
 
 
-def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
+def point_in_polygon(point: _Point, polygon: _Polygon) -> _Relation:
     """
     Finds relation between point and polygon.
 
@@ -870,7 +869,7 @@ def point_in_polygon(point: Point, polygon: Polygon) -> Relation:
                                  context=_get_context())
 
 
-def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
+def segment_in_polygon(segment: _Segment, polygon: _Polygon) -> _Relation:
     """
     Finds relation between segment and polygon.
 
@@ -929,8 +928,8 @@ def segment_in_polygon(segment: Segment, polygon: Polygon) -> Relation:
                                    context=_get_context())
 
 
-def multisegment_in_polygon(multisegment: Multisegment,
-                            polygon: Polygon) -> Relation:
+def multisegment_in_polygon(multisegment: _Multisegment,
+                            polygon: _Polygon) -> _Relation:
     """
     Finds relation between multisegment and polygon.
 
@@ -981,7 +980,7 @@ def multisegment_in_polygon(multisegment: Multisegment,
                                         context=_get_context())
 
 
-def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
+def contour_in_polygon(contour: _Contour, polygon: _Polygon) -> _Relation:
     """
     Finds relation between contour and polygon.
 
@@ -1032,7 +1031,7 @@ def contour_in_polygon(contour: Contour, polygon: Polygon) -> Relation:
                                    context=_get_context())
 
 
-def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
+def region_in_polygon(region: _Region, polygon: _Polygon) -> _Relation:
     """
     Finds relation between region and polygon.
 
@@ -1089,8 +1088,8 @@ def region_in_polygon(region: Region, polygon: Polygon) -> Relation:
                                   context=_get_context())
 
 
-def multiregion_in_polygon(multiregion: Multiregion,
-                           polygon: Polygon) -> Relation:
+def multiregion_in_polygon(multiregion: _Multiregion,
+                           polygon: _Polygon) -> _Relation:
     """
     Finds relation between multiregion and polygon.
 
@@ -1150,7 +1149,7 @@ def multiregion_in_polygon(multiregion: Multiregion,
                                        context=_get_context())
 
 
-def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
+def polygon_in_polygon(left: _Polygon, right: _Polygon) -> _Relation:
     """
     Finds relation between polygons.
 
@@ -1247,8 +1246,8 @@ def polygon_in_polygon(left: Polygon, right: Polygon) -> Relation:
                                    context=_get_context())
 
 
-def point_in_multipolygon(point: Point,
-                          multipolygon: Multipolygon) -> Relation:
+def point_in_multipolygon(point: _Point,
+                          multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between point and multipolygon.
 
@@ -1299,8 +1298,8 @@ def point_in_multipolygon(point: Point,
                                       context=_get_context())
 
 
-def segment_in_multipolygon(segment: Segment,
-                            multipolygon: Multipolygon) -> Relation:
+def segment_in_multipolygon(segment: _Segment,
+                            multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between segment and multipolygon.
 
@@ -1365,8 +1364,8 @@ def segment_in_multipolygon(segment: Segment,
                                         context=_get_context())
 
 
-def multisegment_in_multipolygon(multisegment: Multisegment,
-                                 multipolygon: Multipolygon) -> Relation:
+def multisegment_in_multipolygon(multisegment: _Multisegment,
+                                 multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between multisegment and multipolygon.
 
@@ -1426,8 +1425,8 @@ def multisegment_in_multipolygon(multisegment: Multisegment,
                                              context=_get_context())
 
 
-def contour_in_multipolygon(contour: Contour,
-                            multipolygon: Multipolygon) -> Relation:
+def contour_in_multipolygon(contour: _Contour,
+                            multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between contour and multipolygon.
 
@@ -1507,8 +1506,8 @@ def contour_in_multipolygon(contour: Contour,
                                         context=_get_context())
 
 
-def region_in_multipolygon(region: Region,
-                           multipolygon: Multipolygon) -> Relation:
+def region_in_multipolygon(region: _Region,
+                           multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between region and multipolygon.
 
@@ -1602,8 +1601,8 @@ def region_in_multipolygon(region: Region,
                                        context=_get_context())
 
 
-def multiregion_in_multipolygon(multiregion: Multiregion,
-                                multipolygon: Multipolygon) -> Relation:
+def multiregion_in_multipolygon(multiregion: _Multiregion,
+                                multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between multiregion and multipolygon.
 
@@ -1701,8 +1700,8 @@ def multiregion_in_multipolygon(multiregion: Multiregion,
                                             context=_get_context())
 
 
-def polygon_in_multipolygon(polygon: Polygon,
-                            multipolygon: Multipolygon) -> Relation:
+def polygon_in_multipolygon(polygon: _Polygon,
+                            multipolygon: _Multipolygon) -> _Relation:
     """
     Finds relation between polygon and multipolygon.
 
@@ -1843,8 +1842,8 @@ def polygon_in_multipolygon(polygon: Polygon,
                                         context=_get_context())
 
 
-def multipolygon_in_multipolygon(left: Multipolygon,
-                                 right: Multipolygon) -> Relation:
+def multipolygon_in_multipolygon(left: _Multipolygon,
+                                 right: _Multipolygon) -> _Relation:
     """
     Finds relation between multipolygons.
 
