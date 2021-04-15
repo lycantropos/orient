@@ -12,7 +12,9 @@ from tests.utils import (UNIFORM_COMPOUND_RELATIONS,
                          implication,
                          region_rotations,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          reverse_polygon_border,
+                         reverse_polygon_coordinates,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours)
 from . import strategies
@@ -48,6 +50,8 @@ def test_reversals(polygon_with_region: Tuple[Polygon, Region]) -> None:
     assert result is region_in_polygon(region, reverse_polygon_holes(polygon))
     assert result is region_in_polygon(region,
                                        reverse_polygon_holes_contours(polygon))
+    assert result is region_in_polygon(reverse_contour_coordinates(region),
+                                       reverse_polygon_coordinates(polygon))
 
 
 @given(strategies.polygons_with_contours)
