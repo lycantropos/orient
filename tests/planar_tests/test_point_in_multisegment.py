@@ -8,7 +8,9 @@ from hypothesis import given
 from orient.planar import point_in_multisegment
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
                          multisegment_rotations,
-                         reverse_multisegment)
+                         reverse_multisegment,
+                         reverse_multisegment_coordinates,
+                         reverse_point_coordinates)
 from . import strategies
 
 
@@ -31,6 +33,9 @@ def test_reversals(multisegment_with_point: Tuple[Multisegment, Point]
 
     assert result is point_in_multisegment(point,
                                            reverse_multisegment(multisegment))
+    assert result is point_in_multisegment(
+            reverse_point_coordinates(point),
+            reverse_multisegment_coordinates(multisegment))
 
 
 @given(strategies.multisegments_with_points)
