@@ -10,9 +10,11 @@ from orient.planar import (multiregion_in_multipolygon,
 from tests.utils import (MULTIPART_COMPOUND_RELATIONS,
                          equivalence,
                          reverse_multipolygon_borders,
+                         reverse_multipolygon_coordinates,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
                          reverse_multiregion,
+                         reverse_multiregion_coordinates,
                          sequence_rotations)
 from . import strategies
 
@@ -135,6 +137,9 @@ def test_reversals(multipolygon_with_multiregion
             multiregion, reverse_multipolygon_holes(multipolygon))
     assert result is multiregion_in_multipolygon(
             multiregion, reverse_multipolygon_holes_contours(multipolygon))
+    assert result is multiregion_in_multipolygon(
+            reverse_multiregion_coordinates(multiregion),
+            reverse_multipolygon_coordinates(multipolygon))
 
 
 @given(strategies.multipolygons_with_multiregions)
