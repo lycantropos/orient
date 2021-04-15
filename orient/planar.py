@@ -1,4 +1,7 @@
-from ground.base import (Relation as _Relation,
+from typing import Optional as _Optional
+
+from ground.base import (Context as _Context,
+                         Relation as _Relation,
                          get_context as _get_context)
 from ground.hints import (Contour as _Contour,
                           Multipolygon as _Multipolygon,
@@ -18,7 +21,9 @@ from .hints import (Multiregion as _Multiregion,
                     Region as _Region)
 
 
-def point_in_segment(point: _Point, segment: _Segment) -> _Relation:
+def point_in_segment(point: _Point, segment: _Segment,
+                     *,
+                     context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and segment.
 
@@ -46,11 +51,13 @@ def point_in_segment(point: _Point, segment: _Segment) -> _Relation:
     >>> point_in_segment(Point(0, 1), segment) is Relation.DISJOINT
     True
     """
-    return _segment.relate_point(segment, point,
-                                 context=_get_context())
+    return _segment.relate_point(
+            segment, point, _get_context() if context is None else context)
 
 
-def segment_in_segment(left: _Segment, right: _Segment) -> _Relation:
+def segment_in_segment(left: _Segment, right: _Segment,
+                       *,
+                       context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segments.
 
@@ -89,12 +96,14 @@ def segment_in_segment(left: _Segment, right: _Segment) -> _Relation:
     ...  is Relation.DISJOINT)
     True
     """
-    return _segment.relate_segment(right, left,
-                                   context=_get_context())
+    return _segment.relate_segment(
+            right, left, _get_context() if context is None else context)
 
 
 def point_in_multisegment(point: _Point,
-                          multisegment: _Multisegment) -> _Relation:
+                          multisegment: _Multisegment,
+                          *,
+                          context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and multisegment.
 
@@ -126,12 +135,15 @@ def point_in_multisegment(point: _Point,
     >>> point_in_multisegment(Point(4, 0), multisegment) is Relation.COMPONENT
     True
     """
-    return _multisegment.relate_point(multisegment, point,
-                                      context=_get_context())
+    return _multisegment.relate_point(
+            multisegment, point,
+            _get_context() if context is None else context)
 
 
 def segment_in_multisegment(segment: _Segment,
-                            multisegment: _Multisegment) -> _Relation:
+                            multisegment: _Multisegment,
+                            *,
+                            context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segment and multisegment.
 
@@ -174,12 +186,16 @@ def segment_in_multisegment(segment: _Segment,
     ...                         multisegment) is Relation.DISJOINT
     True
     """
-    return _multisegment.relate_segment(multisegment, segment,
-                                        context=_get_context())
+    return _multisegment.relate_segment(
+            multisegment, segment,
+            _get_context() if context is None else context)
 
 
 def multisegment_in_multisegment(left: _Multisegment,
-                                 right: _Multisegment) -> _Relation:
+                                 right: _Multisegment,
+                                 *,
+                                 context: _Optional[_Context] = None
+                                 ) -> _Relation:
     """
     Finds relation between multisegments.
 
@@ -221,11 +237,13 @@ def multisegment_in_multisegment(left: _Multisegment,
     ...                              square_edges) is Relation.EQUAL
     True
     """
-    return _multisegment.relate_multisegment(right, left,
-                                             context=_get_context())
+    return _multisegment.relate_multisegment(
+            right, left, _get_context() if context is None else context)
 
 
-def point_in_contour(point: _Point, contour: _Contour) -> _Relation:
+def point_in_contour(point: _Point, contour: _Contour,
+                     *,
+                     context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and contour.
 
@@ -251,11 +269,13 @@ def point_in_contour(point: _Point, contour: _Contour) -> _Relation:
     >>> point_in_contour(Point(3, 3), square) is Relation.DISJOINT
     True
     """
-    return _contour.relate_point(contour, point,
-                                 context=_get_context())
+    return _contour.relate_point(
+            contour, point, _get_context() if context is None else context)
 
 
-def segment_in_contour(segment: _Segment, contour: _Contour) -> _Relation:
+def segment_in_contour(segment: _Segment, contour: _Contour,
+                       *,
+                       context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segment and contour.
 
@@ -298,12 +318,14 @@ def segment_in_contour(segment: _Segment, contour: _Contour) -> _Relation:
     ...  is Relation.CROSS)
     True
     """
-    return _contour.relate_segment(contour, segment,
-                                   context=_get_context())
+    return _contour.relate_segment(
+            contour, segment, _get_context() if context is None else context)
 
 
 def multisegment_in_contour(multisegment: _Multisegment,
-                            contour: _Contour) -> _Relation:
+                            contour: _Contour,
+                            *,
+                            context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between multisegment and contour.
 
@@ -345,11 +367,14 @@ def multisegment_in_contour(multisegment: _Multisegment,
     >>> multisegment_in_contour(square_edges, square) is Relation.EQUAL
     True
     """
-    return _contour.relate_multisegment(contour, multisegment,
-                                        context=_get_context())
+    return _contour.relate_multisegment(
+            contour, multisegment,
+            _get_context() if context is None else context)
 
 
-def contour_in_contour(left: _Contour, right: _Contour) -> _Relation:
+def contour_in_contour(left: _Contour, right: _Contour,
+                       *,
+                       context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between contours.
 
@@ -378,11 +403,13 @@ def contour_in_contour(left: _Contour, right: _Contour) -> _Relation:
     >>> contour_in_contour(square, square) is Relation.EQUAL
     True
     """
-    return _contour.relate_contour(right, left,
-                                   context=_get_context())
+    return _contour.relate_contour(
+            right, left, _get_context() if context is None else context)
 
 
-def point_in_region(point: _Point, region: _Region) -> _Relation:
+def point_in_region(point: _Point, region: _Region,
+                    *,
+                    context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and region.
 
@@ -413,10 +440,12 @@ def point_in_region(point: _Point, region: _Region) -> _Relation:
     True
     """
     return _region.relate_point(region, point,
-                                context=_get_context())
+                                _get_context() if context is None else context)
 
 
-def segment_in_region(segment: _Segment, region: _Region) -> _Relation:
+def segment_in_region(segment: _Segment, region: _Region,
+                      *,
+                      context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segment and region.
 
@@ -459,12 +488,14 @@ def segment_in_region(segment: _Segment, region: _Region) -> _Relation:
     ...  is Relation.CROSS)
     True
     """
-    return _region.relate_segment(region, segment,
-                                  context=_get_context())
+    return _region.relate_segment(
+            region, segment, _get_context() if context is None else context)
 
 
 def multisegment_in_region(multisegment: _Multisegment,
-                           region: _Region) -> _Relation:
+                           region: _Region,
+                           *,
+                           context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between multisegment and region.
 
@@ -505,11 +536,14 @@ def multisegment_in_region(multisegment: _Multisegment,
     >>> multisegment_in_region(square_edges, square) is Relation.COMPONENT
     True
     """
-    return _region.relate_multisegment(region, multisegment,
-                                       context=_get_context())
+    return _region.relate_multisegment(
+            region, multisegment,
+            _get_context() if context is None else context)
 
 
-def contour_in_region(contour: _Contour, region: _Region) -> _Relation:
+def contour_in_region(contour: _Contour, region: _Region,
+                      *,
+                      context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between contour and region.
 
@@ -538,11 +572,13 @@ def contour_in_region(contour: _Contour, region: _Region) -> _Relation:
     >>> contour_in_region(square, square) is Relation.COMPONENT
     True
     """
-    return _region.relate_contour(region, contour,
-                                  context=_get_context())
+    return _region.relate_contour(
+            region, contour, _get_context() if context is None else context)
 
 
-def region_in_region(left: _Region, right: _Region) -> _Relation:
+def region_in_region(left: _Region, right: _Region,
+                     *,
+                     context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between regions.
 
@@ -571,12 +607,14 @@ def region_in_region(left: _Region, right: _Region) -> _Relation:
     >>> region_in_region(square, square) is Relation.EQUAL
     True
     """
-    return _region.relate_region(right, left,
-                                 context=_get_context())
+    return _region.relate_region(
+            right, left, _get_context() if context is None else context)
 
 
 def point_in_multiregion(point: _Point,
-                         multiregion: _Multiregion) -> _Relation:
+                         multiregion: _Multiregion,
+                         *,
+                         context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and multiregion.
 
@@ -607,12 +645,14 @@ def point_in_multiregion(point: _Point,
     >>> point_in_multiregion(Point(2, 2), [square]) is Relation.COMPONENT
     True
     """
-    return _multiregion.relate_point(multiregion, point,
-                                     context=_get_context())
+    return _multiregion.relate_point(
+            multiregion, point, _get_context() if context is None else context)
 
 
 def segment_in_multiregion(segment: _Segment,
-                           multiregion: _Multiregion) -> _Relation:
+                           multiregion: _Multiregion,
+                           *,
+                           context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segment and multiregion.
 
@@ -660,12 +700,16 @@ def segment_in_multiregion(segment: _Segment,
     ...  is Relation.CROSS)
     True
     """
-    return _multiregion.relate_segment(multiregion, segment,
-                                       context=_get_context())
+    return _multiregion.relate_segment(
+            multiregion, segment,
+            _get_context() if context is None else context)
 
 
 def multisegment_in_multiregion(multisegment: _Multisegment,
-                                multiregion: _Multiregion) -> _Relation:
+                                multiregion: _Multiregion,
+                                *,
+                                context: _Optional[_Context] = None
+                                ) -> _Relation:
     """
     Finds relation between multisegment and multiregion.
 
@@ -712,12 +756,15 @@ def multisegment_in_multiregion(multisegment: _Multisegment,
     ...  is Relation.COMPONENT)
     True
     """
-    return _multiregion.relate_multisegment(multiregion, multisegment,
-                                            context=_get_context())
+    return _multiregion.relate_multisegment(
+            multiregion, multisegment,
+            _get_context() if context is None else context)
 
 
 def contour_in_multiregion(contour: _Contour,
-                           multiregion: _Multiregion) -> _Relation:
+                           multiregion: _Multiregion,
+                           *,
+                           context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between contour and multiregion.
 
@@ -746,12 +793,15 @@ def contour_in_multiregion(contour: _Contour,
     >>> contour_in_multiregion(square, [square]) is Relation.COMPONENT
     True
     """
-    return _multiregion.relate_contour(multiregion, contour,
-                                       context=_get_context())
+    return _multiregion.relate_contour(
+            multiregion, contour,
+            _get_context() if context is None else context)
 
 
 def region_in_multiregion(region: _Region,
-                          multiregion: _Multiregion) -> _Relation:
+                          multiregion: _Multiregion,
+                          *,
+                          context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between region and multiregion.
 
@@ -784,12 +834,16 @@ def region_in_multiregion(region: _Region,
     >>> region_in_multiregion(square, [square]) is Relation.EQUAL
     True
     """
-    return _multiregion.relate_region(multiregion, region,
-                                      context=_get_context())
+    return _multiregion.relate_region(
+            multiregion, region,
+            _get_context() if context is None else context)
 
 
 def multiregion_in_multiregion(left: _Multiregion,
-                               right: _Multiregion) -> _Relation:
+                               right: _Multiregion,
+                               *,
+                               context: _Optional[_Context] = None
+                               ) -> _Relation:
     """
     Finds relation between multiregions.
 
@@ -818,11 +872,13 @@ def multiregion_in_multiregion(left: _Multiregion,
     >>> multiregion_in_multiregion([square], [square]) is Relation.EQUAL
     True
     """
-    return _multiregion.relate_multiregion(right, left,
-                                           context=_get_context())
+    return _multiregion.relate_multiregion(
+            right, left, _get_context() if context is None else context)
 
 
-def point_in_polygon(point: _Point, polygon: _Polygon) -> _Relation:
+def point_in_polygon(point: _Point, polygon: _Polygon,
+                     *,
+                     context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and polygon.
 
@@ -865,11 +921,13 @@ def point_in_polygon(point: _Point, polygon: _Polygon) -> _Relation:
     ...  is Relation.DISJOINT)
     True
     """
-    return _polygon.relate_point(polygon, point,
-                                 context=_get_context())
+    return _polygon.relate_point(
+            polygon, point, _get_context() if context is None else context)
 
 
-def segment_in_polygon(segment: _Segment, polygon: _Polygon) -> _Relation:
+def segment_in_polygon(segment: _Segment, polygon: _Polygon,
+                       *,
+                       context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segment and polygon.
 
@@ -924,12 +982,14 @@ def segment_in_polygon(segment: _Segment, polygon: _Polygon) -> _Relation:
     ...  is Relation.CROSS)
     True
     """
-    return _polygon.relate_segment(polygon, segment,
-                                   context=_get_context())
+    return _polygon.relate_segment(
+            polygon, segment, _get_context() if context is None else context)
 
 
 def multisegment_in_polygon(multisegment: _Multisegment,
-                            polygon: _Polygon) -> _Relation:
+                            polygon: _Polygon,
+                            *,
+                            context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between multisegment and polygon.
 
@@ -976,11 +1036,14 @@ def multisegment_in_polygon(multisegment: _Multisegment,
     ...  is Relation.COMPONENT)
     True
     """
-    return _polygon.relate_multisegment(polygon, multisegment,
-                                        context=_get_context())
+    return _polygon.relate_multisegment(
+            polygon, multisegment,
+            _get_context() if context is None else context)
 
 
-def contour_in_polygon(contour: _Contour, polygon: _Polygon) -> _Relation:
+def contour_in_polygon(contour: _Contour, polygon: _Polygon,
+                       *,
+                       context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between contour and polygon.
 
@@ -1027,11 +1090,13 @@ def contour_in_polygon(contour: _Contour, polygon: _Polygon) -> _Relation:
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_contour(polygon, contour,
-                                   context=_get_context())
+    return _polygon.relate_contour(
+            polygon, contour, _get_context() if context is None else context)
 
 
-def region_in_polygon(region: _Region, polygon: _Polygon) -> _Relation:
+def region_in_polygon(region: _Region, polygon: _Polygon,
+                      *,
+                      context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between region and polygon.
 
@@ -1084,12 +1149,14 @@ def region_in_polygon(region: _Region, polygon: _Polygon) -> _Relation:
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_region(polygon, region,
-                                  context=_get_context())
+    return _polygon.relate_region(
+            polygon, region, _get_context() if context is None else context)
 
 
 def multiregion_in_polygon(multiregion: _Multiregion,
-                           polygon: _Polygon) -> _Relation:
+                           polygon: _Polygon,
+                           *,
+                           context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between multiregion and polygon.
 
@@ -1145,11 +1212,14 @@ def multiregion_in_polygon(multiregion: _Multiregion,
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_multiregion(polygon, multiregion,
-                                       context=_get_context())
+    return _polygon.relate_multiregion(
+            polygon, multiregion,
+            _get_context() if context is None else context)
 
 
-def polygon_in_polygon(left: _Polygon, right: _Polygon) -> _Relation:
+def polygon_in_polygon(left: _Polygon, right: _Polygon,
+                       *,
+                       context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between polygons.
 
@@ -1242,12 +1312,14 @@ def polygon_in_polygon(left: _Polygon, right: _Polygon) -> _Relation:
     ...  is Relation.WITHIN)
     True
     """
-    return _polygon.relate_polygon(right, left,
-                                   context=_get_context())
+    return _polygon.relate_polygon(
+            right, left, _get_context() if context is None else context)
 
 
 def point_in_multipolygon(point: _Point,
-                          multipolygon: _Multipolygon) -> _Relation:
+                          multipolygon: _Multipolygon,
+                          *,
+                          context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between point and multipolygon.
 
@@ -1294,12 +1366,15 @@ def point_in_multipolygon(point: _Point,
     ...  is Relation.COMPONENT)
     True
     """
-    return _multipolygon.relate_point(multipolygon, point,
-                                      context=_get_context())
+    return _multipolygon.relate_point(
+            multipolygon, point,
+            _get_context() if context is None else context)
 
 
 def segment_in_multipolygon(segment: _Segment,
-                            multipolygon: _Multipolygon) -> _Relation:
+                            multipolygon: _Multipolygon,
+                            *,
+                            context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between segment and multipolygon.
 
@@ -1360,12 +1435,16 @@ def segment_in_multipolygon(segment: _Segment,
     ...  is Relation.CROSS)
     True
     """
-    return _multipolygon.relate_segment(multipolygon, segment,
-                                        context=_get_context())
+    return _multipolygon.relate_segment(
+            multipolygon, segment,
+            _get_context() if context is None else context)
 
 
 def multisegment_in_multipolygon(multisegment: _Multisegment,
-                                 multipolygon: _Multipolygon) -> _Relation:
+                                 multipolygon: _Multipolygon,
+                                 *,
+                                 context: _Optional[_Context] = None
+                                 ) -> _Relation:
     """
     Finds relation between multisegment and multipolygon.
 
@@ -1421,12 +1500,15 @@ def multisegment_in_multipolygon(multisegment: _Multisegment,
     ...  is Relation.COMPONENT)
     True
     """
-    return _multipolygon.relate_multisegment(multipolygon, multisegment,
-                                             context=_get_context())
+    return _multipolygon.relate_multisegment(
+            multipolygon, multisegment,
+            _get_context() if context is None else context)
 
 
 def contour_in_multipolygon(contour: _Contour,
-                            multipolygon: _Multipolygon) -> _Relation:
+                            multipolygon: _Multipolygon,
+                            *,
+                            context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between contour and multipolygon.
 
@@ -1502,12 +1584,15 @@ def contour_in_multipolygon(contour: _Contour,
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_contour(multipolygon, contour,
-                                        context=_get_context())
+    return _multipolygon.relate_contour(
+            multipolygon, contour,
+            _get_context() if context is None else context)
 
 
 def region_in_multipolygon(region: _Region,
-                           multipolygon: _Multipolygon) -> _Relation:
+                           multipolygon: _Multipolygon,
+                           *,
+                           context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between region and multipolygon.
 
@@ -1597,12 +1682,16 @@ def region_in_multipolygon(region: _Region,
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_region(multipolygon, region,
-                                       context=_get_context())
+    return _multipolygon.relate_region(
+            multipolygon, region,
+            _get_context() if context is None else context)
 
 
 def multiregion_in_multipolygon(multiregion: _Multiregion,
-                                multipolygon: _Multipolygon) -> _Relation:
+                                multipolygon: _Multipolygon,
+                                *,
+                                context: _Optional[_Context] = None
+                                ) -> _Relation:
     """
     Finds relation between multiregion and multipolygon.
 
@@ -1696,12 +1785,15 @@ def multiregion_in_multipolygon(multiregion: _Multiregion,
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_multiregion(multipolygon, multiregion,
-                                            context=_get_context())
+    return _multipolygon.relate_multiregion(
+            multipolygon, multiregion,
+            _get_context() if context is None else context)
 
 
 def polygon_in_multipolygon(polygon: _Polygon,
-                            multipolygon: _Multipolygon) -> _Relation:
+                            multipolygon: _Multipolygon,
+                            *,
+                            context: _Optional[_Context] = None) -> _Relation:
     """
     Finds relation between polygon and multipolygon.
 
@@ -1838,12 +1930,16 @@ def polygon_in_multipolygon(polygon: _Polygon,
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_polygon(multipolygon, polygon,
-                                        context=_get_context())
+    return _multipolygon.relate_polygon(
+            multipolygon, polygon,
+            _get_context() if context is None else context)
 
 
 def multipolygon_in_multipolygon(left: _Multipolygon,
-                                 right: _Multipolygon) -> _Relation:
+                                 right: _Multipolygon,
+                                 *,
+                                 context: _Optional[_Context] = None
+                                 ) -> _Relation:
     """
     Finds relation between multipolygons.
 
@@ -2021,5 +2117,5 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
     ...  is Relation.WITHIN)
     True
     """
-    return _multipolygon.relate_multipolygon(right, left,
-                                             context=_get_context())
+    return _multipolygon.relate_multipolygon(
+            right, left, _get_context() if context is None else context)
