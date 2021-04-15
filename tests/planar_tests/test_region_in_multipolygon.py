@@ -14,8 +14,10 @@ from tests.utils import (MULTIPART_COMPOUND_RELATIONS,
                          multipolygon_pop_left,
                          multipolygon_rotations,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
+                         reverse_multipolygon_coordinates,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours)
 from . import strategies
@@ -130,6 +132,9 @@ def test_reversals(multipolygon_with_region: Tuple[Multipolygon, Region]
             region, reverse_multipolygon_holes(multipolygon))
     assert result is region_in_multipolygon(
             region, reverse_multipolygon_holes_contours(multipolygon))
+    assert result is region_in_multipolygon(
+            reverse_contour_coordinates(region),
+            reverse_multipolygon_coordinates(multipolygon))
 
 
 @given(strategies.multipolygons_with_contours)
