@@ -14,8 +14,10 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          multisegment_pop_left,
                          multisegment_rotations,
                          reverse_multiregion,
+                         reverse_multiregion_coordinates,
                          reverse_multiregion_regions,
                          reverse_multisegment,
+                         reverse_multisegment_coordinates,
                          sequence_rotations)
 from . import strategies
 
@@ -119,6 +121,9 @@ def test_reversals(multiregion_with_multisegment
             multisegment, reverse_multiregion(multiregion))
     assert result is multisegment_in_multiregion(
             multisegment, reverse_multiregion_regions(multiregion))
+    assert result is multisegment_in_multiregion(
+            reverse_multisegment_coordinates(multisegment),
+            reverse_multiregion_coordinates(multiregion))
 
 
 @given(strategies.multiregions_with_multisegments)
