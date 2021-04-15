@@ -9,7 +9,8 @@ from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          SAME_LINEAR_RELATIONS,
                          SYMMETRIC_SAME_LINEAR_RELATIONS,
                          equivalence,
-                         reverse_segment)
+                         reverse_segment,
+                         reverse_segment_coordinates)
 from . import strategies
 
 
@@ -53,3 +54,6 @@ def test_reversals(segments_pair: Tuple[Segment, Segment]) -> None:
                                         right_segment)
     assert result is segment_in_segment(left_segment,
                                         reverse_segment(right_segment))
+    assert result is segment_in_segment(
+            reverse_segment_coordinates(left_segment),
+            reverse_segment_coordinates(right_segment))
