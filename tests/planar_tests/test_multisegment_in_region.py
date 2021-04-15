@@ -16,7 +16,9 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          region_rotations,
                          region_to_multisegment,
                          reverse_contour,
-                         reverse_multisegment)
+                         reverse_contour_coordinates,
+                         reverse_multisegment,
+                         reverse_multisegment_coordinates)
 from . import strategies
 
 
@@ -152,6 +154,9 @@ def test_reversals(region_with_multisegment: Tuple[Region, Multisegment]
             reverse_multisegment(multisegment), region)
     assert result is multisegment_in_region(multisegment,
                                             reverse_contour(region))
+    assert result is multisegment_in_region(
+            reverse_multisegment_coordinates(multisegment),
+            reverse_contour_coordinates(region))
 
 
 @given(strategies.contours_with_multisegments)
