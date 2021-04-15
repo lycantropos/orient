@@ -12,6 +12,7 @@ from tests.utils import (ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_polygon_border,
+                         reverse_polygon_coordinates,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
                          to_polygon_vertices,
@@ -79,6 +80,8 @@ def test_reversals(polygons_pair: Tuple[Polygon, Polygon]) -> None:
                                         right)
     assert result is polygon_in_polygon(left,
                                         reverse_polygon_holes_contours(right))
+    assert result is polygon_in_polygon(reverse_polygon_coordinates(left),
+                                        reverse_polygon_coordinates(right))
 
 
 @given(strategies.polygons_pairs)
