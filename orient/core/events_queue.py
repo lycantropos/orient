@@ -107,13 +107,12 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
             self._queue.push(end_event)
 
     def divide_segment(self, event: CompoundEvent, break_point: Point) -> None:
-        left_event = self.event_cls(True, break_point, event.complement,
-                                    event.from_test, event.complement.relation,
-                                    event.interior_to_left)
-        right_event = self.event_cls(False, break_point, event,
-                                     event.from_test, event.relation,
-                                     event.interior_to_left)
-        event.complement.complement, event.complement = left_event, right_event
+        left_event = event.complement.complement = self.event_cls(
+                True, break_point, event.complement, event.from_test,
+                event.complement.relation, event.interior_to_left)
+        right_event = event.complement = self.event_cls(
+                False, break_point, event, event.from_test, event.relation,
+                event.interior_to_left)
         self._queue.push(left_event)
         self._queue.push(right_event)
 
@@ -267,11 +266,11 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
             self._queue.push(end_event)
 
     def divide_segment(self, event: Event, break_point: Point) -> None:
-        left_event = self.event_cls(True, break_point, event.complement,
-                                    event.from_test, event.complement.relation)
-        right_event = self.event_cls(False, break_point, event,
-                                     event.from_test, event.relation)
-        event.complement.complement, event.complement = left_event, right_event
+        left_event = event.complement.complement = self.event_cls(
+                True, break_point, event.complement, event.from_test,
+                event.complement.relation)
+        right_event = event.complement = self.event_cls(
+                False, break_point, event, event.from_test, event.relation)
         self._queue.push(left_event)
         self._queue.push(right_event)
 
