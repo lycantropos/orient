@@ -9,7 +9,7 @@ from orient.planar import (multiregion_in_polygon,
                            region_in_polygon)
 from tests.utils import (MULTIPART_COMPOUND_RELATIONS,
                          equivalence,
-                         reverse_multicontour,
+                         reverse_multiregion,
                          reverse_polygon_border,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
@@ -111,7 +111,7 @@ def test_reversals(polygon_with_multiregion: Tuple[Polygon, Multiregion]
 
     result = multiregion_in_polygon(multiregion, polygon)
 
-    assert result is multiregion_in_polygon(reverse_multicontour(multiregion),
+    assert result is multiregion_in_polygon(reverse_multiregion(multiregion),
                                             polygon)
     assert result is multiregion_in_polygon(multiregion,
                                             reverse_polygon_border(polygon))

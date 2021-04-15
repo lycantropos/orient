@@ -13,8 +13,8 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_contour,
-                         reverse_multicontour,
-                         reverse_multicontour_contours,
+                         reverse_multiregion,
+                         reverse_multiregion_regions,
                          sequence_rotations,
                          to_contour_edges)
 from . import strategies
@@ -86,9 +86,9 @@ def test_reversals(multiregion_with_contour: Tuple[Multiregion, Contour]
     assert result is contour_in_multiregion(reverse_contour(contour),
                                             multiregion)
     assert result is contour_in_multiregion(contour,
-                                            reverse_multicontour(multiregion))
+                                            reverse_multiregion(multiregion))
     assert result is contour_in_multiregion(
-            contour, reverse_multicontour_contours(multiregion))
+            contour, reverse_multiregion_regions(multiregion))
 
 
 @given(strategies.multiregions_with_contours)

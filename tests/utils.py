@@ -166,20 +166,11 @@ def reverse_polygon_coordinates(polygon: Polygon) -> Polygon:
 
 
 def reverse_polygon_holes(polygon: Polygon) -> Polygon:
-    return Polygon(polygon.border, reverse_multicontour(polygon.holes))
+    return Polygon(polygon.border, reverse_multiregion(polygon.holes))
 
 
 def reverse_polygon_holes_contours(polygon: Polygon) -> Polygon:
-    return Polygon(polygon.border,
-                   reverse_multicontour_contours(polygon.holes))
-
-
-def reverse_multicontour(multicontour: Multiregion) -> Multiregion:
-    return multicontour[::-1]
-
-
-def reverse_multicontour_contours(multicontour: Multiregion) -> Multiregion:
-    return [reverse_contour(contour) for contour in multicontour]
+    return Polygon(polygon.border, reverse_multiregion_regions(polygon.holes))
 
 
 def reverse_multipolygon(multipolygon: Multipolygon) -> Multipolygon:
@@ -194,15 +185,27 @@ def reverse_multipolygon_borders(multipolygon: Multipolygon) -> Multipolygon:
 
 def reverse_multipolygon_holes(multipolygon: Multipolygon) -> Multipolygon:
     return Multipolygon([Polygon(polygon.border,
-                                 reverse_multicontour(polygon.holes))
+                                 reverse_multiregion(polygon.holes))
                          for polygon in multipolygon.polygons])
 
 
 def reverse_multipolygon_holes_contours(multipolygon: Multipolygon
                                         ) -> Multipolygon:
     return Multipolygon([Polygon(polygon.border,
-                                 reverse_multicontour_contours(polygon.holes))
+                                 reverse_multiregion_regions(polygon.holes))
                          for polygon in multipolygon.polygons])
+
+
+def reverse_multiregion(multiregion: Multiregion) -> Multiregion:
+    return multiregion[::-1]
+
+
+def reverse_multiregion_regions(multiregion: Multiregion) -> Multiregion:
+    return [reverse_contour(contour) for contour in multiregion]
+
+
+def reverse_multiregion_coordinates(multiregion: Multiregion) -> Multiregion:
+    return [reverse_contour_coordinates(contour) for contour in multiregion]
 
 
 def reverse_multisegment(multisegment: Multisegment) -> Multisegment:

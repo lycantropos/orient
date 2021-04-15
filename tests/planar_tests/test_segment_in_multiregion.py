@@ -11,9 +11,11 @@ from orient.planar import (point_in_multiregion,
 from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
-                         reverse_multicontour,
-                         reverse_multicontour_contours,
+                         reverse_multiregion,
+                         reverse_multiregion_coordinates,
+                         reverse_multiregion_regions,
                          reverse_segment,
+                         reverse_segment_coordinates,
                          sequence_rotations)
 from . import strategies
 
@@ -74,9 +76,12 @@ def test_reversals(multiregion_with_segment: Tuple[Multiregion, Segment]
     assert result is segment_in_multiregion(reverse_segment(segment),
                                             multiregion)
     assert result is segment_in_multiregion(segment,
-                                            reverse_multicontour(multiregion))
+                                            reverse_multiregion(multiregion))
     assert result is segment_in_multiregion(
-            segment, reverse_multicontour_contours(multiregion))
+            segment, reverse_multiregion_regions(multiregion))
+    assert result is segment_in_multiregion(
+            reverse_segment_coordinates(segment),
+            reverse_multiregion_coordinates(multiregion))
 
 
 @given(strategies.multiregions_with_segments)
