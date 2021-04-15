@@ -16,9 +16,11 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          multisegment_rotations,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
+                         reverse_multipolygon_coordinates,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
-                         reverse_multisegment)
+                         reverse_multisegment,
+                         reverse_multisegment_coordinates)
 from . import strategies
 
 
@@ -127,6 +129,9 @@ def test_reversals(multipolygon_with_multisegment
             multisegment, reverse_multipolygon_holes(multipolygon))
     assert result is multisegment_in_multipolygon(
             multisegment, reverse_multipolygon_holes_contours(multipolygon))
+    assert result is multisegment_in_multipolygon(
+            reverse_multisegment_coordinates(multisegment),
+            reverse_multipolygon_coordinates(multipolygon))
 
 
 @given(strategies.multipolygons_with_multisegments)
