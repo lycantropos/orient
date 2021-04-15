@@ -14,7 +14,7 @@ from tests.utils import (ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS,
                          implication,
                          region_rotations,
                          reverse_contour,
-                         to_region_convex_hull)
+                         reverse_contour_coordinates, to_region_convex_hull)
 from . import strategies
 
 
@@ -62,6 +62,8 @@ def test_reversals(regions_pair: Tuple[Region, Region]) -> None:
 
     assert result is region_in_region(reverse_contour(left), right)
     assert result is region_in_region(left, reverse_contour(right))
+    assert result is region_in_region(reverse_contour_coordinates(left),
+                                      reverse_contour_coordinates(right))
 
 
 @given(strategies.contours_pairs)
