@@ -20,19 +20,17 @@ from .segment import (_relate_point as relate_point_to_segment,
                       _relate_segment as relate_segments)
 
 
-def relate_point(contour: Contour, point: Point,
-                 *,
-                 context: Context) -> Relation:
+def relate_point(contour: Contour, point: Point, context: Context) -> Relation:
     return (Relation.DISJOINT
             if all(relate_point_to_segment(edge_start, edge_end, point,
-                                           context=context)
+                                           context)
                    is Relation.DISJOINT
                    for edge_start, edge_end in to_edges_endpoints(contour))
             else Relation.COMPONENT)
 
 
-def relate_segment(contour: Contour, segment: Segment,
-                   *,
+def relate_segment(contour: Contour,
+                   segment: Segment,
                    context: Context) -> Relation:
     angle_orientation = context.angle_orientation
     has_no_touch = has_no_cross = True
@@ -41,7 +39,7 @@ def relate_segment(contour: Contour, segment: Segment,
     for index, edge_endpoints in enumerate(to_edges_endpoints(contour)):
         edge_start, edge_end = edge_endpoints
         relation_with_edge = relate_segments(edge_start, edge_end, start, end,
-                                             context=context)
+                                             context)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
             return Relation.COMPONENT
@@ -59,7 +57,7 @@ def relate_segment(contour: Contour, segment: Segment,
                   and point_vertex_line_divides_angle(start,
                                                       last_touched_edge_start,
                                                       edge_start, edge_end,
-                                                      context=context)):
+                                                      context)):
                 has_no_cross = False
             last_touched_edge_index = index
             last_touched_edge_start = edge_start
@@ -72,7 +70,7 @@ def relate_segment(contour: Contour, segment: Segment,
         first_edge_endpoints = first_edge_start, first_edge_end = (
             vertices[-1], vertices[0])
         if (relate_segments(first_edge_start, first_edge_end, start, end,
-                            context=context) is Relation.TOUCH
+                            context) is Relation.TOUCH
                 and start not in first_edge_endpoints
                 and end not in first_edge_endpoints
                 and (angle_orientation(start, end, first_edge_start)
@@ -80,7 +78,7 @@ def relate_segment(contour: Contour, segment: Segment,
                 and point_vertex_line_divides_angle(start, vertices[-2],
                                                     first_edge_start,
                                                     first_edge_end,
-                                                    context=context)):
+                                                    context)):
             has_no_cross = False
     return ((Relation.DISJOINT if has_no_touch else Relation.TOUCH)
             if has_no_cross
@@ -91,7 +89,6 @@ def point_vertex_line_divides_angle(point: Point,
                                     first_ray_point: Point,
                                     vertex: Point,
                                     second_ray_point: Point,
-                                    *,
                                     context: Context) -> bool:
     return (context.angle_orientation(vertex, first_ray_point, point)
             is context.angle_orientation(vertex, point, second_ray_point))
@@ -99,15 +96,12 @@ def point_vertex_line_divides_angle(point: Point,
 
 def relate_multisegment(contour: Contour,
                         multisegment: Multisegment,
-                        *,
                         context: Context) -> Relation:
     if not multisegment.segments:
         return Relation.DISJOINT
     contour_bounding_box, multisegment_bounding_box = (
-        box.from_contour(contour,
-                         context=context),
-        box.from_multisegment(multisegment,
-                              context=context))
+        box.from_contour(contour, context),
+        box.from_multisegment(multisegment, context))
     if box.disjoint_with(contour_bounding_box, multisegment_bounding_box):
         return Relation.DISJOINT
     events_queue = LinearEventsQueue(context)
@@ -120,34 +114,24 @@ def relate_multisegment(contour: Contour,
                                          multisegment_bounding_box.max_x))
 
 
-def relate_contour(goal: Contour, test: Contour,
-                   *,
-                   context: Context) -> Relation:
-    goal_bounding_box, test_bounding_box = (box.from_contour(goal,
-                                                             context=context),
-                                            box.from_contour(test,
-                                                             context=context))
+def relate_contour(goal: Contour, test: Contour, context: Context) -> Relation:
+    goal_bounding_box, test_bounding_box = (box.from_contour(goal, context),
+                                            box.from_contour(test, context))
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    if equal(goal, test,
-             context=context):
+    if equal(goal, test, context):
         return Relation.EQUAL
     events_queue = CompoundEventsQueue(context)
-    events_queue.register(to_oriented_edges_endpoints(goal,
-                                                      context=context),
+    events_queue.register(to_oriented_edges_endpoints(goal, context),
                           from_test=False)
-    events_queue.register(to_oriented_edges_endpoints(test,
-                                                      context=context),
+    events_queue.register(to_oriented_edges_endpoints(test, context),
                           from_test=True)
     return process_closed_linear_queue(events_queue,
                                        min(goal_bounding_box.max_x,
                                            test_bounding_box.max_x))
 
 
-def equal(left: Contour,
-          right: Contour,
-          *,
-          context: Context) -> bool:
+def equal(left: Contour, right: Contour, context: Context) -> bool:
     left_vertices, right_vertices = left.vertices, right.vertices
     if len(left_vertices) != len(right_vertices):
         return False
@@ -155,10 +139,7 @@ def equal(left: Contour,
         index = right_vertices.index(left_vertices[0])
     except ValueError:
         return False
-    same_oriented = (orientation(left,
-                                 context=context)
-                     is orientation(right,
-                                    context=context))
+    same_oriented = orientation(left, context) is orientation(right, context)
     right_step = 1 if same_oriented else -1
     size = len(left_vertices)
     indices = chain(zip(range(size),
@@ -174,9 +155,7 @@ def equal(left: Contour,
                for left_index, right_index in indices)
 
 
-def orientation(contour: Contour,
-                *,
-                context: Context) -> Orientation:
+def orientation(contour: Contour, context: Context) -> Orientation:
     vertices = contour.vertices
     index = min(range(len(vertices)),
                 key=vertices.__getitem__)
@@ -191,15 +170,13 @@ def to_edges_endpoints(contour: Contour) -> Iterable[SegmentEndpoints]:
 
 
 def to_oriented_edges_endpoints(contour: Contour,
-                                *,
-                                clockwise: bool = False,
-                                context: Context
+                                context: Context,
+                                clockwise: bool = False
                                 ) -> Iterable[SegmentEndpoints]:
     vertices = contour.vertices
     return (((vertices[index - 1], vertices[index])
              for index in range(len(vertices)))
-            if (orientation(contour,
-                            context=context)
+            if (orientation(contour, context)
                 is (Orientation.CLOCKWISE
                     if clockwise
                     else Orientation.COUNTERCLOCKWISE))

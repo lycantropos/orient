@@ -18,18 +18,16 @@ from .utils import to_sorted_pair
 
 
 def relate_point(multisegment: Multisegment, point: Point,
-                 *,
                  context: Context) -> Relation:
     return (Relation.DISJOINT
             if all(relate_point_to_segment(segment, point,
-                                           context=context)
+                                           context)
                    is Relation.DISJOINT
                    for segment in multisegment.segments)
             else Relation.COMPONENT)
 
 
 def relate_segment(multisegment: Multisegment, segment: Segment,
-                   *,
                    context: Context) -> Relation:
     all_components = has_no_touch = has_no_cross = has_no_overlap = True
     # orientations of multisegment's segments
@@ -44,7 +42,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
             sub_segment.start, sub_segment.end)
         relation = relate_segments(sub_segment_start, sub_segment_end, start,
                                    end,
-                                   context=context)
+                                   context)
         if relation is Relation.COMPONENT:
             return Relation.COMPONENT
         elif relation is Relation.EQUAL:
@@ -142,15 +140,14 @@ def _subtract_segments_overlap(minuend: SegmentEndpoints,
 
 
 def relate_multisegment(goal: Multisegment, test: Multisegment,
-                        *,
                         context: Context) -> Relation:
     if not (goal.segments and test.segments):
         return Relation.DISJOINT
     goal_bounding_box, test_bounding_box = (
         box.from_multisegment(goal,
-                              context=context),
+                              context),
         box.from_multisegment(test,
-                              context=context))
+                              context))
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     events_queue = LinearEventsQueue(context)

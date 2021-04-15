@@ -436,7 +436,8 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
     def _to_point_event_cosine(self, point: Point, event: Event) -> Coordinate:
         return (self.context.dot_product(event.start, point, event.start,
                                          event.end)
-                / _points_distance(event.start, event.end))
+                / math.sqrt(self.context.points_squared_distance(event.start,
+                                                                 event.end)))
 
     def _point_in_angle(self, point: Point,
                         first_ray_point: Point,
@@ -493,7 +494,3 @@ class EventsQueueKey:
                           is (Orientation.COUNTERCLOCKWISE
                               if event.is_left_endpoint
                               else Orientation.CLOCKWISE)))
-
-
-def _points_distance(start: Point, end: Point) -> Coordinate:
-    return math.hypot(end.x - start.x, end.y - start.y)

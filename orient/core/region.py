@@ -26,23 +26,21 @@ from .segment import (_relate_point as relate_point_to_segment,
                       _relate_segment as relate_segments)
 
 
-def relate_point(region: Region, point: Point,
-                 *,
+def relate_point(region: Region,
+                 point: Point,
                  context: Context) -> Relation:
-    _, relation = _relate_point(region, point,
-                                context=context)
+    _, relation = _relate_point(region, point, context)
     return relation
 
 
-def _relate_point(region: Region, point: Point,
-                  *,
-                  context: Context) -> Tuple[Optional[int],
-                                             Relation]:
+def _relate_point(region: Region,
+                  point: Point,
+                  context: Context) -> Tuple[Optional[int], Relation]:
     result = False
     point_y = point.y
     for index, (start, end) in enumerate(contour_to_edges_endpoints(region)):
         if relate_point_to_segment(start, end, point,
-                                   context=context) is Relation.COMPONENT:
+                                   context) is Relation.COMPONENT:
             return index, Relation.COMPONENT
         if ((start.y > point_y) is not (end.y > point_y)
                 and ((end.y > start.y)
@@ -52,8 +50,8 @@ def _relate_point(region: Region, point: Point,
     return None, (Relation.WITHIN if result else Relation.DISJOINT)
 
 
-def _relate_segment_to_contour(contour: Contour, segment: Segment,
-                               *,
+def _relate_segment_to_contour(contour: Contour,
+                               segment: Segment,
                                context: Context) -> Relation:
     # similar to segment-in-contour check
     # but cross has higher priority over overlap
@@ -67,7 +65,7 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
             contour)):
         edge_start, edge_end = edge_endpoints
         relation_with_edge = relate_segments(edge_start, edge_end, start, end,
-                                             context=context)
+                                             context)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
             return Relation.COMPONENT
@@ -85,7 +83,7 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
                   and point_vertex_line_divides_angle(start,
                                                       last_touched_edge_start,
                                                       edge_start, edge_end,
-                                                      context=context)):
+                                                      context)):
                 return Relation.CROSS
             last_touched_edge_index = index
             last_touched_edge_start = edge_start
@@ -96,32 +94,30 @@ def _relate_segment_to_contour(contour: Contour, segment: Segment,
         first_edge_endpoints = first_edge_start, first_edge_end = (
             vertices[-1], vertices[0])
         if (relate_segments(first_edge_start, first_edge_end, start, end,
-                            context=context) is Relation.TOUCH
+                            context) is Relation.TOUCH
                 and start not in first_edge_endpoints
                 and end not in first_edge_endpoints
                 and (context.angle_orientation(start, end, first_edge_start)
                      is Orientation.COLLINEAR)
                 and point_vertex_line_divides_angle(start, vertices[-2],
                                                     first_edge_start,
-                                                    first_edge_end,
-                                                    context=context)):
+                                                    first_edge_end, context)):
             return Relation.CROSS
     return ((Relation.DISJOINT if has_no_touch else Relation.TOUCH)
             if has_no_overlap
             else Relation.OVERLAP)
 
 
-def relate_segment(region: Region, segment: Segment,
-                   *,
+def relate_segment(region: Region,
+                   segment: Segment,
                    context: Context) -> Relation:
     relation_with_contour = _relate_segment_to_contour(region, segment,
-                                                       context=context)
+                                                       context)
     if (relation_with_contour is Relation.CROSS
             or relation_with_contour is Relation.COMPONENT):
         return relation_with_contour
     start, end = segment.start, segment.end
-    start_index, start_relation = _relate_point(region, start,
-                                                context=context)
+    start_index, start_relation = _relate_point(region, start, context)
     if relation_with_contour is Relation.DISJOINT:
         return (Relation.DISJOINT
                 if start_relation is Relation.DISJOINT
@@ -131,16 +127,14 @@ def relate_segment(region: Region, segment: Segment,
     elif start_relation is Relation.WITHIN:
         return Relation.ENCLOSED
     else:
-        end_index, end_relation = _relate_point(region, end,
-                                                context=context)
+        end_index, end_relation = _relate_point(region, end, context)
         if end_relation is Relation.DISJOINT:
             return Relation.TOUCH
         elif end_relation is Relation.WITHIN:
             return Relation.ENCLOSED
         else:
             angle_orientation = context.angle_orientation
-            border_orientation = contour_orientation(region,
-                                                     context=context)
+            border_orientation = contour_orientation(region, context)
             positively_oriented = (border_orientation
                                    is Orientation.COUNTERCLOCKWISE)
             vertices = region.vertices
@@ -218,12 +212,10 @@ def relate_segment(region: Region, segment: Segment,
 
 def relate_multisegment(region: Region,
                         multisegment: Multisegment,
-                        *,
                         context: Context) -> Relation:
     return (_relate_multisegment(region, multisegment,
-                                 box.from_multisegment(multisegment,
-                                                       context=context),
-                                 context=context)
+                                 box.from_multisegment(multisegment, context),
+                                 context)
             if multisegment.segments
             else Relation.DISJOINT)
 
@@ -231,16 +223,12 @@ def relate_multisegment(region: Region,
 def _relate_multisegment(region: Region,
                          multisegment: Multisegment,
                          multisegment_bounding_box: Box,
-                         *,
                          context: Context) -> Relation:
-    region_bounding_box = box.from_contour(region,
-                                           context=context)
-    if box.disjoint_with(multisegment_bounding_box,
-                         region_bounding_box):
+    region_bounding_box = box.from_contour(region, context)
+    if box.disjoint_with(multisegment_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     events_queue = CompoundEventsQueue(context)
-    events_queue.register(to_oriented_segments(region,
-                                               context=context),
+    events_queue.register(to_oriented_segments(region, context),
                           from_test=False)
     events_queue.register(to_segments_endpoints(multisegment),
                           from_test=True)
@@ -249,30 +237,25 @@ def _relate_multisegment(region: Region,
                                              region_bounding_box.max_x))
 
 
-def relate_contour(region: Region, contour: Contour,
-                   *,
+def relate_contour(region: Region,
+                   contour: Contour,
                    context: Context) -> Relation:
-    return _relate_contour(region, contour,
-                           box.from_contour(contour,
-                                            context=context),
-                           context=context)
+    return _relate_contour(region, contour, box.from_contour(contour, context),
+                           context)
 
 
 def _relate_contour(region: Region,
                     contour: Contour,
                     contour_bounding_box: Box,
-                    *,
                     context: Context) -> Relation:
-    region_bounding_box = box.from_contour(region,
-                                           context=context)
+    region_bounding_box = box.from_contour(region, context)
     if box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour,
-             context=context):
+             context):
         return Relation.COMPONENT
     events_queue = CompoundEventsQueue(context)
-    events_queue.register(to_oriented_segments(region,
-                                               context=context),
+    events_queue.register(to_oriented_segments(region, context),
                           from_test=False)
     events_queue.register(contour_to_edges_endpoints(contour),
                           from_test=True)
@@ -281,34 +264,29 @@ def _relate_contour(region: Region,
                                              region_bounding_box.max_x))
 
 
-def relate_region(goal: Region, test: Region,
-                  *,
+def relate_region(goal: Region,
+                  test: Region,
                   context: Context) -> Relation:
-    return _relate_region(goal, test,
-                          box.from_contour(goal,
-                                           context=context),
-                          box.from_contour(test,
-                                           context=context),
-                          context=context)
+    return _relate_region(goal, test, box.from_contour(goal, context),
+                          box.from_contour(test, context), context)
 
 
 def _relate_region(goal: Region,
                    test: Region,
                    goal_bounding_box: Box,
                    test_bounding_box: Box,
-                   *,
                    context: Context) -> Relation:
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test,
-             context=context):
+             context):
         return Relation.EQUAL
     events_queue = CompoundEventsQueue(context)
     events_queue.register(to_oriented_segments(goal,
-                                               context=context),
+                                               context),
                           from_test=False)
     events_queue.register(to_oriented_segments(test,
-                                               context=context),
+                                               context),
                           from_test=True)
     return process_compound_queue(events_queue, min(goal_bounding_box.max_x,
                                                     test_bounding_box.max_x))
