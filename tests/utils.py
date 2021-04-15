@@ -209,6 +209,12 @@ def reverse_multisegment(multisegment: Multisegment) -> Multisegment:
     return Multisegment(multisegment.segments[::-1])
 
 
+def reverse_multisegment_coordinates(multisegment: Multisegment
+                                     ) -> Multisegment:
+    return Multisegment([reverse_segment_coordinates(segment)
+                         for segment in multisegment.segments])
+
+
 def rotate_sequence(sequence: Domain, offset: int) -> Domain:
     return (sequence[offset:] + sequence[:offset]
             if offset and sequence

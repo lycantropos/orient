@@ -14,7 +14,9 @@ from tests.utils import (SAME_LINEAR_RELATIONS,
                          multisegment_pop_left,
                          multisegment_rotations,
                          reverse_multisegment,
-                         reverse_segment)
+                         reverse_multisegment_coordinates,
+                         reverse_segment,
+                         reverse_segment_coordinates)
 from . import strategies
 
 
@@ -151,6 +153,9 @@ def test_reversals(multisegment_with_segment: Tuple[Multisegment, Segment]
                                              multisegment)
     assert result is segment_in_multisegment(
             segment, reverse_multisegment(multisegment))
+    assert result is segment_in_multisegment(
+            reverse_segment_coordinates(segment),
+            reverse_multisegment_coordinates(multisegment))
 
 
 @given(strategies.multisegments_with_segments)
