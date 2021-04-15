@@ -13,6 +13,7 @@ from tests.utils import (ASYMMETRIC_LINEAR_RELATIONS,
                          equivalence,
                          implication,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          to_contour_convex_hull)
 from . import strategies
 
@@ -61,6 +62,8 @@ def test_reversals(contours_pair: Tuple[Contour, Contour]) -> None:
 
     assert result is contour_in_contour(reverse_contour(left), right)
     assert result is contour_in_contour(left, reverse_contour(right))
+    assert result is contour_in_contour(reverse_contour_coordinates(left),
+                                        reverse_contour_coordinates(right))
 
 
 @given(strategies.contours_pairs)
