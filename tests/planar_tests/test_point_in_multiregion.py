@@ -10,7 +10,9 @@ from orient.planar import (point_in_multiregion,
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          equivalence,
                          reverse_multiregion,
+                         reverse_multiregion_coordinates,
                          reverse_multiregion_regions,
+                         reverse_point_coordinates,
                          sequence_rotations)
 from . import strategies
 
@@ -69,6 +71,9 @@ def test_reversals(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
                                           reverse_multiregion(multiregion))
     assert result is point_in_multiregion(
             point, reverse_multiregion_regions(multiregion))
+    assert result is point_in_multiregion(
+            reverse_point_coordinates(point),
+            reverse_multiregion_coordinates(multiregion))
 
 
 @given(strategies.multiregions_with_points)
