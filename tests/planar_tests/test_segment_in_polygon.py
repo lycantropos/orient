@@ -11,9 +11,11 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          are_polygons_equivalent,
                          implication,
                          reverse_polygon_border,
+                         reverse_polygon_coordinates,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
                          reverse_segment,
+                         reverse_segment_coordinates,
                          to_contour_separators,
                          to_polygon_edges,
                          to_polygon_with_convex_border)
@@ -72,6 +74,8 @@ def test_reversals(polygon_with_segment: Tuple[Polygon, Segment]) -> None:
                                         reverse_polygon_holes(polygon))
     assert result is segment_in_polygon(
             segment, reverse_polygon_holes_contours(polygon))
+    assert result is segment_in_polygon(reverse_segment_coordinates(segment),
+                                        reverse_polygon_coordinates(polygon))
 
 
 @given(strategies.polygons_with_segments)

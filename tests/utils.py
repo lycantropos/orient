@@ -159,6 +159,12 @@ def reverse_polygon_border(polygon: Polygon) -> Polygon:
     return Polygon(reverse_contour(polygon.border), polygon.holes)
 
 
+def reverse_polygon_coordinates(polygon: Polygon) -> Polygon:
+    return Polygon(reverse_contour_coordinates(polygon.border),
+                   [reverse_contour_coordinates(hole)
+                    for hole in polygon.holes])
+
+
 def reverse_polygon_holes(polygon: Polygon) -> Polygon:
     return Polygon(polygon.border, reverse_multicontour(polygon.holes))
 
