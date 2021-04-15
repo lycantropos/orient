@@ -8,7 +8,9 @@ from orient.hints import Region
 from orient.planar import point_in_region
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          region_rotations,
-                         reverse_contour)
+                         reverse_contour,
+                         reverse_contour_coordinates,
+                         reverse_point_coordinates)
 from . import strategies
 
 
@@ -35,6 +37,8 @@ def test_reversals(region_with_point: Tuple[Region, Point]) -> None:
     result = point_in_region(point, region)
 
     assert result is point_in_region(point, reverse_contour(region))
+    assert result is point_in_region(reverse_point_coordinates(point),
+                                     reverse_contour_coordinates(region))
 
 
 @given(strategies.contours_with_points)
