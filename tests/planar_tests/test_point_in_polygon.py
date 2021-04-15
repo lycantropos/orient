@@ -8,7 +8,9 @@ from hypothesis import given
 from orient.planar import point_in_polygon
 from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          implication,
+                         reverse_point_coordinates,
                          reverse_polygon_border,
+                         reverse_polygon_coordinates,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
                          to_polygon_vertices,
@@ -60,3 +62,5 @@ def test_reversals(polygon_with_point: Tuple[Polygon, Point]) -> None:
     assert result is point_in_polygon(point, reverse_polygon_holes(polygon))
     assert result is point_in_polygon(point,
                                       reverse_polygon_holes_contours(polygon))
+    assert result is point_in_polygon(reverse_point_coordinates(point),
+                                      reverse_polygon_coordinates(polygon))
