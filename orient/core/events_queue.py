@@ -314,14 +314,14 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                     largest_angle_end = largest_angle_event.end
                     base_orientation = self.context.angle_orientation(
                             start, base_end, largest_angle_end)
-                    if all_equal(self._point_in_angle(other_event.end,
-                                                      base_end, start,
-                                                      largest_angle_end,
-                                                      base_orientation)
-                                 for other_event in from_other_events):
-                        relation = SegmentsRelation.TOUCH
-                    else:
-                        relation = SegmentsRelation.CROSS
+                    relation = (
+                        SegmentsRelation.TOUCH
+                        if all_equal(self._point_in_angle(other_event.end,
+                                                          base_end, start,
+                                                          largest_angle_end,
+                                                          base_orientation)
+                                     for other_event in from_other_events)
+                        else SegmentsRelation.CROSS)
                 else:
                     relation = SegmentsRelation.TOUCH
                 for event in same_start_events:
