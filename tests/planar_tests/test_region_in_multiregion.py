@@ -12,7 +12,9 @@ from tests.utils import (MULTIPART_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          reverse_multiregion,
+                         reverse_multiregion_coordinates,
                          reverse_multiregion_regions,
                          sequence_rotations)
 from . import strategies
@@ -113,6 +115,9 @@ def test_reversals(multiregion_with_region: Tuple[Multiregion, Region]
                                            reverse_multiregion(multiregion))
     assert result is region_in_multiregion(
             region, reverse_multiregion_regions(multiregion))
+    assert result is region_in_multiregion(
+            reverse_contour_coordinates(region),
+            reverse_multiregion_coordinates(multiregion))
 
 
 @given(strategies.multiregions_with_contours)
