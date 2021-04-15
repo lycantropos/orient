@@ -32,8 +32,9 @@ def point_in_segment(point: _Point, segment: _Segment,
     Memory complexity:
         ``O(1)``
 
-    :param point: point to locate.
-    :param segment: segment to check.
+    :param point: point to check for.
+    :param segment: segment to check in.
+    :param context: geometric context.
     :returns: relation between point and segment.
 
     >>> from ground.base import Relation, get_context
@@ -66,8 +67,9 @@ def segment_in_segment(left: _Segment, right: _Segment,
     Memory complexity:
         ``O(1)``
 
-    :param left: point to locate.
-    :param right: segment to check im.
+    :param left: point to check for.
+    :param right: segment to check in.
+    :param context: geometric context.
     :returns: relation between segments.
 
     >>> from ground.base import Relation, get_context
@@ -114,6 +116,7 @@ def point_in_multisegment(point: _Point,
 
     :param point: point to check for.
     :param multisegment: multisegment to check in.
+    :param context: geometric context.
     :returns: relation between point and multisegment.
 
     >>> from ground.base import Relation, get_context
@@ -156,6 +159,7 @@ def segment_in_multisegment(segment: _Segment,
 
     :param segment: segment to check for.
     :param multisegment: multisegment to check in.
+    :param context: geometric context.
     :returns: relation between segment and multisegment.
 
     >>> from ground.base import Relation, get_context
@@ -208,6 +212,7 @@ def multisegment_in_multisegment(left: _Multisegment,
 
     :param left: multisegment to check for.
     :param right: multisegment to check in.
+    :param context: geometric context.
     :returns: relation between multisegments.
 
     >>> from ground.base import Relation, get_context
@@ -254,6 +259,7 @@ def point_in_contour(point: _Point, contour: _Contour,
 
     :param point: point to check for.
     :param contour: contour to check in.
+    :param context: geometric context.
     :returns: relation between point and contour.
 
     >>> from ground.base import Relation, get_context
@@ -286,6 +292,7 @@ def segment_in_contour(segment: _Segment, contour: _Contour,
 
     :param segment: segment to check for.
     :param contour: contour to check in.
+    :param context: geometric context.
     :returns: relation between segment and contour.
 
     >>> from ground.base import Relation, get_context
@@ -338,6 +345,7 @@ def multisegment_in_contour(multisegment: _Multisegment,
 
     :param multisegment: multisegment to check for.
     :param contour: contour to check in.
+    :param context: geometric context.
     :returns: relation between multisegment and contour.
 
     >>> from ground.base import Relation, get_context
@@ -387,6 +395,7 @@ def contour_in_contour(left: _Contour, right: _Contour,
 
     :param left: contour to check for.
     :param right: contour to check in.
+    :param context: geometric context.
     :returns: relation between contours.
 
     >>> from ground.base import Relation, get_context
@@ -424,6 +433,7 @@ def point_in_region(point: _Point, region: _Region,
 
     :param point: point to check for.
     :param region: region to check in.
+    :param context: geometric context.
     :returns: relation between point and region.
 
     >>> from ground.base import Relation, get_context
@@ -456,6 +466,7 @@ def segment_in_region(segment: _Segment, region: _Region,
 
     :param segment: segment to check for.
     :param region: region to check in.
+    :param context: geometric context.
     :returns: relation between segment and region.
 
     >>> from ground.base import Relation, get_context
@@ -508,6 +519,7 @@ def multisegment_in_region(multisegment: _Multisegment,
 
     :param multisegment: multisegment to check for.
     :param region: region to check in.
+    :param context: geometric context.
     :returns: relation between multisegment and region.
 
     >>> from ground.base import Relation, get_context
@@ -556,6 +568,7 @@ def contour_in_region(contour: _Contour, region: _Region,
 
     :param contour: contour to check for.
     :param region: region to check in.
+    :param context: geometric context.
     :returns: relation between contour and region.
 
     >>> from ground.base import Relation, get_context
@@ -591,6 +604,7 @@ def region_in_region(left: _Region, right: _Region,
 
     :param left: region to check for.
     :param right: region to check in.
+    :param context: geometric context.
     :returns: relation between regions.
 
     >>> from ground.base import Relation, get_context
@@ -625,6 +639,7 @@ def point_in_multiregion(point: _Point,
 
     :param point: point to check for.
     :param multiregion: multiregion to check in.
+    :param context: geometric context.
     :returns: relation between point and multiregion.
 
     >>> from ground.base import Relation, get_context
@@ -665,6 +680,7 @@ def segment_in_multiregion(segment: _Segment,
 
     :param segment: segment to check for.
     :param multiregion: multiregion to check in.
+    :param context: geometric context.
     :returns: relation between segment and multiregion.
 
     >>> from ground.base import Relation, get_context
@@ -722,6 +738,7 @@ def multisegment_in_multiregion(multisegment: _Multisegment,
 
     :param multisegment: multisegment to check for.
     :param multiregion: multiregion to check in.
+    :param context: geometric context.
     :returns: relation between multisegment and multiregion.
 
     >>> from ground.base import Relation, get_context
@@ -777,6 +794,7 @@ def contour_in_multiregion(contour: _Contour,
 
     :param contour: contour to check for.
     :param multiregion: multiregion to check in.
+    :param context: geometric context.
     :returns: relation between contour and multiregion.
 
     >>> from ground.base import Relation, get_context
@@ -814,6 +832,7 @@ def region_in_multiregion(region: _Region,
 
     :param region: region to check for.
     :param multiregion: multiregion to check in.
+    :param context: geometric context.
     :returns: relation between region and multiregion.
 
     >>> from ground.base import Relation, get_context
@@ -856,6 +875,7 @@ def multiregion_in_multiregion(left: _Multiregion,
 
     :param left: multiregion to check for.
     :param right: multiregion to check in.
+    :param context: geometric context.
     :returns: relation between multiregions.
 
     >>> from ground.base import Relation, get_context
@@ -892,6 +912,7 @@ def point_in_polygon(point: _Point, polygon: _Polygon,
 
     :param point: point to check for.
     :param polygon: polygon to check in.
+    :param context: geometric context.
     :returns: relation between point and polygon.
 
     >>> from ground.base import Relation, get_context
@@ -941,6 +962,7 @@ def segment_in_polygon(segment: _Segment, polygon: _Polygon,
 
     :param segment: segment to check for.
     :param polygon: polygon to check in.
+    :param context: geometric context.
     :returns: relation between segment and polygon.
 
     >>> from ground.base import Relation, get_context
@@ -1004,6 +1026,7 @@ def multisegment_in_polygon(multisegment: _Multisegment,
 
     :param multisegment: multisegment to check for.
     :param polygon: polygon to check in.
+    :param context: geometric context.
     :returns: relation between multisegment and polygon.
 
     >>> from ground.base import Relation, get_context
@@ -1058,6 +1081,7 @@ def contour_in_polygon(contour: _Contour, polygon: _Polygon,
 
     :param contour: contour to check for.
     :param polygon: polygon to check in.
+    :param context: geometric context.
     :returns: relation between contour and polygon.
 
     >>> from ground.base import Relation, get_context
@@ -1111,6 +1135,7 @@ def region_in_polygon(region: _Region, polygon: _Polygon,
 
     :param region: region to check for.
     :param polygon: polygon to check in.
+    :param context: geometric context.
     :returns: relation between region and polygon.
 
     >>> from ground.base import Relation, get_context
@@ -1171,6 +1196,7 @@ def multiregion_in_polygon(multiregion: _Multiregion,
 
     :param multiregion: multiregion to check for.
     :param polygon: polygon to check in.
+    :param context: geometric context.
     :returns: relation between multiregion and polygon.
 
     >>> from ground.base import Relation, get_context
@@ -1234,6 +1260,7 @@ def polygon_in_polygon(left: _Polygon, right: _Polygon,
 
     :param left: polygon to check for.
     :param right: polygon to check in.
+    :param context: geometric context.
     :returns: relation between polygons.
 
     >>> from ground.base import Relation, get_context
@@ -1331,6 +1358,7 @@ def point_in_multipolygon(point: _Point,
 
     :param point: point to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between point and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1388,6 +1416,7 @@ def segment_in_multipolygon(segment: _Segment,
 
     :param segment: segment to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between segment and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1459,6 +1488,7 @@ def multisegment_in_multipolygon(multisegment: _Multisegment,
 
     :param multisegment: multisegment to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between multisegment and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1523,6 +1553,7 @@ def contour_in_multipolygon(contour: _Contour,
 
     :param contour: contour to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between contour and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1607,6 +1638,7 @@ def region_in_multipolygon(region: _Region,
 
     :param region: region to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between region and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1707,6 +1739,7 @@ def multiregion_in_multipolygon(multiregion: _Multiregion,
 
     :param multiregion: multiregion to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between multiregion and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1811,6 +1844,7 @@ def polygon_in_multipolygon(polygon: _Polygon,
 
     :param polygon: polygon to check for.
     :param multipolygon: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between polygon and multipolygon.
 
     >>> from ground.base import Relation, get_context
@@ -1957,6 +1991,7 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
 
     :param left: multipolygon to check for.
     :param right: multipolygon to check in.
+    :param context: geometric context.
     :returns: relation between multipolygons.
 
     >>> from ground.base import Relation, get_context
