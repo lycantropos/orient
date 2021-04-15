@@ -13,8 +13,10 @@ from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
                          multipolygon_rotations,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
+                         reverse_multipolygon_coordinates,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours,
+                         reverse_point_coordinates,
                          to_multipolygon_vertices)
 from . import strategies
 
@@ -78,6 +80,9 @@ def test_reversals(multipolygon_with_point: Tuple[Multipolygon, Point]
             point, reverse_multipolygon_holes(multipolygon))
     assert result is point_in_multipolygon(
             point, reverse_multipolygon_holes_contours(multipolygon))
+    assert result is point_in_multipolygon(
+            reverse_point_coordinates(point),
+            reverse_multipolygon_coordinates(multipolygon))
 
 
 @given(strategies.multipolygons_with_points)
