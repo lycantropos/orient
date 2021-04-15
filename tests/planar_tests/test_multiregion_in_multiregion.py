@@ -12,6 +12,7 @@ from tests.utils import (ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_multiregion,
+                         reverse_multiregion_coordinates,
                          reverse_multiregion_regions,
                          sequence_rotations)
 from . import strategies
@@ -183,6 +184,9 @@ def test_reversals(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
             reverse_multiregion_regions(left), right)
     assert result is multiregion_in_multiregion(
             left, reverse_multiregion_regions(right))
+    assert result is multiregion_in_multiregion(
+            reverse_multiregion_coordinates(left),
+            reverse_multiregion_coordinates(right))
 
 
 @given(strategies.multiregions_pairs)
