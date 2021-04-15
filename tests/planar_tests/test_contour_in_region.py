@@ -13,6 +13,7 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          to_contour_edges)
 from . import strategies
 
@@ -40,6 +41,8 @@ def test_reversals(region_with_contour: Tuple[Region, Contour]) -> None:
 
     assert result is contour_in_region(reverse_contour(contour), region)
     assert result is contour_in_region(contour, reverse_contour(region))
+    assert result is contour_in_region(reverse_contour_coordinates(contour),
+                                       reverse_contour_coordinates(region))
 
 
 @given(strategies.contours_pairs)
