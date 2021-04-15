@@ -64,13 +64,6 @@ class EventsQueue(Generic[Event]):
         Sweeps plane and emits processed segments' events.
         """
 
-    def _orientation(self,
-                     vertex: Point,
-                     first_ray_point: Point,
-                     second_ray_point: Point) -> Orientation:
-        return self.context.angle_orientation(vertex, first_ray_point,
-                                              second_ray_point)
-
     def _segments_intersection(self,
                                first_start: Point,
                                first_end: Point,
@@ -79,8 +72,11 @@ class EventsQueue(Generic[Event]):
         return self.context.segments_intersection(first_start, first_end,
                                                   second_start, second_end)
 
-    def _segments_relation(self, first_start, first_end, second_start,
-                           second_end):
+    def _segments_relation(self,
+                           first_start: Point,
+                           first_end: Point,
+                           second_start: Point,
+                           second_end: Point) -> SegmentsRelation:
         result = self.context.segments_relation(first_start, first_end,
                                                 second_start, second_end)
         return (SegmentsRelation.DISJOINT if result is Relation.DISJOINT
@@ -232,18 +228,15 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
             point = self._segments_intersection(below_segment_start,
                                                 below_segment_end,
                                                 segment_start, segment_end)
-            if (event.start != below_event.start
-                    and event.end != below_event.end):
-                # segments do not intersect at endpoints
-                if point != below_event.start and point != below_event.end:
-                    self.divide_segment(below_event, point)
-                if point != event.start and point != event.end:
-                    self.divide_segment(event, point)
+            if point != below_event.start and point != below_event.end:
+                self.divide_segment(below_event, point)
+            if point != event.start and point != event.end:
+                self.divide_segment(event, point)
             if event.from_test is not below_event.from_test:
                 event.set_both_relations(max(event.relation,
                                              relation))
-                below_event.set_both_relations(
-                        max(below_event.relation, relation))
+                below_event.set_both_relations(max(below_event.relation,
+                                                   relation))
         return False
 
     @staticmethod
@@ -320,8 +313,8 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                                               key=partial(point_event_cosine,
                                                           base_end))
                     largest_angle_end = largest_angle_event.end
-                    base_orientation = self._orientation(start, base_end,
-                                                         largest_angle_end)
+                    base_orientation = self.context.angle_orientation(
+                            start, base_end, largest_angle_end)
                     if all_equal(self._point_in_angle(other_event.end,
                                                       base_end, start,
                                                       largest_angle_end,
@@ -356,8 +349,8 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
             prev_from_same_events, prev_from_other_events = (from_same_events,
                                                              from_other_events)
 
-    def detect_intersection(self, below_event: LinearEvent,
-                            event: LinearEvent) -> None:
+    def detect_intersection(self, below_event: LinearEvent, event: LinearEvent
+                            ) -> None:
         """
         Populates events queue with intersection events.
         """
@@ -421,13 +414,10 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
             point = self._segments_intersection(below_segment_start,
                                                 below_segment_end,
                                                 segment_start, segment_end)
-            if (event.start != below_event.start
-                    and event.end != below_event.end):
-                # segments do not intersect at endpoints
-                if point != below_event.start and point != below_event.end:
-                    self.divide_segment(below_event, point)
-                if point != event.start and point != event.end:
-                    self.divide_segment(event, point)
+            if point != below_event.start and point != below_event.end:
+                self.divide_segment(below_event, point)
+            if point != event.start and point != event.end:
+                self.divide_segment(event, point)
             if event.from_test is not below_event.from_test:
                 event.set_both_relations(max(event.relation, relation))
                 below_event.set_both_relations(max(below_event.relation,
@@ -444,10 +434,10 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                         vertex: Point,
                         second_ray_point: Point,
                         angle_orientation: Orientation) -> bool:
-        first_half_orientation = self._orientation(vertex, first_ray_point,
-                                                   point)
-        second_half_orientation = self._orientation(second_ray_point, vertex,
-                                                    point)
+        first_half_orientation = self.context.angle_orientation(
+                vertex, first_ray_point, point)
+        second_half_orientation = self.context.angle_orientation(
+                second_ray_point, vertex, point)
         return (second_half_orientation is angle_orientation
                 if first_half_orientation is Orientation.COLLINEAR
                 else (first_half_orientation is angle_orientation
