@@ -183,6 +183,12 @@ def reverse_multipolygon_borders(multipolygon: Multipolygon) -> Multipolygon:
                          for polygon in multipolygon.polygons])
 
 
+def reverse_multipolygon_coordinates(multipolygon: Multipolygon
+                                     ) -> Multipolygon:
+    return Multipolygon([reverse_polygon_coordinates(polygon)
+                         for polygon in multipolygon.polygons])
+
+
 def reverse_multipolygon_holes(multipolygon: Multipolygon) -> Multipolygon:
     return Multipolygon([Polygon(polygon.border,
                                  reverse_multiregion(polygon.holes))
