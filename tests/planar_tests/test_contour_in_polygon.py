@@ -13,7 +13,9 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          equivalence,
                          implication,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          reverse_polygon_border,
+                         reverse_polygon_coordinates,
                          reverse_polygon_holes,
                          reverse_polygon_holes_contours,
                          to_contour_edges)
@@ -51,6 +53,8 @@ def test_reversals(polygon_with_contour: Tuple[Polygon, Contour]) -> None:
                                         reverse_polygon_holes(polygon))
     assert result is contour_in_polygon(
             contour, reverse_polygon_holes_contours(polygon))
+    assert result is contour_in_polygon(reverse_contour_coordinates(contour),
+                                        reverse_polygon_coordinates(polygon))
 
 
 @given(strategies.polygons_with_contours)
