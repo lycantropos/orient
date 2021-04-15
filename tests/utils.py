@@ -134,6 +134,11 @@ def reverse_contour(contour: Contour) -> Contour:
     return Contour(contour.vertices[::-1])
 
 
+def reverse_contour_coordinates(contour: Contour) -> Contour:
+    return Contour([reverse_point_coordinates(vertex)
+                    for vertex in contour.vertices])
+
+
 def reverse_segment(segment: Segment) -> Segment:
     return Segment(segment.end, segment.start)
 

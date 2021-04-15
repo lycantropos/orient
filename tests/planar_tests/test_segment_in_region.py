@@ -14,7 +14,9 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          implication,
                          region_rotations,
                          reverse_contour,
+                         reverse_contour_coordinates,
                          reverse_segment,
+                         reverse_segment_coordinates,
                          to_contour_separators,
                          to_region_convex_hull,
                          to_region_edges)
@@ -61,6 +63,8 @@ def test_reversals(region_with_segment: Tuple[Region, Segment]) -> None:
 
     assert result is segment_in_region(reverse_segment(segment), region)
     assert result is segment_in_region(segment, reverse_contour(region))
+    assert result is segment_in_region(reverse_segment_coordinates(segment),
+                                       reverse_contour_coordinates(region))
 
 
 @given(strategies.contours_with_segments)
