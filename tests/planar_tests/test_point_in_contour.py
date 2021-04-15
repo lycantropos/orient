@@ -8,7 +8,9 @@ from hypothesis import given
 from orient.planar import point_in_contour
 from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
                          contour_rotations,
-                         reverse_contour)
+                         reverse_contour,
+                         reverse_contour_coordinates,
+                         reverse_point_coordinates)
 from . import strategies
 
 
@@ -35,6 +37,8 @@ def test_reversals(contour_with_point: Tuple[Contour, Point]) -> None:
     result = point_in_contour(point, contour)
 
     assert result is point_in_contour(point, reverse_contour(contour))
+    assert result is point_in_contour(reverse_point_coordinates(point),
+                                      reverse_contour_coordinates(contour))
 
 
 @given(strategies.contours_with_points)
