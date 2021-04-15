@@ -16,6 +16,7 @@ from tests.utils import (ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS,
                          polygon_to_multipolygon,
                          reverse_multipolygon,
                          reverse_multipolygon_borders,
+                         reverse_multipolygon_coordinates,
                          reverse_multipolygon_holes,
                          reverse_multipolygon_holes_contours)
 from . import strategies
@@ -198,6 +199,9 @@ def test_reversals(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
             reverse_multipolygon_holes_contours(left), right)
     assert result is multipolygon_in_multipolygon(
             left, reverse_multipolygon_holes_contours(right))
+    assert result is multipolygon_in_multipolygon(
+            reverse_multipolygon_coordinates(left),
+            reverse_multipolygon_coordinates(right))
 
 
 @given(strategies.multipolygons_pairs)
