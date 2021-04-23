@@ -40,16 +40,15 @@ def relate_segment(multiregion: Multiregion,
             if len(multiregion) == 1
             else _relate_multisegment(multiregion,
                                       context.multisegment_cls([segment]),
-                                      box.from_segment(segment, context),
-                                      context))
+                                      context.segment_box(segment), context))
 
 
 def relate_multisegment(multiregion: Multiregion,
                         multisegment: Multisegment,
                         context: Context) -> Relation:
     return (_relate_multisegment(multiregion, multisegment,
-                                 box.from_multisegment(multisegment,
-                                                       context), context)
+                                 context.segments_box(multisegment.segments),
+                                 context)
             if multisegment.segments and multiregion
             else Relation.DISJOINT)
 
@@ -60,7 +59,7 @@ def _relate_multisegment(multiregion: Multiregion,
                          context: Context) -> Relation:
     disjoint, multiregion_max_x, events_queue = True, None, None
     for region in multiregion:
-        region_bounding_box = box.from_contour(region, context)
+        region_bounding_box = context.contour_box(region)
         if not box.disjoint_with(region_bounding_box,
                                  multisegment_bounding_box):
             if disjoint:
@@ -85,7 +84,7 @@ def relate_contour(multiregion: Multiregion,
                    contour: Contour,
                    context: Context) -> Relation:
     return (_relate_contour(multiregion, contour,
-                            box.from_contour(contour, context), context)
+                            context.contour_box(contour), context)
             if multiregion
             else Relation.DISJOINT)
 
@@ -96,7 +95,7 @@ def _relate_contour(multiregion: Multiregion,
                     context: Context) -> Relation:
     disjoint, multiregion_max_x, events_queue = True, None, None
     for region in multiregion:
-        region_bounding_box = box.from_contour(region, context)
+        region_bounding_box = context.contour_box(region)
         if not box.disjoint_with(region_bounding_box, contour_bounding_box):
             if disjoint:
                 disjoint = False
@@ -120,7 +119,7 @@ def relate_region(multiregion: Multiregion,
                   region: Region,
                   context: Context) -> Relation:
     return (_relate_region(multiregion, region,
-                           box.from_contour(region, context), context)
+                           context.contour_box(region), context)
             if multiregion
             else Relation.DISJOINT)
 
@@ -130,10 +129,9 @@ def _relate_region(goal_regions: Iterable[Region],
                    region_bounding_box: Box,
                    context: Context) -> Relation:
     all_disjoint, none_disjoint, goal_regions_max_x, events_queue = (
-        True, True,
-        None, None)
+        True, True, None, None)
     for goal_region in goal_regions:
-        goal_region_bounding_box = box.from_contour(goal_region, context)
+        goal_region_bounding_box = context.contour_box(goal_region)
         if box.disjoint_with(region_bounding_box, goal_region_bounding_box):
             if none_disjoint:
                 none_disjoint = False
@@ -169,8 +167,8 @@ def _relate_region(goal_regions: Iterable[Region],
 
 def relate_multiregion(goal: Multiregion, test: Multiregion,
                        context: Context) -> Relation:
-    return (_relate_multiregion(goal, test, box.from_contours(goal, context),
-                                box.from_contours(test, context), context)
+    return (_relate_multiregion(goal, test, context.contours_box(goal),
+                                context.contours_box(test), context)
             if goal and test
             else Relation.DISJOINT)
 

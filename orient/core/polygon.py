@@ -71,8 +71,8 @@ def relate_multisegment(polygon: Polygon,
                         context: Context) -> Relation:
     if not multisegment.segments:
         return Relation.DISJOINT
-    polygon_bounding_box = box.from_polygon(polygon, context)
-    multisegment_bounding_box = box.from_multisegment(multisegment, context)
+    polygon_bounding_box = context.polygon_box(polygon)
+    multisegment_bounding_box = context.segments_box(multisegment.segments)
     if box.disjoint_with(polygon_bounding_box, multisegment_bounding_box):
         return Relation.DISJOINT
     events_queue = CompoundEventsQueue(context)
@@ -88,7 +88,7 @@ def relate_multisegment(polygon: Polygon,
 def relate_contour(polygon: Polygon,
                    contour: Contour,
                    context: Context) -> Relation:
-    contour_bounding_box = box.from_contour(contour, context)
+    contour_bounding_box = context.contour_box(contour)
     relation_without_holes = relate_contour_to_region(polygon.border, contour,
                                                       contour_bounding_box,
                                                       context)
@@ -96,8 +96,7 @@ def relate_contour(polygon: Polygon,
     if holes and (relation_without_holes is Relation.ENCLOSED
                   or relation_without_holes is Relation.WITHIN):
         relation_with_holes = relate_contour_to_multiregion(
-                holes, contour, contour_bounding_box,
-                context)
+                holes, contour, contour_bounding_box, context)
         if relation_with_holes is Relation.DISJOINT:
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
@@ -117,10 +116,10 @@ def relate_contour(polygon: Polygon,
 def relate_region(polygon: Polygon,
                   region: Region,
                   context: Context) -> Relation:
-    region_bounding_box = box.from_contour(region, context)
+    region_bounding_box = context.contour_box(region)
     border, holes = polygon.border, polygon.holes
     relation_with_border = relate_regions(border, region,
-                                          box.from_contour(border, context),
+                                          context.contour_box(border),
                                           region_bounding_box, context)
     if relation_with_border in (Relation.DISJOINT,
                                 Relation.TOUCH,
@@ -163,7 +162,7 @@ def _relate_multiregion(polygon: Polygon,
                         multiregion: Multiregion,
                         context: Context) -> Relation:
     border, holes = polygon.border, polygon.holes
-    border_bounding_box = box.from_contour(border, context)
+    border_bounding_box = context.contour_box(border)
     if not holes:
         return relate_region_to_regions(multiregion, border,
                                         border_bounding_box,
@@ -172,8 +171,7 @@ def _relate_multiregion(polygon: Polygon,
     subsets_regions_indices = []
     for region_index, region in enumerate(multiregion):
         region_relation = relate_regions(border, region, border_bounding_box,
-                                         box.from_contour(region, context),
-                                         context)
+                                         context.contour_box(region), context)
         if region_relation is Relation.TOUCH:
             if none_touch:
                 none_touch = False
@@ -228,8 +226,8 @@ def _relate_multiregion(polygon: Polygon,
 def relate_polygon(goal: Polygon,
                    test: Polygon,
                    context: Context) -> Relation:
-    goal_bounding_box, test_bounding_box = (box.from_polygon(goal, context),
-                                            box.from_polygon(test, context))
+    goal_bounding_box, test_bounding_box = (context.polygon_box(goal),
+                                            context.polygon_box(test))
     goal_border, goal_holes = goal.border, goal.holes
     test_border, test_holes = test.border, test.holes
     borders_relation = relate_regions(goal_border, test_border,
@@ -270,7 +268,7 @@ def relate_polygon(goal: Polygon,
             for hole_index, hole in enumerate(goal_holes):
                 hole_relation = relate_regions(test_border, hole,
                                                test_bounding_box,
-                                               box.from_contour(hole, context),
+                                               context.contour_box(hole),
                                                context)
                 if hole_relation is Relation.TOUCH:
                     if none_touch:
@@ -318,8 +316,7 @@ def relate_polygon(goal: Polygon,
         for hole_index, hole in enumerate(test_holes):
             hole_relation = relate_regions(goal_border, hole,
                                            goal_bounding_box,
-                                           box.from_contour(hole, context),
-                                           context)
+                                           context.contour_box(hole), context)
             if hole_relation is Relation.TOUCH:
                 if none_touch:
                     none_touch = False

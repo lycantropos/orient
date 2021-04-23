@@ -143,11 +143,8 @@ def relate_multisegment(goal: Multisegment, test: Multisegment,
                         context: Context) -> Relation:
     if not (goal.segments and test.segments):
         return Relation.DISJOINT
-    goal_bounding_box, test_bounding_box = (
-        box.from_multisegment(goal,
-                              context),
-        box.from_multisegment(test,
-                              context))
+    goal_bounding_box = context.segments_box(goal.segments)
+    test_bounding_box = context.segments_box(test.segments)
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     events_queue = LinearEventsQueue(context)

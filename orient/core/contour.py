@@ -99,9 +99,8 @@ def relate_multisegment(contour: Contour,
                         context: Context) -> Relation:
     if not multisegment.segments:
         return Relation.DISJOINT
-    contour_bounding_box, multisegment_bounding_box = (
-        box.from_contour(contour, context),
-        box.from_multisegment(multisegment, context))
+    contour_bounding_box = context.contour_box(contour)
+    multisegment_bounding_box = context.segments_box(multisegment.segments)
     if box.disjoint_with(contour_bounding_box, multisegment_bounding_box):
         return Relation.DISJOINT
     events_queue = LinearEventsQueue(context)
@@ -115,8 +114,8 @@ def relate_multisegment(contour: Contour,
 
 
 def relate_contour(goal: Contour, test: Contour, context: Context) -> Relation:
-    goal_bounding_box, test_bounding_box = (box.from_contour(goal, context),
-                                            box.from_contour(test, context))
+    goal_bounding_box, test_bounding_box = (context.contour_box(goal),
+                                            context.contour_box(test))
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     if equal(goal, test, context):

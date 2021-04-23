@@ -214,7 +214,7 @@ def relate_multisegment(region: Region,
                         multisegment: Multisegment,
                         context: Context) -> Relation:
     return (_relate_multisegment(region, multisegment,
-                                 box.from_multisegment(multisegment, context),
+                                 context.segments_box(multisegment.segments),
                                  context)
             if multisegment.segments
             else Relation.DISJOINT)
@@ -224,7 +224,7 @@ def _relate_multisegment(region: Region,
                          multisegment: Multisegment,
                          multisegment_bounding_box: Box,
                          context: Context) -> Relation:
-    region_bounding_box = box.from_contour(region, context)
+    region_bounding_box = context.contour_box(region)
     if box.disjoint_with(multisegment_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     events_queue = CompoundEventsQueue(context)
@@ -240,7 +240,7 @@ def _relate_multisegment(region: Region,
 def relate_contour(region: Region,
                    contour: Contour,
                    context: Context) -> Relation:
-    return _relate_contour(region, contour, box.from_contour(contour, context),
+    return _relate_contour(region, contour, context.contour_box(contour),
                            context)
 
 
@@ -248,7 +248,7 @@ def _relate_contour(region: Region,
                     contour: Contour,
                     contour_bounding_box: Box,
                     context: Context) -> Relation:
-    region_bounding_box = box.from_contour(region, context)
+    region_bounding_box = context.contour_box(region)
     if box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
     if equal(region, contour,
@@ -267,8 +267,8 @@ def _relate_contour(region: Region,
 def relate_region(goal: Region,
                   test: Region,
                   context: Context) -> Relation:
-    return _relate_region(goal, test, box.from_contour(goal, context),
-                          box.from_contour(test, context), context)
+    return _relate_region(goal, test, context.contour_box(goal),
+                          context.contour_box(test), context)
 
 
 def _relate_region(goal: Region,
@@ -282,11 +282,9 @@ def _relate_region(goal: Region,
              context):
         return Relation.EQUAL
     events_queue = CompoundEventsQueue(context)
-    events_queue.register(to_oriented_segments(goal,
-                                               context),
+    events_queue.register(to_oriented_segments(goal, context),
                           from_test=False)
-    events_queue.register(to_oriented_segments(test,
-                                               context),
+    events_queue.register(to_oriented_segments(test, context),
                           from_test=True)
     return process_compound_queue(events_queue, min(goal_bounding_box.max_x,
                                                     test_bounding_box.max_x))
