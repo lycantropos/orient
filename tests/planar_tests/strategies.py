@@ -223,7 +223,8 @@ def polygon_to_polygons_with_multisegments(polygon: Polygon
                                            ) -> Strategy[Tuple[Polygon,
                                                                Multisegment]]:
     return strategies.tuples(strategies.just(polygon),
-                             sub_lists(list(to_polygon_edges(polygon)))
+                             sub_lists(list(to_polygon_edges(polygon)),
+                                       min_size=2)
                              .map(Multisegment))
 
 
@@ -246,13 +247,6 @@ def to_polygons_with_multiregions(coordinates: Strategy[Scalar]
                                   ) -> Strategy[Tuple[Polygon, Multiregion]]:
     return strategies.tuples(planar.polygons(coordinates),
                              planar.multicontours(coordinates))
-
-
-def polygon_to_polygons_with_multiregions(polygon: Polygon
-                                          ) -> Strategy[Tuple[Polygon,
-                                                              Multiregion]]:
-    return strategies.tuples(strategies.just(polygon),
-                             sub_lists(polygon.holes))
 
 
 polygons_with_multiregions = (coordinates_strategies
@@ -295,7 +289,9 @@ def multipolygon_to_multipolygons_with_multisegments(
                                                       Multisegment]]:
     edges = list(to_multipolygon_edges(multipolygon))
     return strategies.tuples(strategies.just(multipolygon),
-                             sub_lists(edges).map(Multisegment))
+                             sub_lists(edges,
+                                       min_size=2)
+                             .map(Multisegment))
 
 
 multipolygons_with_multisegments = (

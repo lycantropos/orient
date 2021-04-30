@@ -4,6 +4,7 @@ from typing import (Any,
                     Callable,
                     Iterable,
                     List,
+                    Optional,
                     Sequence,
                     Tuple,
                     TypeVar)
@@ -240,10 +241,17 @@ def sequence_rotations(sequence: Domain) -> Iterable[Domain]:
         yield rotate_sequence(sequence, offset)
 
 
-def sub_lists(sequence: Sequence[Domain]) -> Strategy[List[Domain]]:
+def sub_lists(sequence: Sequence[Domain],
+              *,
+              min_size: int = 0,
+              max_size: Optional[int] = None) -> SearchStrategy[List[Domain]]:
+    if max_size is None:
+        max_size = len(sequence)
     return strategies.builds(getitem,
                              strategies.permutations(sequence),
-                             strategies.slices(max(len(sequence), 1)))
+                             strategies.builds(slice,
+                                               strategies.integers(min_size,
+                                                                   max_size)))
 
 
 def to_contour_convex_hull(contour: Contour) -> Contour:
