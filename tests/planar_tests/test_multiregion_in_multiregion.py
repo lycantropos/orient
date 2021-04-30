@@ -28,18 +28,10 @@ def test_basic(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     assert result in MULTIPART_COMPOUND_RELATIONS
 
 
-@given(strategies.non_empty_multiregions)
+@given(strategies.multiregions)
 def test_self(multiregion: Multiregion) -> None:
     assert (multiregion_in_multiregion(multiregion, multiregion)
             is Relation.EQUAL)
-    assert equivalence(all(multiregion_in_multiregion([region], multiregion)
-                           is Relation.EQUAL
-                           for region in multiregion),
-                       len(multiregion) == 1)
-    assert equivalence(all(multiregion_in_multiregion([region], multiregion)
-                           is Relation.COMPONENT
-                           for region in multiregion),
-                       len(multiregion) > 1)
 
 
 @given(strategies.multiregions_pairs)
@@ -52,21 +44,14 @@ def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
                                             left_multiregion)
     assert equivalence(result is complement,
                        result in SYMMETRIC_COMPOUND_RELATIONS)
-    assert equivalence(result is not complement,
-                       result.complement is complement
-                       and result in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS
-                       and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
+    assert equivalence(
+            result is not complement,
+            result.complement is complement
+            and result in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS
+            and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
-@given(strategies.empty_multiregions_with_multiregions)
-def test_base(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
-    left_multiregion, right_multiregion = multiregions_pair
-
-    assert multiregion_in_multiregion(left_multiregion,
-                                      right_multiregion) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multiregions_with_multiregions)
+@given(strategies.multiregions_pairs)
 def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
     first_region, *rest_left_multiregion = left_multiregion

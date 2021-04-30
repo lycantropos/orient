@@ -35,47 +35,25 @@ def test_basic(multipolygon_with_polygon: Tuple[Multipolygon, Polygon]
     assert result in MULTIPART_COMPOUND_RELATIONS
 
 
-@given(strategies.non_empty_multipolygons)
+@given(strategies.multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
     has_holes = any(polygon.holes for polygon in multipolygon.polygons)
-    assert equivalence(any(polygon_in_multipolygon(polygon, multipolygon)
-                           is Relation.EQUAL
-                           for polygon in multipolygon.polygons),
-                       len(multipolygon.polygons) == 1)
-    assert equivalence(all(polygon_in_multipolygon(polygon, multipolygon)
-                           is Relation.COMPONENT
-                           for polygon in multipolygon.polygons),
-                       len(multipolygon.polygons) > 1)
-    assert equivalence(any(polygon_in_multipolygon(to_solid_polygon(polygon),
-                                                   multipolygon)
-                           is Relation.EQUAL
-                           for polygon in multipolygon.polygons),
-                       not has_holes and len(multipolygon.polygons) == 1)
+    assert all(polygon_in_multipolygon(polygon, multipolygon)
+               is Relation.COMPONENT
+               for polygon in multipolygon.polygons)
     assert equivalence(all(polygon_in_multipolygon(to_solid_polygon(polygon),
                                                    multipolygon)
                            is Relation.COMPONENT
                            for polygon in multipolygon.polygons),
-                       not has_holes and len(multipolygon.polygons) > 1)
-    assert equivalence(any(polygon_in_multipolygon(to_solid_polygon(polygon),
-                                                   multipolygon)
-                           is Relation.ENCLOSES
-                           for polygon in multipolygon.polygons),
-                       has_holes and len(multipolygon.polygons) == 1)
+                       not has_holes)
     assert equivalence(any(polygon_in_multipolygon(to_solid_polygon(polygon),
                                                    multipolygon)
                            is Relation.OVERLAP
                            for polygon in multipolygon.polygons),
-                       has_holes and len(multipolygon.polygons) > 1)
+                       has_holes)
 
 
-@given(strategies.empty_multipolygons_with_polygons)
-def test_base(multipolygon_with_polygon: Tuple[Multipolygon, Polygon]) -> None:
-    multipolygon, polygon = multipolygon_with_polygon
-
-    assert polygon_in_multipolygon(polygon, multipolygon) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multipolygons_with_polygons)
+@given(strategies.multipolygons_with_polygons)
 def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Polygon]) -> None:
     multipolygon, polygon = multipolygon_with_polygon
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

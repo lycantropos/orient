@@ -34,14 +34,7 @@ def test_vertices(multiregion: Multiregion) -> None:
                for vertex in region.vertices)
 
 
-@given(strategies.empty_multiregions_with_points)
-def test_base(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
-    multiregion, point = multiregion_with_region
-
-    assert point_in_multiregion(point, multiregion) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multiregions_with_points)
+@given(strategies.multiregions_with_points)
 def test_step(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_region
     first_region, *rest_multiregion = multiregion

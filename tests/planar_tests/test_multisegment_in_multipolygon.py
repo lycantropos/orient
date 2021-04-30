@@ -44,17 +44,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                 else Relation.DISJOINT))
 
 
-@given(strategies.multipolygons_with_empty_multisegments)
-def test_base(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
-              ) -> None:
-    multipolygon, multisegment = multipolygon_with_multisegment
-
-    result = multisegment_in_multipolygon(multisegment, multipolygon)
-
-    assert result is Relation.DISJOINT
-
-
-@given(strategies.multipolygons_with_non_empty_multisegments)
+@given(strategies.multipolygons_with_multisegments)
 def test_step(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
               ) -> None:
     multipolygon, multisegment = multipolygon_with_multisegment

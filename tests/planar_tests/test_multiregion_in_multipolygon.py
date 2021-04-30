@@ -30,7 +30,7 @@ def test_basic(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
     assert result in MULTIPART_COMPOUND_RELATIONS
 
 
-@given(strategies.non_empty_multipolygons)
+@given(strategies.multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
     multipolygon_has_holes = any(polygon.holes
                                  for polygon in multipolygon.polygons)
@@ -49,16 +49,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                 else Relation.DISJOINT))
 
 
-@given(strategies.multipolygons_with_empty_multiregions)
-def test_base(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
-              ) -> None:
-    multipolygon, multiregion = multiregion_with_multipolygon
-
-    assert multiregion_in_multipolygon(multiregion,
-                                       multipolygon) is Relation.DISJOINT
-
-
-@given(strategies.multipolygons_with_non_empty_multiregions)
+@given(strategies.multipolygons_with_multiregions)
 def test_step(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
               ) -> None:
     multipolygon, multiregion = multiregion_with_multipolygon

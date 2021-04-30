@@ -29,21 +29,14 @@ def test_basic(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
     assert result in SAME_LINEAR_RELATIONS
 
 
-@given(strategies.non_empty_multisegments)
+@given(strategies.multisegments)
 def test_self(multisegment: Multisegment) -> None:
     assert (multisegment_in_multisegment(multisegment, multisegment)
             is Relation.EQUAL)
-    assert equivalence(
-            all(multisegment_in_multisegment(segment_to_multisegment(segment),
-                                             multisegment) is Relation.EQUAL
-                for segment in multisegment.segments),
-            len(multisegment.segments) == 1)
-    assert equivalence(
-            all(multisegment_in_multisegment(segment_to_multisegment(segment),
-                                             multisegment)
-                is Relation.COMPONENT
-                for segment in multisegment.segments),
-            len(multisegment.segments) > 1)
+    assert all(multisegment_in_multisegment(segment_to_multisegment(segment),
+                                            multisegment)
+               is Relation.COMPONENT
+               for segment in multisegment.segments)
 
 
 @given(strategies.multisegments_pairs)
@@ -62,14 +55,7 @@ def test_relations(multisegments_pair: Tuple[Multisegment, Multisegment]
                        and complement in ASYMMETRIC_LINEAR_RELATIONS)
 
 
-@given(strategies.empty_multisegments_with_multisegments)
-def test_base(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
-    left, right = multisegments_pair
-
-    assert multisegment_in_multisegment(left, right) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multisegments_with_multisegments)
+@given(strategies.multisegments_pairs)
 def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
     left, right = multisegments_pair
     first_segment, rest_left = multisegment_pop_left(left)

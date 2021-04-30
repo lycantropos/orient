@@ -47,14 +47,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                for hole in polygon.holes)
 
 
-@given(strategies.empty_multipolygons_with_contours)
-def test_base(multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
-    multipolygon, contour = multipolygon_with_contour
-
-    assert contour_in_multipolygon(contour, multipolygon) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multipolygons_with_contours)
+@given(strategies.multipolygons_with_contours)
 def test_step(multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
     multipolygon, contour = multipolygon_with_contour
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

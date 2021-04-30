@@ -32,22 +32,14 @@ def test_basic(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
     assert result in MULTIPART_COMPOUND_RELATIONS
 
 
-@given(strategies.non_empty_multipolygons)
+@given(strategies.multipolygons)
 def test_self(multipolygon: Multipolygon) -> None:
     assert (multipolygon_in_multipolygon(multipolygon, multipolygon)
             is Relation.EQUAL)
-    assert equivalence(
-            all(multipolygon_in_multipolygon(polygon_to_multipolygon(polygon),
-                                             multipolygon)
-                is Relation.EQUAL
-                for polygon in multipolygon.polygons),
-            len(multipolygon.polygons) == 1)
-    assert equivalence(
-            all(multipolygon_in_multipolygon(polygon_to_multipolygon(polygon),
-                                             multipolygon)
-                is Relation.COMPONENT
-                for polygon in multipolygon.polygons),
-            len(multipolygon.polygons) > 1)
+    assert all(multipolygon_in_multipolygon(polygon_to_multipolygon(polygon),
+                                            multipolygon)
+               is Relation.COMPONENT
+               for polygon in multipolygon.polygons)
 
 
 @given(strategies.multipolygons_pairs)
@@ -67,15 +59,7 @@ def test_relations(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
             and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
-@given(strategies.empty_multipolygons_with_multipolygons)
-def test_base(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
-    left, right = multipolygons_pair
-
-    assert (multipolygon_in_multipolygon(left, right)
-            is Relation.DISJOINT)
-
-
-@given(strategies.non_empty_multipolygons_with_multipolygons)
+@given(strategies.multipolygons_pairs)
 def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
     left, right = multipolygons_pair
     first_polygon, rest_left = multipolygon_pop_left(left)

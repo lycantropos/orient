@@ -39,14 +39,7 @@ def test_self(multiregion: Multiregion) -> None:
                for region in multiregion)
 
 
-@given(strategies.empty_multiregions_with_contours)
-def test_base(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
-    multiregion, contour = multiregion_with_contour
-
-    assert contour_in_multiregion(contour, multiregion) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multiregions_with_contours)
+@given(strategies.multiregions_with_contours)
 def test_step(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
     multiregion, contour = multiregion_with_contour
     first_region, *rest_multiregion = multiregion

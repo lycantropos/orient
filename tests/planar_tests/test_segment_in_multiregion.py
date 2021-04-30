@@ -30,14 +30,7 @@ def test_basic(multiregion_with_segment: Tuple[Multiregion, Segment]) -> None:
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.empty_multiregions_with_segments)
-def test_base(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
-    multiregion, segment = multiregion_with_region
-
-    assert segment_in_multiregion(segment, multiregion) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multiregions_with_segments)
+@given(strategies.multiregions_with_segments)
 def test_step(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
     multiregion, segment = multiregion_with_region
     first_region, *rest_multiregion = multiregion

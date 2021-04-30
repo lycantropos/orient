@@ -38,17 +38,7 @@ def test_self(multisegment: Multisegment) -> None:
                for segment in multisegment.segments)
 
 
-@given(strategies.empty_multisegments_with_segments)
-def test_base(multisegment_with_segment: Tuple[Multisegment, Segment]
-              ) -> None:
-    multisegment, segment = multisegment_with_segment
-
-    result = segment_in_multisegment(segment, multisegment)
-
-    assert result is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multisegments_with_segments)
+@given(strategies.multisegments_with_segments)
 def test_step(multisegment_with_segment: Tuple[Multisegment, Segment]
               ) -> None:
     multisegment, segment = multisegment_with_segment

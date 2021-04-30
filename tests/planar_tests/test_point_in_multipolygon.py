@@ -38,14 +38,7 @@ def test_vertices(multipolygon: Multipolygon) -> None:
                for vertex in to_multipolygon_vertices(multipolygon))
 
 
-@given(strategies.empty_multipolygons_with_points)
-def test_base(multipolygon_with_polygon: Tuple[Multipolygon, Point]) -> None:
-    multipolygon, point = multipolygon_with_polygon
-
-    assert point_in_multipolygon(point, multipolygon) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multipolygons_with_points)
+@given(strategies.multipolygons_with_points)
 def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Point]) -> None:
     multipolygon, point = multipolygon_with_polygon
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

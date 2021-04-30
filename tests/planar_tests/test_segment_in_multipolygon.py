@@ -34,14 +34,7 @@ def test_basic(multipolygon_with_segment: Tuple[Multipolygon, Segment]
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.empty_multipolygons_with_segments)
-def test_base(multipolygon_with_polygon: Tuple[Multipolygon, Segment]) -> None:
-    multipolygon, segment = multipolygon_with_polygon
-
-    assert segment_in_multipolygon(segment, multipolygon) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multipolygons_with_segments)
+@given(strategies.multipolygons_with_segments)
 def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Segment]) -> None:
     multipolygon, segment = multipolygon_with_polygon
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

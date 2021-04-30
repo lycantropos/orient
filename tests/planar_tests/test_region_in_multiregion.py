@@ -32,25 +32,11 @@ def test_basic(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
 
 @given(strategies.multiregions)
 def test_self(multiregion: Multiregion) -> None:
-    assert equivalence(bool(multiregion)
-                       and all(region_in_multiregion(element, multiregion)
-                               is Relation.EQUAL
-                               for element in multiregion),
-                       len(multiregion) == 1)
-    assert equivalence(all(region_in_multiregion(element, multiregion)
-                           is Relation.COMPONENT
-                           for element in multiregion),
-                       len(multiregion) != 1)
+    assert all(region_in_multiregion(region, multiregion) is Relation.COMPONENT
+               for region in multiregion)
 
 
-@given(strategies.empty_multiregions_with_contours)
-def test_base(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
-    multiregion, region = multiregion_with_region
-
-    assert region_in_multiregion(region, multiregion) is Relation.DISJOINT
-
-
-@given(strategies.non_empty_multiregions_with_contours)
+@given(strategies.multiregions_with_contours)
 def test_step(multiregion_with_region: Tuple[Multiregion, Region]) -> None:
     multiregion, region = multiregion_with_region
     first_region, *rest_multiregion = multiregion

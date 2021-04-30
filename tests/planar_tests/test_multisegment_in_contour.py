@@ -38,14 +38,7 @@ def test_self(contour: Contour) -> None:
                                    contour) is Relation.EQUAL
 
 
-@given(strategies.contours_with_empty_multisegments)
-def test_base(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
-    contour, multisegment = contour_with_multisegment
-
-    assert multisegment_in_contour(multisegment, contour) is Relation.DISJOINT
-
-
-@given(strategies.contours_with_non_empty_multisegments)
+@given(strategies.contours_with_multisegments)
 def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
     contour, multisegment = contour_with_multisegment
     first_segment, rest_multisegment = multisegment_pop_left(multisegment)
