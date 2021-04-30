@@ -22,8 +22,8 @@ from .hints import Region
 from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .segment import (_relate_point as relate_point_to_segment,
-                      _relate_segment as relate_segments)
+from .segment import (relate_point as relate_point_to_segment,
+                      relate_segment as relate_segments)
 
 
 def relate_point(region: Region,
@@ -38,10 +38,10 @@ def _relate_point(region: Region,
                   context: Context) -> Tuple[Optional[int], Relation]:
     result = False
     point_y = point.y
-    for index, (start, end) in enumerate(contour_to_edges_endpoints(region)):
-        if relate_point_to_segment(start, end, point,
-                                   context) is Relation.COMPONENT:
+    for index, edge in enumerate(context.contour_edges(region)):
+        if relate_point_to_segment(edge, point, context) is Relation.COMPONENT:
             return index, Relation.COMPONENT
+        start, end = edge.start, edge.end
         if ((start.y > point_y) is not (end.y > point_y)
                 and ((end.y > start.y)
                      is (context.angle_orientation(start, end, point)
@@ -61,11 +61,9 @@ def _relate_segment_to_contour(contour: Contour,
     has_no_touch = has_no_overlap = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment.start, segment.end
-    for index, edge_endpoints in enumerate(contour_to_edges_endpoints(
-            contour)):
-        edge_start, edge_end = edge_endpoints
-        relation_with_edge = relate_segments(edge_start, edge_end, start, end,
-                                             context)
+    for index, edge in enumerate(context.contour_edges(contour)):
+        edge_start, edge_end = edge_endpoints = edge.start, edge.end
+        relation_with_edge = relate_segments(edge, segment, context)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
             return Relation.COMPONENT
@@ -93,7 +91,8 @@ def _relate_segment_to_contour(contour: Contour,
     if not has_no_touch and last_touched_edge_index == len(vertices) - 1:
         first_edge_endpoints = first_edge_start, first_edge_end = (
             vertices[-1], vertices[0])
-        if (relate_segments(first_edge_start, first_edge_end, start, end,
+        if (relate_segments(context.segment_cls(first_edge_start,
+                                                first_edge_end), segment,
                             context) is Relation.TOUCH
                 and start not in first_edge_endpoints
                 and end not in first_edge_endpoints

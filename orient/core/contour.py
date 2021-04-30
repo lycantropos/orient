@@ -16,16 +16,15 @@ from .hints import SegmentEndpoints
 from .multisegment import to_segments_endpoints
 from .processing import (process_closed_linear_queue,
                          process_open_linear_queue)
-from .segment import (_relate_point as relate_point_to_segment,
-                      _relate_segment as relate_segments)
+from .segment import (relate_point as relate_point_to_segment,
+                      relate_segment as relate_segments)
 
 
 def relate_point(contour: Contour, point: Point, context: Context) -> Relation:
     return (Relation.DISJOINT
-            if all(relate_point_to_segment(edge_start, edge_end, point,
-                                           context)
+            if all(relate_point_to_segment(edge, point, context)
                    is Relation.DISJOINT
-                   for edge_start, edge_end in to_edges_endpoints(contour))
+                   for edge in context.contour_edges(contour))
             else Relation.COMPONENT)
 
 
@@ -36,10 +35,9 @@ def relate_segment(contour: Contour,
     has_no_touch = has_no_cross = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment.start, segment.end
-    for index, edge_endpoints in enumerate(to_edges_endpoints(contour)):
-        edge_start, edge_end = edge_endpoints
-        relation_with_edge = relate_segments(edge_start, edge_end, start, end,
-                                             context)
+    for index, edge in enumerate(context.contour_edges(contour)):
+        edge_start, edge_end = edge_endpoints = edge.start, edge.end
+        relation_with_edge = relate_segments(edge, segment, context)
         if (relation_with_edge is Relation.COMPONENT
                 or relation_with_edge is Relation.EQUAL):
             return Relation.COMPONENT
@@ -69,7 +67,8 @@ def relate_segment(contour: Contour,
             and last_touched_edge_index == len(vertices) - 1):
         first_edge_endpoints = first_edge_start, first_edge_end = (
             vertices[-1], vertices[0])
-        if (relate_segments(first_edge_start, first_edge_end, start, end,
+        if (relate_segments(context.segment_cls(first_edge_start,
+                                                first_edge_end), segment,
                             context) is Relation.TOUCH
                 and start not in first_edge_endpoints
                 and end not in first_edge_endpoints

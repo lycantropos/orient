@@ -12,8 +12,8 @@ from . import box
 from .events_queue import LinearEventsQueue
 from .hints import SegmentEndpoints
 from .processing import process_open_linear_queue
-from .segment import (_relate_segment as relate_segments,
-                      relate_point as relate_point_to_segment)
+from .segment import (relate_point as relate_point_to_segment,
+                      relate_segment as relate_segments)
 from .utils import to_sorted_pair
 
 
@@ -38,11 +38,8 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
     if start > end:
         start, end = end, start
     for index, sub_segment in enumerate(multisegment.segments):
-        sub_segment_start, sub_segment_end = sub_segment_endpoints = (
-            sub_segment.start, sub_segment.end)
-        relation = relate_segments(sub_segment_start, sub_segment_end, start,
-                                   end,
-                                   context)
+        sub_segment_endpoints = sub_segment.start, sub_segment.end
+        relation = relate_segments(sub_segment, segment, context)
         if relation is Relation.COMPONENT:
             return Relation.COMPONENT
         elif relation is Relation.EQUAL:
@@ -77,7 +74,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                         has_no_touch = False
                     if has_no_cross:
                         intersection = context.segments_intersection(
-                                sub_segment_start, sub_segment_end, start, end)
+                                sub_segment, segment)
                         if intersection != start and intersection != end:
                             sub_start, sub_end = sub_segment_endpoints
                             non_touched_endpoint = (sub_start

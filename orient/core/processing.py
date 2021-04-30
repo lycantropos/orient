@@ -1,5 +1,5 @@
 from ground.base import Relation
-from ground.hints import Coordinate
+from ground.hints import Scalar
 
 from .enums import SegmentsRelation
 from .events_queue import (CompoundEventsQueue,
@@ -7,7 +7,7 @@ from .events_queue import (CompoundEventsQueue,
 
 
 def process_open_linear_queue(events_queue: LinearEventsQueue,
-                              stop_x: Coordinate) -> Relation:
+                              stop_x: Scalar) -> Relation:
     test_is_subset = goal_is_subset = True
     has_no_cross = has_no_touch = has_no_overlap = True
     for event in events_queue.sweep(stop_x):
@@ -49,7 +49,7 @@ def process_open_linear_queue(events_queue: LinearEventsQueue,
 
 
 def process_closed_linear_queue(events_queue: CompoundEventsQueue,
-                                stop_x: Coordinate) -> Relation:
+                                stop_x: Scalar) -> Relation:
     test_is_subset_of_goal = goal_is_subset_of_test = True
     test_boundary_not_in_goal_interior = True
     goal_boundary_not_in_test_interior = True
@@ -110,7 +110,7 @@ def process_closed_linear_queue(events_queue: CompoundEventsQueue,
 
 
 def process_linear_compound_queue(events_queue: CompoundEventsQueue,
-                                  stop_x: Coordinate) -> Relation:
+                                  stop_x: Scalar) -> Relation:
     # ``goal`` is a compound object
     # ``test`` is a linear object
     test_not_in_goal_interior = has_no_touch = True
@@ -154,7 +154,7 @@ def process_linear_compound_queue(events_queue: CompoundEventsQueue,
 
 
 def process_compound_queue(events_queue: CompoundEventsQueue,
-                           stop_x: Coordinate) -> Relation:
+                           stop_x: Scalar) -> Relation:
     test_boundary_not_in_goal_interior = True
     goal_boundary_not_in_test_interior = True
     boundaries_do_not_intersect = True

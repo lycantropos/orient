@@ -10,8 +10,8 @@ from typing import (Generic,
 from ground.base import (Context,
                          Orientation,
                          Relation)
-from ground.hints import (Coordinate,
-                          Point)
+from ground.hints import (Point,
+                          Scalar)
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
@@ -59,26 +59,15 @@ class EventsQueue(Generic[Event]):
         """
 
     @abstractmethod
-    def sweep(self, stop_x: Coordinate) -> Iterable[Event]:
+    def sweep(self, stop_x: Scalar) -> Iterable[Event]:
         """
         Sweeps plane and emits processed segments' events.
         """
 
-    def _segments_intersection(self,
-                               first_start: Point,
-                               first_end: Point,
-                               second_start: Point,
-                               second_end: Point) -> Point:
-        return self.context.segments_intersection(first_start, first_end,
-                                                  second_start, second_end)
-
     def _segments_relation(self,
-                           first_start: Point,
-                           first_end: Point,
-                           second_start: Point,
-                           second_end: Point) -> SegmentsRelation:
-        result = self.context.segments_relation(first_start, first_end,
-                                                second_start, second_end)
+                           first: Event,
+                           second: Event) -> SegmentsRelation:
+        result = self.context.segments_relation(first, second)
         return (SegmentsRelation.DISJOINT if result is Relation.DISJOINT
                 else (SegmentsRelation.TOUCH if result is Relation.TOUCH
                       else (SegmentsRelation.CROSS if result is Relation.CROSS
@@ -116,7 +105,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
         self._queue.push(left_event)
         self._queue.push(right_event)
 
-    def sweep(self, stop_x: Coordinate) -> Iterable[CompoundEvent]:
+    def sweep(self, stop_x: Scalar) -> Iterable[CompoundEvent]:
         sweep_line = SweepLine(self.context)
         queue = self._queue
         while queue:
@@ -162,12 +151,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
         """
-        below_segment_start, below_segment_end = (below_event.start,
-                                                  below_event.end)
-        segment_start, segment_end = event.start, event.end
-        relation = self._segments_relation(below_segment_start,
-                                           below_segment_end, segment_start,
-                                           segment_end)
+        relation = self._segments_relation(below_event, event)
         if relation is SegmentsRelation.OVERLAP:
             # segments overlap
             if event.from_test is below_event.from_test:
@@ -224,9 +208,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                 start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
         elif relation is not SegmentsRelation.DISJOINT:
-            point = self._segments_intersection(below_segment_start,
-                                                below_segment_end,
-                                                segment_start, segment_end)
+            point = self.context.segments_intersection(below_event, event)
             if point != below_event.start and point != below_event.end:
                 self.divide_segment(below_event, point)
             if point != event.start and point != event.end:
@@ -274,7 +256,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
         self._queue.push(left_event)
         self._queue.push(right_event)
 
-    def sweep(self, stop_x: Coordinate) -> Iterable[LinearEvent]:
+    def sweep(self, stop_x: Scalar) -> Iterable[LinearEvent]:
         sweep_line = SweepLine(self.context)
         queue = self._queue
         prev_start = None
@@ -353,12 +335,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
         """
         Populates events queue with intersection events.
         """
-        below_segment_start, below_segment_end = (below_event.start,
-                                                  below_event.end)
-        segment_start, segment_end = event.start, event.end
-        relation = self._segments_relation(below_segment_start,
-                                           below_segment_end, segment_start,
-                                           segment_end)
+        relation = self._segments_relation(below_event, event)
         if relation is SegmentsRelation.OVERLAP:
             # segments overlap
             if event.from_test is below_event.from_test:
@@ -410,9 +387,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
         elif relation is not SegmentsRelation.DISJOINT:
-            point = self._segments_intersection(below_segment_start,
-                                                below_segment_end,
-                                                segment_start, segment_end)
+            point = self.context.segments_intersection(below_event, event)
             if point != below_event.start and point != below_event.end:
                 self.divide_segment(below_event, point)
             if point != event.start and point != event.end:
@@ -422,7 +397,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 below_event.set_both_relations(max(below_event.relation,
                                                    relation))
 
-    def _to_point_event_cosine(self, point: Point, event: Event) -> Coordinate:
+    def _to_point_event_cosine(self, point: Point, event: Event) -> Scalar:
         return (self.context.dot_product(event.start, point, event.start,
                                          event.end)
                 / math.sqrt(self.context.points_squared_distance(event.start,
