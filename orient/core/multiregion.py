@@ -18,7 +18,6 @@ from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
 from .region import (relate_point as relate_point_to_region,
-                     relate_segment as relate_segment_to_region,
                      to_oriented_segments as region_to_oriented_segments)
 
 
@@ -36,21 +35,17 @@ def relate_point(multiregion: Multiregion,
 def relate_segment(multiregion: Multiregion,
                    segment: Segment,
                    context: Context) -> Relation:
-    return (relate_segment_to_region(multiregion[0], segment, context)
-            if len(multiregion) == 1
-            else _relate_multisegment(multiregion,
-                                      context.multisegment_cls([segment]),
-                                      context.segment_box(segment), context))
+    return _relate_multisegment(multiregion,
+                                context.multisegment_cls([segment]),
+                                context.segment_box(segment), context)
 
 
 def relate_multisegment(multiregion: Multiregion,
                         multisegment: Multisegment,
                         context: Context) -> Relation:
-    return (_relate_multisegment(multiregion, multisegment,
-                                 context.segments_box(multisegment.segments),
-                                 context)
-            if multisegment.segments and multiregion
-            else Relation.DISJOINT)
+    return _relate_multisegment(multiregion, multisegment,
+                                context.segments_box(multisegment.segments),
+                                context)
 
 
 def _relate_multisegment(multiregion: Multiregion,
@@ -73,20 +68,19 @@ def _relate_multisegment(multiregion: Multiregion,
                                         region_bounding_box.max_x)
             events_queue.register(region_to_oriented_segments(region, context),
                                   from_test=False)
-    if disjoint:
-        return Relation.DISJOINT
-    return process_linear_compound_queue(events_queue,
-                                         min(multisegment_bounding_box.max_x,
-                                             multiregion_max_x))
+    return (Relation.DISJOINT
+            if disjoint
+            else
+            process_linear_compound_queue(events_queue,
+                                          min(multisegment_bounding_box.max_x,
+                                              multiregion_max_x)))
 
 
 def relate_contour(multiregion: Multiregion,
                    contour: Contour,
                    context: Context) -> Relation:
-    return (_relate_contour(multiregion, contour,
-                            context.contour_box(contour), context)
-            if multiregion
-            else Relation.DISJOINT)
+    return _relate_contour(multiregion, contour, context.contour_box(contour),
+                           context)
 
 
 def _relate_contour(multiregion: Multiregion,
@@ -108,20 +102,18 @@ def _relate_contour(multiregion: Multiregion,
                                         region_bounding_box.max_x)
             events_queue.register(region_to_oriented_segments(region, context),
                                   from_test=False)
-    if disjoint:
-        return Relation.DISJOINT
-    return process_linear_compound_queue(events_queue,
-                                         min(contour_bounding_box.max_x,
-                                             multiregion_max_x))
+    return (Relation.DISJOINT
+            if disjoint
+            else process_linear_compound_queue(events_queue,
+                                               min(contour_bounding_box.max_x,
+                                                   multiregion_max_x)))
 
 
 def relate_region(multiregion: Multiregion,
                   region: Region,
                   context: Context) -> Relation:
-    return (_relate_region(multiregion, region,
-                           context.contour_box(region), context)
-            if multiregion
-            else Relation.DISJOINT)
+    return _relate_region(multiregion, region, context.contour_box(region),
+                          context)
 
 
 def _relate_region(goal_regions: Iterable[Region],
@@ -167,17 +159,8 @@ def _relate_region(goal_regions: Iterable[Region],
 
 def relate_multiregion(goal: Multiregion, test: Multiregion,
                        context: Context) -> Relation:
-    return (_relate_multiregion(goal, test, context.contours_box(goal),
-                                context.contours_box(test), context)
-            if goal and test
-            else Relation.DISJOINT)
-
-
-def _relate_multiregion(goal: Iterable[Region],
-                        test: Iterable[Region],
-                        goal_bounding_box: Box,
-                        test_bounding_box: Box,
-                        context: Context) -> Relation:
+    goal_bounding_box = context.contours_box(goal)
+    test_bounding_box = context.contours_box(test)
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
     events_queue = CompoundEventsQueue(context)

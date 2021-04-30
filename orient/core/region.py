@@ -212,17 +212,7 @@ def relate_segment(region: Region,
 def relate_multisegment(region: Region,
                         multisegment: Multisegment,
                         context: Context) -> Relation:
-    return (_relate_multisegment(region, multisegment,
-                                 context.segments_box(multisegment.segments),
-                                 context)
-            if multisegment.segments
-            else Relation.DISJOINT)
-
-
-def _relate_multisegment(region: Region,
-                         multisegment: Multisegment,
-                         multisegment_bounding_box: Box,
-                         context: Context) -> Relation:
+    multisegment_bounding_box = context.segments_box(multisegment.segments)
     region_bounding_box = context.contour_box(region)
     if box.disjoint_with(multisegment_bounding_box, region_bounding_box):
         return Relation.DISJOINT
@@ -250,8 +240,7 @@ def _relate_contour(region: Region,
     region_bounding_box = context.contour_box(region)
     if box.disjoint_with(contour_bounding_box, region_bounding_box):
         return Relation.DISJOINT
-    if equal(region, contour,
-             context):
+    if equal(region, contour, context):
         return Relation.COMPONENT
     events_queue = CompoundEventsQueue(context)
     events_queue.register(to_oriented_segments(region, context),
@@ -277,8 +266,7 @@ def _relate_region(goal: Region,
                    context: Context) -> Relation:
     if box.disjoint_with(goal_bounding_box, test_bounding_box):
         return Relation.DISJOINT
-    if equal(goal, test,
-             context):
+    if equal(goal, test, context):
         return Relation.EQUAL
     events_queue = CompoundEventsQueue(context)
     events_queue.register(to_oriented_segments(goal, context),

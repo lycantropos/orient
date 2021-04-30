@@ -60,8 +60,6 @@ def relate_segment(multipolygon: Multipolygon,
 def relate_multisegment(multipolygon: Multipolygon,
                         multisegment: Multisegment,
                         context: Context) -> Relation:
-    if not (multisegment.segments and multipolygon.polygons):
-        return Relation.DISJOINT
     multisegment_bounding_box = context.segments_box(multisegment.segments)
     disjoint, multipolygon_max_x, events_queue = True, None, None
     for polygon in multipolygon.polygons:
@@ -80,18 +78,17 @@ def relate_multisegment(multipolygon: Multipolygon,
             events_queue.register(polygon_to_oriented_segments(polygon,
                                                                context),
                                   from_test=False)
-    if disjoint:
-        return Relation.DISJOINT
-    return process_linear_compound_queue(events_queue,
-                                         min(multisegment_bounding_box.max_x,
-                                             multipolygon_max_x))
+    return (Relation.DISJOINT
+            if disjoint
+            else
+            process_linear_compound_queue(events_queue,
+                                          min(multisegment_bounding_box.max_x,
+                                              multipolygon_max_x)))
 
 
 def relate_contour(multipolygon: Multipolygon,
                    contour: Contour,
                    context: Context) -> Relation:
-    if not multipolygon.polygons:
-        return Relation.DISJOINT
     contour_bounding_box = context.contour_box(contour)
     disjoint, multipolygon_max_x, events_queue = True, None, None
     for polygon in multipolygon.polygons:
@@ -109,18 +106,16 @@ def relate_contour(multipolygon: Multipolygon,
             events_queue.register(polygon_to_oriented_segments(polygon,
                                                                context),
                                   from_test=False)
-    if disjoint:
-        return Relation.DISJOINT
-    return process_linear_compound_queue(events_queue,
-                                         min(contour_bounding_box.max_x,
-                                             multipolygon_max_x))
+    return (Relation.DISJOINT
+            if disjoint
+            else process_linear_compound_queue(events_queue,
+                                               min(contour_bounding_box.max_x,
+                                                   multipolygon_max_x)))
 
 
 def relate_region(multipolygon: Multipolygon,
                   region: Region,
                   context: Context) -> Relation:
-    if not multipolygon.polygons:
-        return Relation.DISJOINT
     region_bounding_box = context.contour_box(region)
     all_disjoint, none_disjoint, multipolygon_max_x, events_queue = (
         True, True, None, None)
@@ -162,8 +157,6 @@ def relate_region(multipolygon: Multipolygon,
 def relate_multiregion(multipolygon: Multipolygon,
                        multiregion: Multiregion,
                        context: Context) -> Relation:
-    if not (multipolygon.polygons and multiregion):
-        return Relation.DISJOINT
     multiregion_bounding_box = context.contours_box(multiregion)
     multipolygon_bounding_box = context.polygons_box(multipolygon.polygons)
     if box.disjoint_with(multipolygon_bounding_box, multiregion_bounding_box):
@@ -182,8 +175,6 @@ def relate_multiregion(multipolygon: Multipolygon,
 def relate_polygon(multipolygon: Multipolygon,
                    polygon: Polygon,
                    context: Context) -> Relation:
-    if not multipolygon.polygons:
-        return Relation.DISJOINT
     polygon_bounding_box = context.polygon_box(polygon)
     all_disjoint, none_disjoint, multipolygon_max_x, events_queue = (
         True, True, None, None)
@@ -225,8 +216,6 @@ def relate_polygon(multipolygon: Multipolygon,
 def relate_multipolygon(goal: Multipolygon,
                         test: Multipolygon,
                         context: Context) -> Relation:
-    if not (goal.polygons and test.polygons):
-        return Relation.DISJOINT
     goal_bounding_box = context.polygons_box(goal.polygons)
     test_bounding_box = context.polygons_box(test.polygons)
     events_queue = CompoundEventsQueue(context)

@@ -20,8 +20,7 @@ from .utils import to_sorted_pair
 def relate_point(multisegment: Multisegment, point: Point,
                  context: Context) -> Relation:
     return (Relation.DISJOINT
-            if all(relate_point_to_segment(segment, point,
-                                           context)
+            if all(relate_point_to_segment(segment, point, context)
                    is Relation.DISJOINT
                    for segment in multisegment.segments)
             else Relation.COMPONENT)
@@ -135,8 +134,6 @@ def _subtract_segments_overlap(minuend: SegmentEndpoints,
 
 def relate_multisegment(goal: Multisegment, test: Multisegment,
                         context: Context) -> Relation:
-    if not (goal.segments and test.segments):
-        return Relation.DISJOINT
     goal_bounding_box = context.segments_box(goal.segments)
     test_bounding_box = context.segments_box(test.segments)
     if box.disjoint_with(goal_bounding_box, test_bounding_box):

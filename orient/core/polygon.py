@@ -69,8 +69,6 @@ def relate_segment(polygon: Polygon,
 def relate_multisegment(polygon: Polygon,
                         multisegment: Multisegment,
                         context: Context) -> Relation:
-    if not multisegment.segments:
-        return Relation.DISJOINT
     polygon_bounding_box = context.polygon_box(polygon)
     multisegment_bounding_box = context.segments_box(multisegment.segments)
     if box.disjoint_with(polygon_bounding_box, multisegment_bounding_box):
@@ -153,14 +151,6 @@ def relate_region(polygon: Polygon,
 def relate_multiregion(polygon: Polygon,
                        multiregion: Multiregion,
                        context: Context) -> Relation:
-    return (_relate_multiregion(polygon, multiregion, context)
-            if multiregion
-            else Relation.DISJOINT)
-
-
-def _relate_multiregion(polygon: Polygon,
-                        multiregion: Multiregion,
-                        context: Context) -> Relation:
     border, holes = polygon.border, polygon.holes
     border_bounding_box = context.contour_box(border)
     if not holes:
