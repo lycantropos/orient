@@ -4,7 +4,7 @@ from typing import (Optional,
                     Sequence,
                     Tuple)
 
-from ground.hints import Coordinate
+from ground.hints import Scalar
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
@@ -28,7 +28,7 @@ points = coordinates_strategies.flatmap(planar.points)
 segments = coordinates_strategies.flatmap(planar.segments)
 
 
-def to_segments_with_points(coordinates: Strategy[Coordinate]
+def to_segments_with_points(coordinates: Strategy[Scalar]
                             ) -> Strategy[Tuple[Segment, Point]]:
     return strategies.tuples(planar.segments(coordinates),
                              planar.points(coordinates))
@@ -44,7 +44,7 @@ non_empty_multisegments = (coordinates_strategies
                                             min_size=1)))
 
 
-def to_multisegments_with_points(coordinates: Strategy[Coordinate]
+def to_multisegments_with_points(coordinates: Strategy[Scalar]
                                  ) -> Strategy[Tuple[Multisegment, Point]]:
     return strategies.tuples(planar.multisegments(coordinates),
                              planar.points(coordinates))
@@ -56,7 +56,7 @@ empty_multisegments_with_segments = strategies.tuples(empty_multisegments,
                                                       segments)
 
 
-def to_multisegments_with_segments(coordinates: Strategy[Coordinate],
+def to_multisegments_with_segments(coordinates: Strategy[Scalar],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
@@ -112,7 +112,7 @@ multisegments_with_segments |= (
 multisegments_strategies = coordinates_strategies.map(planar.multisegments)
 
 
-def to_multisegments_pairs(coordinates: Strategy[Coordinate],
+def to_multisegments_pairs(coordinates: Strategy[Scalar],
                            *,
                            min_size: int = 0,
                            max_size: Optional[int] = None
@@ -132,7 +132,7 @@ non_empty_multisegments_with_multisegments = (
 contours = coordinates_strategies.flatmap(planar.contours)
 
 
-def to_contours_with_points(coordinates: Strategy[Coordinate]
+def to_contours_with_points(coordinates: Strategy[Scalar]
                             ) -> Strategy[Tuple[Contour, Point]]:
     return strategies.tuples(planar.contours(coordinates),
                              planar.points(coordinates))
@@ -141,7 +141,7 @@ def to_contours_with_points(coordinates: Strategy[Coordinate]
 contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
 
 
-def to_contours_with_segments(coordinates: Strategy[Coordinate]
+def to_contours_with_segments(coordinates: Strategy[Scalar]
                               ) -> Strategy[Tuple[Contour, Segment]]:
     return strategies.tuples(planar.contours(coordinates),
                              planar.segments(coordinates))
@@ -153,7 +153,7 @@ contours_with_empty_multisegments = strategies.tuples(contours,
                                                       empty_multisegments)
 
 
-def to_contours_with_multisegments(coordinates: Strategy[Coordinate],
+def to_contours_with_multisegments(coordinates: Strategy[Scalar],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
@@ -179,7 +179,7 @@ non_empty_multiregions = (coordinates_strategies
                                            min_size=1)))
 
 
-def to_multiregions_with_points(coordinates: Strategy[Coordinate],
+def to_multiregions_with_points(coordinates: Strategy[Scalar],
                                 *,
                                 min_size: int = 0,
                                 max_size: Optional[int] = None
@@ -200,7 +200,7 @@ empty_multiregions_with_segments = strategies.tuples(empty_multiregions,
                                                      segments)
 
 
-def to_multiregions_with_segments(coordinates: Strategy[Coordinate],
+def to_multiregions_with_segments(coordinates: Strategy[Scalar],
                                   *,
                                   min_size: int = 0,
                                   max_size: Optional[int] = None
@@ -220,7 +220,7 @@ multiregions_with_empty_multisegments = strategies.tuples(multiregions,
                                                           empty_multisegments)
 
 
-def to_multiregions_with_multisegments(coordinates: Strategy[Coordinate],
+def to_multiregions_with_multisegments(coordinates: Strategy[Scalar],
                                        *,
                                        min_size: int = 0,
                                        max_size: Optional[int] = None
@@ -239,7 +239,7 @@ multiregions_with_non_empty_multisegments = (
                                            min_size=1)))
 
 
-def to_multiregions_with_contours(coordinates: Strategy[Coordinate],
+def to_multiregions_with_contours(coordinates: Strategy[Scalar],
                                   *,
                                   min_size: int = 0,
                                   max_size: Optional[int] = None
@@ -261,7 +261,7 @@ empty_multiregions_with_multiregions = strategies.tuples(empty_multiregions,
                                                          multiregions)
 
 
-def to_multiregions_pairs(coordinates: Strategy[Coordinate],
+def to_multiregions_pairs(coordinates: Strategy[Scalar],
                           *,
                           min_size: int = 0,
                           max_size: Optional[int] = None
@@ -279,7 +279,7 @@ non_empty_multiregions_with_multiregions = (
 polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
-def to_polygons_with_points(coordinates: Strategy[Coordinate]
+def to_polygons_with_points(coordinates: Strategy[Scalar]
                             ) -> Strategy[Tuple[Polygon, Point]]:
     return strategies.tuples(planar.polygons(coordinates),
                              planar.points(coordinates))
@@ -288,7 +288,7 @@ def to_polygons_with_points(coordinates: Strategy[Coordinate]
 polygons_with_points = coordinates_strategies.flatmap(to_polygons_with_points)
 
 
-def to_polygons_with_segments(coordinates: Strategy[Coordinate]
+def to_polygons_with_segments(coordinates: Strategy[Scalar]
                               ) -> Strategy[Tuple[Polygon, Segment]]:
     return strategies.tuples(planar.polygons(coordinates),
                              planar.segments(coordinates))
@@ -298,7 +298,7 @@ polygons_with_segments = (coordinates_strategies
                           .flatmap(to_polygons_with_segments))
 
 
-def to_polygons_with_multisegments(coordinates: Strategy[Coordinate],
+def to_polygons_with_multisegments(coordinates: Strategy[Scalar],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
@@ -327,7 +327,7 @@ polygons_with_non_empty_multisegments = (
                                            min_size=1)))
 
 
-def to_polygons_with_contours(coordinates: Strategy[Coordinate]
+def to_polygons_with_contours(coordinates: Strategy[Scalar]
                               ) -> Strategy[Tuple[Polygon, Contour]]:
     return strategies.tuples(planar.polygons(coordinates),
                              planar.contours(coordinates))
@@ -339,7 +339,7 @@ polygons_with_empty_multiregions = strategies.tuples(polygons,
                                                      empty_multiregions)
 
 
-def to_polygons_with_multiregions(coordinates: Strategy[Coordinate],
+def to_polygons_with_multiregions(coordinates: Strategy[Scalar],
                                   *,
                                   min_size: int = 0,
                                   max_size: Optional[int] = None
@@ -375,7 +375,7 @@ empty_multipolygons_with_points = strategies.tuples(empty_multipolygons,
                                                     points)
 
 
-def to_multipolygons_with_points(coordinates: Strategy[Coordinate],
+def to_multipolygons_with_points(coordinates: Strategy[Scalar],
                                  *,
                                  min_size: int = 0,
                                  max_size: Optional[int] = None
@@ -395,7 +395,7 @@ empty_multipolygons_with_segments = strategies.tuples(empty_multipolygons,
                                                       segments)
 
 
-def to_multipolygons_with_segments(coordinates: Strategy[Coordinate],
+def to_multipolygons_with_segments(coordinates: Strategy[Scalar],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
@@ -415,7 +415,7 @@ multipolygons_with_empty_multisegments = strategies.tuples(multipolygons,
                                                            empty_multisegments)
 
 
-def to_multipolygons_with_multisegments(coordinates: Strategy[Coordinate],
+def to_multipolygons_with_multisegments(coordinates: Strategy[Scalar],
                                         *,
                                         min_size: int = 0,
                                         max_size: Optional[int] = None
@@ -445,7 +445,7 @@ empty_multipolygons_with_contours = strategies.tuples(empty_multipolygons,
                                                       contours)
 
 
-def to_multipolygons_with_contours(coordinates: Strategy[Coordinate],
+def to_multipolygons_with_contours(coordinates: Strategy[Scalar],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
@@ -465,7 +465,7 @@ multipolygons_with_empty_multiregions = strategies.tuples(multipolygons,
                                                           empty_multiregions)
 
 
-def to_multipolygons_with_multiregions(coordinates: Strategy[Coordinate],
+def to_multipolygons_with_multiregions(coordinates: Strategy[Scalar],
                                        *,
                                        min_size: int = 0,
                                        max_size: Optional[int] = None
@@ -486,7 +486,7 @@ empty_multipolygons_with_polygons = strategies.tuples(empty_multipolygons,
                                                       polygons)
 
 
-def to_multipolygons_with_polygons(coordinates: Strategy[Coordinate],
+def to_multipolygons_with_polygons(coordinates: Strategy[Scalar],
                                    *,
                                    min_size: int = 0,
                                    max_size: Optional[int] = None
@@ -506,7 +506,7 @@ empty_multipolygons_with_multipolygons = strategies.tuples(empty_multipolygons,
                                                            multipolygons)
 
 
-def to_multipolygons_pairs(coordinates: Strategy[Coordinate],
+def to_multipolygons_pairs(coordinates: Strategy[Scalar],
                            *,
                            min_size: int = 0,
                            max_size: Optional[int] = None
