@@ -181,7 +181,7 @@ def segment_in_multisegment(segment: _Segment,
     ...                         multisegment) is Relation.COMPONENT
     True
     >>> segment_in_multisegment(Segment(Point(0, 0), Point(3, 3)),
-    ...                         multisegment) is Relation.COMPOSITE
+    ...                         multisegment) is Relation.EQUAL
     True
     >>> segment_in_multisegment(Segment(Point(2, 2), Point(4, 4)),
     ...                         multisegment) is Relation.OVERLAP
