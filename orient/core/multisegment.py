@@ -29,7 +29,7 @@ def relate_point(multisegment: Multisegment, point: Point,
 
 def relate_segment(multisegment: Multisegment, segment: Segment,
                    context: Context) -> Relation:
-    all_components = has_no_touch = has_no_cross = has_no_overlap = True
+    is_segment_superset = has_no_touch = has_no_cross = has_no_overlap = True
     # orientations of multisegment's segments
     # which touch given segment in the middle
     middle_touching_orientations = {}  # type: Dict[Point, Orientation]
@@ -40,13 +40,8 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
     for index, sub_segment in enumerate(multisegment.segments):
         sub_segment_endpoints = sub_segment.start, sub_segment.end
         relation = relate_segments(sub_segment, segment, context)
-        if relation is Relation.COMPONENT:
+        if relation is Relation.COMPONENT or relation is Relation.EQUAL:
             return Relation.COMPONENT
-        elif relation is Relation.EQUAL:
-            return (Relation.EQUAL
-                    if (all_components
-                        and index == len(multisegment.segments) - 1)
-                    else Relation.COMPONENT)
         elif relation is Relation.COMPOSITE:
             if has_no_overlap:
                 has_no_overlap = False
@@ -59,15 +54,15 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
             else:
                 components.append(to_sorted_pair(sub_segment_endpoints))
         elif relation is Relation.OVERLAP:
-            if all_components:
-                all_components = False
+            if is_segment_superset:
+                is_segment_superset = False
             if has_no_overlap:
                 has_no_overlap = False
             start, end = segment_endpoints = _subtract_segments_overlap(
                     segment_endpoints, sub_segment_endpoints)
         else:
-            if all_components:
-                all_components = False
+            if is_segment_superset:
+                is_segment_superset = False
             if has_no_overlap:
                 if relation is Relation.TOUCH:
                     if has_no_touch:
@@ -111,7 +106,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
             if max_component_end < component_end:
                 max_component_end = component_end
         return ((Relation.EQUAL
-                 if all_components
+                 if is_segment_superset
                  else Relation.COMPONENT)
                 if (min_component_start == start
                     and max_component_end == end
@@ -119,11 +114,13 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                             or component_end == max_component_end
                             for _, component_end in components))
                 else (Relation.COMPOSITE
-                      if all_components
+                      if is_segment_superset
                       else Relation.OVERLAP))
     else:
-        return (Relation.COMPOSITE
-                if all_components
+        return ((Relation.EQUAL
+                 if start == end
+                 else Relation.COMPOSITE)
+                if is_segment_superset
                 else Relation.OVERLAP)
 
 
