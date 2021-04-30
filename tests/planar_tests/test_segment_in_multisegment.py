@@ -34,9 +34,7 @@ def test_basic(multisegment_with_segment: Tuple[Multisegment, Segment]
 @given(strategies.multisegments)
 def test_self(multisegment: Multisegment) -> None:
     assert all(segment_in_multisegment(segment, multisegment)
-               is (Relation.COMPONENT
-                   if len(multisegment.segments) > 1
-                   else Relation.EQUAL)
+               is Relation.COMPONENT
                for segment in multisegment.segments)
 
 
