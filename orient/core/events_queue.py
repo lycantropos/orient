@@ -214,8 +214,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
             if point != event.start and point != event.end:
                 self.divide_segment(event, point)
             if event.from_test is not below_event.from_test:
-                event.set_both_relations(max(event.relation,
-                                             relation))
+                event.set_both_relations(max(event.relation, relation))
                 below_event.set_both_relations(max(below_event.relation,
                                                    relation))
         return False
