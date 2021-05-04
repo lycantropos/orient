@@ -274,13 +274,16 @@ def relate_polygon(goal: Polygon,
                 elif hole_relation is not Relation.DISJOINT:
                     subsets_holes_indices.append(hole_index)
             if subsets_holes_indices:
-                holes_relation = relate_multiregions(
-                        test_holes,
-                        goal_holes
-                        if len(subsets_holes_indices) == len(goal_holes)
-                        else [goal_holes[index]
-                              for index in subsets_holes_indices],
-                        context)
+                holes_relation = (
+                    relate_multiregions(
+                            test_holes,
+                            goal_holes
+                            if len(subsets_holes_indices) == len(goal_holes)
+                            else [goal_holes[index]
+                                  for index in subsets_holes_indices],
+                            context)
+                    if test_holes
+                    else Relation.DISJOINT)
                 if holes_relation is Relation.EQUAL:
                     return (Relation.ENCLOSED
                             if borders_relation is Relation.WITHIN
@@ -321,13 +324,16 @@ def relate_polygon(goal: Polygon,
             elif hole_relation is not Relation.DISJOINT:
                 subsets_holes_indices.append(hole_index)
         if subsets_holes_indices:
-            holes_relation = relate_multiregions(
-                    goal_holes,
-                    test_holes
-                    if len(subsets_holes_indices) == len(test_holes)
-                    else [test_holes[index]
-                          for index in subsets_holes_indices],
-                    context)
+            holes_relation = (
+                relate_multiregions(
+                        goal_holes,
+                        test_holes
+                        if len(subsets_holes_indices) == len(test_holes)
+                        else [test_holes[index]
+                              for index in subsets_holes_indices],
+                        context)
+                if goal_holes
+                else Relation.DISJOINT)
             if holes_relation is Relation.EQUAL:
                 return (Relation.ENCLOSES
                         if borders_relation is Relation.COVER
