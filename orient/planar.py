@@ -536,28 +536,38 @@ def multisegment_in_region(multisegment: _Multisegment,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Multisegment, Point, Segment = (context.contour_cls,
-    ...                                          context.multisegment_cls,
-    ...                                          context.point_cls,
-    ...                                          context.segment_cls)
-    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
-    ...                                Segment(Point(1, 0), Point(0, 1)),
-    ...                                Segment(Point(0, 1), Point(0, 0))])
-    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
-    ...                              Segment(Point(1, 0), Point(1, 1)),
-    ...                              Segment(Point(1, 1), Point(0, 1)),
-    ...                              Segment(Point(0, 1), Point(0, 0))])
-    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
-    >>> multisegment_in_region(Multisegment([]), triangle) is Relation.DISJOINT
+    >>> Contour = context.contour_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
+    >>> square = Contour([Point(0, 0), Point(4, 0), Point(4, 4), Point(0, 4)])
+    >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                         Point(1, 3)])
+    >>> square_edges = list(context.contour_edges(square))
+    >>> inner_square_edges = list(context.contour_edges(inner_square))
+    >>> square_diagonals = [Segment(Point(0, 0), Point(2, 2)),
+    ...                     Segment(Point(2, 2), Point(4, 0)),
+    ...                     Segment(Point(2, 2), Point(4, 4)),
+    ...                     Segment(Point(0, 4), Point(2, 2))]
+    >>> (multisegment_in_region(Multisegment(square_edges), inner_square)
+    ...  is Relation.DISJOINT)
     True
-    >>> multisegment_in_region(triangle_edges, triangle) is Relation.COMPONENT
+    >>> (multisegment_in_region(
+    ...      Multisegment(square_edges + inner_square_edges), inner_square)
+    ...  is Relation.TOUCH)
     True
-    >>> multisegment_in_region(triangle_edges, square) is Relation.ENCLOSED
+    >>> (multisegment_in_region(Multisegment(square_diagonals), inner_square)
+    ...  is Relation.CROSS)
     True
-    >>> multisegment_in_region(square_edges, triangle) is Relation.TOUCH
+    >>> (multisegment_in_region(Multisegment(square_edges), square)
+    ...  is Relation.COMPONENT)
     True
-    >>> multisegment_in_region(square_edges, square) is Relation.COMPONENT
+    >>> (multisegment_in_region(
+    ...      Multisegment(square_edges + inner_square_edges), square)
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (multisegment_in_region(Multisegment(inner_square_edges), square)
+    ...  is Relation.WITHIN)
     True
     """
     return _region.relate_multisegment(
