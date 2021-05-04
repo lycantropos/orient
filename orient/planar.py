@@ -1103,32 +1103,51 @@ def multisegment_in_polygon(multisegment: _Multisegment,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point, Polygon, Segment, Multisegment = (
-    ...         context.contour_cls, context.point_cls, context.polygon_cls,
-    ...         context.segment_cls, context.multisegment_cls)
-    >>> triangle_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
-    ...                                Segment(Point(1, 0), Point(0, 1)),
-    ...                                Segment(Point(0, 1), Point(0, 0))])
-    >>> square_edges = Multisegment([Segment(Point(0, 0), Point(1, 0)),
-    ...                              Segment(Point(1, 0), Point(1, 1)),
-    ...                              Segment(Point(1, 1), Point(0, 1)),
-    ...                              Segment(Point(0, 1), Point(0, 0))])
-    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
-    >>> (multisegment_in_polygon(Multisegment([]), Polygon(triangle, []))
+    >>> Contour = context.contour_cls
+    >>> Multisegment = context.multisegment_cls
+    >>> Point = context.point_cls
+    >>> Polygon = context.polygon_cls
+    >>> Segment = context.segment_cls
+    >>> square = Contour([Point(0, 0), Point(4, 0), Point(4, 4), Point(0, 4)])
+    >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                         Point(1, 3)])
+    >>> square_edges = [Segment(Point(0, 0), Point(4, 0)),
+    ...                 Segment(Point(0, 0), Point(0, 4)),
+    ...                 Segment(Point(4, 0), Point(4, 4)),
+    ...                 Segment(Point(0, 4), Point(4, 4))]
+    >>> inner_square_edges = [Segment(Point(1, 1), Point(3, 1)),
+    ...                       Segment(Point(1, 3), Point(1, 1)),
+    ...                       Segment(Point(3, 1), Point(3, 3)),
+    ...                       Segment(Point(1, 3), Point(3, 3))]
+    >>> square_diagonals = [Segment(Point(0, 0), Point(2, 2)),
+    ...                     Segment(Point(2, 2), Point(4, 0)),
+    ...                     Segment(Point(2, 2), Point(4, 4)),
+    ...                     Segment(Point(0, 4), Point(2, 2))]
+    >>> (multisegment_in_polygon(Multisegment(square_edges),
+    ...                          Polygon(inner_square, []))
     ...  is Relation.DISJOINT)
     True
-    >>> (multisegment_in_polygon(triangle_edges, Polygon(triangle, []))
-    ...  is Relation.COMPONENT)
-    True
-    >>> (multisegment_in_polygon(triangle_edges, Polygon(square, []))
-    ...  is Relation.ENCLOSED)
-    True
-    >>> (multisegment_in_polygon(square_edges, Polygon(triangle, []))
+    >>> (multisegment_in_polygon(Multisegment(square_edges
+    ...                                       + inner_square_edges),
+    ...                          Polygon(inner_square, []))
     ...  is Relation.TOUCH)
     True
-    >>> (multisegment_in_polygon(square_edges, Polygon(square, []))
+    >>> (multisegment_in_polygon(Multisegment(square_diagonals),
+    ...                          Polygon(inner_square, []))
+    ...  is Relation.CROSS)
+    True
+    >>> (multisegment_in_polygon(Multisegment(square_edges),
+    ...                          Polygon(square, []))
     ...  is Relation.COMPONENT)
+    True
+    >>> (multisegment_in_polygon(Multisegment(square_edges
+    ...                                       + inner_square_edges),
+    ...                          Polygon(square, []))
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (multisegment_in_polygon(Multisegment(inner_square_edges),
+    ...                          Polygon(square, []))
+    ...  is Relation.WITHIN)
     True
     """
     return _polygon.relate_multisegment(
