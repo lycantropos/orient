@@ -1,4 +1,5 @@
 from fractions import Fraction
+from functools import partial
 from typing import (Optional,
                     Sequence,
                     Tuple)
@@ -49,14 +50,22 @@ multisegments_with_points = (coordinates_strategies
                              .flatmap(to_multisegments_with_points))
 
 
-def to_multisegments_with_segments(coordinates: Strategy[Scalar]
+def to_multisegments_with_segments(coordinates: Strategy[Scalar],
+                                   *,
+                                   min_size: int = 2,
+                                   max_size: Optional[int] = None
                                    ) -> Strategy[Tuple[Multisegment, Segment]]:
-    return strategies.tuples(planar.multisegments(coordinates),
+    return strategies.tuples(planar.multisegments(coordinates,
+                                                  min_size=2,
+                                                  max_size=None),
                              planar.segments(coordinates))
 
 
 multisegments_with_segments = (coordinates_strategies
                                .flatmap(to_multisegments_with_segments))
+size_three_or_more_multisegments_with_segments = (
+    coordinates_strategies.flatmap(partial(to_multisegments_with_segments,
+                                           min_size=3)))
 
 
 def chop_segment(segment: Segment, parts_count: int) -> Sequence[Segment]:
@@ -78,11 +87,12 @@ def chop_segment(segment: Segment, parts_count: int) -> Sequence[Segment]:
 
 def segment_to_multisegments_with_segments(segment: Segment,
                                            *,
-                                           max_partition_size: int = 100
+                                           min_size: int = 2,
+                                           max_size: int = 100
                                            ) -> Strategy[Tuple[Multisegment,
                                                                Segment]]:
     always_segment = strategies.just(segment)
-    partition_sizes = strategies.integers(1, max_partition_size)
+    partition_sizes = strategies.integers(min_size, max_size)
     return strategies.tuples((strategies.builds(chop_segment,
                                                 always_segment,
                                                 partition_sizes)
@@ -91,9 +101,13 @@ def segment_to_multisegments_with_segments(segment: Segment,
                              always_segment)
 
 
-rational_segments = rational_coordinates_strategies.flatmap(planar.segments)
 multisegments_with_segments |= (
-    rational_segments.flatmap(segment_to_multisegments_with_segments))
+    (rational_coordinates_strategies.flatmap(planar.segments)
+     .flatmap(segment_to_multisegments_with_segments)))
+size_three_or_more_multisegments_with_segments |= (
+    (rational_coordinates_strategies.flatmap(planar.segments)
+     .flatmap(partial(segment_to_multisegments_with_segments,
+                      min_size=3))))
 multisegments_strategies = coordinates_strategies.map(planar.multisegments)
 multisegments_pairs = (coordinates_strategies.map(planar.multisegments)
                        .flatmap(to_pairs))

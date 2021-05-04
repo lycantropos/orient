@@ -38,7 +38,7 @@ def test_self(multisegment: Multisegment) -> None:
                for segment in multisegment.segments)
 
 
-@given(strategies.multisegments_with_segments)
+@given(strategies.size_three_or_more_multisegments_with_segments)
 def test_step(multisegment_with_segment: Tuple[Multisegment, Segment]
               ) -> None:
     multisegment, segment = multisegment_with_segment
