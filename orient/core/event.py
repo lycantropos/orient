@@ -7,15 +7,26 @@ from reprit.base import generate_repr
 
 from .enums import (OverlapKind,
                     SegmentsRelation)
+from .hints import SegmentEndpoints
 
 
 class LinearEvent:
+    @classmethod
+    def from_endpoints(cls, endpoints, from_test: bool) -> 'LinearEvent':
+        start, end = endpoints
+        if start > end:
+            start, end = end, start
+        result = cls(start, None, True, from_test, SegmentsRelation.DISJOINT)
+        result.complement = cls(end, result, False, from_test,
+                                SegmentsRelation.DISJOINT)
+        return result
+
     __slots__ = 'complement', 'from_test', 'is_left', 'relation', 'start'
 
     def __init__(self,
-                 is_left: bool,
                  start: Point,
                  complement: Optional['Event'],
+                 is_left: bool,
                  from_test: bool,
                  relation: SegmentsRelation) -> None:
         self.is_left = is_left
@@ -26,31 +37,66 @@ class LinearEvent:
     __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
+    def end(self) -> Point:
+        return self.complement.start
+
+    @property
     def from_goal(self) -> bool:
         return not self.from_test
 
-    @property
-    def end(self) -> Point:
-        return self.complement.start
+    def divide(self, break_point: Point) -> 'LinearEvent':
+        tail = self.complement.complement = LinearEvent(
+                break_point, self.complement, True, self.from_test,
+                self.complement.relation)
+        self.complement = LinearEvent(break_point, self, False, self.from_test,
+                                      self.relation)
+        return tail
 
     def set_both_relations(self, relation: SegmentsRelation) -> None:
         self.relation = self.complement.relation = relation
 
 
-class CompoundEvent(LinearEvent):
-    __slots__ = 'interior_to_left', 'other_interior_to_left', 'overlap_kind'
+class CompoundEvent:
+    @classmethod
+    def from_endpoints(cls,
+                       segment_endpoints: SegmentEndpoints,
+                       from_test: bool) -> 'CompoundEvent':
+        start, end = segment_endpoints
+        inside_on_left = True
+        if start > end:
+            start, end = end, start
+            inside_on_left = False
+        result = cls(start, None, True, from_test, SegmentsRelation.DISJOINT,
+                     inside_on_left)
+        result.complement = cls(end, result, False, from_test,
+                                SegmentsRelation.DISJOINT, inside_on_left)
+        return result
+
+    __slots__ = ('complement', 'from_test', 'interior_to_left', 'is_left',
+                 'other_interior_to_left', 'overlap_kind', 'relation', 'start')
 
     def __init__(self,
-                 is_left: bool,
                  start: Point,
                  complement: Optional['CompoundEvent'],
+                 is_left: bool,
                  from_test: bool,
                  relation: SegmentsRelation,
                  interior_to_left: bool) -> None:
-        super().__init__(is_left, start, complement, from_test, relation)
+        self.is_left = is_left
+        self.start, self.complement = start, complement
+        self.from_test = from_test
+        self.relation = relation
         self.overlap_kind = OverlapKind.NONE
         self.interior_to_left = interior_to_left
         self.other_interior_to_left = False
+
+    @property
+    def end(self) -> Point:
+        return self.complement.start
+
+    @property
+    def from_goal(self) -> bool:
+        return not self.from_test
 
     @property
     def inside(self) -> bool:
@@ -82,6 +128,18 @@ class CompoundEvent(LinearEvent):
         """
         return (not self.other_interior_to_left
                 and self.overlap_kind is OverlapKind.NONE)
+
+    def divide(self, break_point: Point) -> 'CompoundEvent':
+        tail = self.complement.complement = CompoundEvent(
+                break_point, self.complement, True, self.from_test,
+                self.complement.relation, self.interior_to_left)
+        self.complement = CompoundEvent(
+                break_point, self, False, self.from_test, self.relation,
+                self.interior_to_left)
+        return tail
+
+    def set_both_relations(self, relation: SegmentsRelation) -> None:
+        self.relation = self.complement.relation = relation
 
 
 Event = TypeVar('Event', LinearEvent, CompoundEvent)

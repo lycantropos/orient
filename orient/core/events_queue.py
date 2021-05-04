@@ -44,14 +44,12 @@ class EventsQueue(Generic[Event]):
     def peek(self) -> Event:
         return self._queue.peek()
 
-    @abstractmethod
-    def divide_segment(self, event: Event, point: Point) -> None:
-        """
-        Divides segment into parts at given point.
-        """
+    def divide_segment(self, event: CompoundEvent, break_point: Point) -> None:
+        self._queue.push(event.divide(break_point))
+        self._queue.push(event.complement)
 
     @abstractmethod
-    def register(self, endpoints: Iterable[SegmentEndpoints],
+    def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
         """
@@ -75,35 +73,16 @@ class EventsQueue(Generic[Event]):
 
 
 class CompoundEventsQueue(EventsQueue[CompoundEvent]):
-    event_cls = CompoundEvent
-
-    def register(self, endpoints: Iterable[SegmentEndpoints],
+    def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
-        for start, end in endpoints:
-            inside_on_left = True
-            if start > end:
-                start, end = end, start
-                inside_on_left = False
-            start_event = self.event_cls(True, start, None, from_test,
-                                         SegmentsRelation.DISJOINT,
-                                         inside_on_left)
-            end_event = self.event_cls(False, end, start_event, from_test,
-                                       SegmentsRelation.DISJOINT,
-                                       inside_on_left)
-            start_event.complement = end_event
-            self._queue.push(start_event)
-            self._queue.push(end_event)
+        for segment_endpoints in segments_endpoints:
+            event = CompoundEvent.from_endpoints(segment_endpoints, from_test)
+            self.push(event)
+            self.push(event.complement)
 
-    def divide_segment(self, event: CompoundEvent, break_point: Point) -> None:
-        left_event = event.complement.complement = self.event_cls(
-                True, break_point, event.complement, event.from_test,
-                event.complement.relation, event.interior_to_left)
-        right_event = event.complement = self.event_cls(
-                False, break_point, event, event.from_test, event.relation,
-                event.interior_to_left)
-        self._queue.push(left_event)
-        self._queue.push(right_event)
+    def push(self, event: Event) -> None:
+        self._queue.push(event)
 
     def sweep(self, stop_x: Scalar) -> Iterable[CompoundEvent]:
         sweep_line = SweepLine(self.context)
@@ -230,30 +209,13 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
 
 
 class LinearEventsQueue(EventsQueue[LinearEvent]):
-    event_cls = LinearEvent
-
-    def register(self, endpoints: Iterable[SegmentEndpoints],
+    def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
-        for start, end in endpoints:
-            if start > end:
-                start, end = end, start
-            start_event = self.event_cls(True, start, None, from_test,
-                                         SegmentsRelation.DISJOINT)
-            end_event = self.event_cls(False, end, start_event, from_test,
-                                       SegmentsRelation.DISJOINT)
-            start_event.complement = end_event
-            self._queue.push(start_event)
-            self._queue.push(end_event)
-
-    def divide_segment(self, event: Event, break_point: Point) -> None:
-        left_event = event.complement.complement = self.event_cls(
-                True, break_point, event.complement, event.from_test,
-                event.complement.relation)
-        right_event = event.complement = self.event_cls(
-                False, break_point, event, event.from_test, event.relation)
-        self._queue.push(left_event)
-        self._queue.push(right_event)
+        for segment_endpoints in segments_endpoints:
+            event = LinearEvent.from_endpoints(segment_endpoints, from_test)
+            self._queue.push(event)
+            self._queue.push(event.complement)
 
     def sweep(self, stop_x: Scalar) -> Iterable[LinearEvent]:
         sweep_line = SweepLine(self.context)
