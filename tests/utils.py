@@ -1,3 +1,4 @@
+from functools import partial
 from itertools import chain
 from operator import getitem
 from typing import (Any,
@@ -19,6 +20,7 @@ from orient.core.utils import flatten
 from orient.hints import Multiregion
 
 Domain = TypeVar('Domain')
+Range = TypeVar('Range')
 Key = Callable[[Domain], Any]
 Strategy = SearchStrategy
 context = get_context()
@@ -61,6 +63,44 @@ def implication(antecedent: bool, consequent: bool) -> bool:
 
 def equivalence(left: bool, right: bool) -> bool:
     return left is right
+
+
+def pack(function: Callable[..., Range]
+         ) -> Callable[[Iterable[Domain]], Range]:
+    return partial(apply, function)
+
+
+def apply(function: Callable[..., Range], args: Iterable[Domain]) -> Range:
+    return function(*args)
+
+
+def cleavage(functions: Tuple[Callable[[Domain], Range], ...],
+             *args: Domain, **kwargs: Domain) -> Tuple[Range, ...]:
+    return tuple(function(*args, **kwargs) for function in functions)
+
+
+def cleave(*functions: Callable[[Domain], Range]
+           ) -> Callable[[Tuple[Domain, ...]], Tuple[Range, ...]]:
+    return partial(cleavage, functions)
+
+
+def composition(functions: Tuple[Callable[[Domain], Range], ...],
+                *args: Domain,
+                **kwargs: Domain) -> Range:
+    result = functions[-1](*args, **kwargs)
+    for function in reversed(functions[:-1]):
+        result = function(result)
+    return result
+
+
+def compose(*functions: Callable[..., Range]) -> Callable[..., Range]:
+    return partial(composition, functions)
+
+
+def cleave_in_tuples(*functions: Callable[[Strategy[Domain]], Strategy[Range]]
+                     ) -> Callable[[Strategy[Domain]],
+                                   Strategy[Tuple[Range, ...]]]:
+    return compose(pack(strategies.tuples), cleave(*functions))
 
 
 def are_contours_equal(left: Contour, right: Contour) -> bool:

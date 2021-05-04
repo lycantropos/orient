@@ -1,23 +1,20 @@
 from fractions import Fraction
 from functools import partial
-from typing import (Optional,
-                    Sequence,
+from typing import (Sequence,
                     Tuple)
 
-from ground.hints import Scalar
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from orient.hints import Multiregion
 from tests.strategies import (coordinates_strategies,
                               rational_coordinates_strategies)
-from tests.utils import (Contour,
-                         Multipolygon,
+from tests.utils import (Multipolygon,
                          Multisegment,
                          Point,
                          Polygon,
                          Segment,
                          Strategy,
+                         cleave_in_tuples,
                          sub_lists,
                          to_multipolygon_edges,
                          to_pairs,
@@ -26,46 +23,23 @@ from tests.utils import (Contour,
 
 points = coordinates_strategies.flatmap(planar.points)
 segments = coordinates_strategies.flatmap(planar.segments)
-
-
-def to_segments_with_points(coordinates: Strategy[Scalar]
-                            ) -> Strategy[Tuple[Segment, Point]]:
-    return strategies.tuples(planar.segments(coordinates),
-                             planar.points(coordinates))
-
-
-segments_with_points = coordinates_strategies.flatmap(to_segments_with_points)
+segments_with_points = (coordinates_strategies
+                        .flatmap(cleave_in_tuples(planar.segments,
+                                                  planar.points)))
 segments_strategies = coordinates_strategies.map(planar.segments)
 segments_pairs = segments_strategies.flatmap(to_pairs)
 multisegments = coordinates_strategies.flatmap(planar.multisegments)
-
-
-def to_multisegments_with_points(coordinates: Strategy[Scalar]
-                                 ) -> Strategy[Tuple[Multisegment, Point]]:
-    return strategies.tuples(planar.multisegments(coordinates),
-                             planar.points(coordinates))
-
-
 multisegments_with_points = (coordinates_strategies
-                             .flatmap(to_multisegments_with_points))
-
-
-def to_multisegments_with_segments(coordinates: Strategy[Scalar],
-                                   *,
-                                   min_size: int = 2,
-                                   max_size: Optional[int] = None
-                                   ) -> Strategy[Tuple[Multisegment, Segment]]:
-    return strategies.tuples(planar.multisegments(coordinates,
-                                                  min_size=2,
-                                                  max_size=None),
-                             planar.segments(coordinates))
-
-
+                             .flatmap(cleave_in_tuples(planar.multisegments,
+                                                       planar.points)))
 multisegments_with_segments = (coordinates_strategies
-                               .flatmap(to_multisegments_with_segments))
+                               .flatmap(cleave_in_tuples(planar.multisegments,
+                                                         planar.segments)))
 size_three_or_more_multisegments_with_segments = (
-    coordinates_strategies.flatmap(partial(to_multisegments_with_segments,
-                                           min_size=3)))
+    (coordinates_strategies
+     .flatmap(cleave_in_tuples(partial(planar.multisegments,
+                                       min_size=3),
+                               planar.segments))))
 
 
 def chop_segment(segment: Segment, parts_count: int) -> Sequence[Segment]:
@@ -112,125 +86,40 @@ multisegments_strategies = coordinates_strategies.map(planar.multisegments)
 multisegments_pairs = (coordinates_strategies.map(planar.multisegments)
                        .flatmap(to_pairs))
 contours = coordinates_strategies.flatmap(planar.contours)
-
-
-def to_contours_with_points(coordinates: Strategy[Scalar]
-                            ) -> Strategy[Tuple[Contour, Point]]:
-    return strategies.tuples(planar.contours(coordinates),
-                             planar.points(coordinates))
-
-
-contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
-
-
-def to_contours_with_segments(coordinates: Strategy[Scalar]
-                              ) -> Strategy[Tuple[Contour, Segment]]:
-    return strategies.tuples(planar.contours(coordinates),
-                             planar.segments(coordinates))
-
-
+contours_with_points = (coordinates_strategies
+                        .flatmap(cleave_in_tuples(planar.contours,
+                                                  planar.points)))
 contours_with_segments = (coordinates_strategies
-                          .flatmap(to_contours_with_segments))
-
-
-def to_contours_with_multisegments(coordinates: Strategy[Scalar]
-                                   ) -> Strategy[Tuple[Contour, Multisegment]]:
-    return strategies.tuples(planar.contours(coordinates),
-                             planar.multisegments(coordinates))
-
-
-contours_with_multisegments = (coordinates_strategies
-                               .flatmap(to_contours_with_multisegments))
+                          .flatmap(cleave_in_tuples(planar.contours,
+                                                    planar.segments)))
+contours_with_multisegments = (
+    coordinates_strategies.flatmap(cleave_in_tuples(planar.contours,
+                                                    planar.multisegments)))
 contours_strategies = coordinates_strategies.map(planar.contours)
 contours_pairs = contours_strategies.flatmap(to_pairs)
 contours_triplets = contours_strategies.flatmap(to_triplets)
 multiregions = coordinates_strategies.flatmap(planar.multicontours)
-
-
-def to_multiregions_with_points(coordinates: Strategy[Scalar],
-                                *,
-                                min_size: int = 0,
-                                max_size: Optional[int] = None
-                                ) -> Strategy[Tuple[Multiregion, Point]]:
-    return strategies.tuples(planar.multicontours(coordinates,
-                                                  min_size=min_size,
-                                                  max_size=max_size),
-                             planar.points(coordinates))
-
-
 multiregions_with_points = (coordinates_strategies
-                            .flatmap(to_multiregions_with_points))
-
-
-def to_multiregions_with_segments(coordinates: Strategy[Scalar],
-                                  *,
-                                  min_size: int = 0,
-                                  max_size: Optional[int] = None
-                                  ) -> Strategy[Tuple[Multiregion, Segment]]:
-    return strategies.tuples(planar.multicontours(coordinates,
-                                                  min_size=min_size,
-                                                  max_size=max_size),
-                             planar.segments(coordinates))
-
-
+                            .flatmap(cleave_in_tuples(planar.multicontours,
+                                                      planar.points)))
 multiregions_with_segments = (coordinates_strategies
-                              .flatmap(to_multiregions_with_segments))
-
-
-def to_multiregions_with_multisegments(coordinates: Strategy[Scalar]
-                                       ) -> Strategy[Tuple[Multiregion,
-                                                           Multisegment]]:
-    return strategies.tuples(planar.multicontours(coordinates),
-                             planar.multisegments(coordinates))
-
-
+                              .flatmap(cleave_in_tuples(planar.multicontours,
+                                                        planar.segments)))
 multiregions_with_multisegments = (
-    coordinates_strategies.flatmap(to_multiregions_with_multisegments))
-
-
-def to_multiregions_with_contours(coordinates: Strategy[Scalar]
-                                  ) -> Strategy[Tuple[Multiregion, Contour]]:
-    return strategies.tuples(planar.multicontours(coordinates),
-                             planar.contours(coordinates))
-
-
+    coordinates_strategies.flatmap(cleave_in_tuples(planar.multicontours,
+                                                    planar.multisegments)))
 multiregions_with_contours = (coordinates_strategies
-                              .flatmap(to_multiregions_with_contours))
-
-
-def to_multiregions_pairs(coordinates: Strategy[Scalar]
-                          ) -> Strategy[Tuple[Multiregion, Multiregion]]:
-    return strategies.tuples(planar.multicontours(coordinates),
-                             planar.multicontours(coordinates))
-
-
-multiregions_pairs = coordinates_strategies.flatmap(to_multiregions_pairs)
+                              .flatmap(cleave_in_tuples(planar.multicontours,
+                                                        planar.contours)))
+multiregions_pairs = (coordinates_strategies.map(planar.multicontours)
+                      .flatmap(to_pairs))
 polygons = coordinates_strategies.flatmap(planar.polygons)
-
-
-def to_polygons_with_points(coordinates: Strategy[Scalar]
-                            ) -> Strategy[Tuple[Polygon, Point]]:
-    return strategies.tuples(planar.polygons(coordinates),
-                             planar.points(coordinates))
-
-
-polygons_with_points = coordinates_strategies.flatmap(to_polygons_with_points)
-
-
-def to_polygons_with_segments(coordinates: Strategy[Scalar]
-                              ) -> Strategy[Tuple[Polygon, Segment]]:
-    return strategies.tuples(planar.polygons(coordinates),
-                             planar.segments(coordinates))
-
-
+polygons_with_points = (coordinates_strategies
+                        .flatmap(cleave_in_tuples(planar.polygons,
+                                                  planar.points)))
 polygons_with_segments = (coordinates_strategies
-                          .flatmap(to_polygons_with_segments))
-
-
-def to_polygons_with_multisegments(coordinates: Strategy[Scalar]
-                                   ) -> Strategy[Tuple[Polygon, Multisegment]]:
-    return strategies.tuples(planar.polygons(coordinates),
-                             planar.multisegments(coordinates))
+                          .flatmap(cleave_in_tuples(planar.polygons,
+                                                    planar.segments)))
 
 
 def polygon_to_polygons_with_multisegments(polygon: Polygon
@@ -244,58 +133,24 @@ def polygon_to_polygons_with_multisegments(polygon: Polygon
 
 polygons_with_multisegments = (
         polygons.flatmap(polygon_to_polygons_with_multisegments)
-        | coordinates_strategies.flatmap(to_polygons_with_multisegments))
-
-
-def to_polygons_with_contours(coordinates: Strategy[Scalar]
-                              ) -> Strategy[Tuple[Polygon, Contour]]:
-    return strategies.tuples(planar.polygons(coordinates),
-                             planar.contours(coordinates))
-
-
+        | (coordinates_strategies
+           .flatmap(cleave_in_tuples(planar.polygons, planar.multisegments))))
 polygons_with_contours = (coordinates_strategies
-                          .flatmap(to_polygons_with_contours))
-
-
-def to_polygons_with_multiregions(coordinates: Strategy[Scalar]
-                                  ) -> Strategy[Tuple[Polygon, Multiregion]]:
-    return strategies.tuples(planar.polygons(coordinates),
-                             planar.multicontours(coordinates))
-
-
+                          .flatmap(cleave_in_tuples(planar.polygons,
+                                                    planar.contours)))
 polygons_with_multiregions = (coordinates_strategies
-                              .flatmap(to_polygons_with_multiregions))
+                              .flatmap(cleave_in_tuples(planar.polygons,
+                                                        planar.multicontours)))
 polygons_strategies = coordinates_strategies.map(planar.polygons)
 polygons_pairs = polygons_strategies.flatmap(to_pairs)
 polygons_triplets = polygons_strategies.flatmap(to_triplets)
 multipolygons = coordinates_strategies.flatmap(planar.multipolygons)
-
-
-def to_multipolygons_with_points(coordinates: Strategy[Scalar]
-                                 ) -> Strategy[Tuple[Multipolygon, Point]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.points(coordinates))
-
-
 multipolygons_with_points = (coordinates_strategies
-                             .flatmap(to_multipolygons_with_points))
-
-
-def to_multipolygons_with_segments(coordinates: Strategy[Scalar]
-                                   ) -> Strategy[Tuple[Multipolygon, Segment]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.segments(coordinates))
-
-
+                             .flatmap(cleave_in_tuples(planar.multipolygons,
+                                                       planar.points)))
 multipolygons_with_segments = (coordinates_strategies
-                               .flatmap(to_multipolygons_with_segments))
-
-
-def to_multipolygons_with_multisegments(coordinates: Strategy[Scalar]
-                                        ) -> Strategy[Tuple[Multipolygon,
-                                                            Multisegment]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.multisegments(coordinates))
+                               .flatmap(cleave_in_tuples(planar.multipolygons,
+                                                         planar.segments)))
 
 
 def multipolygon_to_multipolygons_with_multisegments(
@@ -310,45 +165,17 @@ def multipolygon_to_multipolygons_with_multisegments(
 
 multipolygons_with_multisegments = (
         multipolygons.flatmap(multipolygon_to_multipolygons_with_multisegments)
-        | coordinates_strategies.flatmap(to_multipolygons_with_multisegments))
-
-
-def to_multipolygons_with_contours(coordinates: Strategy[Scalar]
-                                   ) -> Strategy[Tuple[Multipolygon, Contour]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.contours(coordinates))
-
-
+        | (coordinates_strategies
+           .flatmap(cleave_in_tuples(planar.multipolygons,
+                                     planar.multisegments))))
 multipolygons_with_contours = (coordinates_strategies
-                               .flatmap(to_multipolygons_with_contours))
-
-
-def to_multipolygons_with_multiregions(coordinates: Strategy[Scalar]
-                                       ) -> Strategy[Tuple[Multipolygon,
-                                                           Multiregion]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.multicontours(coordinates))
-
-
+                               .flatmap(cleave_in_tuples(planar.multipolygons,
+                                                         planar.contours)))
 multipolygons_with_multiregions = (
-    coordinates_strategies.flatmap(to_multipolygons_with_multiregions))
-
-
-def to_multipolygons_with_polygons(coordinates: Strategy[Scalar]
-                                   ) -> Strategy[Tuple[Multipolygon, Polygon]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.polygons(coordinates))
-
-
+    coordinates_strategies.flatmap(cleave_in_tuples(planar.multipolygons,
+                                                    planar.multicontours)))
 multipolygons_with_polygons = (coordinates_strategies
-                               .flatmap(to_multipolygons_with_polygons))
-
-
-def to_multipolygons_pairs(coordinates: Strategy[Scalar]
-                           ) -> Strategy[Tuple[Multipolygon, Multipolygon]]:
-    return strategies.tuples(planar.multipolygons(coordinates),
-                             planar.multipolygons(coordinates))
-
-
+                               .flatmap(cleave_in_tuples(planar.multipolygons,
+                                                         planar.polygons)))
 multipolygons_pairs = (coordinates_strategies.map(planar.multipolygons)
                        .flatmap(to_pairs))
