@@ -1,10 +1,4 @@
-from ground.hints import (Box,
-                          Point)
-
-
-def contains_point(box: Box, point: Point) -> bool:
-    return (box.min_x <= point.x <= box.max_x
-            and box.min_y <= point.y <= box.max_y)
+from ground.hints import Box
 
 
 def disjoint_with(goal: Box, test: Box) -> bool:
