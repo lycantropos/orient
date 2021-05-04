@@ -157,7 +157,8 @@ def _relate_region(goal_regions: Iterable[Region],
                         else relation)))
 
 
-def relate_multiregion(goal: Multiregion, test: Multiregion,
+def relate_multiregion(goal: Multiregion,
+                       test: Multiregion,
                        context: Context) -> Relation:
     goal_bounding_box = context.contours_box(goal)
     test_bounding_box = context.contours_box(test)

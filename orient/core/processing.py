@@ -118,8 +118,7 @@ def process_linear_compound_queue(events_queue: CompoundEventsQueue,
     for event in events_queue.sweep(stop_x):
         if event.relation is SegmentsRelation.CROSS:
             return Relation.CROSS
-        elif (has_no_touch
-              and event.relation is not SegmentsRelation.DISJOINT):
+        elif has_no_touch and event.relation is not SegmentsRelation.DISJOINT:
             has_no_touch = False
         if event.from_test:
             if test_is_subset_of_goal and event.outside:
