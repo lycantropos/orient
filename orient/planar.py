@@ -1396,7 +1396,8 @@ def polygon_in_polygon(left: _Polygon, right: _Polygon,
     ...                        Polygon(outer_square, [innermore_square]))
     ...  is Relation.OVERLAP)
     True
-    >>> (polygon_in_polygon(Polygon(outer_square, []), Polygon(inner_square, []))
+    >>> (polygon_in_polygon(Polygon(outer_square, []),
+    ...                     Polygon(inner_square, []))
     ...  is polygon_in_polygon(Polygon(outer_square, [innermost_square]),
     ...                        Polygon(inner_square, [innermore_square]))
     ...  is Relation.COVER)
