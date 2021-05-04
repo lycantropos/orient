@@ -2134,155 +2134,107 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
     >>> Multipolygon = context.multipolygon_cls
     >>> Point = context.point_cls
     >>> Polygon = context.polygon_cls
-    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
-    ...                         Point(0, 7)])
-    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
-    ...                         Point(1, 6)])
-    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
-    ...                             Point(2, 5)])
-    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
-    ...                             Point(3, 4)])
+    >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
+    ...                          Point(4, 4)])
+    >>> third_square = Contour([Point(4, 4), Point(8, 4), Point(8, 8),
+    ...                         Point(4, 8)])
+    >>> fourth_square = Contour([Point(0, 4), Point(4, 4), Point(4, 8),
+    ...                          Point(0, 8)])
+    >>> first_inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                               Point(1, 3)])
+    >>> second_inner_square = Contour([Point(5, 1), Point(7, 1), Point(7, 3),
+    ...                                Point(5, 3)])
+    >>> third_inner_square = Contour([Point(5, 5), Point(7, 5), Point(7, 7),
+    ...                               Point(5, 7)])
+    >>> fourth_inner_square = Contour([Point(1, 5), Point(3, 5), Point(3, 7),
+    ...                                Point(1, 7)])
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...         Multipolygon([Polygon(innermore_square, [])]))
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_square, [])]),
+    ...      Multipolygon([Polygon(second_inner_square, []),
+    ...                    Polygon(fourth_inner_square, [])]))
     ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(innermore_square, [])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...                 Multipolygon([Polygon(innermore_square,
-    ...                                       [innermost_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(innermore_square,
-    ...                                       [innermost_square])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...          Multipolygon([Polygon(first_inner_square, []),
+    ...                        Polygon(third_inner_square, [])]),
+    ...          Multipolygon([Polygon(second_square, [second_inner_square]),
+    ...                        Polygon(fourth_square, [fourth_inner_square])]))
     ...  is Relation.DISJOINT)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(inner_square, [])]),
-    ...         Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_square, [])]),
+    ...      Multipolygon([Polygon(second_square, []),
+    ...                    Polygon(fourth_square, [])]))
     ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...                 Multipolygon([Polygon(inner_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermore_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...          Multipolygon([Polygon(first_inner_square, []),
+    ...                        Polygon(third_inner_square, [])]),
+    ...          Multipolygon([Polygon(first_square, [first_inner_square]),
+    ...                        Polygon(third_square, [third_inner_square])]))
     ...  is Relation.TOUCH)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(inner_square, [])]),
-    ...         Multipolygon([Polygon(outer_square, [innermore_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(inner_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermost_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermost_square])]),
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]))
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_inner_square, [])]),
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_square, [])]))
     ...  is Relation.OVERLAP)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(outer_square, [])]),
-    ...         Multipolygon([Polygon(inner_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermost_square])]),
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermore_square])]))
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_square, [])]),
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]))
     ...  is Relation.COVER)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(outer_square, [])]),
-    ...         Multipolygon([Polygon(outer_square, [inner_square])]))
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_inner_square, [])]),
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]))
     ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermore_square])]))
+    ...          Multipolygon([Polygon(first_square, []),
+    ...                        Polygon(third_square, [])]),
+    ...          Multipolygon([Polygon(first_square, [first_inner_square]),
+    ...                        Polygon(third_square, [third_inner_square])]))
     ...  is Relation.ENCLOSES)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                       Polygon(innermore_square, [])]),
-    ...         Multipolygon([Polygon(innermore_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square,
-    ...                                       [innermost_square])]),
-    ...                 Multipolygon([Polygon(innermore_square,
-    ...                                       [innermost_square])]))
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(second_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]),
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]))
     ...  is Relation.COMPOSITE)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(outer_square, [])]),
-    ...         Multipolygon([Polygon(outer_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square, [])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square,
-    ...                                       [innermost_square])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square,
-    ...                                       [innermost_square])]))
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_square, [])]),
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_square, [])]))
     ...  is Relation.EQUAL)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(innermore_square, [])]),
-    ...         Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                       Polygon(innermore_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(innermore_square,
-    ...                                       [innermost_square])]),
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square,
-    ...                                       [innermost_square])]))
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(second_inner_square, [])]),
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(second_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]))
     ...  is Relation.COMPONENT)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...         Multipolygon([Polygon(outer_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]),
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]))
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]),
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_inner_square, [])]))
     ...  is Relation.ENCLOSED)
     True
     >>> (multipolygon_in_multipolygon(
-    ...         Multipolygon([Polygon(inner_square, [])]),
-    ...         Multipolygon([Polygon(outer_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...                 Multipolygon([Polygon(inner_square,
-    ...                                       [innermore_square])]),
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermost_square])]))
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]),
+    ...      Multipolygon([Polygon(first_square, []),
+    ...                    Polygon(third_square, [])]))
     ...  is Relation.WITHIN)
     True
     """
