@@ -40,13 +40,6 @@ def test_self(multipolygon: Multipolygon) -> None:
             is (Relation.ENCLOSES
                 if multipolygon_has_holes
                 else Relation.EQUAL))
-    assert (multiregion_in_multipolygon([hole
-                                         for polygon in multipolygon.polygons
-                                         for hole in polygon.holes],
-                                        multipolygon)
-            is (Relation.TOUCH
-                if multipolygon_has_holes
-                else Relation.DISJOINT))
 
 
 @given(strategies.multipolygons_with_multiregions)
