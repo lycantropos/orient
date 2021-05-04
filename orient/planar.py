@@ -357,8 +357,14 @@ def multisegment_in_contour(multisegment: _Multisegment,
     >>> square = Contour([Point(0, 0), Point(4, 0), Point(4, 4), Point(0, 4)])
     >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
     ...                         Point(1, 3)])
-    >>> square_edges = list(context.contour_edges(square))
-    >>> inner_square_edges = list(context.contour_edges(inner_square))
+    >>> square_edges = [Segment(Point(0, 0), Point(4, 0)),
+    ...                 Segment(Point(0, 0), Point(0, 4)),
+    ...                 Segment(Point(4, 0), Point(4, 4)),
+    ...                 Segment(Point(0, 4), Point(4, 4))]
+    >>> inner_square_edges = [Segment(Point(1, 1), Point(3, 1)),
+    ...                       Segment(Point(1, 3), Point(1, 1)),
+    ...                       Segment(Point(3, 1), Point(3, 3)),
+    ...                       Segment(Point(1, 3), Point(3, 3))]
     >>> square_diagonals = [Segment(Point(0, 0), Point(2, 2)),
     ...                     Segment(Point(2, 2), Point(4, 0)),
     ...                     Segment(Point(2, 2), Point(4, 4)),
@@ -543,8 +549,14 @@ def multisegment_in_region(multisegment: _Multisegment,
     >>> square = Contour([Point(0, 0), Point(4, 0), Point(4, 4), Point(0, 4)])
     >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
     ...                         Point(1, 3)])
-    >>> square_edges = list(context.contour_edges(square))
-    >>> inner_square_edges = list(context.contour_edges(inner_square))
+    >>> square_edges = [Segment(Point(0, 0), Point(4, 0)),
+    ...                 Segment(Point(0, 0), Point(0, 4)),
+    ...                 Segment(Point(4, 0), Point(4, 4)),
+    ...                 Segment(Point(0, 4), Point(4, 4))]
+    >>> inner_square_edges = [Segment(Point(1, 1), Point(3, 1)),
+    ...                       Segment(Point(1, 3), Point(1, 1)),
+    ...                       Segment(Point(3, 1), Point(3, 3)),
+    ...                       Segment(Point(1, 3), Point(3, 3))]
     >>> square_diagonals = [Segment(Point(0, 0), Point(2, 2)),
     ...                     Segment(Point(2, 2), Point(4, 0)),
     ...                     Segment(Point(2, 2), Point(4, 4)),
