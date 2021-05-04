@@ -136,7 +136,9 @@ def process_linear_compound_queue(events_queue: CompoundEventsQueue,
         elif goal_border_subset_of_test:
             goal_border_subset_of_test = False
     if goal_border_subset_of_test:
-        return (Relation.COMPONENT
+        return ((Relation.COMPONENT
+                 if test_not_in_goal_interior
+                 else Relation.ENCLOSED)
                 if test_is_subset_of_goal
                 else Relation.TOUCH)
     elif test_is_subset_of_goal:
