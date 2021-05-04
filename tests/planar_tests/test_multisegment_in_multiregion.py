@@ -40,7 +40,7 @@ def test_self(multiregion: Multiregion) -> None:
             is (Relation.COMPONENT if multiregion else Relation.DISJOINT))
 
 
-@given(strategies.multiregions_with_multisegments)
+@given(strategies.multiregions_with_size_three_or_more_multisegments)
 def test_step(multiregion_with_multisegment: Tuple[Multiregion, Multisegment]
               ) -> None:
     multiregion, multisegment = multiregion_with_multisegment

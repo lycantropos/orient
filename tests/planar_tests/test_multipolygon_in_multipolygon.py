@@ -59,7 +59,7 @@ def test_relations(multipolygons_pair: Tuple[Multipolygon, Multipolygon]
             and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
-@given(strategies.multipolygons_pairs)
+@given(strategies.size_three_or_more_multipolygons_with_multipolygons)
 def test_step(multipolygons_pair: Tuple[Multipolygon, Multipolygon]) -> None:
     left, right = multipolygons_pair
     first_polygon, rest_left = multipolygon_pop_left(left)

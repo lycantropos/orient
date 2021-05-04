@@ -44,7 +44,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                 else Relation.DISJOINT))
 
 
-@given(strategies.multipolygons_with_multisegments)
+@given(strategies.multipolygons_with_size_three_or_more_multisegments)
 def test_step(multipolygon_with_multisegment: Tuple[Multipolygon, Multisegment]
               ) -> None:
     multipolygon, multisegment = multipolygon_with_multisegment

@@ -51,7 +51,7 @@ def test_relations(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
             and complement in ASYMMETRIC_MULTIPART_COMPOUND_RELATIONS)
 
 
-@given(strategies.multiregions_pairs)
+@given(strategies.size_three_or_more_multiregion_with_multiregion)
 def test_step(multiregions_pair: Tuple[Multiregion, Multiregion]) -> None:
     left_multiregion, right_multiregion = multiregions_pair
     first_region, *rest_left_multiregion = left_multiregion

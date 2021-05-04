@@ -42,7 +42,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                 else Relation.EQUAL))
 
 
-@given(strategies.multipolygons_with_multiregions)
+@given(strategies.size_three_or_more_multipolygons_with_multiregions)
 def test_step(multiregion_with_multipolygon: Tuple[Multipolygon, Multiregion]
               ) -> None:
     multipolygon, multiregion = multiregion_with_multipolygon

@@ -46,7 +46,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                        has_holes)
 
 
-@given(strategies.multipolygons_with_contours)
+@given(strategies.size_three_or_more_multipolygons_with_contours)
 def test_step(multipolygon_with_region: Tuple[Multipolygon, Region]) -> None:
     multipolygon, region = multipolygon_with_region
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

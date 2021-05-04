@@ -34,7 +34,7 @@ def test_vertices(multiregion: Multiregion) -> None:
                for vertex in region.vertices)
 
 
-@given(strategies.multiregions_with_points)
+@given(strategies.size_three_or_more_multiregions_with_points)
 def test_step(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
     multiregion, point = multiregion_with_region
     first_region, *rest_multiregion = multiregion

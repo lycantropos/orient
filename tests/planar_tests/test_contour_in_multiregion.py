@@ -39,7 +39,7 @@ def test_self(multiregion: Multiregion) -> None:
                for region in multiregion)
 
 
-@given(strategies.multiregions_with_contours)
+@given(strategies.size_three_or_more_multiregions_with_contours)
 def test_step(multiregion_with_contour: Tuple[Multiregion, Contour]) -> None:
     multiregion, contour = multiregion_with_contour
     first_region, *rest_multiregion = multiregion

@@ -55,7 +55,7 @@ def test_relations(multisegments_pair: Tuple[Multisegment, Multisegment]
                        and complement in ASYMMETRIC_LINEAR_RELATIONS)
 
 
-@given(strategies.multisegments_pairs)
+@given(strategies.size_three_or_more_multisegment_with_multisegment)
 def test_step(multisegments_pair: Tuple[Multisegment, Multisegment]) -> None:
     left, right = multisegments_pair
     first_segment, rest_left = multisegment_pop_left(left)

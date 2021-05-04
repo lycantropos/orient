@@ -47,7 +47,7 @@ def test_self(multipolygon: Multipolygon) -> None:
                for hole in polygon.holes)
 
 
-@given(strategies.multipolygons_with_contours)
+@given(strategies.size_three_or_more_multipolygons_with_contours)
 def test_step(multipolygon_with_contour: Tuple[Multipolygon, Contour]) -> None:
     multipolygon, contour = multipolygon_with_contour
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

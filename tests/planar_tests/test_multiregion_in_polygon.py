@@ -37,7 +37,7 @@ def test_self(polygon: Polygon) -> None:
             is (Relation.TOUCH if polygon.holes else Relation.DISJOINT))
 
 
-@given(strategies.polygons_with_multiregions)
+@given(strategies.polygons_with_size_three_or_more_multiregions)
 def test_step(multiregion_with_polygon: Tuple[Polygon, Multiregion]) -> None:
     polygon, multiregion = multiregion_with_polygon
     first_region, *rest_multiregion = multiregion

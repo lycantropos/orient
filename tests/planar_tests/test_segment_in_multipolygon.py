@@ -34,7 +34,7 @@ def test_basic(multipolygon_with_segment: Tuple[Multipolygon, Segment]
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.multipolygons_with_segments)
+@given(strategies.size_three_or_more_multipolygons_with_segments)
 def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Segment]) -> None:
     multipolygon, segment = multipolygon_with_polygon
     first_polygon, rest_multipolygon = multipolygon_pop_left(multipolygon)

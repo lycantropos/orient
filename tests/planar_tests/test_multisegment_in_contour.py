@@ -38,7 +38,7 @@ def test_self(contour: Contour) -> None:
                                    contour) is Relation.EQUAL
 
 
-@given(strategies.contours_with_multisegments)
+@given(strategies.contours_with_size_three_or_more_multisegments)
 def test_step(contour_with_multisegment: Tuple[Contour, Multisegment]) -> None:
     contour, multisegment = contour_with_multisegment
     first_segment, rest_multisegment = multisegment_pop_left(multisegment)

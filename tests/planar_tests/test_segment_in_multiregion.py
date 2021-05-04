@@ -30,7 +30,7 @@ def test_basic(multiregion_with_segment: Tuple[Multiregion, Segment]) -> None:
     assert result in LINEAR_COMPOUND_RELATIONS
 
 
-@given(strategies.multiregions_with_segments)
+@given(strategies.size_three_or_more_multiregions_with_segments)
 def test_step(multiregion_with_region: Tuple[Multiregion, Segment]) -> None:
     multiregion, segment = multiregion_with_region
     first_region, *rest_multiregion = multiregion

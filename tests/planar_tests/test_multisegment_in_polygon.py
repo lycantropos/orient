@@ -39,7 +39,7 @@ def test_self(polygon: Polygon) -> None:
                                    polygon) is Relation.COMPONENT
 
 
-@given(strategies.polygons_with_multisegments)
+@given(strategies.polygons_with_with_size_three_or_more_multisegments)
 def test_step(polygon_with_multisegment: Tuple[Polygon, Multisegment]) -> None:
     polygon, multisegment = polygon_with_multisegment
     first_segment, rest_multisegment = multisegment_pop_left(multisegment)

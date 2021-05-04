@@ -38,7 +38,7 @@ def test_self(region: Region) -> None:
                                   region) is Relation.COMPONENT
 
 
-@given(strategies.contours_with_multisegments)
+@given(strategies.contours_with_size_three_or_more_multisegments)
 def test_step(region_with_multisegment: Tuple[Region, Multisegment]) -> None:
     region, multisegment = region_with_multisegment
     first_segment, rest_multisegment = multisegment_pop_left(multisegment)
