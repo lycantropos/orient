@@ -123,7 +123,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                     event.set_both_relations(max(event.relation,
                                                  SegmentsRelation.TOUCH))
             for event in same_start_events:
-                if event.is_left_endpoint:
+                if event.is_left:
                     sweep_line.add(event)
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
@@ -308,7 +308,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 for event in same_start_events:
                     event.set_both_relations(max(event.relation, relation))
             for event in same_start_events:
-                if event.is_left_endpoint:
+                if event.is_left:
                     sweep_line.add(event)
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))

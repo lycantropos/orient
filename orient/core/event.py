@@ -10,16 +10,15 @@ from .enums import (OverlapKind,
 
 
 class LinearEvent:
-    __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_test',
-                 'relation')
+    __slots__ = 'complement', 'from_test', 'is_left', 'relation', 'start'
 
     def __init__(self,
-                 is_left_endpoint: bool,
+                 is_left: bool,
                  start: Point,
                  complement: Optional['Event'],
                  from_test: bool,
                  relation: SegmentsRelation) -> None:
-        self.is_left_endpoint = is_left_endpoint
+        self.is_left = is_left
         self.start, self.complement = start, complement
         self.from_test = from_test
         self.relation = relation
@@ -39,17 +38,16 @@ class LinearEvent:
 
 
 class CompoundEvent(LinearEvent):
-    __slots__ = 'overlap_kind', 'interior_to_left', 'other_interior_to_left'
+    __slots__ = 'interior_to_left', 'other_interior_to_left', 'overlap_kind'
 
     def __init__(self,
-                 is_left_endpoint: bool,
+                 is_left: bool,
                  start: Point,
                  complement: Optional['CompoundEvent'],
                  from_test: bool,
                  relation: SegmentsRelation,
                  interior_to_left: bool) -> None:
-        super().__init__(is_left_endpoint, start, complement, from_test,
-                         relation)
+        super().__init__(is_left, start, complement, from_test, relation)
         self.overlap_kind = OverlapKind.NONE
         self.interior_to_left = interior_to_left
         self.other_interior_to_left = False
