@@ -1459,31 +1459,24 @@ def point_in_multipolygon(point: _Point,
     ...                                          context.multipolygon_cls,
     ...                                          context.point_cls,
     ...                                          context.polygon_cls)
-    >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
-    >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
-    >>> (point_in_multipolygon(Point(0, 0),
-    ...                        Multipolygon([Polygon(triangle, [])]))
-    ...  is Relation.COMPONENT)
-    True
-    >>> (point_in_multipolygon(Point(0, 0),
-    ...                        Multipolygon([Polygon(square, [])]))
-    ...  is Relation.COMPONENT)
-    True
-    >>> (point_in_multipolygon(Point(1, 1),
-    ...                        Multipolygon([Polygon(triangle, [])]))
-    ...  is Relation.COMPONENT)
-    True
-    >>> (point_in_multipolygon(Point(1, 1),
-    ...                        Multipolygon([Polygon(square, [])]))
-    ...  is Relation.WITHIN)
-    True
-    >>> (point_in_multipolygon(Point(2, 2),
-    ...                        Multipolygon([Polygon(triangle, [])]))
+    >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> second_square = Contour([Point(4, 4), Point(8, 4), Point(8, 8),
+    ...                          Point(4, 8)])
+    >>> (point_in_multipolygon(Point(6, 2),
+    ...                        Multipolygon([Polygon(first_square, []),
+    ...                                      Polygon(second_square, [])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (point_in_multipolygon(Point(2, 2),
-    ...                        Multipolygon([Polygon(square, [])]))
+    >>> (point_in_multipolygon(Point(4, 4),
+    ...                        Multipolygon([Polygon(first_square, []),
+    ...                                      Polygon(second_square, [])]))
     ...  is Relation.COMPONENT)
+    True
+    >>> (point_in_multipolygon(Point(2, 2),
+    ...                        Multipolygon([Polygon(first_square, []),
+    ...                                      Polygon(second_square, [])]))
+    ...  is Relation.WITHIN)
     True
     """
     return _multipolygon.relate_point(
