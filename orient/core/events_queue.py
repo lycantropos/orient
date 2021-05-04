@@ -440,11 +440,11 @@ class EventsQueueKey:
             # different points, but same x-coordinate,
             # the event with lower y-coordinate is processed first
             return start.y < other_start.y
-        elif event.is_left_endpoint is not other_event.is_left_endpoint:
+        elif event.is_left is not other_event.is_left:
             # same start, but one is a left endpoint
             # and the other a right endpoint,
             # the right endpoint is processed first
-            return other_event.is_left_endpoint
+            return other_event.is_left
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
@@ -455,5 +455,5 @@ class EventsQueueKey:
                     else (other_end_orientation
                           # the lowest segment is processed first
                           is (Orientation.COUNTERCLOCKWISE
-                              if event.is_left_endpoint
+                              if event.is_left
                               else Orientation.CLOCKWISE)))
