@@ -45,10 +45,6 @@ class EventsQueue(Generic[Event]):
     def peek(self) -> Event:
         return self._queue.peek()
 
-    def divide_segment(self, event: CompoundEvent, break_point: Point) -> None:
-        self._queue.push(event.divide(break_point))
-        self._queue.push(event.complement)
-
     @abstractmethod
     def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
@@ -63,18 +59,22 @@ class EventsQueue(Generic[Event]):
         Sweeps plane and emits processed segments' events.
         """
 
+    def _divide_segment(self,
+                        event: CompoundEvent,
+                        break_point: Point) -> None:
+        self._queue.push(event.divide(break_point))
+        self._queue.push(event.complement)
+
 
 class CompoundEventsQueue(EventsQueue[CompoundEvent]):
     def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
+        push = self._queue.push
         for segment_endpoints in segments_endpoints:
             event = CompoundEvent.from_endpoints(segment_endpoints, from_test)
-            self.push(event)
-            self.push(event.complement)
-
-    def push(self, event: Event) -> None:
-        self._queue.push(event)
+            push(event)
+            push(event.complement)
 
     def sweep(self, stop_x: Scalar) -> Iterable[CompoundEvent]:
         sweep_line = SweepLine(self.context)
@@ -125,9 +125,9 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
         if relation is Relation.TOUCH or relation is Relation.CROSS:
             point = self.context.segments_intersection(below_event, event)
             if point != below_event.start and point != below_event.end:
-                self.divide_segment(below_event, point)
+                self._divide_segment(below_event, point)
             if point != event.start and point != event.end:
-                self.divide_segment(event, point)
+                self._divide_segment(event, point)
         elif relation is not Relation.DISJOINT:
             # segments overlap
             if event.from_test is below_event.from_test:
@@ -156,19 +156,19 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                     if event.interior_to_left is below_event.interior_to_left
                     else OverlapKind.DIFFERENT_ORIENTATION)
                 if not ends_equal:
-                    self.divide_segment(end_max.complement, end_min.start)
+                    self._divide_segment(end_max.complement, end_min.start)
                 return True
             elif ends_equal:
                 # the line segments share the right endpoint
-                self.divide_segment(start_min, start_max.start)
+                self._divide_segment(start_min, start_max.start)
             elif start_min is end_max.complement:
                 # one line segment includes the other one
-                self.divide_segment(start_min, end_min.start)
-                self.divide_segment(start_min, start_max.start)
+                self._divide_segment(start_min, end_min.start)
+                self._divide_segment(start_min, start_max.start)
             else:
                 # no line segment includes the other one
-                self.divide_segment(start_max, end_min.start)
-                self.divide_segment(start_min, start_max.start)
+                self._divide_segment(start_max, end_min.start)
+                self._divide_segment(start_min, start_max.start)
         return False
 
     @staticmethod
@@ -185,10 +185,11 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
     def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
+        push = self._queue.push
         for segment_endpoints in segments_endpoints:
             event = LinearEvent.from_endpoints(segment_endpoints, from_test)
-            self._queue.push(event)
-            self._queue.push(event.complement)
+            push(event)
+            push(event.complement)
 
     def sweep(self, stop_x: Scalar) -> Iterable[LinearEvent]:
         sweep_line = SweepLine(self.context)
@@ -269,9 +270,9 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
         if relation is Relation.TOUCH or relation is Relation.CROSS:
             point = self.context.segments_intersection(below_event, event)
             if point != below_event.start and point != below_event.end:
-                self.divide_segment(below_event, point)
+                self._divide_segment(below_event, point)
             if point != event.start and point != event.end:
-                self.divide_segment(event, point)
+                self._divide_segment(event, point)
         elif relation is not Relation.DISJOINT:
             # segments overlap
             if event.from_test is below_event.from_test:
@@ -296,18 +297,18 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 if not ends_equal:
-                    self.divide_segment(end_max.complement, end_min.start)
+                    self._divide_segment(end_max.complement, end_min.start)
             elif ends_equal:
                 # the line segments share the right endpoint
-                self.divide_segment(start_min, start_max.start)
+                self._divide_segment(start_min, start_max.start)
             elif start_min is end_max.complement:
                 # one line segment includes the other one
-                self.divide_segment(start_min, end_min.start)
-                self.divide_segment(start_min, start_max.start)
+                self._divide_segment(start_min, end_min.start)
+                self._divide_segment(start_min, start_max.start)
             else:
                 # no line segment includes the other one
-                self.divide_segment(start_max, end_min.start)
-                self.divide_segment(start_min, start_max.start)
+                self._divide_segment(start_max, end_min.start)
+                self._divide_segment(start_min, start_max.start)
 
     def _point_in_angle(self,
                         point: Point,
