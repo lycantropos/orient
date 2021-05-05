@@ -1,6 +1,7 @@
+from abc import (ABC,
+                 abstractmethod)
 from reprlib import recursive_repr
-from typing import (Optional,
-                    TypeVar)
+from typing import Optional
 
 from ground.hints import Point
 from reprit.base import generate_repr
@@ -10,89 +11,184 @@ from .enums import (OverlapKind,
 from .hints import SegmentEndpoints
 
 
-class LinearEvent:
-    @classmethod
-    def from_endpoints(cls, endpoints, from_test: bool) -> 'LinearEvent':
-        start, end = endpoints
-        if start > end:
-            start, end = end, start
-        result = cls(start, None, start, True, from_test,
-                     SegmentsRelation.DISJOINT)
-        result.complement = cls(end, result, end, False, from_test,
-                                SegmentsRelation.DISJOINT)
-        return result
+class Event(ABC):
+    left = None  # type: Optional[LeftEvent]
+    right = None  # type: Optional[RightEvent]
 
-    __slots__ = ('complement', 'from_test', 'is_left', 'original_start',
-                 'relation', 'start')
+    __slots__ = ()
+
+    @property
+    @abstractmethod
+    def end(self) -> Point:
+        """Returns end of the event."""
+
+    @property
+    @abstractmethod
+    def from_test(self) -> bool:
+        """Checks if the event's segment is from test geometry."""
+
+    @property
+    @abstractmethod
+    def from_goal(self) -> bool:
+        """Checks if the event's segment is from goal geometry."""
+
+    @property
+    @abstractmethod
+    def is_left(self) -> bool:
+        """
+        Checks if the event corresponds to a leftmost endpoint of the segment.
+        """
+
+    @property
+    @abstractmethod
+    def original_end(self) -> Point:
+        """Returns original end of the event's segment."""
+
+    @property
+    @abstractmethod
+    def original_start(self) -> Point:
+        """Returns original start of the event's segment."""
+
+    @property
+    @abstractmethod
+    def start(self) -> Point:
+        """Returns start of the event."""
+
+
+class LeftEvent(Event):
+    is_left = True
+
+    @abstractmethod
+    def divide(self, break_point: Point) -> 'LeftEvent':
+        """Divides the event at given break point and returns tail."""
+
+
+class RightEvent(Event):
+    is_left = False
+
+    __slots__ = 'left', '_original_start', '_start'
 
     def __init__(self,
                  start: Point,
-                 complement: Optional['Event'],
+                 left: LeftEvent,
+                 original_start: Point) -> None:
+        self.left, self._original_start, self._start = (left, original_start,
+                                                        start)
+
+    __repr__ = recursive_repr()(generate_repr(__init__))
+
+    @property
+    def end(self) -> Point:
+        return self.left.start
+
+    @property
+    def from_test(self) -> bool:
+        return self.left.from_test
+
+    @property
+    def from_goal(self) -> bool:
+        return self.left.from_goal
+
+    @property
+    def original_end(self) -> Point:
+        return self.left.original_start
+
+    @property
+    def original_start(self) -> Point:
+        return self._original_start
+
+    @property
+    def start(self) -> Point:
+        return self._start
+
+
+class LinearLeftEvent(LeftEvent):
+    @classmethod
+    def from_endpoints(cls, endpoints, from_test: bool) -> 'LinearLeftEvent':
+        start, end = endpoints
+        if start > end:
+            start, end = end, start
+        result = cls(start, None, start, from_test, SegmentsRelation.DISJOINT)
+        result.right = RightEvent(end, result, end)
+        return result
+
+    __slots__ = ('right', 'relation', '_from_test', '_original_start',
+                 '_start')
+
+    def __init__(self,
+                 start: Point,
+                 right: Optional[RightEvent],
                  original_start: Point,
-                 is_left: bool,
                  from_test: bool,
                  relation: SegmentsRelation) -> None:
-        self.complement, self.original_start, self.start = (
-            complement, original_start, start)
-        self.is_left = is_left
-        self.from_test = from_test
+        self.right, self._original_start, self._start = (right, original_start,
+                                                         start)
+        self._from_test = from_test
         self.relation = relation
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
     def end(self) -> Point:
-        return self.complement.start
+        return self.right.start
 
     @property
     def from_goal(self) -> bool:
         return not self.from_test
 
     @property
-    def original_end(self) -> Point:
-        return self.complement.original_start
+    def from_test(self) -> bool:
+        return self._from_test
 
-    def divide(self, break_point: Point) -> 'LinearEvent':
-        tail = self.complement.complement = LinearEvent(
-                break_point, self.complement, self.original_start,
-                True, self.from_test, self.complement.relation)
-        self.complement = LinearEvent(break_point, self, self.original_end,
-                                      False, self.from_test, self.relation)
+    @property
+    def original_end(self) -> Point:
+        return self.right.original_start
+
+    @property
+    def original_start(self) -> Point:
+        return self._original_start
+
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    def divide(self, break_point: Point) -> 'LinearLeftEvent':
+        tail = self.right.left = LinearLeftEvent(break_point, self.right,
+                                                 self.original_start,
+                                                 self.from_test, self.relation)
+        self.right = RightEvent(break_point, self, self.original_end)
         return tail
 
 
-class CompoundEvent:
+class CompoundLeftEvent(LeftEvent):
     @classmethod
     def from_endpoints(cls,
                        segment_endpoints: SegmentEndpoints,
-                       from_test: bool) -> 'CompoundEvent':
+                       from_test: bool) -> 'CompoundLeftEvent':
         start, end = segment_endpoints
         inside_on_left = True
         if start > end:
             start, end = end, start
             inside_on_left = False
-        result = cls(start, None, start, True, from_test,
+        result = cls(start, None, start, from_test,
                      SegmentsRelation.DISJOINT, inside_on_left)
-        result.complement = cls(end, result, end, False, from_test,
-                                SegmentsRelation.DISJOINT, inside_on_left)
+        result.right = RightEvent(end, result, end)
         return result
 
-    __slots__ = ('complement', 'from_test', 'interior_to_left', 'is_left',
-                 'original_start', 'other_interior_to_left', 'overlap_kind',
-                 'relation', 'start')
+    __slots__ = ('right', 'interior_to_left', 'other_interior_to_left',
+                 'overlap_kind', 'relation', '_from_test', '_original_start',
+                 '_start')
 
     def __init__(self,
                  start: Point,
-                 complement: Optional['CompoundEvent'],
+                 right: Optional[RightEvent],
                  original_start: Point,
-                 is_left: bool,
                  from_test: bool,
                  relation: SegmentsRelation,
                  interior_to_left: bool) -> None:
-        self.complement, self.original_start, self.start = (
-            complement, original_start, start)
-        self.is_left = is_left
-        self.from_test = from_test
+        self.right, self._original_start, self._start = (right, original_start,
+                                                         start)
+        self._from_test = from_test
         self.relation = relation
         self.overlap_kind = OverlapKind.NONE
         self.interior_to_left = interior_to_left
@@ -102,11 +198,15 @@ class CompoundEvent:
 
     @property
     def end(self) -> Point:
-        return self.complement.start
+        return self.right.start
 
     @property
     def from_goal(self) -> bool:
         return not self.from_test
+
+    @property
+    def from_test(self) -> bool:
+        return self._from_test
 
     @property
     def inside(self) -> bool:
@@ -133,7 +233,11 @@ class CompoundEvent:
 
     @property
     def original_end(self) -> Point:
-        return self.complement.original_start
+        return self.right.original_start
+
+    @property
+    def original_start(self) -> Point:
+        return self._original_start
 
     @property
     def outside(self) -> bool:
@@ -143,15 +247,13 @@ class CompoundEvent:
         return (not self.other_interior_to_left
                 and self.overlap_kind is OverlapKind.NONE)
 
-    def divide(self, break_point: Point) -> 'CompoundEvent':
-        tail = self.complement.complement = CompoundEvent(
-                break_point, self.complement, self.original_start, True,
-                self.from_test, self.complement.relation,
-                self.interior_to_left)
-        self.complement = CompoundEvent(
-                break_point, self, self.original_end, False, self.from_test,
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    def divide(self, break_point: Point) -> 'CompoundLeftEvent':
+        tail = self.right.left = CompoundLeftEvent(
+                break_point, self.right, self.original_start, self.from_test,
                 self.relation, self.interior_to_left)
+        self.right = RightEvent(break_point, self, self.original_end)
         return tail
-
-
-Event = TypeVar('Event', LinearEvent, CompoundEvent)

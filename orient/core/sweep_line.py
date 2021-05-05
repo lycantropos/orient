@@ -1,16 +1,21 @@
 from functools import partial
-from typing import Optional
+from typing import (Generic,
+                    Optional,
+                    TypeVar)
 
 from dendroid import red_black
 from ground.base import (Context,
                          Orientation)
 from reprit.base import generate_repr
 
-from .event import Event
+from .event import LeftEvent
 from .hints import Orienteer
 
+Event = TypeVar('Event',
+                bound=LeftEvent)
 
-class SweepLine:
+
+class SweepLine(Generic[Event]):
     __slots__ = 'context', '_set'
 
     def __init__(self, context: Context) -> None:

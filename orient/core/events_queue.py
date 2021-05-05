@@ -1,12 +1,10 @@
 import math
 from abc import abstractmethod
 from functools import partial
-from typing import (Generic,
-                    Iterable,
+from typing import (Iterable,
                     List,
                     Optional,
-                    Sequence,
-                    Type)
+                    Sequence)
 
 from ground.base import (Context,
                          Orientation,
@@ -18,16 +16,17 @@ from reprit.base import generate_repr
 
 from .enums import (OverlapKind,
                     SegmentsRelation)
-from .event import (CompoundEvent,
+from .event import (CompoundLeftEvent as CompoundEvent,
                     Event,
-                    LinearEvent)
+                    LeftEvent,
+                    LinearLeftEvent as LinearEvent)
 from .hints import (Orienteer,
                     SegmentEndpoints)
 from .sweep_line import SweepLine
 from .utils import all_equal
 
 
-class EventsQueue(Generic[Event]):
+class EventsQueue:
     __slots__ = 'context', 'key', '_queue'
 
     def __init__(self, context: Context) -> None:
@@ -52,30 +51,29 @@ class EventsQueue(Generic[Event]):
         """
 
     @abstractmethod
-    def sweep(self, stop_x: Scalar) -> Iterable[Event]:
+    def sweep(self, stop_x: Scalar) -> Iterable[LeftEvent]:
         """
         Sweeps plane and emits processed segments' events.
         """
 
-    def _divide_segment(self,
-                        event: CompoundEvent,
-                        break_point: Point) -> None:
+    def _divide_segment(self, event: LeftEvent, break_point: Point) -> None:
         self._queue.push(event.divide(break_point))
-        self._queue.push(event.complement)
+        self._queue.push(event.right)
 
 
-class CompoundEventsQueue(EventsQueue[CompoundEvent]):
+class CompoundEventsQueue(EventsQueue):
     def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
         push = self._queue.push
         for segment_endpoints in segments_endpoints:
-            event = CompoundEvent.from_endpoints(segment_endpoints, from_test)
+            event = CompoundEvent.from_endpoints(segment_endpoints,
+                                                 from_test)
             push(event)
-            push(event.complement)
+            push(event.right)
 
     def sweep(self, stop_x: Scalar) -> Iterable[CompoundEvent]:
-        sweep_line = SweepLine(self.context)
+        sweep_line = SweepLine(self.context)  # type: SweepLine[CompoundEvent]
         queue = self._queue
         start = queue.peek().start if queue else None  # type: Optional[Point]
         same_start_events = []  # type: List[Event]
@@ -103,7 +101,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                     self.compute_position(sweep_line.below(below_event),
                                           below_event)
             else:
-                event = event.complement
+                event = event.left
                 if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
@@ -138,11 +136,11 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                 if starts_equal or self.key(event) < self.key(below_event)
                 else (below_event, event))
             end_min, end_max = (
-                (event.complement, below_event.complement)
-                if ends_equal or (self.key(event.complement)
-                                  < self.key(below_event.complement))
-                else (below_event.complement,
-                      event.complement))
+                (event.right, below_event.right)
+                if ends_equal or (self.key(event.right)
+                                  < self.key(below_event.right))
+                else (below_event.right,
+                      event.right))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 below_event.overlap_kind = event.overlap_kind = (
@@ -150,12 +148,12 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                     if event.interior_to_left is below_event.interior_to_left
                     else OverlapKind.DIFFERENT_ORIENTATION)
                 if not ends_equal:
-                    self._divide_segment(end_max.complement, end_min.start)
+                    self._divide_segment(end_max.left, end_min.start)
                 return True
             elif ends_equal:
                 # the line segments share the right endpoint
                 self._divide_segment(start_min, start_max.start)
-            elif start_min is end_max.complement:
+            elif start_min is end_max.left:
                 # one line segment includes the other one
                 self._divide_segment(start_min, end_min.start)
                 self._divide_segment(start_min, start_max.start)
@@ -175,18 +173,19 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                                             else below_event.interior_to_left)
 
 
-class LinearEventsQueue(EventsQueue[LinearEvent]):
+class LinearEventsQueue(EventsQueue):
     def register(self, segments_endpoints: Iterable[SegmentEndpoints],
                  *,
                  from_test: bool) -> None:
         push = self._queue.push
         for segment_endpoints in segments_endpoints:
-            event = LinearEvent.from_endpoints(segment_endpoints, from_test)
+            event = LinearEvent.from_endpoints(segment_endpoints,
+                                               from_test)
             push(event)
-            push(event.complement)
+            push(event.right)
 
     def sweep(self, stop_x: Scalar) -> Iterable[LinearEvent]:
-        sweep_line = SweepLine(self.context)
+        sweep_line = SweepLine(self.context)  # type: SweepLine[LinearEvent]
         queue = self._queue
         start = queue.peek().start if queue else None  # type: Optional[Point]
         same_start_events = []  # type: List[Event]
@@ -211,7 +210,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 if below_event is not None:
                     self.detect_intersection(below_event, event)
             else:
-                event = event.complement
+                event = event.left
                 if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
@@ -221,7 +220,7 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
         self.detect_crossing_angles(same_start_events)
         yield from complete_events_relations(same_start_events)
 
-    def detect_crossing_angles(self, same_start_events: Sequence[LinearEvent]
+    def detect_crossing_angles(self, same_start_events: Sequence[Event]
                                ) -> None:
         if (len(same_start_events) < 4
                 or not (1 < sum(event.from_test for event in same_start_events)
@@ -251,12 +250,13 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                                               base_orientation)
                          for test_event in from_test_events):
             for event in same_start_events:
-                left_event = event if event.is_left else event.complement
+                left_event = event if event.is_left else event.left
                 left_event.relation = max(left_event.relation,
                                           SegmentsRelation.CROSS)
 
-    def detect_intersection(self, below_event: LinearEvent, event: LinearEvent
-                            ) -> None:
+    def detect_intersection(self,
+                            below_event: LinearEvent,
+                            event: LinearEvent) -> None:
         """
         Populates events queue with intersection events.
         """
@@ -279,19 +279,19 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 if starts_equal or self.key(event) < self.key(below_event)
                 else (below_event, event))
             end_min, end_max = (
-                (event.complement, below_event.complement)
-                if ends_equal or (self.key(event.complement)
-                                  < self.key(below_event.complement))
-                else (below_event.complement,
-                      event.complement))
+                (event.right, below_event.right)
+                if ends_equal or (self.key(event.right)
+                                  < self.key(below_event.right))
+                else (below_event.right,
+                      event.right))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 if not ends_equal:
-                    self._divide_segment(end_max.complement, end_min.start)
+                    self._divide_segment(end_max.left, end_min.start)
             elif ends_equal:
                 # the line segments share the right endpoint
                 self._divide_segment(start_min, start_max.start)
-            elif start_min is end_max.complement:
+            elif start_min is end_max.left:
                 # one line segment includes the other one
                 self._divide_segment(start_min, end_min.start)
                 self._divide_segment(start_min, start_max.start)
@@ -368,10 +368,10 @@ def complete_events_relations(same_start_events: Sequence[Event]
                               ) -> Iterable[Event]:
     for offset, first in enumerate(same_start_events,
                                    start=1):
-        first_left = first if first.is_left else first.complement
+        first_left = first if first.is_left else first.left
         for second_index in range(offset, len(same_start_events)):
             second = same_start_events[second_index]
-            second_left = second if second.is_left else second.complement
+            second_left = second if second.is_left else second.left
             if second_left.from_test is first_left.from_test:
                 continue
             if (first_left.start == second_left.start
