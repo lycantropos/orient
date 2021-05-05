@@ -1778,56 +1778,45 @@ def contour_in_multipolygon(contour: _Contour,
     >>> Multipolygon = context.multipolygon_cls
     >>> Point = context.point_cls
     >>> Polygon = context.polygon_cls
-    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
-    ...                         Point(0, 7)])
-    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
-    ...                         Point(1, 6)])
-    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
-    ...                             Point(2, 5)])
-    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
-    ...                             Point(3, 4)])
-    >>> (contour_in_multipolygon(outer_square, Multipolygon([]))
-    ...  is contour_in_multipolygon(outer_square,
-    ...                             Multipolygon([Polygon(inner_square, [])]))
-    ...  is contour_in_multipolygon(
-    ...                 innermore_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
-    ...  is contour_in_multipolygon(
-    ...                 innermore_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermost_square, [])]))
+    >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
+    ...                          Point(4, 4)])
+    >>> third_square = Contour([Point(4, 4), Point(8, 4), Point(8, 8),
+    ...                         Point(4, 8)])
+    >>> first_inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                               Point(1, 3)])
+    >>> second_inner_square = Contour([Point(5, 1), Point(7, 1), Point(7, 3),
+    ...                                Point(5, 3)])
+    >>> triangle = Contour([Point(0, 0), Point(4, 0), Point(0, 4)])
+    >>> (contour_in_multipolygon(
+    ...      first_square, Multipolygon([Polygon(first_inner_square, []),
+    ...                                  Polygon(second_inner_square, [])]))
     ...  is Relation.DISJOINT)
     True
     >>> (contour_in_multipolygon(
-    ...         outer_square, Multipolygon([Polygon(outer_square, [])]))
-    ...  is contour_in_multipolygon(
-    ...                 outer_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
-    ...  is contour_in_multipolygon(
-    ...                 inner_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square])]))
-    ...  is contour_in_multipolygon(
-    ...                 outer_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(inner_square,
-    ...                                       [innermost_square])]))
-    ...  is contour_in_multipolygon(
-    ...                 innermost_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square,
-    ...                                       [innermost_square])]))
+    ...      second_square, Multipolygon([Polygon(first_square, []),
+    ...                                   Polygon(third_square, [])]))
+    ...  is Relation.TOUCH)
+    True
+    >>> (contour_in_multipolygon(
+    ...      first_inner_square, Multipolygon([Polygon(triangle, []),
+    ...                                        Polygon(second_square, [])]))
+    ...  is Relation.CROSS)
+    True
+    >>> (contour_in_multipolygon(
+    ...      first_square, Multipolygon([Polygon(first_square, []),
+    ...                                  Polygon(third_square, [])]))
     ...  is Relation.COMPONENT)
     True
-    >>> (contour_in_multipolygon(inner_square,
-    ...                          Multipolygon([Polygon(outer_square, [])]))
-    ...  is contour_in_multipolygon(
-    ...                 inner_square,
-    ...                 Multipolygon([Polygon(outer_square,
-    ...                                       [innermore_square])]))
-    ...  is contour_in_multipolygon(
-    ...                 innermost_square,
-    ...                 Multipolygon([Polygon(outer_square, [inner_square]),
-    ...                               Polygon(innermore_square, [])]))
+    >>> (contour_in_multipolygon(
+    ...      triangle, Multipolygon([Polygon(first_square, []),
+    ...                              Polygon(third_square, [])]))
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (contour_in_multipolygon(
+    ...      first_inner_square, Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(third_square, [])]))
     ...  is Relation.WITHIN)
     True
     """
