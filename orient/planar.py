@@ -277,7 +277,7 @@ def point_in_contour(point: _Point, contour: _Contour,
     Finds relation between point and contour.
 
     Time complexity:
-        ``O(len(contour))``
+        ``O(len(contour.vertices))``
     Memory complexity:
         ``O(1)``
 
@@ -310,7 +310,7 @@ def segment_in_contour(segment: _Segment, contour: _Contour,
     Finds relation between segment and contour.
 
     Time complexity:
-        ``O(len(contour))``
+        ``O(len(contour.vertices))``
     Memory complexity:
         ``O(1)``
 
@@ -366,7 +366,7 @@ def multisegment_in_contour(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(left) + len(right)``.
+    where ``segments_count = len(left.vertices) + len(right.vertices)``.
 
     :param multisegment: multisegment to check for.
     :param contour: contour to check in.
@@ -434,7 +434,7 @@ def contour_in_contour(left: _Contour, right: _Contour,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(left) + len(right)``.
+    where ``vertices_count = len(left.vertices) + len(right.vertices)``.
 
     :param left: contour to check for.
     :param right: contour to check in.
