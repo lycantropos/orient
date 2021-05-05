@@ -915,19 +915,43 @@ def region_in_multiregion(region: _Region,
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
     >>> Contour, Point = context.contour_cls, context.point_cls
-    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
-    >>> region_in_multiregion(triangle, []) is Relation.DISJOINT
+    >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
+    ...                          Point(4, 4)])
+    >>> third_square = Contour([Point(4, 4), Point(8, 4), Point(8, 8),
+    ...                         Point(4, 8)])
+    >>> first_inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                               Point(1, 3)])
+    >>> second_inner_square = Contour([Point(5, 1), Point(7, 1), Point(7, 3),
+    ...                                Point(5, 3)])
+    >>> outer_square = Contour([Point(0, 0), Point(8, 0), Point(8, 8),
+    ...                         Point(0, 8)])
+    >>> triangle = Contour([Point(0, 0), Point(4, 0), Point(0, 4)])
+    >>> (region_in_multiregion(third_square,
+    ...                        [first_inner_square, second_inner_square])
+    ...  is Relation.DISJOINT)
     True
-    >>> region_in_multiregion(square, []) is Relation.DISJOINT
+    >>> (region_in_multiregion(second_square, [first_square, third_square])
+    ...  is Relation.TOUCH)
     True
-    >>> region_in_multiregion(triangle, [triangle]) is Relation.EQUAL
+    >>> (region_in_multiregion(first_square,
+    ...                        [first_inner_square, second_inner_square])
+    ...  is Relation.OVERLAP)
     True
-    >>> region_in_multiregion(square, [triangle]) is Relation.ENCLOSES
+    >>> (region_in_multiregion(outer_square,
+    ...                        [first_inner_square, second_inner_square])
+    ...  is Relation.COVER)
     True
-    >>> region_in_multiregion(triangle, [square]) is Relation.ENCLOSED
+    >>> (region_in_multiregion(outer_square, [first_square, third_square])
+    ...  is Relation.ENCLOSES)
     True
-    >>> region_in_multiregion(square, [square]) is Relation.EQUAL
+    >>> (region_in_multiregion(triangle, [first_square, third_square])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (region_in_multiregion(first_inner_square,
+    ...                        [first_square, third_square])
+    ...  is Relation.WITHIN)
     True
     """
     return _multiregion.relate_region(
