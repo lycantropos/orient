@@ -126,7 +126,7 @@ class CompoundEventsQueue(EventsQueue):
         elif relation is not Relation.DISJOINT:
             # segments overlap
             if event.from_test is below_event.from_test:
-                raise ValueError('Segments of the same object '
+                raise ValueError('Segments of the same geometry '
                                  'should not overlap.')
             starts_equal = below_event.start == event.start
             ends_equal = below_event.end == event.end
@@ -267,7 +267,7 @@ class LinearEventsQueue(EventsQueue):
         elif relation is not Relation.DISJOINT:
             # segments overlap
             if event.from_test is below_event.from_test:
-                raise ValueError('Segments of the same object '
+                raise ValueError('Segments of the same geometry '
                                  'should not overlap.')
             starts_equal = below_event.start == event.start
             ends_equal = below_event.end == event.end
