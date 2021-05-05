@@ -1600,41 +1600,39 @@ def segment_in_multipolygon(segment: _Segment,
     >>> Point = context.point_cls
     >>> Polygon = context.polygon_cls
     >>> Segment = context.segment_cls
-    >>> square = Contour([Point(0, 0), Point(3, 0), Point(3, 3), Point(0, 3)])
-    >>> segment_in_multipolygon(Segment(Point(0, 0), Point(1, 0)),
-    ...                         Multipolygon([])) is Relation.DISJOINT
-    True
-    >>> (segment_in_multipolygon(Segment(Point(0, 0), Point(1, 0)),
-    ...                          Multipolygon([Polygon(square, [])]))
-    ...  is Relation.COMPONENT)
-    True
-    >>> (segment_in_multipolygon(Segment(Point(0, 0), Point(3, 0)),
-    ...                          Multipolygon([Polygon(square, [])]))
-    ...  is Relation.COMPONENT)
-    True
-    >>> (segment_in_multipolygon(Segment(Point(2, 0), Point(4, 0)),
-    ...                          Multipolygon([Polygon(square, [])]))
-    ...  is Relation.TOUCH)
-    True
-    >>> (segment_in_multipolygon(Segment(Point(4, 0), Point(5, 0)),
-    ...                          Multipolygon([Polygon(square, [])]))
+    >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> second_square = Contour([Point(4, 4), Point(8, 4), Point(8, 8),
+    ...                          Point(4, 8)])
+    >>> (segment_in_multipolygon(Segment(Point(2, 5), Point(2, 9)),
+    ...                          Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(second_square, [])]))
     ...  is Relation.DISJOINT)
     True
-    >>> (segment_in_multipolygon(Segment(Point(1, 0), Point(1, 2)),
-    ...                          Multipolygon([Polygon(square, [])]))
-    ...  is Relation.ENCLOSED)
+    >>> (segment_in_multipolygon(Segment(Point(2, 4), Point(2, 8)),
+    ...                          Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(second_square, [])]))
+    ...  is Relation.TOUCH)
     True
-    >>> (segment_in_multipolygon(Segment(Point(0, 0), Point(1, 1)),
-    ...                          Multipolygon([Polygon(square, [])]))
-    ...  is Relation.ENCLOSED)
-    True
-    >>> (segment_in_multipolygon(Segment(Point(1, 1), Point(2, 2)),
-    ...                          Multipolygon([Polygon(square, [])]))
-    ...  is Relation.WITHIN)
-    True
-    >>> (segment_in_multipolygon(Segment(Point(2, 2), Point(4, 4)),
-    ...                          Multipolygon([Polygon(square, [])]))
+    >>> (segment_in_multipolygon(Segment(Point(2, 2), Point(2, 6)),
+    ...                          Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(second_square, [])]))
     ...  is Relation.CROSS)
+    True
+    >>> (segment_in_multipolygon(Segment(Point(2, 4), Point(6, 4)),
+    ...                          Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(second_square, [])]))
+    ...  is Relation.COMPONENT)
+    True
+    >>> (segment_in_multipolygon(Segment(Point(3, 3), Point(5, 5)),
+    ...                          Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(second_square, [])]))
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (segment_in_multipolygon(Segment(Point(1, 1), Point(3, 3)),
+    ...                          Multipolygon([Polygon(first_square, []),
+    ...                                        Polygon(second_square, [])]))
+    ...  is Relation.WITHIN)
     True
     """
     return _multipolygon.relate_segment(
