@@ -1362,36 +1362,30 @@ def region_in_polygon(region: _Region, polygon: _Polygon,
     >>> Contour = context.contour_cls
     >>> Point = context.point_cls
     >>> Polygon = context.polygon_cls
-    >>> outer_square = Contour([Point(0, 0), Point(7, 0), Point(7, 7),
-    ...                         Point(0, 7)])
-    >>> inner_square = Contour([Point(1, 1), Point(6, 1), Point(6, 6),
-    ...                         Point(1, 6)])
-    >>> innermore_square = Contour([Point(2, 2), Point(5, 2), Point(5, 5),
-    ...                             Point(2, 5)])
-    >>> innermost_square = Contour([Point(3, 3), Point(4, 3), Point(4, 4),
-    ...                             Point(3, 4)])
-    >>> (region_in_polygon(innermore_square,
-    ...                    Polygon(outer_square, [inner_square]))
+    >>> square = Contour([Point(0, 0), Point(4, 0), Point(4, 4), Point(0, 4)])
+    >>> neighbour_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
+    ...                             Point(4, 4)])
+    >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                         Point(1, 3)])
+    >>> triangle = Contour([Point(0, 0), Point(4, 0), Point(0, 4)])
+    >>> (region_in_polygon(inner_square, Polygon(neighbour_square, []))
     ...  is Relation.DISJOINT)
     True
-    >>> (region_in_polygon(inner_square, Polygon(outer_square, [inner_square]))
+    >>> (region_in_polygon(square, Polygon(neighbour_square, []))
     ...  is Relation.TOUCH)
     True
-    >>> (region_in_polygon(inner_square,
-    ...                    Polygon(outer_square, [innermore_square]))
+    >>> (region_in_polygon(inner_square, Polygon(triangle, []))
     ...  is Relation.OVERLAP)
     True
-    >>> (region_in_polygon(outer_square, Polygon(inner_square, []))
-    ...  is Relation.COVER)
+    >>> region_in_polygon(square, Polygon(inner_square, [])) is Relation.COVER
     True
-    >>> (region_in_polygon(outer_square, Polygon(outer_square, [inner_square]))
-    ...  is Relation.ENCLOSES)
+    >>> region_in_polygon(square, Polygon(triangle, [])) is Relation.ENCLOSES
     True
-    >>> (region_in_polygon(outer_square, Polygon(outer_square, []))
-    ...  is Relation.EQUAL)
+    >>> region_in_polygon(square, Polygon(square, [])) is Relation.EQUAL
     True
-    >>> (region_in_polygon(inner_square, Polygon(outer_square, []))
-    ...  is Relation.WITHIN)
+    >>> region_in_polygon(triangle, Polygon(square, [])) is Relation.ENCLOSED
+    True
+    >>> region_in_polygon(inner_square, Polygon(square, [])) is Relation.WITHIN
     True
     """
     return _polygon.relate_region(
