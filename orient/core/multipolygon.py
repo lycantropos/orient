@@ -19,7 +19,6 @@ from .multiregion import (to_oriented_edges_endpoints
                           as multiregion_to_oriented_segments)
 from .multisegment import to_segments_endpoints
 from .polygon import (relate_point as relate_point_to_polygon,
-                      relate_segment as relate_segment_to_polygon,
                       to_oriented_edges_endpoints
                       as polygon_to_oriented_segments)
 from .processing import (process_compound_queue,
@@ -41,20 +40,8 @@ def relate_point(multipolygon: Multipolygon,
 def relate_segment(multipolygon: Multipolygon,
                    segment: Segment,
                    context: Context) -> Relation:
-    do_not_touch = True
-    for polygon in multipolygon.polygons:
-        relation_with_polygon = relate_segment_to_polygon(polygon, segment,
-                                                          context)
-        if relation_with_polygon in (Relation.CROSS,
-                                     Relation.COMPONENT,
-                                     Relation.ENCLOSED,
-                                     Relation.WITHIN):
-            return relation_with_polygon
-        elif do_not_touch and relation_with_polygon is Relation.TOUCH:
-            do_not_touch = False
-    return (Relation.DISJOINT
-            if do_not_touch
-            else Relation.TOUCH)
+    return relate_multisegment(multipolygon,
+                               context.multisegment_cls([segment]), context)
 
 
 def relate_multisegment(multipolygon: Multipolygon,
