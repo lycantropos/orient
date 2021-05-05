@@ -83,7 +83,7 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
             event = queue.peek()
             if event.start.x > stop_x:
                 # no intersection segments left
-                return
+                break
             queue.pop()
             if event.start == start:
                 same_start_events.append(event)
