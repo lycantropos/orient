@@ -46,12 +46,12 @@ def relate_point(polygon: Polygon,
 def relate_segment(polygon: Polygon,
                    segment: Segment,
                    context: Context) -> Relation:
-    border, holes = polygon.border, polygon.holes
-    relation_without_holes = relate_segment_to_region(border, segment, context)
-    if (holes and (relation_without_holes is Relation.WITHIN
-                   or relation_without_holes is Relation.ENCLOSED)):
-        relation_with_holes = relate_segment_to_multiregion(holes, segment,
-                                                            context)
+    relation_without_holes = relate_segment_to_region(polygon.border, segment,
+                                                      context)
+    if (polygon.holes and (relation_without_holes is Relation.WITHIN
+                           or relation_without_holes is Relation.ENCLOSED)):
+        relation_with_holes = relate_segment_to_multiregion(polygon.holes,
+                                                            segment, context)
         if relation_with_holes is Relation.DISJOINT:
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
