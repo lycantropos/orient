@@ -63,15 +63,6 @@ class EventsQueue(Generic[Event]):
         Sweeps plane and emits processed segments' events.
         """
 
-    def _segments_relation(self,
-                           first: Event,
-                           second: Event) -> SegmentsRelation:
-        result = self.context.segments_relation(first, second)
-        return (SegmentsRelation.DISJOINT if result is Relation.DISJOINT
-                else (SegmentsRelation.TOUCH if result is Relation.TOUCH
-                      else (SegmentsRelation.CROSS if result is Relation.CROSS
-                            else SegmentsRelation.OVERLAP)))
-
 
 class CompoundEventsQueue(EventsQueue[CompoundEvent]):
     def register(self, segments_endpoints: Iterable[SegmentEndpoints],
