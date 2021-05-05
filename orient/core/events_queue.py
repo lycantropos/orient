@@ -373,8 +373,8 @@ class EventsQueueKey:
                               else Orientation.CLOCKWISE)))
 
 
-def complete_events_relations(same_start_events: Sequence[CompoundEvent]
-                              ) -> Iterable[CompoundEvent]:
+def complete_events_relations(same_start_events: Sequence[Event]
+                              ) -> Iterable[Event]:
     for offset, first in enumerate(same_start_events,
                                    start=1):
         first_left = first if first.is_left else first.complement
