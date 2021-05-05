@@ -2186,12 +2186,13 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = left_multipolygon_vertices_count\
- + right_multipolygon_vertices_count ``,
-    ``left_multipolygon_vertices_count = sum(len(border)\
- + sum(map(len, holes)) for border, holes in multipolygon)``.
-    ``right_multipolygon_vertices_count = sum(len(border)\
- + sum(map(len, holes)) for border, holes in multipolygon)``.
+    where ``vertices_count = left_vertices_count + right_vertices_count``,
+    ``left_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes))\
+ for polygon in left.polygons)``,
+    ``right_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes))\
+ for polygon in right.polygons)``.
 
     :param left: multipolygon to check for.
     :param right: multipolygon to check in.
@@ -2218,18 +2219,11 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
     ...                                Point(5, 3)])
     >>> third_inner_square = Contour([Point(5, 5), Point(7, 5), Point(7, 7),
     ...                               Point(5, 7)])
-    >>> fourth_inner_square = Contour([Point(1, 5), Point(3, 5), Point(3, 7),
-    ...                                Point(1, 7)])
     >>> (multipolygon_in_multipolygon(
-    ...      Multipolygon([Polygon(first_square, []),
-    ...                    Polygon(third_square, [])]),
-    ...      Multipolygon([Polygon(second_inner_square, []),
-    ...                    Polygon(fourth_inner_square, [])]))
-    ...  is multipolygon_in_multipolygon(
-    ...          Multipolygon([Polygon(first_inner_square, []),
-    ...                        Polygon(third_inner_square, [])]),
-    ...          Multipolygon([Polygon(second_square, [second_inner_square]),
-    ...                        Polygon(fourth_square, [fourth_inner_square])]))
+    ...      Multipolygon([Polygon(first_inner_square, []),
+    ...                    Polygon(third_inner_square, [])]),
+    ...      Multipolygon([Polygon(second_square, []),
+    ...                    Polygon(fourth_square, [])]))
     ...  is Relation.DISJOINT)
     True
     >>> (multipolygon_in_multipolygon(
