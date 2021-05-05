@@ -30,8 +30,6 @@ from .utils import all_equal
 class EventsQueue(Generic[Event]):
     __slots__ = 'context', 'key', '_queue'
 
-    event_cls = None  # type: Type[Event]
-
     def __init__(self, context: Context) -> None:
         self.context = context
         key = self.key = partial(EventsQueueKey, context.angle_orientation)
