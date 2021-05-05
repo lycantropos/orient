@@ -371,7 +371,7 @@ def complete_events_relations(same_start_events: Sequence[Event]
             second_left = second if second.is_left else second.left
             if second_left.from_test is first_left.from_test:
                 continue
-            if (first_left.start == second_left.start
+            elif (first_left.start == second_left.start
                     and first_left.end == second_left.end):
                 first_left.relation = second_left.relation = (
                     SegmentsRelation.OVERLAP)
