@@ -1524,8 +1524,9 @@ def point_in_multipolygon(point: _Point,
     Finds relation between point and multipolygon.
 
     Time complexity:
-        ``O(sum(len(border) = sum(map(len, holes))\
- for border, holes in multipolygon))``
+        ``O(sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes))\
+ for polygon in multipolygon.polygons))``
     Memory complexity:
         ``O(1)``
 
@@ -1577,8 +1578,9 @@ def segment_in_multipolygon(segment: _Segment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = sum(len(border) + sum(map(len, holes))\
- for border, holes in multipolygon)``.
+    where ``segments_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in multipolygon.polygons)``.
 
     :param segment: segment to check for.
     :param multipolygon: multipolygon to check in.
@@ -1647,9 +1649,11 @@ def multisegment_in_multipolygon(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment) + multipolygon_segments_count``,
-    ``multipolygon_segments_count = sum(len(border) + sum(map(len, holes))\
- for border, holes in multipolygon)``.
+    where ``segments_count = len(multisegment.segments)\
+ + multipolygon_segments_count``,
+    ``multipolygon_segments_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in multipolygon.polygons)``.
 
     :param multisegment: multisegment to check for.
     :param multipolygon: multipolygon to check in.
@@ -1733,8 +1737,9 @@ def contour_in_multipolygon(contour: _Contour,
         ``O(vertices_count)``
 
     where ``vertices_count = len(contour) + multipolygon_vertices_count``,
-    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
- for border, holes in multipolygon)``.
+    ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in multipolygon.polygons)``.
 
     :param contour: contour to check for.
     :param multipolygon: multipolygon to check in.
@@ -1818,8 +1823,9 @@ def region_in_multipolygon(region: _Region,
         ``O(vertices_count)``
 
     where ``vertices_count = len(region) + multipolygon_vertices_count``,
-    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
- for border, holes in multipolygon)``.
+    ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in multipolygon.polygons)``.
 
     :param region: region to check for.
     :param multipolygon: multipolygon to check in.
@@ -1919,8 +1925,9 @@ def multiregion_in_multipolygon(multiregion: _Multiregion,
 
     where ``vertices_count = sum(map(len, multiregion))\
  + multipolygon_vertices_count``,
-    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
- for border, holes in multipolygon)``.
+    ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in multipolygon.polygons)``.
 
     :param multiregion: multiregion to check for.
     :param multipolygon: multipolygon to check in.
@@ -2042,10 +2049,11 @@ def polygon_in_multipolygon(polygon: _Polygon,
 
     where ``vertices_count = polygon_vertices_count\
  + multipolygon_vertices_count``,
-    ``polygon_vertices_count = len(border) + sum(map(len, holes)``,
-    ``border, holes = polygon``,
-    ``multipolygon_vertices_count = sum(len(border) + sum(map(len, holes))\
- for border, holes in multipolygon)``.
+    ``polygon_vertices_count = len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``,
+    ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
+ for polygon in multipolygon.polygons)``.
 
     :param polygon: polygon to check for.
     :param multipolygon: multipolygon to check in.
@@ -2189,10 +2197,10 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
 
     where ``vertices_count = left_vertices_count + right_vertices_count``,
     ``left_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes))\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in left.polygons)``,
     ``right_vertices_count = sum(len(polygon.border.vertices)\
- + sum(len(hole.vertices) for hole in polygon.holes))\
+ + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in right.polygons)``.
 
     :param left: multipolygon to check for.
