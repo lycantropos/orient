@@ -468,7 +468,7 @@ def point_in_region(point: _Point, region: _Region,
     Based on ray casting algorithm.
 
     Time complexity:
-        ``O(len(region))``
+        ``O(len(region.vertices))``
     Memory complexity:
         ``O(1)``
     Reference:
@@ -503,7 +503,7 @@ def segment_in_region(segment: _Segment, region: _Region,
     Finds relation between segment and region.
 
     Time complexity:
-        ``O(len(region))``
+        ``O(len(region.vertices))``
     Memory complexity:
         ``O(1)``
 
@@ -559,7 +559,8 @@ def multisegment_in_region(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment.segments) + len(region)``.
+    where ``segments_count = len(multisegment.segments)\
+ + len(region.vertices)``.
 
     :param multisegment: multisegment to check for.
     :param region: region to check in.
@@ -624,7 +625,7 @@ def contour_in_region(contour: _Contour, region: _Region,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(contour) + len(region)``.
+    where ``vertices_count = len(contour.vertices) + len(region.vertices)``.
 
     :param contour: contour to check for.
     :param region: region to check in.
@@ -660,7 +661,7 @@ def region_in_region(left: _Region, right: _Region,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(left) + len(right)``.
+    where ``vertices_count = len(left.vertices) + len(right.vertices)``.
 
     :param left: region to check for.
     :param right: region to check in.
