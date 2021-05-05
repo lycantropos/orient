@@ -881,15 +881,36 @@ def contour_in_multiregion(contour: _Contour,
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
     >>> Contour, Point = context.contour_cls, context.point_cls
-    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
-    >>> contour_in_multiregion(triangle, [triangle]) is Relation.COMPONENT
+    >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
+    ...                         Point(0, 4)])
+    >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
+    ...                          Point(4, 4)])
+    >>> third_square = Contour([Point(4, 4), Point(8, 4), Point(8, 8),
+    ...                         Point(4, 8)])
+    >>> first_inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                               Point(1, 3)])
+    >>> second_inner_square = Contour([Point(5, 1), Point(7, 1), Point(7, 3),
+    ...                                Point(5, 3)])
+    >>> triangle = Contour([Point(0, 0), Point(4, 0), Point(0, 4)])
+    >>> (contour_in_multiregion(first_square,
+    ...                         [first_inner_square, second_inner_square])
+    ...  is Relation.DISJOINT)
     True
-    >>> contour_in_multiregion(triangle, [square]) is Relation.ENCLOSED
+    >>> (contour_in_multiregion(second_square, [first_square, third_square])
+    ...  is Relation.TOUCH)
     True
-    >>> contour_in_multiregion(square, [triangle]) is Relation.TOUCH
+    >>> (contour_in_multiregion(first_inner_square, [triangle, second_square])
+    ...  is Relation.CROSS)
     True
-    >>> contour_in_multiregion(square, [square]) is Relation.COMPONENT
+    >>> (contour_in_multiregion(first_square, [first_square, third_square])
+    ...  is Relation.COMPONENT)
+    True
+    >>> (contour_in_multiregion(triangle, [first_square, third_square])
+    ...  is Relation.ENCLOSED)
+    True
+    >>> (contour_in_multiregion(first_inner_square,
+    ...                         [first_square, third_square])
+    ...  is Relation.WITHIN)
     True
     """
     return _multiregion.relate_contour(
