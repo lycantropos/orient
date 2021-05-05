@@ -1361,7 +1361,7 @@ def multiregion_in_polygon(multiregion: _Multiregion,
         ``O(vertices_count)``
 
     where ``vertices_count =\
- sum(len(contour.vertices) for contour in multiregion)\
+ sum(len(region.vertices) for region in multiregion)\
  + len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)``.
 
