@@ -110,7 +110,7 @@ def point_in_multisegment(point: _Point,
     Finds relation between point and multisegment.
 
     Time complexity:
-        ``O(len(multisegment))``
+        ``O(len(multisegment.segments))``
     Memory complexity:
         ``O(1)``
 
@@ -156,7 +156,7 @@ def segment_in_multisegment(segment: _Segment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment)``.
+    where ``segments_count = len(multisegment.segments)``.
 
     :param segment: segment to check for.
     :param multisegment: multisegment to check in.
@@ -210,7 +210,7 @@ def multisegment_in_multisegment(left: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(left) + len(right)``.
+    where ``segments_count = len(left.segments) + len(right.segments)``.
 
     :param left: multisegment to check for.
     :param right: multisegment to check in.
@@ -559,7 +559,7 @@ def multisegment_in_region(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment) + len(region)``.
+    where ``segments_count = len(multisegment.segments) + len(region)``.
 
     :param multisegment: multisegment to check for.
     :param region: region to check in.
@@ -795,7 +795,7 @@ def multisegment_in_multiregion(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment) + sum(map(len, multiregion))``.
+    where ``segments_count = len(multisegment.segments) + sum(map(len, multiregion))``.
 
     :param multisegment: multisegment to check for.
     :param multiregion: multiregion to check in.
