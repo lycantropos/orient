@@ -135,20 +135,16 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                                  'should not overlap.')
             starts_equal = below_event.start == event.start
             ends_equal = below_event.end == event.end
-            start_min, start_max = ((None, None)
-                                    if starts_equal
-                                    else ((event, below_event)
-                                          if (self.key(event)
-                                              < self.key(below_event))
-                                          else (below_event, event)))
-            end_min, end_max = ((None, None)
-                                if ends_equal
-                                else
-                                ((event.complement, below_event.complement)
-                                 if (self.key(event.complement)
-                                     < self.key(below_event.complement))
-                                 else (below_event.complement,
-                                       event.complement)))
+            start_min, start_max = (
+                (event, below_event)
+                if starts_equal or self.key(event) < self.key(below_event)
+                else (below_event, event))
+            end_min, end_max = (
+                (event.complement, below_event.complement)
+                if ends_equal or (self.key(event.complement)
+                                  < self.key(below_event.complement))
+                else (below_event.complement,
+                      event.complement))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 below_event.overlap_kind = event.overlap_kind = (
