@@ -1742,7 +1742,8 @@ def contour_in_multipolygon(contour: _Contour,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(contour) + multipolygon_vertices_count``,
+    where ``vertices_count = len(contour.vertices)\
+ + multipolygon_vertices_count``,
     ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in multipolygon.polygons)``.
@@ -1828,7 +1829,8 @@ def region_in_multipolygon(region: _Region,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(region) + multipolygon_vertices_count``,
+    where ``vertices_count = len(region.vertices)\
+ + multipolygon_vertices_count``,
     ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in multipolygon.polygons)``.
@@ -1929,8 +1931,10 @@ def multiregion_in_multipolygon(multiregion: _Multiregion,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = sum(len(region.vertices) for region in multiregion)\
+    where ``vertices_count = multiregion_vertices_count\
  + multipolygon_vertices_count``,
+    ``multiregion_vertices_count =\
+ sum(len(region.vertices) for region in multiregion)``,
     ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
  for polygon in multipolygon.polygons)``.
