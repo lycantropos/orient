@@ -309,12 +309,6 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 self.divide_segment(start_max, end_min.start)
                 self.divide_segment(start_min, start_max.start)
 
-    def _to_point_event_cosine(self, point: Point, event: Event) -> Scalar:
-        return (self.context.dot_product(event.start, point, event.start,
-                                         event.end)
-                / math.sqrt(self.context.points_squared_distance(event.start,
-                                                                 event.end)))
-
     def _point_in_angle(self,
                         point: Point,
                         vertex: Point,
@@ -333,6 +327,12 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                             is (angle_orientation
                                 # if angle is degenerate
                                 or Orientation.COUNTERCLOCKWISE))))
+
+    def _to_point_event_cosine(self, point: Point, event: Event) -> Scalar:
+        return (self.context.dot_product(event.start, point, event.start,
+                                         event.end)
+                / math.sqrt(self.context.points_squared_distance(event.start,
+                                                                 event.end)))
 
 
 class EventsQueueKey:
