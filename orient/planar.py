@@ -694,7 +694,7 @@ def point_in_multiregion(point: _Point,
     Finds relation between point and multiregion.
 
     Time complexity:
-        ``O(sum(map(len, multiregion)))``
+        ``O(sum(len(region.vertices) for region in multiregion))``
     Memory complexity:
         ``O(1)``
 
@@ -737,7 +737,8 @@ def segment_in_multiregion(segment: _Segment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = sum(map(len, multiregion))``.
+    where ``segments_count =\
+ sum(len(region.vertices) for region in multiregion)``.
 
     :param segment: segment to check for.
     :param multiregion: multiregion to check in.
@@ -796,7 +797,8 @@ def multisegment_in_multiregion(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment.segments) + sum(map(len, multiregion))``.
+    where ``segments_count = len(multisegment.segments)\
+ + sum(len(region.vertices) for region in multiregion)``.
 
     :param multisegment: multisegment to check for.
     :param multiregion: multiregion to check in.
@@ -868,7 +870,8 @@ def contour_in_multiregion(contour: _Contour,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(contour) + sum(map(len, multiregion))``.
+    where ``vertices_count = len(contour.vertices)\
+ + sum(len(region.vertices) for region in multiregion)``.
 
     :param contour: contour to check for.
     :param multiregion: multiregion to check in.
@@ -906,7 +909,8 @@ def region_in_multiregion(region: _Region,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(region) + sum(map(len, multiregion))``.
+    where ``vertices_count = len(region.vertices)\
+ + sum(len(region.vertices) for region in multiregion)``.
 
     :param region: region to check for.
     :param multiregion: multiregion to check in.
@@ -973,7 +977,8 @@ def multiregion_in_multiregion(left: _Multiregion,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = sum(map(len, left)) + sum(map(len, right))``.
+    where ``vertices_count = sum(len(region.vertices) for region in left)\
+ + sum(len(region.vertices) for region in right)``.
 
     :param left: multiregion to check for.
     :param right: multiregion to check in.
@@ -1924,7 +1929,7 @@ def multiregion_in_multipolygon(multiregion: _Multiregion,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = sum(map(len, multiregion))\
+    where ``vertices_count = sum(len(region.vertices) for region in multiregion)\
  + multipolygon_vertices_count``,
     ``multipolygon_vertices_count = sum(len(polygon.border.vertices)\
  + sum(len(hole.vertices) for hole in polygon.holes)\
