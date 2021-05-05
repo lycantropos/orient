@@ -60,9 +60,6 @@ class LinearEvent:
                                       False, self.from_test, self.relation)
         return tail
 
-    def set_both_relations(self, relation: SegmentsRelation) -> None:
-        self.relation = self.complement.relation = relation
-
 
 class CompoundEvent:
     @classmethod
@@ -155,9 +152,6 @@ class CompoundEvent:
                 break_point, self, self.original_end, False, self.from_test,
                 self.relation, self.interior_to_left)
         return tail
-
-    def set_both_relations(self, relation: SegmentsRelation) -> None:
-        self.relation = self.complement.relation = relation
 
 
 Event = TypeVar('Event', LinearEvent, CompoundEvent)

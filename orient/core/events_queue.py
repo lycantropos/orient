@@ -256,8 +256,9 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                                               base_orientation)
                          for test_event in from_test_events):
             for event in same_start_events:
-                event.set_both_relations(max(event.relation,
-                                             SegmentsRelation.CROSS))
+                left_event = event if event.is_left else event.complement
+                left_event.relation = max(left_event.relation,
+                                          SegmentsRelation.CROSS)
 
     def detect_intersection(self, below_event: LinearEvent, event: LinearEvent
                             ) -> None:
