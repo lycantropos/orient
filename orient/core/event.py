@@ -24,13 +24,13 @@ class Event(ABC):
 
     @property
     @abstractmethod
-    def from_test(self) -> bool:
-        """Checks if the event's segment is from test geometry."""
+    def from_goal(self) -> bool:
+        """Checks if the event's segment is from goal geometry."""
 
     @property
     @abstractmethod
-    def from_goal(self) -> bool:
-        """Checks if the event's segment is from goal geometry."""
+    def from_test(self) -> bool:
+        """Checks if the event's segment is from test geometry."""
 
     @property
     @abstractmethod
@@ -82,12 +82,12 @@ class RightEvent(Event):
         return self.left.start
 
     @property
-    def from_test(self) -> bool:
-        return self.left.from_test
-
-    @property
     def from_goal(self) -> bool:
         return self.left.from_goal
+
+    @property
+    def from_test(self) -> bool:
+        return self.left.from_test
 
     @property
     def original_end(self) -> Point:
