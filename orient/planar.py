@@ -39,7 +39,8 @@ def point_in_segment(point: _Point, segment: _Segment,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Point, Segment = context.point_cls, context.segment_cls
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
     >>> segment = Segment(Point(0, 0), Point(2, 0))
     >>> point_in_segment(Point(0, 0), segment) is Relation.COMPONENT
     True
@@ -74,7 +75,8 @@ def segment_in_segment(left: _Segment, right: _Segment,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Point, Segment = context.point_cls, context.segment_cls
+    >>> Point = context.point_cls
+    >>> Segment = context.segment_cls
     >>> segment = Segment(Point(0, 0), Point(2, 0))
     >>> (segment_in_segment(Segment(Point(0, 0), Point(0, 2)), segment)
     ...  is Relation.TOUCH)
@@ -288,7 +290,8 @@ def point_in_contour(point: _Point, contour: _Contour,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> point_in_contour(Point(0, 0), square) is Relation.COMPONENT
     True
@@ -443,7 +446,8 @@ def contour_in_contour(left: _Contour, right: _Contour,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_contour(triangle, triangle) is Relation.EQUAL
@@ -481,7 +485,8 @@ def point_in_region(point: _Point, region: _Region,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> point_in_region(Point(0, 0), square) is Relation.COMPONENT
     True
@@ -634,7 +639,8 @@ def contour_in_region(contour: _Contour, region: _Region,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> contour_in_region(triangle, triangle) is Relation.COMPONENT
@@ -670,7 +676,8 @@ def region_in_region(left: _Region, right: _Region,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
     >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
     >>> region_in_region(triangle, triangle) is Relation.EQUAL
@@ -705,7 +712,8 @@ def point_in_multiregion(point: _Point,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
     >>> point_in_multiregion(Point(0, 0), [triangle]) is Relation.COMPONENT
@@ -880,7 +888,8 @@ def contour_in_multiregion(contour: _Contour,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
     ...                         Point(0, 4)])
     >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
@@ -940,7 +949,8 @@ def region_in_multiregion(region: _Region,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
     ...                         Point(0, 4)])
     >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
@@ -1008,7 +1018,8 @@ def multiregion_in_multiregion(left: _Multiregion,
 
     >>> from ground.base import Relation, get_context
     >>> context = get_context()
-    >>> Contour, Point = context.contour_cls, context.point_cls
+    >>> Contour = context.contour_cls
+    >>> Point = context.point_cls
     >>> first_square = Contour([Point(0, 0), Point(4, 0), Point(4, 4),
     ...                         Point(0, 4)])
     >>> second_square = Contour([Point(4, 0), Point(8, 0), Point(8, 4),
