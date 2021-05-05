@@ -1054,8 +1054,8 @@ def point_in_polygon(point: _Point, polygon: _Polygon,
     Memory complexity:
         ``O(1)``
 
-    where ``vertices_count = len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``.
+    where ``vertices_count = len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``.
 
     :param point: point to check for.
     :param polygon: polygon to check in.
@@ -1105,8 +1105,8 @@ def segment_in_polygon(segment: _Segment, polygon: _Polygon,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``.
+    where ``vertices_count = len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``.
 
     :param segment: segment to check for.
     :param polygon: polygon to check in.
@@ -1168,9 +1168,9 @@ def multisegment_in_polygon(multisegment: _Multisegment,
     Memory complexity:
         ``O(segments_count)``
 
-    where ``segments_count = len(multisegment)\
- + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``.
+    where ``segments_count = len(multisegment.segments)\
+ + len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``.
 
     :param multisegment: multisegment to check for.
     :param polygon: polygon to check in.
@@ -1242,9 +1242,9 @@ def contour_in_polygon(contour: _Contour, polygon: _Polygon,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(contour)\
- + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``.
+    where ``vertices_count = len(contour.vertices)\
+ + len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``.
 
     :param contour: contour to check for.
     :param polygon: polygon to check in.
@@ -1297,9 +1297,9 @@ def region_in_polygon(region: _Region, polygon: _Polygon,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(region)\
- + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``.
+    where ``vertices_count = len(region.vertices)\
+ + len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``.
 
     :param region: region to check for.
     :param polygon: polygon to check in.
@@ -1359,9 +1359,10 @@ def multiregion_in_polygon(multiregion: _Multiregion,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = sum(map(len, multiregion))\
- + len(border) + sum(map(len, holes))``,
-    ``border, holes = polygon``.
+    where ``vertices_count =\
+ sum(len(contour.vertices) for contour in multiregion)\
+ + len(polygon.border.vertices)\
+ + sum(len(hole.vertices) for hole in polygon.holes)``.
 
     :param multiregion: multiregion to check for.
     :param polygon: polygon to check in.
@@ -1424,9 +1425,9 @@ def polygon_in_polygon(left: _Polygon, right: _Polygon,
     Memory complexity:
         ``O(vertices_count)``
 
-    where ``vertices_count = len(left_border) + sum(map(len, left_holes)) \
-+ len(right_border) + sum(map(len, right_holes))``,
-    ``left_border, left_holes = left``, ``right_border, right_holes = right``.
+    where ``vertices_count = len(left.border.vertices)\
+ + sum(len(hole.vertices) for hole in left.holes) + len(right.border.vertices)\
+ + sum(len(hole.vertices) for hole in right.holes)``.
 
     :param left: polygon to check for.
     :param right: polygon to check in.
