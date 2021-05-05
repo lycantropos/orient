@@ -641,15 +641,21 @@ def contour_in_region(contour: _Contour, region: _Region,
     >>> context = get_context()
     >>> Contour = context.contour_cls
     >>> Point = context.point_cls
-    >>> triangle = Contour([Point(0, 0), Point(1, 0), Point(0, 1)])
-    >>> square = Contour([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)])
-    >>> contour_in_region(triangle, triangle) is Relation.COMPONENT
-    True
-    >>> contour_in_region(triangle, square) is Relation.ENCLOSED
+    >>> square = Contour([Point(0, 0), Point(4, 0), Point(4, 4), Point(0, 4)])
+    >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
+    ...                         Point(1, 3)])
+    >>> triangle = Contour([Point(0, 0), Point(4, 0), Point(0, 4)])
+    >>> contour_in_region(square, inner_square) is Relation.DISJOINT
     True
     >>> contour_in_region(square, triangle) is Relation.TOUCH
     True
+    >>> contour_in_region(inner_square, triangle) is Relation.CROSS
+    True
     >>> contour_in_region(square, square) is Relation.COMPONENT
+    True
+    >>> contour_in_region(triangle, square) is Relation.ENCLOSED
+    True
+    >>> contour_in_region(inner_square, square) is Relation.WITHIN
     True
     """
     return _region.relate_contour(
