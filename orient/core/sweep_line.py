@@ -11,33 +11,33 @@ from .hints import Orienteer
 
 
 class SweepLine:
-    __slots__ = 'context', '_tree'
+    __slots__ = 'context', '_set'
 
     def __init__(self, context: Context) -> None:
         self.context = context
-        self._tree = red_black.set_(key=partial(SweepLineKey,
-                                                context.angle_orientation))
+        self._set = red_black.set_(key=partial(SweepLineKey,
+                                               context.angle_orientation))
 
     __repr__ = generate_repr(__init__)
 
     def __contains__(self, event: Event) -> bool:
-        return event in self._tree
+        return event in self._set
 
     def add(self, event: Event) -> None:
-        self._tree.add(event)
+        self._set.add(event)
 
     def remove(self, event: Event) -> None:
-        self._tree.remove(event)
+        self._set.remove(event)
 
     def above(self, event: Event) -> Optional[Event]:
         try:
-            return self._tree.next(event)
+            return self._set.next(event)
         except ValueError:
             return None
 
     def below(self, event: Event) -> Optional[Event]:
         try:
-            return self._tree.prev(event)
+            return self._set.prev(event)
         except ValueError:
             return None
 
