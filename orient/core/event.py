@@ -66,29 +66,34 @@ class CompoundEvent:
         if start > end:
             start, end = end, start
             inside_on_left = False
-        result = cls(start, None, True, from_test, SegmentsRelation.DISJOINT,
-                     inside_on_left)
-        result.complement = cls(end, result, False, from_test,
+        result = cls(start, None, start, True, from_test,
+                     SegmentsRelation.DISJOINT, inside_on_left)
+        result.complement = cls(end, result, end, False, from_test,
                                 SegmentsRelation.DISJOINT, inside_on_left)
         return result
 
     __slots__ = ('complement', 'from_test', 'interior_to_left', 'is_left',
-                 'other_interior_to_left', 'overlap_kind', 'relation', 'start')
+                 'original_start', 'other_interior_to_left', 'overlap_kind',
+                 'relation', 'start')
 
     def __init__(self,
                  start: Point,
                  complement: Optional['CompoundEvent'],
+                 original_start: Point,
                  is_left: bool,
                  from_test: bool,
                  relation: SegmentsRelation,
                  interior_to_left: bool) -> None:
+        self.complement, self.original_start, self.start = (
+            complement, original_start, start)
         self.is_left = is_left
-        self.start, self.complement = start, complement
         self.from_test = from_test
         self.relation = relation
         self.overlap_kind = OverlapKind.NONE
         self.interior_to_left = interior_to_left
         self.other_interior_to_left = False
+
+    __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
     def end(self) -> Point:
@@ -122,6 +127,10 @@ class CompoundEvent:
         return self.overlap_kind is OverlapKind.SAME_ORIENTATION
 
     @property
+    def original_end(self) -> Point:
+        return self.complement.original_start
+
+    @property
     def outside(self) -> bool:
         """
         Checks if the segment touches or disjoint with the intersection.
@@ -131,11 +140,12 @@ class CompoundEvent:
 
     def divide(self, break_point: Point) -> 'CompoundEvent':
         tail = self.complement.complement = CompoundEvent(
-                break_point, self.complement, True, self.from_test,
-                self.complement.relation, self.interior_to_left)
-        self.complement = CompoundEvent(
-                break_point, self, False, self.from_test, self.relation,
+                break_point, self.complement, self.original_start, True,
+                self.from_test, self.complement.relation,
                 self.interior_to_left)
+        self.complement = CompoundEvent(
+                break_point, self, self.original_end, False, self.from_test,
+                self.relation, self.interior_to_left)
         return tail
 
     def set_both_relations(self, relation: SegmentsRelation) -> None:

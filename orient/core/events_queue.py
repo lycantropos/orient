@@ -5,6 +5,7 @@ from typing import (Generic,
                     Iterable,
                     List,
                     Optional,
+                    Sequence,
                     Type)
 
 from ground.base import (Context,
@@ -87,51 +88,56 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
     def sweep(self, stop_x: Scalar) -> Iterable[CompoundEvent]:
         sweep_line = SweepLine(self.context)
         queue = self._queue
+        start = queue.peek().start if queue else None  # type: Optional[Point]
+        same_start_events = []  # type: List[Event]
         while queue:
             event = queue.peek()
-            start = event.start
-            if start.x > stop_x:
+            if event.start.x > stop_x:
                 # no intersection segments left
                 return
             queue.pop()
-            same_start_events = [event]
-            while queue and queue.peek().start == start:
-                same_start_events.append(queue.pop())
-            if not all_equal(event.from_test for event in same_start_events):
-                for event in same_start_events:
-                    event.set_both_relations(max(event.relation,
-                                                 SegmentsRelation.TOUCH))
-            for event in same_start_events:
-                if event.is_left:
-                    sweep_line.add(event)
+            if event.start == start:
+                same_start_events.append(event)
+            else:
+                yield from complete_events_relations(same_start_events)
+                same_start_events, start = [event], event.start
+            if event.is_left:
+                sweep_line.add(event)
+                above_event, below_event = (sweep_line.above(event),
+                                            sweep_line.below(event))
+                self.compute_position(below_event, event)
+                if (above_event is not None
+                        and self.detect_intersection(event, above_event)):
+                    self.compute_position(event, above_event)
+                if (below_event is not None
+                        and self.detect_intersection(below_event, event)):
+                    self.compute_position(sweep_line.below(below_event),
+                                          below_event)
+            else:
+                event = event.complement
+                if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
-                    self.compute_position(below_event, event)
-                    if (above_event is not None
-                            and self.detect_intersection(event, above_event)):
-                        self.compute_position(event, above_event)
-                    if (below_event is not None
-                            and self.detect_intersection(below_event, event)):
-                        self.compute_position(sweep_line.below(below_event),
-                                              below_event)
-                else:
-                    event = event.complement
-                    if event in sweep_line:
-                        above_event, below_event = (sweep_line.above(event),
-                                                    sweep_line.below(event))
-                        sweep_line.remove(event)
-                        if above_event is not None and below_event is not None:
-                            self.detect_intersection(below_event, above_event)
-                    yield event
+                    sweep_line.remove(event)
+                    if above_event is not None and below_event is not None:
+                        self.detect_intersection(below_event, above_event)
+        yield from complete_events_relations(same_start_events)
 
-    def detect_intersection(self, below_event: CompoundEvent,
+    def detect_intersection(self,
+                            below_event: CompoundEvent,
                             event: CompoundEvent) -> bool:
         """
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
         """
-        relation = self._segments_relation(below_event, event)
-        if relation is SegmentsRelation.OVERLAP:
+        relation = self.context.segments_relation(below_event, event)
+        if relation is Relation.TOUCH or relation is Relation.CROSS:
+            point = self.context.segments_intersection(below_event, event)
+            if point != below_event.start and point != below_event.end:
+                self.divide_segment(below_event, point)
+            if point != event.start and point != event.end:
+                self.divide_segment(event, point)
+        elif relation is not Relation.DISJOINT:
             # segments overlap
             if event.from_test is below_event.from_test:
                 raise ValueError('Segments of the same object '
@@ -158,44 +164,20 @@ class CompoundEventsQueue(EventsQueue[CompoundEvent]):
                     OverlapKind.SAME_ORIENTATION
                     if event.interior_to_left is below_event.interior_to_left
                     else OverlapKind.DIFFERENT_ORIENTATION)
-                if ends_equal:
-                    event.set_both_relations(relation)
-                    below_event.set_both_relations(relation)
-                else:
-                    end_min.set_both_relations(relation)
-                    end_max.complement.relation = relation
+                if not ends_equal:
                     self.divide_segment(end_max.complement, end_min.start)
                 return True
             elif ends_equal:
                 # the line segments share the right endpoint
-                start_max.set_both_relations(relation)
-                start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
             elif start_min is end_max.complement:
                 # one line segment includes the other one
-                start_max.set_both_relations(relation)
-                start_min_original_relation = start_min.relation
-                start_min.relation = relation
                 self.divide_segment(start_min, end_min.start)
-                start_min.relation = start_min_original_relation
-                start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
             else:
                 # no line segment includes the other one
-                start_max.relation = relation
                 self.divide_segment(start_max, end_min.start)
-                start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
-        elif relation is not SegmentsRelation.DISJOINT:
-            point = self.context.segments_intersection(below_event, event)
-            if point != below_event.start and point != below_event.end:
-                self.divide_segment(below_event, point)
-            if point != event.start and point != event.end:
-                self.divide_segment(event, point)
-            if event.from_test is not below_event.from_test:
-                event.set_both_relations(max(event.relation, relation))
-                below_event.set_both_relations(max(below_event.relation,
-                                                   relation))
         return False
 
     @staticmethod
@@ -419,3 +401,27 @@ class EventsQueueKey:
                           is (Orientation.COUNTERCLOCKWISE
                               if event.is_left
                               else Orientation.CLOCKWISE)))
+
+
+def complete_events_relations(same_start_events: Sequence[CompoundEvent]
+                              ) -> Iterable[CompoundEvent]:
+    for offset, first in enumerate(same_start_events,
+                                   start=1):
+        first_left = first if first.is_left else first.complement
+        for second_index in range(offset, len(same_start_events)):
+            second = same_start_events[second_index]
+            second_left = second if second.is_left else second.complement
+            if second_left.from_test is first_left.from_test:
+                continue
+            if (first_left.start == second_left.start
+                    and first_left.end == second_left.end):
+                first_left.relation = second_left.relation = (
+                    SegmentsRelation.OVERLAP)
+            else:
+                relation = (SegmentsRelation.TOUCH
+                            if (first.start == first.original_start
+                                or second.start == second.original_start)
+                            else SegmentsRelation.CROSS)
+                first_left.relation = max(first_left.relation, relation)
+                second_left.relation = max(second_left.relation, relation)
+        yield first_left
