@@ -16,21 +16,25 @@ class LinearEvent:
         start, end = endpoints
         if start > end:
             start, end = end, start
-        result = cls(start, None, True, from_test, SegmentsRelation.DISJOINT)
-        result.complement = cls(end, result, False, from_test,
+        result = cls(start, None, start, True, from_test,
+                     SegmentsRelation.DISJOINT)
+        result.complement = cls(end, result, end, False, from_test,
                                 SegmentsRelation.DISJOINT)
         return result
 
-    __slots__ = 'complement', 'from_test', 'is_left', 'relation', 'start'
+    __slots__ = ('complement', 'from_test', 'is_left', 'original_start',
+                 'relation', 'start')
 
     def __init__(self,
                  start: Point,
                  complement: Optional['Event'],
+                 original_start: Point,
                  is_left: bool,
                  from_test: bool,
                  relation: SegmentsRelation) -> None:
+        self.complement, self.original_start, self.start = (
+            complement, original_start, start)
         self.is_left = is_left
-        self.start, self.complement = start, complement
         self.from_test = from_test
         self.relation = relation
 
@@ -44,12 +48,16 @@ class LinearEvent:
     def from_goal(self) -> bool:
         return not self.from_test
 
+    @property
+    def original_end(self) -> Point:
+        return self.complement.original_start
+
     def divide(self, break_point: Point) -> 'LinearEvent':
         tail = self.complement.complement = LinearEvent(
-                break_point, self.complement, True, self.from_test,
-                self.complement.relation)
-        self.complement = LinearEvent(break_point, self, False, self.from_test,
-                                      self.relation)
+                break_point, self.complement, self.original_start,
+                True, self.from_test, self.complement.relation)
+        self.complement = LinearEvent(break_point, self, self.original_end,
+                                      False, self.from_test, self.relation)
         return tail
 
     def set_both_relations(self, relation: SegmentsRelation) -> None:

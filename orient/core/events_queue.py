@@ -202,84 +202,85 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
     def sweep(self, stop_x: Scalar) -> Iterable[LinearEvent]:
         sweep_line = SweepLine(self.context)
         queue = self._queue
-        prev_start = None
-        prev_from_same_events = []  # type: List[LinearEvent]
-        prev_from_other_events = []  # type: List[LinearEvent]
+        start = queue.peek().start if queue else None  # type: Optional[Point]
+        same_start_events = []  # type: List[Event]
         while queue:
             event = queue.peek()
-            start = event.start
-            if start.x > stop_x:
+            if event.start.x > stop_x:
                 # no intersection segments left
-                return
+                break
             queue.pop()
-            same_start_events = [event]
-            from_same_events, from_other_events = (
-                ((prev_from_same_events + [event], prev_from_other_events)
-                 if event.from_test is prev_from_same_events[0].from_test
-                 else ((prev_from_other_events + [event],
-                        prev_from_same_events)))
-                if start == prev_start
-                else ([event], []))
-            while queue and queue.peek().start == start:
-                next_event = queue.pop()
-                same_start_events.append(next_event)
-                (from_same_events
-                 if next_event.from_test is event.from_test
-                 else from_other_events).append(next_event)
-            if from_other_events:
-                if len(from_same_events) > 1 and len(from_other_events) > 1:
-                    point_event_cosine = self._to_point_event_cosine
-                    base_event = min(from_same_events,
-                                     key=partial(point_event_cosine,
-                                                 event.end))
-                    base_end = base_event.end
-                    largest_angle_event = min(from_same_events,
-                                              key=partial(point_event_cosine,
-                                                          base_end))
-                    largest_angle_end = largest_angle_event.end
-                    base_orientation = self.context.angle_orientation(
-                            start, base_end, largest_angle_end)
-                    relation = (
-                        SegmentsRelation.TOUCH
-                        if all_equal(self._point_in_angle(other_event.end,
-                                                          base_end, start,
-                                                          largest_angle_end,
-                                                          base_orientation)
-                                     for other_event in from_other_events)
-                        else SegmentsRelation.CROSS)
-                else:
-                    relation = SegmentsRelation.TOUCH
-                for event in same_start_events:
-                    event.set_both_relations(max(event.relation, relation))
-            for event in same_start_events:
-                if event.is_left:
-                    sweep_line.add(event)
+            if event.start == start:
+                same_start_events.append(event)
+            else:
+                self.detect_crossing_angles(same_start_events)
+                yield from complete_events_relations(same_start_events)
+                same_start_events, start = [event], event.start
+            if event.is_left:
+                sweep_line.add(event)
+                above_event, below_event = (sweep_line.above(event),
+                                            sweep_line.below(event))
+                if above_event is not None:
+                    self.detect_intersection(event, above_event)
+                if below_event is not None:
+                    self.detect_intersection(below_event, event)
+            else:
+                event = event.complement
+                if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
-                    if above_event is not None:
-                        self.detect_intersection(event, above_event)
-                    if below_event is not None:
-                        self.detect_intersection(below_event, event)
-                else:
-                    event = event.complement
-                    if event in sweep_line:
-                        above_event, below_event = (sweep_line.above(event),
-                                                    sweep_line.below(event))
-                        sweep_line.remove(event)
-                        if above_event is not None and below_event is not None:
-                            self.detect_intersection(below_event, above_event)
-                    yield event
-            prev_start = start
-            prev_from_same_events, prev_from_other_events = (from_same_events,
-                                                             from_other_events)
+                    sweep_line.remove(event)
+                    if above_event is not None and below_event is not None:
+                        self.detect_intersection(below_event, above_event)
+        self.detect_crossing_angles(same_start_events)
+        yield from complete_events_relations(same_start_events)
+
+    def detect_crossing_angles(self, same_start_events: Sequence[LinearEvent]
+                               ) -> None:
+        if (len(same_start_events) < 4
+                or not (1 < sum(event.from_test for event in same_start_events)
+                        < len(same_start_events) - 1)):
+            # for crossing angles there should be at least two pairs
+            # of segments from different origins
+            return
+        from_test_events, from_goal_events = [], []
+        for event in same_start_events:
+            (from_test_events
+             if event.from_test
+             else from_goal_events).append(event)
+        start = same_start_events[0].start
+        point_event_cosine = self._to_point_event_cosine
+        base_event = min(from_goal_events,
+                         key=partial(point_event_cosine,
+                                     from_goal_events[0].end))
+        base_end = base_event.end
+        largest_angle_event = min(from_goal_events,
+                                  key=partial(point_event_cosine,
+                                              base_end))
+        largest_angle_end = largest_angle_event.end
+        base_orientation = self.context.angle_orientation(
+                start, base_end, largest_angle_end)
+        if not all_equal(self._point_in_angle(test_event.end, start, base_end,
+                                              largest_angle_end,
+                                              base_orientation)
+                         for test_event in from_test_events):
+            for event in same_start_events:
+                event.set_both_relations(max(event.relation,
+                                             SegmentsRelation.CROSS))
 
     def detect_intersection(self, below_event: LinearEvent, event: LinearEvent
                             ) -> None:
         """
         Populates events queue with intersection events.
         """
-        relation = self._segments_relation(below_event, event)
-        if relation is SegmentsRelation.OVERLAP:
+        relation = self.context.segments_relation(below_event, event)
+        if relation is Relation.TOUCH or relation is Relation.CROSS:
+            point = self.context.segments_intersection(below_event, event)
+            if point != below_event.start and point != below_event.end:
+                self.divide_segment(below_event, point)
+            if point != event.start and point != event.end:
+                self.divide_segment(event, point)
+        elif relation is not Relation.DISJOINT:
             # segments overlap
             if event.from_test is below_event.from_test:
                 raise ValueError('Segments of the same object '
@@ -302,43 +303,19 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                                        event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
-                if ends_equal:
-                    event.set_both_relations(relation)
-                    below_event.set_both_relations(relation)
-                else:
-                    end_min.set_both_relations(relation)
-                    end_max.complement.relation = relation
+                if not ends_equal:
                     self.divide_segment(end_max.complement, end_min.start)
             elif ends_equal:
                 # the line segments share the right endpoint
-                start_max.set_both_relations(relation)
-                start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
             elif start_min is end_max.complement:
                 # one line segment includes the other one
-                start_max.set_both_relations(relation)
-                start_min_original_relation = start_min.relation
-                start_min.relation = relation
                 self.divide_segment(start_min, end_min.start)
-                start_min.relation = start_min_original_relation
-                start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
             else:
                 # no line segment includes the other one
-                start_max.relation = relation
                 self.divide_segment(start_max, end_min.start)
-                start_min.complement.relation = relation
                 self.divide_segment(start_min, start_max.start)
-        elif relation is not SegmentsRelation.DISJOINT:
-            point = self.context.segments_intersection(below_event, event)
-            if point != below_event.start and point != below_event.end:
-                self.divide_segment(below_event, point)
-            if point != event.start and point != event.end:
-                self.divide_segment(event, point)
-            if event.from_test is not below_event.from_test:
-                event.set_both_relations(max(event.relation, relation))
-                below_event.set_both_relations(max(below_event.relation,
-                                                   relation))
 
     def _to_point_event_cosine(self, point: Point, event: Event) -> Scalar:
         return (self.context.dot_product(event.start, point, event.start,
@@ -346,9 +323,10 @@ class LinearEventsQueue(EventsQueue[LinearEvent]):
                 / math.sqrt(self.context.points_squared_distance(event.start,
                                                                  event.end)))
 
-    def _point_in_angle(self, point: Point,
-                        first_ray_point: Point,
+    def _point_in_angle(self,
+                        point: Point,
                         vertex: Point,
+                        first_ray_point: Point,
                         second_ray_point: Point,
                         angle_orientation: Orientation) -> bool:
         first_half_orientation = self.context.angle_orientation(
