@@ -67,8 +67,7 @@ class CompoundEventsQueue(EventsQueue):
                  from_test: bool) -> None:
         push = self._queue.push
         for segment_endpoints in segments_endpoints:
-            event = CompoundEvent.from_endpoints(segment_endpoints,
-                                                 from_test)
+            event = CompoundEvent.from_endpoints(segment_endpoints, from_test)
             push(event)
             push(event.right)
 
@@ -179,8 +178,7 @@ class LinearEventsQueue(EventsQueue):
                  from_test: bool) -> None:
         push = self._queue.push
         for segment_endpoints in segments_endpoints:
-            event = LinearEvent.from_endpoints(segment_endpoints,
-                                               from_test)
+            event = LinearEvent.from_endpoints(segment_endpoints, from_test)
             push(event)
             push(event.right)
 
@@ -240,8 +238,7 @@ class LinearEventsQueue(EventsQueue):
                                      from_goal_events[0].end))
         base_end = base_event.end
         largest_angle_event = min(from_goal_events,
-                                  key=partial(point_event_cosine,
-                                              base_end))
+                                  key=partial(point_event_cosine, base_end))
         largest_angle_end = largest_angle_event.end
         base_orientation = self.context.angle_orientation(
                 start, base_end, largest_angle_end)
