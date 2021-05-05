@@ -996,10 +996,8 @@ def multiregion_in_multiregion(left: _Multiregion,
     ...                                Point(5, 3)])
     >>> third_inner_square = Contour([Point(5, 5), Point(7, 5), Point(7, 7),
     ...                               Point(5, 7)])
-    >>> fourth_inner_square = Contour([Point(1, 5), Point(3, 5), Point(3, 7),
-    ...                                Point(1, 7)])
     >>> (multiregion_in_multiregion([first_inner_square, third_inner_square],
-    ...                             [second_inner_square, fourth_inner_square])
+    ...                             [second_square, fourth_square])
     ...  is Relation.DISJOINT)
     True
     >>> (multiregion_in_multiregion([first_square, third_square],
