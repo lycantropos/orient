@@ -1,8 +1,10 @@
 from fractions import Fraction
 from functools import partial
-from typing import (Sequence,
+from typing import (List,
+                    Sequence,
                     Tuple)
 
+from ground.hints import Scalar
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
@@ -15,6 +17,8 @@ from tests.utils import (Multipolygon,
                          Segment,
                          Strategy,
                          cleave_in_tuples,
+                         left_scale_segment,
+                         right_scale_segment,
                          sub_lists,
                          to_multipolygon_edges,
                          to_pairs,
@@ -44,12 +48,9 @@ size_three_or_more_multisegments_with_segments = (
 
 
 def chop_segment(segment: Segment, parts_count: int) -> Sequence[Segment]:
-    if parts_count == 1:
-        return [segment]
-    delta_x, delta_y = (segment.end.x - segment.start.x,
-                        segment.end.y - segment.start.y)
-    step_x, step_y = (Fraction(delta_x, parts_count),
-                      Fraction(delta_y, parts_count))
+    assert parts_count > 1
+    step_x, step_y = (Fraction(segment.end.x - segment.start.x) / parts_count,
+                      Fraction(segment.end.y - segment.start.y) / parts_count)
     start_x, start_y = segment.start.x, segment.start.y
     end_x, end_y = start_x + step_x, start_y + step_y
     result = []
@@ -66,14 +67,30 @@ def segment_to_multisegments_with_segments(segment: Segment,
                                            max_size: int = 100
                                            ) -> Strategy[Tuple[Multisegment,
                                                                Segment]]:
-    always_segment = strategies.just(segment)
+    just_segment = strategies.just(segment)
     partition_sizes = strategies.integers(min_size, max_size)
-    return strategies.tuples((strategies.builds(chop_segment,
-                                                always_segment,
-                                                partition_sizes)
-                              .flatmap(strategies.permutations))
-                             .map(Multisegment),
-                             always_segment)
+    scales = strategies.integers(1, 100)
+    partitions = strategies.builds(chop_segment, just_segment, partition_sizes)
+    return strategies.tuples(
+            (strategies.builds(scale_head,
+                               strategies.builds(scale_tail, partitions,
+                                                 scales),
+                               scales)
+             .flatmap(strategies.permutations)
+             .map(Multisegment)),
+            just_segment)
+
+
+def scale_head(segment_partition: List[Segment],
+               scale: Scalar) -> List[Segment]:
+    return segment_partition[:-1] + [left_scale_segment(segment_partition[-1],
+                                                        scale)]
+
+
+def scale_tail(segment_partition: List[Segment],
+               scale: Scalar) -> List[Segment]:
+    return segment_partition[:-1] + [right_scale_segment(segment_partition[-1],
+                                                         scale)]
 
 
 multisegments_with_segments |= (

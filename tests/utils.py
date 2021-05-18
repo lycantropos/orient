@@ -13,10 +13,12 @@ from typing import (Any,
 from ground.base import (Orientation,
                          Relation,
                          get_context)
+from ground.hints import Scalar
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 
-from orient.core.utils import flatten
+from orient.core.utils import (flatten,
+                               to_sorted_pair)
 from orient.hints import Multiregion
 
 Domain = TypeVar('Domain')
@@ -384,3 +386,17 @@ def _to_counterclockwise_vertices(vertices: Sequence[Point]
 
 def _to_first_angle_orientation(vertices: Sequence[Point]) -> Orientation:
     return context.angle_orientation(vertices[0], vertices[-1], vertices[1])
+
+
+def scale_point(point: Point, scale: Scalar) -> Point:
+    return Point(point.x * scale, point.y * scale)
+
+
+def left_scale_segment(segment: Segment, scale: Scalar) -> Segment:
+    start, end = to_sorted_pair((segment.start, segment.end))
+    return Segment(scale_point(start, scale), end)
+
+
+def right_scale_segment(segment: Segment, scale: Scalar) -> Segment:
+    start, end = to_sorted_pair((segment.start, segment.end))
+    return Segment(start, scale_point(end, scale))
