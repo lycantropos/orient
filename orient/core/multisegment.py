@@ -117,10 +117,12 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                       else Relation.OVERLAP))
     else:
         return ((Relation.EQUAL
-                 if start == end
-                 else Relation.COMPOSITE)
-                if is_segment_superset
-                else Relation.OVERLAP)
+                 if is_segment_superset
+                 else Relation.COMPONENT)
+                if start == end
+                else (Relation.COMPOSITE
+                      if is_segment_superset
+                      else Relation.OVERLAP))
 
 
 def _subtract_segments_overlap(minuend: SegmentEndpoints,
