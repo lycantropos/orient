@@ -16,7 +16,7 @@ from tests.utils import (LINEAR_RELATIONS,
                          reverse_segment,
                          reverse_segment_coordinates,
                          to_contour_convex_hull,
-                         to_contour_edges,
+                         to_contour_segments,
                          to_contour_separators)
 from . import strategies
 
@@ -33,8 +33,8 @@ def test_basic(contour_with_segment: Tuple[Contour, Segment]) -> None:
 
 @given(strategies.contours)
 def test_self(contour: Contour) -> None:
-    assert all(segment_in_contour(edge, contour) is Relation.COMPONENT
-               for edge in to_contour_edges(contour))
+    assert all(segment_in_contour(segment, contour) is Relation.COMPONENT
+               for segment in to_contour_segments(contour))
 
 
 @given(strategies.contours)

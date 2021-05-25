@@ -124,7 +124,7 @@ def contour_rotations(contour: Contour) -> Iterable[Contour]:
 
 
 def contour_to_multisegment(contour: Contour) -> Multisegment:
-    return Multisegment(list(to_contour_edges(contour)))
+    return Multisegment(list(to_contour_segments(contour)))
 
 
 def multipolygon_pop_left(multipolygon: Multipolygon
@@ -300,10 +300,7 @@ def to_contour_convex_hull(contour: Contour) -> Contour:
     return Contour(context.points_convex_hull(contour.vertices))
 
 
-def to_contour_edges(contour: Contour) -> Iterable[Segment]:
-    vertices = contour.vertices
-    return (Segment(vertices[index - 1], vertices[index])
-            for index in range(len(vertices)))
+to_contour_segments = context.contour_segments
 
 
 def to_contour_separators(contour: Contour) -> Iterable[Segment]:
@@ -338,8 +335,8 @@ def to_polygon_convex_hull(polygon: Polygon) -> Polygon:
 
 
 def to_polygon_edges(polygon: Polygon) -> Iterable[Segment]:
-    return chain(to_contour_edges(polygon.border),
-                 flatten(map(to_contour_edges, polygon.holes)))
+    return chain(to_contour_segments(polygon.border),
+                 flatten(map(to_contour_segments, polygon.holes)))
 
 
 def to_polygon_vertices(polygon: Polygon) -> Iterable[Point]:
@@ -353,7 +350,7 @@ def to_polygon_with_convex_border(polygon: Polygon) -> Polygon:
 
 
 to_region_convex_hull = to_contour_convex_hull
-to_region_edges = to_contour_edges
+to_region_edges = to_contour_segments
 
 
 def to_solid_polygon(polygon: Polygon) -> Polygon:

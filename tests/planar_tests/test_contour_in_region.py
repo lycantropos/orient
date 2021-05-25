@@ -14,7 +14,7 @@ from tests.utils import (LINEAR_COMPOUND_RELATIONS,
                          implication,
                          reverse_contour,
                          reverse_contour_coordinates,
-                         to_contour_edges)
+                         to_contour_segments)
 from . import strategies
 
 
@@ -105,41 +105,41 @@ def test_connection_with_segment_in_region(region_with_contour
 
     result = contour_in_region(contour, region)
 
-    edges_relations = [segment_in_region(edge, region)
-                       for edge in to_contour_edges(contour)]
+    contour_segments_relations = [segment_in_region(segment, region)
+                                  for segment in to_contour_segments(contour)]
     assert equivalence(result is Relation.DISJOINT,
-                       all(edge_relation is Relation.DISJOINT
-                           for edge_relation in edges_relations))
+                       all(relation is Relation.DISJOINT
+                           for relation in contour_segments_relations))
     assert equivalence(result is Relation.TOUCH,
-                       all(edge_relation is not Relation.CROSS
-                           and edge_relation is not Relation.ENCLOSED
-                           and edge_relation is not Relation.WITHIN
-                           for edge_relation in edges_relations)
-                       and any(edge_relation is Relation.TOUCH
-                               for edge_relation in edges_relations))
+                       all(relation is not Relation.CROSS
+                           and relation is not Relation.ENCLOSED
+                           and relation is not Relation.WITHIN
+                           for relation in contour_segments_relations)
+                       and any(relation is Relation.TOUCH
+                               for relation in contour_segments_relations))
     assert equivalence(result is Relation.CROSS,
-                       any(edge_relation is Relation.CROSS
-                           for edge_relation in edges_relations)
-                       or any(edge_relation is Relation.TOUCH
-                              or edge_relation is Relation.DISJOINT
-                              for edge_relation in edges_relations)
-                       and any(edge_relation is Relation.ENCLOSED
-                               or edge_relation is Relation.WITHIN
-                               for edge_relation in edges_relations))
+                       any(relation is Relation.CROSS
+                           for relation in contour_segments_relations)
+                       or any(relation is Relation.TOUCH
+                              or relation is Relation.DISJOINT
+                              for relation in contour_segments_relations)
+                       and any(relation is Relation.ENCLOSED
+                               or relation is Relation.WITHIN
+                               for relation in contour_segments_relations))
     assert equivalence(result is Relation.COMPONENT,
-                       all(edge_relation is Relation.COMPONENT
-                           for edge_relation in edges_relations))
+                       all(relation is Relation.COMPONENT
+                           for relation in contour_segments_relations))
     assert equivalence(result is Relation.ENCLOSED,
-                       all(edge_relation is Relation.COMPONENT
-                           or edge_relation is Relation.ENCLOSED
-                           or edge_relation is Relation.WITHIN
-                           for edge_relation in edges_relations)
-                       and any(edge_relation is Relation.COMPONENT
-                               or edge_relation is Relation.ENCLOSED
-                               for edge_relation in edges_relations)
-                       and any(edge_relation is Relation.ENCLOSED
-                               or edge_relation is Relation.WITHIN
-                               for edge_relation in edges_relations))
+                       all(relation is Relation.COMPONENT
+                           or relation is Relation.ENCLOSED
+                           or relation is Relation.WITHIN
+                           for relation in contour_segments_relations)
+                       and any(relation is Relation.COMPONENT
+                               or relation is Relation.ENCLOSED
+                               for relation in contour_segments_relations)
+                       and any(relation is Relation.ENCLOSED
+                               or relation is Relation.WITHIN
+                               for relation in contour_segments_relations))
     assert equivalence(result is Relation.WITHIN,
-                       all(edge_relation is Relation.WITHIN
-                           for edge_relation in edges_relations))
+                       all(relation is Relation.WITHIN
+                           for relation in contour_segments_relations))
