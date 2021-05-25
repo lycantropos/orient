@@ -38,7 +38,7 @@ def _relate_point(region: Region,
                   context: Context) -> Tuple[Optional[int], Relation]:
     result = False
     point_y = point.y
-    for index, edge in enumerate(context.contour_edges(region)):
+    for index, edge in enumerate(context.contour_segments(region)):
         if relate_point_to_segment(edge, point, context) is Relation.COMPONENT:
             return index, Relation.COMPONENT
         start, end = edge.start, edge.end
@@ -61,7 +61,7 @@ def _relate_segment_to_contour(contour: Contour,
     has_no_touch = has_no_overlap = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment.start, segment.end
-    for index, edge in enumerate(context.contour_edges(contour)):
+    for index, edge in enumerate(context.contour_segments(contour)):
         edge_start, edge_end = edge_endpoints = edge.start, edge.end
         relation_with_edge = relate_segments(edge, segment, context)
         if (relation_with_edge is Relation.COMPONENT

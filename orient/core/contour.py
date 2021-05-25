@@ -22,9 +22,9 @@ from .segment import (relate_point as relate_point_to_segment,
 
 def relate_point(contour: Contour, point: Point, context: Context) -> Relation:
     return (Relation.DISJOINT
-            if all(relate_point_to_segment(edge, point, context)
+            if all(relate_point_to_segment(segment, point, context)
                    is Relation.DISJOINT
-                   for edge in context.contour_edges(contour))
+                   for segment in context.contour_segments(contour))
             else Relation.COMPONENT)
 
 
@@ -35,48 +35,51 @@ def relate_segment(contour: Contour,
     has_no_touch = has_no_cross = True
     last_touched_edge_index = last_touched_edge_start = None
     start, end = segment.start, segment.end
-    for index, edge in enumerate(context.contour_edges(contour)):
-        edge_start, edge_end = edge_endpoints = edge.start, edge.end
-        relation_with_edge = relate_segments(edge, segment, context)
-        if (relation_with_edge is Relation.COMPONENT
-                or relation_with_edge is Relation.EQUAL):
+    for index, sub_segment in enumerate(context.contour_segments(contour)):
+        sub_segment_start, sub_segment_end = sub_segment_endpoints = (
+            sub_segment.start, sub_segment.end)
+        relation = relate_segments(sub_segment, segment, context)
+        if relation is Relation.COMPONENT or relation is Relation.EQUAL:
             return Relation.COMPONENT
-        elif (relation_with_edge is Relation.OVERLAP
-              or relation_with_edge is Relation.COMPOSITE):
+        elif relation is Relation.OVERLAP or relation is Relation.COMPOSITE:
             return Relation.OVERLAP
-        elif relation_with_edge is Relation.TOUCH:
+        elif relation is Relation.TOUCH:
             if has_no_touch:
                 has_no_touch = False
             elif (has_no_cross
                   and index - last_touched_edge_index == 1
-                  and start not in edge_endpoints and end not in edge_endpoints
-                  and (angle_orientation(start, end, edge_start)
+                  and start not in sub_segment_endpoints
+                  and end not in sub_segment_endpoints
+                  and (angle_orientation(start, end, sub_segment_start)
                        is Orientation.COLLINEAR)
                   and point_vertex_line_divides_angle(start,
                                                       last_touched_edge_start,
-                                                      edge_start, edge_end,
+                                                      sub_segment_start,
+                                                      sub_segment_end,
                                                       context)):
                 has_no_cross = False
             last_touched_edge_index = index
-            last_touched_edge_start = edge_start
-        elif has_no_cross and relation_with_edge is Relation.CROSS:
+            last_touched_edge_start = sub_segment_start
+        elif has_no_cross and relation is Relation.CROSS:
             has_no_cross = False
     vertices = contour.vertices
     if (has_no_cross
             and not has_no_touch
             and last_touched_edge_index == len(vertices) - 1):
-        first_edge_endpoints = first_edge_start, first_edge_end = (
-            vertices[-1], vertices[0])
-        if (relate_segments(context.segment_cls(first_edge_start,
-                                                first_edge_end), segment,
+        first_sub_segment_endpoints = (first_sub_segment_start,
+                                       first_sub_segment_end) = (vertices[-1],
+                                                                 vertices[0])
+        if (relate_segments(context.segment_cls(first_sub_segment_start,
+                                                first_sub_segment_end),
+                            segment,
                             context) is Relation.TOUCH
-                and start not in first_edge_endpoints
-                and end not in first_edge_endpoints
-                and (angle_orientation(start, end, first_edge_start)
+                and start not in first_sub_segment_endpoints
+                and end not in first_sub_segment_endpoints
+                and (angle_orientation(start, end, first_sub_segment_start)
                      is Orientation.COLLINEAR)
                 and point_vertex_line_divides_angle(start, vertices[-2],
-                                                    first_edge_start,
-                                                    first_edge_end,
+                                                    first_sub_segment_start,
+                                                    first_sub_segment_end,
                                                     context)):
             has_no_cross = False
     return ((Relation.DISJOINT if has_no_touch else Relation.TOUCH)
