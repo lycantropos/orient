@@ -1,12 +1,12 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import Location
 from ground.hints import (Multisegment,
                           Point)
 from hypothesis import given
 
 from orient.planar import point_in_multisegment
-from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
+from tests.utils import (LINEAR_LOCATIONS,
                          multisegment_rotations,
                          reverse_multisegment,
                          reverse_multisegment_coordinates,
@@ -20,8 +20,8 @@ def test_basic(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
 
     result = point_in_multisegment(point, multisegment)
 
-    assert isinstance(result, Relation)
-    assert result in PRIMITIVE_LINEAR_RELATIONS
+    assert isinstance(result, Location)
+    assert result in LINEAR_LOCATIONS
 
 
 @given(strategies.multisegments_with_points)

@@ -10,7 +10,7 @@ from typing import (Any,
                     Tuple,
                     TypeVar)
 
-from ground.base import (Orientation,
+from ground.base import (Location, Orientation,
                          Relation,
                          get_context)
 from ground.hints import Scalar
@@ -33,8 +33,8 @@ Contour = context.contour_cls
 Polygon = context.polygon_cls
 Multipolygon = context.multipolygon_cls
 
-PRIMITIVE_LINEAR_RELATIONS = Relation.DISJOINT, Relation.COMPONENT
-PRIMITIVE_COMPOUND_RELATIONS = PRIMITIVE_LINEAR_RELATIONS + (Relation.WITHIN,)
+LINEAR_LOCATIONS = Location.EXTERIOR, Location.BOUNDARY
+SHAPED_LOCATIONS = LINEAR_LOCATIONS + (Location.INTERIOR,)
 SYMMETRIC_LINEAR_RELATIONS = (Relation.DISJOINT, Relation.TOUCH,
                               Relation.CROSS, Relation.OVERLAP)
 ASYMMETRIC_LINEAR_RELATIONS = Relation.COMPONENT, Relation.COMPOSITE

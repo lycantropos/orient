@@ -1,13 +1,13 @@
 from typing import Tuple
 
-from ground.base import (Orientation,
-                         Relation)
+from ground.base import (Location,
+                         Orientation)
 from ground.hints import (Point,
                           Segment)
 from hypothesis import given
 
 from orient.planar import point_in_segment
-from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
+from tests.utils import (LINEAR_LOCATIONS,
                          implication,
                          orientation,
                          reverse_point_coordinates,
@@ -22,21 +22,21 @@ def test_basic(segment_with_point: Tuple[Segment, Point]) -> None:
 
     result = point_in_segment(point, segment)
 
-    assert isinstance(result, Relation)
-    assert result in PRIMITIVE_LINEAR_RELATIONS
+    assert isinstance(result, Location)
+    assert result in LINEAR_LOCATIONS
 
 
 @given(strategies.segments)
 def test_self(segment: Segment) -> None:
-    assert point_in_segment(segment.start, segment) is Relation.COMPONENT
-    assert point_in_segment(segment.end, segment) is Relation.COMPONENT
+    assert point_in_segment(segment.start, segment) is Location.BOUNDARY
+    assert point_in_segment(segment.end, segment) is Location.BOUNDARY
 
 
 @given(strategies.segments_with_points)
 def test_orientation(segment_with_point: Tuple[Segment, Point]) -> None:
     segment, point = segment_with_point
 
-    assert implication(point_in_segment(point, segment) is Relation.COMPONENT,
+    assert implication(point_in_segment(point, segment) is Location.BOUNDARY,
                        orientation(segment.start, segment.end, point)
                        is Orientation.COLLINEAR)
 

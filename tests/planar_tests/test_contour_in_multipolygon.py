@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import (Contour,
                           Multipolygon)
 from hypothesis import given
@@ -120,37 +121,37 @@ def test_connection_with_point_in_multipolygon(multipolygon_with_contour
 
     result = contour_in_multipolygon(contour, multipolygon)
 
-    vertices_relations = [point_in_multipolygon(vertex, multipolygon)
+    vertices_locations = [point_in_multipolygon(vertex, multipolygon)
                           for vertex in contour.vertices]
     assert implication(result is Relation.DISJOINT,
-                       all(vertex_relation is Relation.DISJOINT
-                           for vertex_relation in vertices_relations))
+                       all(vertex_location is Location.EXTERIOR
+                           for vertex_location in vertices_locations))
     assert implication(result is Relation.TOUCH,
-                       all(vertex_relation is not Relation.WITHIN
-                           for vertex_relation in vertices_relations))
+                       all(vertex_location is not Location.INTERIOR
+                           for vertex_location in vertices_locations))
     assert implication(result is Relation.COMPONENT,
-                       all(vertex_relation is Relation.COMPONENT
-                           for vertex_relation in vertices_relations))
+                       all(vertex_location is Location.BOUNDARY
+                           for vertex_location in vertices_locations))
     assert implication(result is Relation.ENCLOSED,
-                       all(vertex_relation is not Relation.DISJOINT
-                           for vertex_relation in vertices_relations))
+                       all(vertex_location is not Location.EXTERIOR
+                           for vertex_location in vertices_locations))
     assert implication(result is Relation.WITHIN,
-                       all(vertex_relation is Relation.WITHIN
-                           for vertex_relation in vertices_relations))
-    assert implication(all(vertex_relation is Relation.DISJOINT
-                           for vertex_relation in vertices_relations),
+                       all(vertex_location is Location.INTERIOR
+                           for vertex_location in vertices_locations))
+    assert implication(all(vertex_location is Location.EXTERIOR
+                           for vertex_location in vertices_locations),
                        result is Relation.DISJOINT
                        or result is Relation.TOUCH
                        or result is Relation.CROSS)
-    assert implication(all(vertex_relation is Relation.WITHIN
-                           for vertex_relation in vertices_relations),
+    assert implication(all(vertex_location is Location.INTERIOR
+                           for vertex_location in vertices_locations),
                        result is Relation.CROSS
                        or result is Relation.ENCLOSED
                        or result is Relation.WITHIN)
-    assert implication(any(vertex_relation is Relation.DISJOINT
-                           for vertex_relation in vertices_relations)
-                       and any(vertex_relation is Relation.WITHIN
-                               for vertex_relation in vertices_relations),
+    assert implication(any(vertex_location is Location.EXTERIOR
+                           for vertex_location in vertices_locations)
+                       and any(vertex_location is Location.INTERIOR
+                               for vertex_location in vertices_locations),
                        result is Relation.CROSS)
 
 

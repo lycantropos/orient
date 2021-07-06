@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import Segment
 from hypothesis import given
 
@@ -84,18 +85,18 @@ def test_connection_with_point_in_region(region_with_segment
 
     result = segment_in_region(segment, region)
 
-    start_relation, end_relation = (point_in_region(segment.start, region),
+    start_location, end_location = (point_in_region(segment.start, region),
                                     point_in_region(segment.end, region))
     assert implication(result is Relation.DISJOINT,
-                       start_relation is end_relation is Relation.DISJOINT)
+                       start_location is end_location is Location.EXTERIOR)
     assert implication(result is Relation.COMPONENT,
-                       start_relation is end_relation is Relation.COMPONENT)
+                       start_location is end_location is Location.BOUNDARY)
     assert implication(result is Relation.WITHIN,
-                       start_relation is end_relation is Relation.WITHIN)
-    assert implication(start_relation is Relation.DISJOINT
-                       and end_relation is Relation.WITHIN
-                       or start_relation is Relation.WITHIN
-                       and end_relation is Relation.DISJOINT,
+                       start_location is end_location is Location.INTERIOR)
+    assert implication(start_location is Location.EXTERIOR
+                       and end_location is Location.INTERIOR
+                       or start_location is Location.INTERIOR
+                       and end_location is Location.EXTERIOR,
                        result is Relation.CROSS)
 
 

@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import Polygon
 from hypothesis import given
 
@@ -93,5 +94,5 @@ def test_connection_with_point_in_polygon(polygons_pair
                        in (Relation.EQUAL, Relation.COMPONENT,
                            Relation.ENCLOSED, Relation.WITHIN),
                        all(point_in_polygon(vertex, right)
-                           is not Relation.DISJOINT
+                           is not Location.EXTERIOR
                            for vertex in to_polygon_vertices(left)))

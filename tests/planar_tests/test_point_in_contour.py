@@ -1,12 +1,12 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import Location
 from ground.hints import (Contour,
                           Point)
 from hypothesis import given
 
 from orient.planar import point_in_contour
-from tests.utils import (PRIMITIVE_LINEAR_RELATIONS,
+from tests.utils import (LINEAR_LOCATIONS,
                          contour_rotations,
                          reverse_contour,
                          reverse_contour_coordinates,
@@ -20,13 +20,13 @@ def test_basic(contour_with_point: Tuple[Contour, Point]) -> None:
 
     result = point_in_contour(point, contour)
 
-    assert isinstance(result, Relation)
-    assert result in PRIMITIVE_LINEAR_RELATIONS
+    assert isinstance(result, Location)
+    assert result in LINEAR_LOCATIONS
 
 
 @given(strategies.contours)
 def test_self(contour: Contour) -> None:
-    assert all(point_in_contour(vertex, contour) is Relation.COMPONENT
+    assert all(point_in_contour(vertex, contour) is Location.BOUNDARY
                for vertex in contour.vertices)
 
 

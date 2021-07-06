@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from hypothesis import given
 
 from orient.hints import Region
@@ -14,7 +15,8 @@ from tests.utils import (ASYMMETRIC_UNIFORM_COMPOUND_RELATIONS,
                          implication,
                          region_rotations,
                          reverse_contour,
-                         reverse_contour_coordinates, to_region_convex_hull)
+                         reverse_contour_coordinates,
+                         to_region_convex_hull)
 from . import strategies
 
 
@@ -87,7 +89,7 @@ def test_connection_with_point_in_region(regions_pair: Tuple[Region, Region]
                        in (Relation.EQUAL, Relation.COMPONENT,
                            Relation.ENCLOSED, Relation.WITHIN),
                        all(point_in_region(vertex, right_region)
-                           is not Relation.DISJOINT
+                           is not Location.EXTERIOR
                            for vertex in left_region.vertices))
 
 

@@ -1,13 +1,13 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import Location
 from ground.hints import (Multipolygon,
                           Point)
 from hypothesis import given
 
 from orient.planar import (point_in_multipolygon,
                            point_in_polygon)
-from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
+from tests.utils import (SHAPED_LOCATIONS,
                          equivalence,
                          multipolygon_pop_left,
                          multipolygon_rotations,
@@ -27,14 +27,13 @@ def test_basic(multipolygon_with_point: Tuple[Multipolygon, Point]) -> None:
 
     result = point_in_multipolygon(point, multipolygon)
 
-    assert isinstance(result, Relation)
-    assert result in PRIMITIVE_COMPOUND_RELATIONS
+    assert isinstance(result, Location)
+    assert result in SHAPED_LOCATIONS
 
 
 @given(strategies.multipolygons)
 def test_vertices(multipolygon: Multipolygon) -> None:
-    assert all(point_in_multipolygon(vertex, multipolygon)
-               is Relation.COMPONENT
+    assert all(point_in_multipolygon(vertex, multipolygon) is Location.BOUNDARY
                for vertex in to_multipolygon_vertices(multipolygon))
 
 
@@ -47,15 +46,15 @@ def test_step(multipolygon_with_polygon: Tuple[Multipolygon, Point]) -> None:
     next_result = point_in_multipolygon(point, multipolygon)
 
     relation_with_first_polygon = point_in_polygon(point, first_polygon)
-    assert equivalence(next_result is Relation.DISJOINT,
-                       result is Relation.DISJOINT
-                       and relation_with_first_polygon is Relation.DISJOINT)
-    assert equivalence(next_result is Relation.WITHIN,
-                       result is Relation.WITHIN
-                       or relation_with_first_polygon is Relation.WITHIN)
-    assert equivalence(next_result is Relation.COMPONENT,
-                       result is Relation.COMPONENT
-                       or relation_with_first_polygon is Relation.COMPONENT)
+    assert equivalence(next_result is Location.EXTERIOR,
+                       result is Location.EXTERIOR
+                       and relation_with_first_polygon is Location.EXTERIOR)
+    assert equivalence(next_result is Location.INTERIOR,
+                       result is Location.INTERIOR
+                       or relation_with_first_polygon is Location.INTERIOR)
+    assert equivalence(next_result is Location.BOUNDARY,
+                       result is Location.BOUNDARY
+                       or relation_with_first_polygon is Location.BOUNDARY)
 
 
 @given(strategies.multipolygons_with_points)

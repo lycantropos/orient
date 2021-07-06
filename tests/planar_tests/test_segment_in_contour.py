@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import (Contour,
                           Segment)
 from hypothesis import given
@@ -86,4 +87,4 @@ def test_connection_with_point_in_contour(contour_with_segment
     assert implication(result is Relation.DISJOINT,
                        point_in_contour(segment.start, contour)
                        is point_in_contour(segment.end, contour)
-                       is Relation.DISJOINT)
+                       is Location.EXTERIOR)

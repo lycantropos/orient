@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import (Multisegment,
                           Segment)
 from hypothesis import given
@@ -168,4 +169,4 @@ def test_connection_with_point_in_multisegment(multisegment_with_segment
     assert implication(result is Relation.DISJOINT,
                        point_in_multisegment(segment.start, multisegment)
                        is point_in_multisegment(segment.end, multisegment)
-                       is Relation.DISJOINT)
+                       is Location.EXTERIOR)

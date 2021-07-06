@@ -1,13 +1,13 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import Location
 from ground.hints import Point
 from hypothesis import given
 
 from orient.hints import Multiregion
 from orient.planar import (point_in_multiregion,
                            point_in_region)
-from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
+from tests.utils import (SHAPED_LOCATIONS,
                          equivalence,
                          reverse_multiregion,
                          reverse_multiregion_coordinates,
@@ -23,13 +23,13 @@ def test_basic(multiregion_with_point: Tuple[Multiregion, Point]) -> None:
 
     result = point_in_multiregion(point, multiregion)
 
-    assert isinstance(result, Relation)
-    assert result in PRIMITIVE_COMPOUND_RELATIONS
+    assert isinstance(result, Location)
+    assert result in SHAPED_LOCATIONS
 
 
 @given(strategies.multiregions)
 def test_vertices(multiregion: Multiregion) -> None:
-    assert all(point_in_multiregion(vertex, multiregion) is Relation.COMPONENT
+    assert all(point_in_multiregion(vertex, multiregion) is Location.BOUNDARY
                for region in multiregion
                for vertex in region.vertices)
 
@@ -43,15 +43,15 @@ def test_step(multiregion_with_region: Tuple[Multiregion, Point]) -> None:
     next_result = point_in_multiregion(point, multiregion)
 
     relation_with_first_region = point_in_region(point, first_region)
-    assert equivalence(next_result is Relation.DISJOINT,
-                       result is Relation.DISJOINT
-                       and relation_with_first_region is Relation.DISJOINT)
-    assert equivalence(next_result is Relation.WITHIN,
-                       result is Relation.WITHIN
-                       or relation_with_first_region is Relation.WITHIN)
-    assert equivalence(next_result is Relation.COMPONENT,
-                       result is Relation.COMPONENT
-                       or relation_with_first_region is Relation.COMPONENT)
+    assert equivalence(next_result is Location.EXTERIOR,
+                       result is Location.EXTERIOR
+                       and relation_with_first_region is Location.EXTERIOR)
+    assert equivalence(next_result is Location.INTERIOR,
+                       result is Location.INTERIOR
+                       or relation_with_first_region is Location.INTERIOR)
+    assert equivalence(next_result is Location.BOUNDARY,
+                       result is Location.BOUNDARY
+                       or relation_with_first_region is Location.BOUNDARY)
 
 
 @given(strategies.multiregions_with_points)

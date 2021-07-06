@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import Contour
 from hypothesis import given
 
@@ -86,5 +87,5 @@ def test_connection_with_point_in_contour(contours_pair
     assert implication(contour_in_contour(left_contour, right_contour)
                        in (Relation.EQUAL, Relation.COMPONENT),
                        all(point_in_contour(vertex, right_contour)
-                           is Relation.COMPONENT
+                           is Location.BOUNDARY
                            for vertex in left_contour.vertices))

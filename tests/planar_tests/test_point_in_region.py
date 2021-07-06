@@ -1,12 +1,12 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import Location
 from ground.hints import Point
 from hypothesis import given
 
 from orient.hints import Region
 from orient.planar import point_in_region
-from tests.utils import (PRIMITIVE_COMPOUND_RELATIONS,
+from tests.utils import (SHAPED_LOCATIONS,
                          region_rotations,
                          reverse_contour,
                          reverse_contour_coordinates,
@@ -20,13 +20,13 @@ def test_basic(region_with_point: Tuple[Region, Point]) -> None:
 
     result = point_in_region(point, region)
 
-    assert isinstance(result, Relation)
-    assert result in PRIMITIVE_COMPOUND_RELATIONS
+    assert isinstance(result, Location)
+    assert result in SHAPED_LOCATIONS
 
 
 @given(strategies.contours)
 def test_self(region: Region) -> None:
-    assert all(point_in_region(vertex, region) is Relation.COMPONENT
+    assert all(point_in_region(vertex, region) is Location.BOUNDARY
                for vertex in region.vertices)
 
 

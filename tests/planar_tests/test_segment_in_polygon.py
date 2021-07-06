@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Location,
+                         Relation)
 from ground.hints import (Polygon,
                           Segment)
 from hypothesis import given
@@ -88,4 +89,4 @@ def test_connection_with_point_in_polygon(polygon_with_segment
     assert implication(result is Relation.DISJOINT,
                        point_in_polygon(segment.start, polygon)
                        is point_in_polygon(segment.end, polygon)
-                       is Relation.DISJOINT)
+                       is Location.EXTERIOR)
