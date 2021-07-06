@@ -59,28 +59,29 @@ Usage
 >>> right_top = Point(4, 4)
 >>> bottom_segment_midpoint = Point(2, 0)
 >>> bottom_segment = Segment(left_bottom, right_bottom)
->>> from ground.base import Relation
+>>> from ground.base import Location
 >>> from orient.planar import point_in_segment
->>> point_in_segment(left_bottom, bottom_segment) is Relation.COMPONENT
+>>> point_in_segment(left_bottom, bottom_segment) is Location.BOUNDARY
 True
 >>> (point_in_segment(bottom_segment_midpoint, bottom_segment) 
-...  is Relation.COMPONENT)
+...  is Location.BOUNDARY)
 True
->>> point_in_segment(right_bottom, bottom_segment) is Relation.COMPONENT
+>>> point_in_segment(right_bottom, bottom_segment) is Location.BOUNDARY
 True
->>> point_in_segment(left_top, bottom_segment) is Relation.DISJOINT
+>>> point_in_segment(left_top, bottom_segment) is Location.EXTERIOR
 True
 >>> square = Contour([left_bottom, right_bottom, right_top, left_top])
 >>> from orient.planar import point_in_region
->>> point_in_region(left_bottom, square) is Relation.COMPONENT
+>>> point_in_region(left_bottom, square) is Location.BOUNDARY
 True
->>> point_in_region(Point(1, 1), square) is Relation.WITHIN
+>>> point_in_region(Point(1, 1), square) is Location.INTERIOR
 True
->>> point_in_region(right_top, square) is Relation.COMPONENT
+>>> point_in_region(right_top, square) is Location.BOUNDARY
 True
->>> point_in_region(Point(5, 5), square) is Relation.DISJOINT
+>>> point_in_region(Point(5, 5), square) is Location.EXTERIOR
 True
 >>> main_diagonal = Segment(left_bottom, right_top)
+>>> from ground.base import Relation
 >>> from orient.planar import segment_in_region
 >>> segment_in_region(bottom_segment, square) is Relation.COMPONENT
 True
@@ -105,17 +106,17 @@ True
 >>> region_in_region(square, inner_square) is Relation.COVER
 True
 >>> from orient.planar import point_in_polygon
->>> point_in_polygon(left_bottom, Polygon(square, [])) is Relation.COMPONENT
+>>> point_in_polygon(left_bottom, Polygon(square, [])) is Location.BOUNDARY
 True
->>> point_in_polygon(Point(1, 1), Polygon(square, [])) is Relation.WITHIN
+>>> point_in_polygon(Point(1, 1), Polygon(square, [])) is Location.INTERIOR
 True
->>> point_in_polygon(Point(2, 2), Polygon(square, [])) is Relation.WITHIN
+>>> point_in_polygon(Point(2, 2), Polygon(square, [])) is Location.INTERIOR
 True
 >>> (point_in_polygon(Point(1, 1), Polygon(square, [inner_square]))
-...  is Relation.COMPONENT)
+...  is Location.BOUNDARY)
 True
 >>> (point_in_polygon(Point(2, 2), Polygon(square, [inner_square]))
-...  is Relation.DISJOINT)
+...  is Location.EXTERIOR)
 True
 >>> from orient.planar import segment_in_polygon
 >>> (segment_in_polygon(bottom_segment, Polygon(square, []))
