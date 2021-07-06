@@ -1,6 +1,7 @@
 from typing import Optional as _Optional
 
 from ground.base import (Context as _Context,
+                         Location as _Location,
                          Relation as _Relation,
                          get_context as _get_context)
 from ground.hints import (Contour as _Contour,
@@ -23,9 +24,9 @@ from .hints import (Multiregion as _Multiregion,
 
 def point_in_segment(point: _Point, segment: _Segment,
                      *,
-                     context: _Optional[_Context] = None) -> _Relation:
+                     context: _Optional[_Context] = None) -> _Location:
     """
-    Finds relation between point and segment.
+    Finds location of point in segment.
 
     Time complexity:
         ``O(1)``
@@ -35,25 +36,25 @@ def point_in_segment(point: _Point, segment: _Segment,
     :param point: point to check for.
     :param segment: segment to check in.
     :param context: geometric context.
-    :returns: relation between point and segment.
+    :returns: location of point in segment.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Point = context.point_cls
     >>> Segment = context.segment_cls
     >>> segment = Segment(Point(0, 0), Point(2, 0))
-    >>> point_in_segment(Point(0, 0), segment) is Relation.COMPONENT
+    >>> point_in_segment(Point(0, 0), segment) is Location.BOUNDARY
     True
-    >>> point_in_segment(Point(1, 0), segment) is Relation.COMPONENT
+    >>> point_in_segment(Point(1, 0), segment) is Location.BOUNDARY
     True
-    >>> point_in_segment(Point(2, 0), segment) is Relation.COMPONENT
+    >>> point_in_segment(Point(2, 0), segment) is Location.BOUNDARY
     True
-    >>> point_in_segment(Point(3, 0), segment) is Relation.DISJOINT
+    >>> point_in_segment(Point(3, 0), segment) is Location.EXTERIOR
     True
-    >>> point_in_segment(Point(0, 1), segment) is Relation.DISJOINT
+    >>> point_in_segment(Point(0, 1), segment) is Location.EXTERIOR
     True
     """
-    return _segment.relate_point(
+    return _segment.locate_point(
             segment, point, _get_context() if context is None else context)
 
 
@@ -107,9 +108,9 @@ def segment_in_segment(left: _Segment, right: _Segment,
 def point_in_multisegment(point: _Point,
                           multisegment: _Multisegment,
                           *,
-                          context: _Optional[_Context] = None) -> _Relation:
+                          context: _Optional[_Context] = None) -> _Location:
     """
-    Finds relation between point and multisegment.
+    Finds location of point in multisegment.
 
     Time complexity:
         ``O(len(multisegment.segments))``
@@ -119,29 +120,29 @@ def point_in_multisegment(point: _Point,
     :param point: point to check for.
     :param multisegment: multisegment to check in.
     :param context: geometric context.
-    :returns: relation between point and multisegment.
+    :returns: location of point in multisegment.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Multisegment = context.multisegment_cls
     >>> Point = context.point_cls
     >>> Segment = context.segment_cls
     >>> multisegment = Multisegment([Segment(Point(0, 0), Point(1, 0)),
     ...                              Segment(Point(3, 0), Point(5, 0))])
-    >>> point_in_multisegment(Point(0, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(0, 0), multisegment) is Location.BOUNDARY
     True
-    >>> point_in_multisegment(Point(0, 1), multisegment) is Relation.DISJOINT
+    >>> point_in_multisegment(Point(0, 1), multisegment) is Location.EXTERIOR
     True
-    >>> point_in_multisegment(Point(1, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(1, 0), multisegment) is Location.BOUNDARY
     True
-    >>> point_in_multisegment(Point(2, 0), multisegment) is Relation.DISJOINT
+    >>> point_in_multisegment(Point(2, 0), multisegment) is Location.EXTERIOR
     True
-    >>> point_in_multisegment(Point(3, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(3, 0), multisegment) is Location.BOUNDARY
     True
-    >>> point_in_multisegment(Point(4, 0), multisegment) is Relation.COMPONENT
+    >>> point_in_multisegment(Point(4, 0), multisegment) is Location.BOUNDARY
     True
     """
-    return _multisegment.relate_point(
+    return _multisegment.locate_point(
             multisegment, point,
             _get_context() if context is None else context)
 
@@ -274,9 +275,9 @@ def multisegment_in_multisegment(left: _Multisegment,
 
 def point_in_contour(point: _Point, contour: _Contour,
                      *,
-                     context: _Optional[_Context] = None) -> _Relation:
+                     context: _Optional[_Context] = None) -> _Location:
     """
-    Finds relation between point and contour.
+    Finds location of point in contour.
 
     Time complexity:
         ``O(len(contour.vertices))``
@@ -286,23 +287,23 @@ def point_in_contour(point: _Point, contour: _Contour,
     :param point: point to check for.
     :param contour: contour to check in.
     :param context: geometric context.
-    :returns: relation between point and contour.
+    :returns: location of point in contour.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Contour = context.contour_cls
     >>> Point = context.point_cls
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
-    >>> point_in_contour(Point(0, 0), square) is Relation.COMPONENT
+    >>> point_in_contour(Point(0, 0), square) is Location.BOUNDARY
     True
-    >>> point_in_contour(Point(1, 1), square) is Relation.DISJOINT
+    >>> point_in_contour(Point(1, 1), square) is Location.EXTERIOR
     True
-    >>> point_in_contour(Point(2, 2), square) is Relation.COMPONENT
+    >>> point_in_contour(Point(2, 2), square) is Location.BOUNDARY
     True
-    >>> point_in_contour(Point(3, 3), square) is Relation.DISJOINT
+    >>> point_in_contour(Point(3, 3), square) is Location.EXTERIOR
     True
     """
-    return _contour.relate_point(
+    return _contour.locate_point(
             contour, point, _get_context() if context is None else context)
 
 
@@ -465,9 +466,9 @@ def contour_in_contour(left: _Contour, right: _Contour,
 
 def point_in_region(point: _Point, region: _Region,
                     *,
-                    context: _Optional[_Context] = None) -> _Relation:
+                    context: _Optional[_Context] = None) -> _Location:
     """
-    Finds relation between point and region.
+    Finds location of point in region.
 
     Based on ray casting algorithm.
 
@@ -481,23 +482,23 @@ def point_in_region(point: _Point, region: _Region,
     :param point: point to check for.
     :param region: region to check in.
     :param context: geometric context.
-    :returns: relation between point and region.
+    :returns: location of point in region.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Contour = context.contour_cls
     >>> Point = context.point_cls
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
-    >>> point_in_region(Point(0, 0), square) is Relation.COMPONENT
+    >>> point_in_region(Point(0, 0), square) is Location.BOUNDARY
     True
-    >>> point_in_region(Point(1, 1), square) is Relation.WITHIN
+    >>> point_in_region(Point(1, 1), square) is Location.INTERIOR
     True
-    >>> point_in_region(Point(2, 2), square) is Relation.COMPONENT
+    >>> point_in_region(Point(2, 2), square) is Location.BOUNDARY
     True
-    >>> point_in_region(Point(3, 3), square) is Relation.DISJOINT
+    >>> point_in_region(Point(3, 3), square) is Location.EXTERIOR
     True
     """
-    return _region.relate_point(region, point,
+    return _region.locate_point(region, point,
                                 _get_context() if context is None else context)
 
 
@@ -715,9 +716,9 @@ def region_in_region(left: _Region, right: _Region,
 def point_in_multiregion(point: _Point,
                          multiregion: _Multiregion,
                          *,
-                         context: _Optional[_Context] = None) -> _Relation:
+                         context: _Optional[_Context] = None) -> _Location:
     """
-    Finds relation between point and multiregion.
+    Finds location of point in multiregion.
 
     Time complexity:
         ``O(sum(len(region.vertices) for region in multiregion))``
@@ -727,28 +728,28 @@ def point_in_multiregion(point: _Point,
     :param point: point to check for.
     :param multiregion: multiregion to check in.
     :param context: geometric context.
-    :returns: relation between point and multiregion.
+    :returns: location of point in multiregion.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Contour = context.contour_cls
     >>> Point = context.point_cls
     >>> triangle = Contour([Point(0, 0), Point(2, 0), Point(0, 2)])
     >>> square = Contour([Point(0, 0), Point(2, 0), Point(2, 2), Point(0, 2)])
-    >>> point_in_multiregion(Point(0, 0), [triangle]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(0, 0), [triangle]) is Location.BOUNDARY
     True
-    >>> point_in_multiregion(Point(0, 0), [square]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(0, 0), [square]) is Location.BOUNDARY
     True
-    >>> point_in_multiregion(Point(1, 1), [triangle]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(1, 1), [triangle]) is Location.BOUNDARY
     True
-    >>> point_in_multiregion(Point(1, 1), [square]) is Relation.WITHIN
+    >>> point_in_multiregion(Point(1, 1), [square]) is Location.INTERIOR
     True
-    >>> point_in_multiregion(Point(2, 2), [triangle]) is Relation.DISJOINT
+    >>> point_in_multiregion(Point(2, 2), [triangle]) is Location.EXTERIOR
     True
-    >>> point_in_multiregion(Point(2, 2), [square]) is Relation.COMPONENT
+    >>> point_in_multiregion(Point(2, 2), [square]) is Location.BOUNDARY
     True
     """
-    return _multiregion.relate_point(
+    return _multiregion.locate_point(
             multiregion, point, _get_context() if context is None else context)
 
 
@@ -1102,9 +1103,9 @@ def multiregion_in_multiregion(left: _Multiregion,
 
 def point_in_polygon(point: _Point, polygon: _Polygon,
                      *,
-                     context: _Optional[_Context] = None) -> _Relation:
+                     context: _Optional[_Context] = None) -> _Location:
     """
-    Finds relation between point and polygon.
+    Finds location of point in polygon.
 
     Time complexity:
         ``O(vertices_count)``
@@ -1117,9 +1118,9 @@ def point_in_polygon(point: _Point, polygon: _Polygon,
     :param point: point to check for.
     :param polygon: polygon to check in.
     :param context: geometric context.
-    :returns: relation between point and polygon.
+    :returns: location of point in polygon.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Contour = context.contour_cls
     >>> Point = context.point_cls
@@ -1129,25 +1130,25 @@ def point_in_polygon(point: _Point, polygon: _Polygon,
     >>> inner_square = Contour([Point(1, 1), Point(3, 1), Point(3, 3),
     ...                         Point(1, 3)])
     >>> (point_in_polygon(Point(0, 0), Polygon(inner_square, []))
-    ...  is Relation.DISJOINT)
+    ...  is Location.EXTERIOR)
     True
     >>> (point_in_polygon(Point(0, 0), Polygon(outer_square, []))
-    ...  is Relation.COMPONENT)
+    ...  is Location.BOUNDARY)
     True
     >>> (point_in_polygon(Point(1, 1), Polygon(inner_square, []))
-    ...  is Relation.COMPONENT)
+    ...  is Location.BOUNDARY)
     True
     >>> (point_in_polygon(Point(1, 1), Polygon(outer_square, []))
-    ...  is Relation.WITHIN)
+    ...  is Location.INTERIOR)
     True
     >>> (point_in_polygon(Point(2, 2), Polygon(outer_square, []))
-    ...  is Relation.WITHIN)
+    ...  is Location.INTERIOR)
     True
     >>> (point_in_polygon(Point(2, 2), Polygon(outer_square, [inner_square]))
-    ...  is Relation.DISJOINT)
+    ...  is Location.EXTERIOR)
     True
     """
-    return _polygon.relate_point(
+    return _polygon.locate_point(
             polygon, point, _get_context() if context is None else context)
 
 
@@ -1576,7 +1577,7 @@ def point_in_multipolygon(point: _Point,
                           *,
                           context: _Optional[_Context] = None) -> _Relation:
     """
-    Finds relation between point and multipolygon.
+    Finds location of point in multipolygon.
 
     Time complexity:
         ``O(sum(len(polygon.border.vertices)\
@@ -1588,9 +1589,9 @@ def point_in_multipolygon(point: _Point,
     :param point: point to check for.
     :param multipolygon: multipolygon to check in.
     :param context: geometric context.
-    :returns: relation between point and multipolygon.
+    :returns: location of point in multipolygon.
 
-    >>> from ground.base import Relation, get_context
+    >>> from ground.base import Location, get_context
     >>> context = get_context()
     >>> Contour = context.contour_cls
     >>> Multipolygon = context.multipolygon_cls
@@ -1603,20 +1604,20 @@ def point_in_multipolygon(point: _Point,
     >>> (point_in_multipolygon(Point(6, 2),
     ...                        Multipolygon([Polygon(first_square, []),
     ...                                      Polygon(second_square, [])]))
-    ...  is Relation.DISJOINT)
+    ...  is Location.EXTERIOR)
     True
     >>> (point_in_multipolygon(Point(4, 4),
     ...                        Multipolygon([Polygon(first_square, []),
     ...                                      Polygon(second_square, [])]))
-    ...  is Relation.COMPONENT)
+    ...  is Location.BOUNDARY)
     True
     >>> (point_in_multipolygon(Point(2, 2),
     ...                        Multipolygon([Polygon(first_square, []),
     ...                                      Polygon(second_square, [])]))
-    ...  is Relation.WITHIN)
+    ...  is Location.INTERIOR)
     True
     """
-    return _multipolygon.relate_point(
+    return _multipolygon.locate_point(
             multipolygon, point,
             _get_context() if context is None else context)
 

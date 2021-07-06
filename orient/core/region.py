@@ -2,6 +2,7 @@ from typing import (Optional,
                     Tuple)
 
 from ground.base import (Context,
+                         Location,
                          Orientation,
                          Relation)
 from ground.hints import (Box,
@@ -22,32 +23,32 @@ from .hints import Region
 from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .segment import (relate_point as relate_point_to_segment,
+from .segment import (locate_point as locate_point_in_segment,
                       relate_segment as relate_segments)
 
 
-def relate_point(region: Region,
+def locate_point(region: Region,
                  point: Point,
-                 context: Context) -> Relation:
-    _, relation = _relate_point(region, point, context)
-    return relation
+                 context: Context) -> Location:
+    _, location = _locate_point(region, point, context)
+    return location
 
 
-def _relate_point(region: Region,
+def _locate_point(region: Region,
                   point: Point,
-                  context: Context) -> Tuple[Optional[int], Relation]:
+                  context: Context) -> Tuple[Optional[int], Location]:
     result = False
     point_y = point.y
     for index, edge in enumerate(context.contour_segments(region)):
-        if relate_point_to_segment(edge, point, context) is Relation.COMPONENT:
-            return index, Relation.COMPONENT
+        if locate_point_in_segment(edge, point, context) is Location.BOUNDARY:
+            return index, Location.BOUNDARY
         start, end = edge.start, edge.end
         if ((start.y > point_y) is not (end.y > point_y)
                 and ((end.y > start.y)
                      is (context.angle_orientation(start, end, point)
                          is Orientation.COUNTERCLOCKWISE))):
             result = not result
-    return None, (Relation.WITHIN if result else Relation.DISJOINT)
+    return None, (Location.INTERIOR if result else Location.EXTERIOR)
 
 
 def _relate_segment_to_contour(contour: Contour,
@@ -116,20 +117,20 @@ def relate_segment(region: Region,
             or relation_with_contour is Relation.COMPONENT):
         return relation_with_contour
     start, end = segment.start, segment.end
-    start_index, start_relation = _relate_point(region, start, context)
+    start_index, start_location = _locate_point(region, start, context)
     if relation_with_contour is Relation.DISJOINT:
         return (Relation.DISJOINT
-                if start_relation is Relation.DISJOINT
+                if start_location is Location.EXTERIOR
                 else Relation.WITHIN)
-    elif start_relation is Relation.DISJOINT:
+    elif start_location is Location.EXTERIOR:
         return Relation.TOUCH
-    elif start_relation is Relation.WITHIN:
+    elif start_location is Location.INTERIOR:
         return Relation.ENCLOSED
     else:
-        end_index, end_relation = _relate_point(region, end, context)
-        if end_relation is Relation.DISJOINT:
+        end_index, end_location = _locate_point(region, end, context)
+        if end_location is Location.EXTERIOR:
             return Relation.TOUCH
-        elif end_relation is Relation.WITHIN:
+        elif end_location is Location.INTERIOR:
             return Relation.ENCLOSED
         else:
             angle_orientation = context.angle_orientation

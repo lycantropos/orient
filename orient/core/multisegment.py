@@ -2,6 +2,7 @@ from typing import (Dict,
                     Iterable)
 
 from ground.base import (Context,
+                         Location,
                          Orientation,
                          Relation)
 from ground.hints import (Multisegment,
@@ -12,18 +13,19 @@ from . import box
 from .events_queue import LinearEventsQueue
 from .hints import SegmentEndpoints
 from .processing import process_open_linear_queue
-from .segment import (relate_point as relate_point_to_segment,
+from .segment import (locate_point as locate_point_to_segment,
                       relate_segment as relate_segments)
 from .utils import to_sorted_pair
 
 
-def relate_point(multisegment: Multisegment, point: Point,
-                 context: Context) -> Relation:
-    return (Relation.DISJOINT
-            if all(relate_point_to_segment(segment, point, context)
-                   is Relation.DISJOINT
+def locate_point(multisegment: Multisegment,
+                 point: Point,
+                 context: Context) -> Location:
+    return (Location.EXTERIOR
+            if all(locate_point_to_segment(segment, point, context)
+                   is Location.EXTERIOR
                    for segment in multisegment.segments)
-            else Relation.COMPONENT)
+            else Location.BOUNDARY)
 
 
 def relate_segment(multisegment: Multisegment, segment: Segment,

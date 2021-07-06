@@ -2,6 +2,7 @@ from itertools import chain
 from typing import Iterable
 
 from ground.base import (Context,
+                         Location,
                          Orientation,
                          Relation)
 from ground.hints import (Contour,
@@ -16,16 +17,16 @@ from .hints import SegmentEndpoints
 from .multisegment import to_segments_endpoints
 from .processing import (process_closed_linear_queue,
                          process_open_linear_queue)
-from .segment import (relate_point as relate_point_to_segment,
+from .segment import (locate_point as locate_point_to_segment,
                       relate_segment as relate_segments)
 
 
-def relate_point(contour: Contour, point: Point, context: Context) -> Relation:
-    return (Relation.DISJOINT
-            if all(relate_point_to_segment(segment, point, context)
-                   is Relation.DISJOINT
+def locate_point(contour: Contour, point: Point, context: Context) -> Location:
+    return (Location.EXTERIOR
+            if all(locate_point_to_segment(segment, point, context)
+                   is Location.EXTERIOR
                    for segment in context.contour_segments(contour))
-            else Relation.COMPONENT)
+            else Location.BOUNDARY)
 
 
 def relate_segment(contour: Contour,

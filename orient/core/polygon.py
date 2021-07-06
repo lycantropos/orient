@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from ground.base import (Context,
-                         Relation)
+                         Location, Relation)
 from ground.hints import (Contour,
                           Multisegment,
                           Point,
@@ -23,24 +23,24 @@ from .multisegment import to_segments_endpoints
 from .processing import process_linear_compound_queue
 from .region import (_relate_contour as relate_contour_to_region,
                      _relate_region as relate_regions,
-                     relate_point as relate_point_to_region,
+                     locate_point as locate_point_in_region,
                      relate_segment as relate_segment_to_region,
                      to_oriented_segments as region_to_oriented_segments)
 
 
-def relate_point(polygon: Polygon,
+def locate_point(polygon: Polygon,
                  point: Point,
-                 context: Context) -> Relation:
-    relation_without_holes = relate_point_to_region(polygon.border, point,
+                 context: Context) -> Location:
+    location_without_holes = locate_point_in_region(polygon.border, point,
                                                     context)
-    if relation_without_holes is Relation.WITHIN:
+    if location_without_holes is Location.INTERIOR:
         for hole in polygon.holes:
-            relation_with_hole = relate_point_to_region(hole, point, context)
-            if relation_with_hole is Relation.WITHIN:
-                return Relation.DISJOINT
-            elif relation_with_hole is Relation.COMPONENT:
-                return Relation.COMPONENT
-    return relation_without_holes
+            location_in_hole = locate_point_in_region(hole, point, context)
+            if location_in_hole is Location.INTERIOR:
+                return Location.EXTERIOR
+            elif location_in_hole is Location.BOUNDARY:
+                return Location.BOUNDARY
+    return location_without_holes
 
 
 def relate_segment(polygon: Polygon,

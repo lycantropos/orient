@@ -1,6 +1,7 @@
 from typing import Iterable
 
 from ground.base import (Context,
+                         Location,
                          Relation)
 from ground.hints import (Contour,
                           Multipolygon,
@@ -18,7 +19,7 @@ from .hints import (Multiregion,
 from .multiregion import (to_oriented_edges_endpoints
                           as multiregion_to_oriented_segments)
 from .multisegment import to_segments_endpoints
-from .polygon import (relate_point as relate_point_to_polygon,
+from .polygon import (locate_point as locate_point_in_polygon,
                       to_oriented_edges_endpoints
                       as polygon_to_oriented_segments)
 from .processing import (process_compound_queue,
@@ -26,15 +27,14 @@ from .processing import (process_compound_queue,
 from .region import to_oriented_segments as region_to_oriented_segments
 
 
-def relate_point(multipolygon: Multipolygon,
+def locate_point(multipolygon: Multipolygon,
                  point: Point,
-                 context: Context) -> Relation:
+                 context: Context) -> Location:
     for polygon in multipolygon.polygons:
-        relation_with_polygon = relate_point_to_polygon(polygon, point,
-                                                        context)
-        if relation_with_polygon is not Relation.DISJOINT:
-            return relation_with_polygon
-    return Relation.DISJOINT
+        location_in_polygon = locate_point_in_polygon(polygon, point, context)
+        if location_in_polygon is not Location.EXTERIOR:
+            return location_in_polygon
+    return Location.EXTERIOR
 
 
 def relate_segment(multipolygon: Multipolygon,

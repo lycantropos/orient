@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from ground.base import (Context,
-                         Relation)
+                         Location, Relation)
 from ground.hints import (Box,
                           Contour,
                           Multisegment,
@@ -17,19 +17,18 @@ from .hints import (Multiregion,
 from .multisegment import to_segments_endpoints
 from .processing import (process_compound_queue,
                          process_linear_compound_queue)
-from .region import (relate_point as relate_point_to_region,
+from .region import (locate_point as locate_point_to_region,
                      to_oriented_segments as region_to_oriented_segments)
 
 
-def relate_point(multiregion: Multiregion,
+def locate_point(multiregion: Multiregion,
                  point: Point,
-                 context: Context) -> Relation:
+                 context: Context) -> Location:
     for region in multiregion:
-        relation_with_region = relate_point_to_region(region, point,
-                                                      context)
-        if relation_with_region is not Relation.DISJOINT:
-            return relation_with_region
-    return Relation.DISJOINT
+        location_in_region = locate_point_to_region(region, point, context)
+        if location_in_region is not Location.EXTERIOR:
+            return location_in_region
+    return Location.EXTERIOR
 
 
 def relate_segment(multiregion: Multiregion,

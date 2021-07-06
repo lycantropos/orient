@@ -1,15 +1,16 @@
 from ground.base import (Context,
+                         Location, 
                          Relation)
 from ground.hints import (Point,
                           Segment)
 
 
-def relate_point(segment: Segment,
+def locate_point(segment: Segment,
                  point: Point,
-                 context: Context) -> Relation:
-    return (Relation.COMPONENT
+                 context: Context) -> Location:
+    return (Location.BOUNDARY
             if context.segment_contains_point(segment, point)
-            else Relation.DISJOINT)
+            else Location.EXTERIOR)
 
 
 def relate_segment(goal: Segment,
