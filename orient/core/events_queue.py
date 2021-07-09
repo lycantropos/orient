@@ -1,4 +1,3 @@
-import math
 from abc import abstractmethod
 from functools import partial
 from typing import (Iterable,
@@ -319,8 +318,7 @@ class LinearEventsQueue(EventsQueue):
     def _to_point_event_cosine(self, point: Point, event: Event) -> Scalar:
         return (self.context.dot_product(event.start, point, event.start,
                                          event.end)
-                / math.sqrt(self.context.points_squared_distance(event.start,
-                                                                 event.end)))
+                / self.context.segment_length(event))
 
 
 class EventsQueueKey:
@@ -372,7 +370,7 @@ def complete_events_relations(same_start_events: Sequence[Event]
             if second_left.from_test is first_left.from_test:
                 continue
             elif (first_left.start == second_left.start
-                    and first_left.end == second_left.end):
+                  and first_left.end == second_left.end):
                 first_left.relation = second_left.relation = (
                     SegmentsRelation.OVERLAP)
             else:
