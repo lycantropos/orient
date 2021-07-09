@@ -231,7 +231,7 @@ class LinearEventsQueue(EventsQueue):
              if event.from_test
              else from_goal_events).append(event)
         start = same_start_events[0].start
-        point_event_cosine = self._to_point_event_cosine
+        point_event_cosine = self._to_signed_point_event_squared_cosine
         base_event = min(from_goal_events,
                          key=partial(point_event_cosine,
                                      from_goal_events[0].end))
@@ -315,10 +315,13 @@ class LinearEventsQueue(EventsQueue):
                                 # if angle is degenerate
                                 or Orientation.COUNTERCLOCKWISE))))
 
-    def _to_point_event_cosine(self, point: Point, event: Event) -> Scalar:
-        return (self.context.dot_product(event.start, point, event.start,
-                                         event.end)
-                / self.context.segment_length(event))
+    def _to_signed_point_event_squared_cosine(self,
+                                              point: Point,
+                                              event: Event) -> Scalar:
+        dot_product = self.context.dot_product(event.start, point, event.start,
+                                               event.end)
+        return ((2 * (dot_product > 0) - 1) * (dot_product * dot_product)
+                / self.context.points_squared_distance(event.start, event.end))
 
 
 class EventsQueueKey:
