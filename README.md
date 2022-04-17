@@ -1,7 +1,7 @@
 orient
 ======
 
-[![](https://dev.azure.com/lycantropos/orient/_apis/build/status/lycantropos.orient?branchName=master)](https://dev.azure.com/lycantropos/orient/_build/latest?definitionId=22&branchName=master "Azure Pipelines")
+[![](https://github.com/lycantropos/orient/workflows/CI/badge.svg)](https://github.com/lycantropos/orient/actions/workflows/ci.yml "Github Actions")
 [![](https://readthedocs.org/projects/orient/badge/?version=latest)](https://orient.readthedocs.io/en/latest "Documentation")
 [![](https://codecov.io/gh/lycantropos/orient/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/orient "Codecov")
 [![](https://img.shields.io/github/license/lycantropos/orient.svg)](https://github.com/lycantropos/orient/blob/master/LICENSE "License")
