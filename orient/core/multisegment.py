@@ -60,7 +60,8 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
             if has_no_overlap:
                 has_no_overlap = False
             start, end = segment_endpoints = _subtract_segments_overlap(
-                    segment_endpoints, sub_segment_endpoints)
+                    segment_endpoints, sub_segment_endpoints
+            )
         else:
             if is_segment_superset:
                 is_segment_superset = False
@@ -70,7 +71,8 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                         has_no_touch = False
                     if has_no_cross:
                         intersection = context.segments_intersection(
-                                sub_segment, segment)
+                                sub_segment, segment
+                        )
                         if intersection != start and intersection != end:
                             sub_start, sub_end = sub_segment_endpoints
                             non_touched_endpoint = (sub_start
@@ -78,15 +80,18 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
                                                     else sub_end)
                             try:
                                 previous_orientation = (
-                                    middle_touching_orientations[intersection])
+                                    middle_touching_orientations[intersection]
+                                )
                             except KeyError:
                                 middle_touching_orientations[intersection] = (
                                     context.angle_orientation(
-                                            start, end, non_touched_endpoint))
+                                            start, end, non_touched_endpoint
+                                    )
+                                )
                             else:
-                                if (context.angle_orientation(
-                                        start, end, non_touched_endpoint)
-                                        is not previous_orientation):
+                                if context.angle_orientation(
+                                        start, end, non_touched_endpoint
+                                ) is not previous_orientation:
                                     has_no_cross = False
                 elif has_no_cross and relation is Relation.CROSS:
                     has_no_cross = False

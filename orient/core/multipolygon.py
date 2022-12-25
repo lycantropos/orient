@@ -105,7 +105,8 @@ def relate_region(multipolygon: Multipolygon,
                   context: Context) -> Relation:
     region_bounding_box = context.contour_box(region)
     all_disjoint, none_disjoint, multipolygon_max_x, events_queue = (
-        True, True, None, None)
+        True, True, None, None
+    )
     for polygon in multipolygon.polygons:
         polygon_bounding_box = context.polygon_box(polygon)
         if box.disjoint_with(region_bounding_box, polygon_bounding_box):
@@ -164,7 +165,8 @@ def relate_polygon(multipolygon: Multipolygon,
                    context: Context) -> Relation:
     polygon_bounding_box = context.polygon_box(polygon)
     all_disjoint, none_disjoint, multipolygon_max_x, events_queue = (
-        True, True, None, None)
+        True, True, None, None
+    )
     for sub_polygon in multipolygon.polygons:
         sub_polygon_bounding_box = context.polygon_box(sub_polygon)
         if box.disjoint_with(sub_polygon_bounding_box, polygon_bounding_box):

@@ -12,12 +12,13 @@ from ground.hints import (Box,
                           Segment)
 
 from . import box
-from .contour import (equal as contours_equal,
-                      orientation as contour_orientation,
-                      point_vertex_line_divides_angle,
-                      to_edges_endpoints as contour_to_edges_endpoints,
-                      to_oriented_edges_endpoints
-                      as contour_to_oriented_segments)
+from .contour import (
+    equal as contours_equal,
+    orientation as contour_orientation,
+    point_vertex_line_divides_angle,
+    to_edges_endpoints as contour_to_edges_endpoints,
+    to_oriented_edges_endpoints as contour_to_oriented_segments
+)
 from .events_queue import CompoundEventsQueue
 from .hints import Region
 from .multisegment import to_segments_endpoints
@@ -91,7 +92,8 @@ def _relate_segment_to_contour(contour: Contour,
     vertices = contour.vertices
     if not has_no_touch and last_touched_edge_index == len(vertices) - 1:
         first_edge_endpoints = first_edge_start, first_edge_end = (
-            vertices[-1], vertices[0])
+            vertices[-1], vertices[0]
+        )
         if (relate_segments(context.segment_cls(first_edge_start,
                                                 first_edge_end), segment,
                             context) is Relation.TOUCH

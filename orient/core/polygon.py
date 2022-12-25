@@ -94,7 +94,8 @@ def relate_contour(polygon: Polygon,
     if holes and (relation_without_holes is Relation.ENCLOSED
                   or relation_without_holes is Relation.WITHIN):
         relation_with_holes = relate_contour_to_multiregion(
-                holes, contour, contour_bounding_box, context)
+                holes, contour, contour_bounding_box, context
+        )
         if relation_with_holes is Relation.DISJOINT:
             return relation_without_holes
         elif relation_with_holes is Relation.TOUCH:
@@ -184,7 +185,8 @@ def relate_multiregion(polygon: Polygon,
                 multiregion
                 if is_subset_of_border
                 else [multiregion[index] for index in subsets_regions_indices],
-                context)
+                context
+        )
         if relation_with_holes is Relation.DISJOINT:
             return ((Relation.WITHIN
                      if none_touch
@@ -281,9 +283,11 @@ def relate_polygon(goal: Polygon,
                             if len(subsets_holes_indices) == len(goal_holes)
                             else [goal_holes[index]
                                   for index in subsets_holes_indices],
-                            context)
+                            context
+                    )
                     if test_holes
-                    else Relation.DISJOINT)
+                    else Relation.DISJOINT
+                )
                 if holes_relation is Relation.EQUAL:
                     return (Relation.ENCLOSED
                             if borders_relation is Relation.WITHIN
@@ -331,9 +335,11 @@ def relate_polygon(goal: Polygon,
                         if len(subsets_holes_indices) == len(test_holes)
                         else [test_holes[index]
                               for index in subsets_holes_indices],
-                        context)
+                        context
+                )
                 if goal_holes
-                else Relation.DISJOINT)
+                else Relation.DISJOINT
+            )
             if holes_relation is Relation.EQUAL:
                 return (Relation.ENCLOSES
                         if borders_relation is Relation.COVER

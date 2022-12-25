@@ -120,7 +120,8 @@ def _relate_region(goal_regions: Iterable[Region],
                    region_bounding_box: Box,
                    context: Context) -> Relation:
     all_disjoint, none_disjoint, goal_regions_max_x, events_queue = (
-        True, True, None, None)
+        True, True, None, None
+    )
     for goal_region in goal_regions:
         goal_region_bounding_box = context.contour_box(goal_region)
         if box.disjoint_with(region_bounding_box, goal_region_bounding_box):

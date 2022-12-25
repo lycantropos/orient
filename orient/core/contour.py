@@ -38,7 +38,8 @@ def relate_segment(contour: Contour,
     start, end = segment.start, segment.end
     for index, sub_segment in enumerate(context.contour_segments(contour)):
         sub_segment_start, sub_segment_end = sub_segment_endpoints = (
-            sub_segment.start, sub_segment.end)
+            sub_segment.start, sub_segment.end
+        )
         relation = relate_segments(sub_segment, segment, context)
         if relation is Relation.COMPONENT or relation is Relation.EQUAL:
             return Relation.COMPONENT
@@ -67,13 +68,12 @@ def relate_segment(contour: Contour,
     if (has_no_cross
             and not has_no_touch
             and last_touched_edge_index == len(vertices) - 1):
-        first_sub_segment_endpoints = (first_sub_segment_start,
-                                       first_sub_segment_end) = (vertices[-1],
-                                                                 vertices[0])
+        first_sub_segment_endpoints = (
+            first_sub_segment_start, first_sub_segment_end
+        ) = vertices[-1], vertices[0]
         if (relate_segments(context.segment_cls(first_sub_segment_start,
                                                 first_sub_segment_end),
-                            segment,
-                            context) is Relation.TOUCH
+                            segment, context) is Relation.TOUCH
                 and start not in first_sub_segment_endpoints
                 and end not in first_sub_segment_endpoints
                 and (angle_orientation(start, end, first_sub_segment_start)
@@ -169,10 +169,9 @@ def to_edges_endpoints(contour: Contour) -> Iterable[SegmentEndpoints]:
             for index in range(len(vertices)))
 
 
-def to_oriented_edges_endpoints(contour: Contour,
-                                context: Context,
-                                clockwise: bool = False
-                                ) -> Iterable[SegmentEndpoints]:
+def to_oriented_edges_endpoints(
+        contour: Contour, context: Context, clockwise: bool = False
+) -> Iterable[SegmentEndpoints]:
     vertices = contour.vertices
     return (((vertices[index - 1], vertices[index])
              for index in range(len(vertices)))

@@ -55,7 +55,8 @@ def point_in_segment(point: _Point, segment: _Segment,
     True
     """
     return _segment.locate_point(
-            segment, point, _get_context() if context is None else context)
+            segment, point, _get_context() if context is None else context
+    )
 
 
 def segment_in_segment(left: _Segment, right: _Segment,
@@ -102,7 +103,8 @@ def segment_in_segment(left: _Segment, right: _Segment,
     True
     """
     return _segment.relate_segment(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )
 
 
 def point_in_multisegment(point: _Point,
@@ -143,8 +145,8 @@ def point_in_multisegment(point: _Point,
     True
     """
     return _multisegment.locate_point(
-            multisegment, point,
-            _get_context() if context is None else context)
+            multisegment, point, _get_context() if context is None else context
+    )
 
 
 def segment_in_multisegment(segment: _Segment,
@@ -197,7 +199,8 @@ def segment_in_multisegment(segment: _Segment,
     """
     return _multisegment.relate_segment(
             multisegment, segment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def multisegment_in_multisegment(left: _Multisegment,
@@ -270,7 +273,8 @@ def multisegment_in_multisegment(left: _Multisegment,
     True
     """
     return _multisegment.relate_multisegment(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )
 
 
 def point_in_contour(point: _Point, contour: _Contour,
@@ -304,7 +308,8 @@ def point_in_contour(point: _Point, contour: _Contour,
     True
     """
     return _contour.locate_point(
-            contour, point, _get_context() if context is None else context)
+            contour, point, _get_context() if context is None else context
+    )
 
 
 def segment_in_contour(segment: _Segment, contour: _Contour,
@@ -355,7 +360,8 @@ def segment_in_contour(segment: _Segment, contour: _Contour,
     True
     """
     return _contour.relate_segment(
-            contour, segment, _get_context() if context is None else context)
+            contour, segment, _get_context() if context is None else context
+    )
 
 
 def multisegment_in_contour(multisegment: _Multisegment,
@@ -424,7 +430,8 @@ def multisegment_in_contour(multisegment: _Multisegment,
     """
     return _contour.relate_multisegment(
             contour, multisegment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def contour_in_contour(left: _Contour, right: _Contour,
@@ -461,7 +468,8 @@ def contour_in_contour(left: _Contour, right: _Contour,
     True
     """
     return _contour.relate_contour(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )
 
 
 def point_in_region(point: _Point, region: _Region,
@@ -550,7 +558,8 @@ def segment_in_region(segment: _Segment, region: _Region,
     True
     """
     return _region.relate_segment(
-            region, segment, _get_context() if context is None else context)
+            region, segment, _get_context() if context is None else context
+    )
 
 
 def multisegment_in_region(multisegment: _Multisegment,
@@ -617,7 +626,8 @@ def multisegment_in_region(multisegment: _Multisegment,
     """
     return _region.relate_multisegment(
             region, multisegment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def contour_in_region(contour: _Contour, region: _Region,
@@ -660,7 +670,8 @@ def contour_in_region(contour: _Contour, region: _Region,
     True
     """
     return _region.relate_contour(
-            region, contour, _get_context() if context is None else context)
+            region, contour, _get_context() if context is None else context
+    )
 
 
 def region_in_region(left: _Region, right: _Region,
@@ -710,7 +721,8 @@ def region_in_region(left: _Region, right: _Region,
     True
     """
     return _region.relate_region(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )
 
 
 def point_in_multiregion(point: _Point,
@@ -750,7 +762,8 @@ def point_in_multiregion(point: _Point,
     True
     """
     return _multiregion.locate_point(
-            multiregion, point, _get_context() if context is None else context)
+            multiregion, point, _get_context() if context is None else context
+    )
 
 
 def segment_in_multiregion(segment: _Segment,
@@ -809,7 +822,8 @@ def segment_in_multiregion(segment: _Segment,
     """
     return _multiregion.relate_segment(
             multiregion, segment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def multisegment_in_multiregion(multisegment: _Multisegment,
@@ -883,7 +897,8 @@ def multisegment_in_multiregion(multisegment: _Multisegment,
     """
     return _multiregion.relate_multisegment(
             multiregion, multisegment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def contour_in_multiregion(contour: _Contour,
@@ -944,7 +959,8 @@ def contour_in_multiregion(contour: _Contour,
     """
     return _multiregion.relate_contour(
             multiregion, contour,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def region_in_multiregion(region: _Region,
@@ -1011,8 +1027,8 @@ def region_in_multiregion(region: _Region,
     True
     """
     return _multiregion.relate_region(
-            multiregion, region,
-            _get_context() if context is None else context)
+            multiregion, region, _get_context() if context is None else context
+    )
 
 
 def multiregion_in_multiregion(left: _Multiregion,
@@ -1098,7 +1114,8 @@ def multiregion_in_multiregion(left: _Multiregion,
     True
     """
     return _multiregion.relate_multiregion(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )
 
 
 def point_in_polygon(point: _Point, polygon: _Polygon,
@@ -1149,7 +1166,8 @@ def point_in_polygon(point: _Point, polygon: _Polygon,
     True
     """
     return _polygon.locate_point(
-            polygon, point, _get_context() if context is None else context)
+            polygon, point, _get_context() if context is None else context
+    )
 
 
 def segment_in_polygon(segment: _Segment, polygon: _Polygon,
@@ -1211,7 +1229,8 @@ def segment_in_polygon(segment: _Segment, polygon: _Polygon,
     True
     """
     return _polygon.relate_segment(
-            polygon, segment, _get_context() if context is None else context)
+            polygon, segment, _get_context() if context is None else context
+    )
 
 
 def multisegment_in_polygon(multisegment: _Multisegment,
@@ -1286,7 +1305,8 @@ def multisegment_in_polygon(multisegment: _Multisegment,
     """
     return _polygon.relate_multisegment(
             polygon, multisegment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def contour_in_polygon(contour: _Contour, polygon: _Polygon,
@@ -1335,7 +1355,8 @@ def contour_in_polygon(contour: _Contour, polygon: _Polygon,
     True
     """
     return _polygon.relate_contour(
-            polygon, contour, _get_context() if context is None else context)
+            polygon, contour, _get_context() if context is None else context
+    )
 
 
 def region_in_polygon(region: _Region, polygon: _Polygon,
@@ -1390,7 +1411,8 @@ def region_in_polygon(region: _Region, polygon: _Polygon,
     True
     """
     return _polygon.relate_region(
-            polygon, region, _get_context() if context is None else context)
+            polygon, region, _get_context() if context is None else context
+    )
 
 
 def multiregion_in_polygon(multiregion: _Multiregion,
@@ -1467,7 +1489,8 @@ def multiregion_in_polygon(multiregion: _Multiregion,
     """
     return _polygon.relate_multiregion(
             polygon, multiregion,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def polygon_in_polygon(left: _Polygon, right: _Polygon,
@@ -1569,7 +1592,8 @@ def polygon_in_polygon(left: _Polygon, right: _Polygon,
     True
     """
     return _polygon.relate_polygon(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )
 
 
 def point_in_multipolygon(point: _Point,
@@ -1618,8 +1642,8 @@ def point_in_multipolygon(point: _Point,
     True
     """
     return _multipolygon.locate_point(
-            multipolygon, point,
-            _get_context() if context is None else context)
+            multipolygon, point, _get_context() if context is None else context
+    )
 
 
 def segment_in_multipolygon(segment: _Segment,
@@ -1687,7 +1711,8 @@ def segment_in_multipolygon(segment: _Segment,
     """
     return _multipolygon.relate_segment(
             multipolygon, segment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def multisegment_in_multipolygon(multisegment: _Multisegment,
@@ -1775,7 +1800,8 @@ def multisegment_in_multipolygon(multisegment: _Multisegment,
     """
     return _multipolygon.relate_multisegment(
             multipolygon, multisegment,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def contour_in_multipolygon(contour: _Contour,
@@ -1851,7 +1877,8 @@ def contour_in_multipolygon(contour: _Contour,
     """
     return _multipolygon.relate_contour(
             multipolygon, contour,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def region_in_multipolygon(region: _Region,
@@ -1934,7 +1961,8 @@ def region_in_multipolygon(region: _Region,
     """
     return _multipolygon.relate_region(
             multipolygon, region,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def multiregion_in_multipolygon(multiregion: _Multiregion,
@@ -2061,7 +2089,8 @@ def multiregion_in_multipolygon(multiregion: _Multiregion,
     """
     return _multipolygon.relate_multiregion(
             multipolygon, multiregion,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def polygon_in_multipolygon(polygon: _Polygon,
@@ -2208,7 +2237,8 @@ def polygon_in_multipolygon(polygon: _Polygon,
     """
     return _multipolygon.relate_polygon(
             multipolygon, polygon,
-            _get_context() if context is None else context)
+            _get_context() if context is None else context
+    )
 
 
 def multipolygon_in_multipolygon(left: _Multipolygon,
@@ -2341,4 +2371,5 @@ def multipolygon_in_multipolygon(left: _Multipolygon,
     True
     """
     return _multipolygon.relate_multipolygon(
-            right, left, _get_context() if context is None else context)
+            right, left, _get_context() if context is None else context
+    )

@@ -132,19 +132,21 @@ class CompoundEventsQueue(EventsQueue):
             start_min, start_max = (
                 (event, below_event)
                 if starts_equal or self.key(event) < self.key(below_event)
-                else (below_event, event))
+                else (below_event, event)
+            )
             end_min, end_max = (
                 (event.right, below_event.right)
                 if ends_equal or (self.key(event.right)
                                   < self.key(below_event.right))
-                else (below_event.right,
-                      event.right))
+                else (below_event.right, event.right)
+            )
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 below_event.overlap_kind = event.overlap_kind = (
                     OverlapKind.SAME_ORIENTATION
                     if event.interior_to_left is below_event.interior_to_left
-                    else OverlapKind.DIFFERENT_ORIENTATION)
+                    else OverlapKind.DIFFERENT_ORIENTATION
+                )
                 if not ends_equal:
                     self._divide_segment(end_max.left, end_min.start)
                 return True
@@ -217,8 +219,8 @@ class LinearEventsQueue(EventsQueue):
         self.detect_crossing_angles(same_start_events)
         yield from complete_events_relations(same_start_events)
 
-    def detect_crossing_angles(self, same_start_events: Sequence[Event]
-                               ) -> None:
+    def detect_crossing_angles(self,
+                               same_start_events: Sequence[Event]) -> None:
         if (len(same_start_events) < 4
                 or not (1 < sum(event.from_test for event in same_start_events)
                         < len(same_start_events) - 1)):
@@ -240,7 +242,8 @@ class LinearEventsQueue(EventsQueue):
                                   key=partial(point_event_cosine, base_end))
         largest_angle_end = largest_angle_event.end
         base_orientation = self.context.angle_orientation(
-                start, base_end, largest_angle_end)
+                start, base_end, largest_angle_end
+        )
         if not all_equal(self._point_in_angle(test_event.end, start, base_end,
                                               largest_angle_end,
                                               base_orientation)
@@ -273,13 +276,14 @@ class LinearEventsQueue(EventsQueue):
             start_min, start_max = (
                 (event, below_event)
                 if starts_equal or self.key(event) < self.key(below_event)
-                else (below_event, event))
+                else (below_event, event)
+            )
             end_min, end_max = (
                 (event.right, below_event.right)
                 if ends_equal or (self.key(event.right)
                                   < self.key(below_event.right))
-                else (below_event.right,
-                      event.right))
+                else (below_event.right, event.right)
+            )
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 if not ends_equal:
@@ -303,9 +307,11 @@ class LinearEventsQueue(EventsQueue):
                         second_ray_point: Point,
                         angle_orientation: Orientation) -> bool:
         first_half_orientation = self.context.angle_orientation(
-                vertex, first_ray_point, point)
+                vertex, first_ray_point, point
+        )
         second_half_orientation = self.context.angle_orientation(
-                second_ray_point, vertex, point)
+                second_ray_point, vertex, point
+        )
         return (second_half_orientation is angle_orientation
                 if first_half_orientation is Orientation.COLLINEAR
                 else (first_half_orientation is angle_orientation
@@ -362,8 +368,9 @@ class EventsQueueKey:
                               else Orientation.CLOCKWISE)))
 
 
-def complete_events_relations(same_start_events: Sequence[Event]
-                              ) -> Iterable[Event]:
+def complete_events_relations(
+        same_start_events: Sequence[Event]
+) -> Iterable[Event]:
     for offset, first in enumerate(same_start_events,
                                    start=1):
         first_left = first if first.is_left else first.left
@@ -375,7 +382,8 @@ def complete_events_relations(same_start_events: Sequence[Event]
             elif (first_left.start == second_left.start
                   and first_left.end == second_left.end):
                 first_left.relation = second_left.relation = (
-                    SegmentsRelation.OVERLAP)
+                    SegmentsRelation.OVERLAP
+                )
             else:
                 relation = (SegmentsRelation.TOUCH
                             if (first.start == first.original_start
