@@ -69,7 +69,7 @@ def segment_in_segment(left: _Segment, right: _Segment,
     Memory complexity:
         ``O(1)``
 
-    :param left: point to check for.
+    :param left: segment to check for.
     :param right: segment to check in.
     :param context: geometric context.
     :returns: relation between segments.
