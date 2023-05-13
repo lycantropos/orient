@@ -17,13 +17,13 @@ from .hints import SegmentEndpoints
 from .multisegment import to_segments_endpoints
 from .processing import (process_closed_linear_queue,
                          process_open_linear_queue)
-from .segment import (locate_point as locate_point_to_segment,
+from .segment import (locate_point as locate_point_in_segment,
                       relate_segment as relate_segments)
 
 
 def locate_point(contour: Contour, point: Point, context: Context) -> Location:
     return (Location.EXTERIOR
-            if all(locate_point_to_segment(segment, point, context)
+            if all(locate_point_in_segment(segment, point, context)
                    is Location.EXTERIOR
                    for segment in context.contour_segments(contour))
             else Location.BOUNDARY)
