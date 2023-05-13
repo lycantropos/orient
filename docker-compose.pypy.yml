@@ -10,10 +10,8 @@ services:
     image: lycantropos/orient-pypy:6.2.0
     volumes:
       - ./orient:/opt/orient/orient
-      - ./pytest.ini:/opt/orient/pytest.ini
+      - ./pyproject.toml:/opt/orient/pyproject.toml
       - ./README.md:/opt/orient/README.md
-      - ./requirements-tests.txt:/opt/orient/requirements-tests.txt
-      - ./requirements.txt:/opt/orient/requirements.txt
       - ./setup.py:/opt/orient/setup.py
       - ./tests:/opt/orient/tests
     entrypoint: pytest
