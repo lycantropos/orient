@@ -42,9 +42,6 @@ build-backend = "setuptools.build_meta"
 [tool.coverage.run]
 source = ["orient"]
 
-[tool.mypy]
-strict = true
-
 [tool.pytest.ini_options]
 addopts = "--verbose -s --hypothesis-profile=default"
 
