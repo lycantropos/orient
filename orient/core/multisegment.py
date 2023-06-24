@@ -33,7 +33,7 @@ def relate_segment(multisegment: Multisegment, segment: Segment,
     is_segment_superset = has_no_touch = has_no_cross = has_no_overlap = True
     # orientations of multisegment's segments
     # which touch given segment in the middle
-    middle_touching_orientations = {}  # type: Dict[Point, Orientation]
+    middle_touching_orientations: Dict[Point, Orientation] = {}
     components = []
     start, end = segment_endpoints = segment.start, segment.end
     if start > end:

@@ -12,8 +12,8 @@ from .hints import SegmentEndpoints
 
 
 class Event(ABC):
-    left = None  # type: Optional[LeftEvent]
-    right = None  # type: Optional[RightEvent]
+    left: Optional[LeftEvent] = None
+    right: Optional[RightEvent] = None
 
     __slots__ = ()
 

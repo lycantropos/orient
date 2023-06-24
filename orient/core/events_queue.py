@@ -71,10 +71,10 @@ class CompoundEventsQueue(EventsQueue):
             push(event.right)
 
     def sweep(self, stop_x: Scalar) -> Iterable[CompoundEvent]:
-        sweep_line = SweepLine(self.context)  # type: SweepLine[CompoundEvent]
+        sweep_line: SweepLine[CompoundEvent] = SweepLine(self.context)
         queue = self._queue
-        start = queue.peek().start if queue else None  # type: Optional[Point]
-        same_start_events = []  # type: List[Event]
+        start: Optional[Point] = queue.peek().start if queue else None
+        same_start_events: List[Event] = []
         while queue:
             event = queue.peek()
             if event.start.x > stop_x:
@@ -184,10 +184,10 @@ class LinearEventsQueue(EventsQueue):
             push(event.right)
 
     def sweep(self, stop_x: Scalar) -> Iterable[LinearEvent]:
-        sweep_line = SweepLine(self.context)  # type: SweepLine[LinearEvent]
+        sweep_line: SweepLine[LinearEvent] = SweepLine(self.context)
         queue = self._queue
-        start = queue.peek().start if queue else None  # type: Optional[Point]
-        same_start_events = []  # type: List[Event]
+        start: Optional[Point] = queue.peek().start if queue else None
+        same_start_events: List[Event] = []
         while queue:
             event = queue.peek()
             if event.start.x > stop_x:
